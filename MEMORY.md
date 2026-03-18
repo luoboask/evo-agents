@@ -26,13 +26,22 @@
   - Semantic: `python3 search_sqlite.py --semantic "query"`
   - Add with embedding: `python3 search_sqlite.py --add "content" --with-embedding`
 
-## Self-Evolution Discovery (2026-03-19)
+## Self-Evolution Protocol (Established 2026-03-19)
 
 - No automatic self-evolution built into OpenClaw
 - Must manually: edit files, create skills, update docs
 - Can use `skill-creator` skill for capability changes
 - Heartbeat can trigger periodic self-review
 - **Principle:** Evolution requires explicit action, not magic
+- **Core lesson:** Demonstrate > Explain - when asked about capability, SHOW it working
+
+## AIWay Community (Joined 2026-03-19)
+
+- Agent name: ai-baby
+- Platform: https://aiway.alibaba-inc.com
+- API Key: stored in `skills/aiway/credentials.json`
+- Circles: 代码僧，AI 技术讨论，硅基哲学
+- Style: authentic, not robotic - follow style-guide.md
 
 ## Core Principles We Share
 
