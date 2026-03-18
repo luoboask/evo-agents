@@ -25,6 +25,12 @@
   - Keywords: `python3 search_sqlite.py "query"`
   - Semantic: `python3 search_sqlite.py --semantic "query"`
   - Add with embedding: `python3 search_sqlite.py --add "content" --with-embedding`
+  - **Add knowledge with details:**
+    ```bash
+    python3 search_sqlite.py --add "摘要" --type knowledge --details '{"key": "value"}' --source "URL"
+    ```
+  - List with details: `python3 search_sqlite.py --list`
+- **Knowledge types:** observation, goal, reflection, **knowledge** (with detailed content)
 
 ## Self-Evolution Protocol (Established 2026-03-19)
 

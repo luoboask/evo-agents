@@ -137,24 +137,42 @@ class SQLiteMemorySearch:
         conn.close()
         return final_results
     
-    def add(self, content, memory_type='observation', importance=5.0, tags=None, with_embedding=False):
-        """添加记忆"""
+    def add(self, content, memory_type='observation', importance=5.0, tags=None, with_embedding=False, details=None, source_url=None):
+        """添加记忆
+        
+        Args:
+            content: 记忆摘要
+            memory_type: 类型 (observation/goal/reflection/knowledge)
+            importance: 重要性 (1-10)
+            tags: 标签列表
+            with_embedding: 是否生成向量嵌入
+            details: 详细知识内容 (字典或字符串)
+            source_url: 来源 URL
+        """
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
         
         tags_json = json.dumps(tags or [])
         embedding_json = '[]'
         
+        # 构建元数据（包含知识详情）
+        metadata = {
+            'details': details,
+            'source_url': source_url,
+            'content_length': len(content)
+        }
+        metadata_json = json.dumps(metadata, ensure_ascii=False)
+        
         # 生成向量嵌入 (可选)
         if with_embedding:
-            embedding = get_embedding(content)
+            embedding = get_embedding(content + (details if isinstance(details, str) else json.dumps(details)))
             if embedding:
                 embedding_json = json.dumps(embedding)
         
         cur.execute('''
-            INSERT INTO memories (content, memory_type, importance, tags, embedding, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (content, memory_type, importance, tags_json, embedding_json, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            INSERT INTO memories (content, memory_type, importance, tags, embedding, metadata, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (content, memory_type, importance, tags_json, embedding_json, metadata_json, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
         
         conn.commit()
         conn.close()
@@ -227,6 +245,8 @@ def main():
     parser.add_argument('--limit', '-n', type=int, default=10, help='返回数量')
     parser.add_argument('--semantic', action='store_true', help='使用向量语义搜索 (需要 Ollama)')
     parser.add_argument('--with-embedding', action='store_true', help='添加时生成向量嵌入')
+    parser.add_argument('--details', '-d', help='知识详情 (长文本或 JSON)')
+    parser.add_argument('--source', help='来源 URL')
     
     args = parser.parse_args()
     search = SQLiteMemorySearch()
@@ -234,11 +254,31 @@ def main():
     # 添加记忆
     if args.add:
         tags = [t.strip() for t in args.tags.split(',')] if args.tags else []
-        mem_id = search.add(args.add, args.type, args.importance, tags, with_embedding=args.with_embedding)
+        
+        # 解析详情 (支持 JSON 或普通文本)
+        details = None
+        if args.details:
+            try:
+                details = json.loads(args.details)
+            except:
+                details = args.details
+        
+        mem_id = search.add(args.add, args.type, args.importance, tags, 
+                           with_embedding=args.with_embedding, 
+                           details=details, 
+                           source_url=args.source)
+        
         if args.with_embedding:
             print(f"✅ 已添加记忆 #{mem_id} (带向量嵌入)")
         else:
             print(f"✅ 已添加记忆 #{mem_id}")
+        
+        if args.details:
+            detail_len = len(args.details)
+            print(f"   详情：{detail_len} 字符")
+        if args.source:
+            print(f"   来源：{args.source}")
+        
         return
     
     # 统计
@@ -258,8 +298,17 @@ def main():
         for m in memories:
             tags = json.loads(m.get('tags', '[]'))
             tag_str = f" [{', '.join(tags)}]" if tags else ""
+            metadata = json.loads(m.get('metadata') or '{}')
+            has_details = 'details' in metadata and metadata['details']
+            source = metadata.get('source_url')
+            
             print(f"  [{m['id']}] {m['content']}")
             print(f"      类型：{m['memory_type']} | 重要性：{m['importance']} | {m['created_at']}{tag_str}")
+            if has_details:
+                details_preview = str(metadata['details'])[:100] + "..." if len(str(metadata['details'])) > 100 else metadata['details']
+                print(f"      详情：{details_preview}")
+            if source:
+                print(f"      来源：{source}")
             print()
         return
     
@@ -274,8 +323,17 @@ def main():
             for r in results:
                 tags = json.loads(r.get('tags', '[]'))
                 tag_str = f" [{', '.join(tags)}]" if tags else ""
+                metadata = json.loads(r.get('metadata') or '{}')
+                has_details = 'details' in metadata and metadata['details']
+                source = metadata.get('source_url')
+                
                 print(f"  [{r['id']}] {r['content']}")
                 print(f"      类型：{r['memory_type']} | 重要性：{r['importance']} | {r['created_at']}{tag_str}")
+                if has_details:
+                    details_preview = str(metadata['details'])[:200] + "..." if len(str(metadata['details'])) > 200 else metadata['details']
+                    print(f"      详情：{details_preview}")
+                if source:
+                    print(f"      来源：{source}")
                 print()
         return
     
