@@ -1,14 +1,44 @@
 #!/usr/bin/env python3
 """
 SQLite 记忆搜索 - 直接查询 ai-baby_memory_stream.db
-支持关键词匹配和简单语义搜索
+支持关键词匹配 + Ollama 向量语义搜索
 """
 
 import argparse
 import sqlite3
 import json
+import subprocess
 from pathlib import Path
 from datetime import datetime
+
+
+def get_embedding(text):
+    """使用 Ollama 生成嵌入向量"""
+    try:
+        result = subprocess.run(
+            ["curl", "-s", "http://localhost:11434/api/embeddings",
+             "-H", "Content-Type: application/json",
+             "-d", json.dumps({"model": "nomic-embed-text", "prompt": text[:500]})],
+            capture_output=True, text=True, timeout=10
+        )
+        if result.returncode == 0:
+            data = json.loads(result.stdout)
+            return data.get("embedding", [])
+    except Exception as e:
+        pass
+    return []
+
+
+def cosine_similarity(a, b):
+    """计算余弦相似度"""
+    if not a or not b:
+        return 0
+    dot = sum(x * y for x, y in zip(a, b))
+    norm_a = sum(x * x for x in a) ** 0.5
+    norm_b = sum(x * x for x in b) ** 0.5
+    if norm_a == 0 or norm_b == 0:
+        return 0
+    return dot / (norm_a * norm_b)
 
 
 class SQLiteMemorySearch:
@@ -19,7 +49,7 @@ class SQLiteMemorySearch:
             db_path = Path("/Users/dhr/.openclaw/workspace-ai-baby/memory/ai-baby_memory_stream.db")
         self.db_path = Path(db_path)
     
-    def search(self, query, top_k=10, memory_type=None):
+    def search(self, query, top_k=10, memory_type=None, semantic=False):
         """
         搜索记忆
         
@@ -27,6 +57,7 @@ class SQLiteMemorySearch:
             query: 查询关键词
             top_k: 返回数量
             memory_type: 过滤类型 (observation/goal/reflection/etc)
+            semantic: 是否使用向量语义搜索 (需要 Ollama)
         """
         if not self.db_path.exists():
             return []
@@ -35,50 +66,95 @@ class SQLiteMemorySearch:
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
         
-        # 基础查询
+        # 获取所有记忆
         if memory_type:
             cur.execute('''
-                SELECT id, content, memory_type, importance, tags, created_at, last_accessed
+                SELECT id, content, memory_type, importance, tags, created_at, last_accessed, embedding
                 FROM memories
-                WHERE content LIKE ? OR tags LIKE ?
-                AND memory_type = ?
-                ORDER BY importance DESC, created_at DESC
-                LIMIT ?
-            ''', (f'%{query}%', f'%{query}%', memory_type, top_k))
+                WHERE memory_type = ?
+                ORDER BY created_at DESC
+            ''', (memory_type,))
         else:
             cur.execute('''
-                SELECT id, content, memory_type, importance, tags, created_at, last_accessed
+                SELECT id, content, memory_type, importance, tags, created_at, last_accessed, embedding
                 FROM memories
-                WHERE content LIKE ? OR tags LIKE ?
-                ORDER BY importance DESC, created_at DESC
-                LIMIT ?
-            ''', (f'%{query}%', f'%{query}%', top_k))
+                ORDER BY created_at DESC
+            ''')
         
-        results = [dict(row) for row in cur.fetchall()]
+        all_memories = [dict(row) for row in cur.fetchall()]
         
-        # 更新 last_accessed
-        if results:
+        if semantic:
+            # 向量语义搜索
+            query_embedding = get_embedding(query)
+            if query_embedding:
+                results = []
+                for m in all_memories:
+                    embedding = json.loads(m.get('embedding') or '[]')
+                    if embedding:
+                        similarity = cosine_similarity(query_embedding, embedding)
+                        if similarity > 0.5:  # 阈值
+                            m['score'] = similarity
+                            results.append(m)
+                
+                # 按相似度排序
+                results.sort(key=lambda x: -x['score'])
+                final_results = results[:top_k]
+                
+                # 更新访问时间
+                if final_results:
+                    cur.execute('''
+                        UPDATE memories
+                        SET last_accessed = ?
+                        WHERE id IN ({})
+                    '''.format(','.join('?' * len(final_results))),
+                    [datetime.now().strftime('%Y-%m-%d %H:%M:%S')] + [r['id'] for r in final_results])
+                    conn.commit()
+                
+                conn.close()
+                return final_results
+        
+        # 关键词匹配 (fallback)
+        keyword_results = []
+        query_lower = query.lower()
+        for m in all_memories:
+            if query_lower in m['content'].lower() or query_lower in m.get('tags', '').lower():
+                m['score'] = 1.0
+                keyword_results.append(m)
+        
+        keyword_results.sort(key=lambda x: -x['importance'])
+        final_results = keyword_results[:top_k]
+        
+        # 更新访问时间
+        if final_results:
             cur.execute('''
                 UPDATE memories
                 SET last_accessed = ?
                 WHERE id IN ({})
-            '''.format(','.join('?' * len(results))),
-            [datetime.now().strftime('%Y-%m-%d %H:%M:%S')] + [r['id'] for r in results])
+            '''.format(','.join('?' * len(final_results))),
+            [datetime.now().strftime('%Y-%m-%d %H:%M:%S')] + [r['id'] for r in final_results])
             conn.commit()
         
         conn.close()
-        return results
+        return final_results
     
-    def add(self, content, memory_type='observation', importance=5.0, tags=None):
+    def add(self, content, memory_type='observation', importance=5.0, tags=None, with_embedding=False):
         """添加记忆"""
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
         
         tags_json = json.dumps(tags or [])
+        embedding_json = '[]'
+        
+        # 生成向量嵌入 (可选)
+        if with_embedding:
+            embedding = get_embedding(content)
+            if embedding:
+                embedding_json = json.dumps(embedding)
+        
         cur.execute('''
-            INSERT INTO memories (content, memory_type, importance, tags, created_at)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (content, memory_type, importance, tags_json, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            INSERT INTO memories (content, memory_type, importance, tags, embedding, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (content, memory_type, importance, tags_json, embedding_json, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
         
         conn.commit()
         conn.close()
@@ -149,6 +225,8 @@ def main():
     parser.add_argument('--list', '-l', action='store_true', help='列出所有记忆')
     parser.add_argument('--stats', '-s', action='store_true', help='统计信息')
     parser.add_argument('--limit', '-n', type=int, default=10, help='返回数量')
+    parser.add_argument('--semantic', action='store_true', help='使用向量语义搜索 (需要 Ollama)')
+    parser.add_argument('--with-embedding', action='store_true', help='添加时生成向量嵌入')
     
     args = parser.parse_args()
     search = SQLiteMemorySearch()
@@ -156,8 +234,11 @@ def main():
     # 添加记忆
     if args.add:
         tags = [t.strip() for t in args.tags.split(',')] if args.tags else []
-        mem_id = search.add(args.add, args.type, args.importance, tags)
-        print(f"✅ 已添加记忆 #{mem_id}")
+        mem_id = search.add(args.add, args.type, args.importance, tags, with_embedding=args.with_embedding)
+        if args.with_embedding:
+            print(f"✅ 已添加记忆 #{mem_id} (带向量嵌入)")
+        else:
+            print(f"✅ 已添加记忆 #{mem_id}")
         return
     
     # 统计
@@ -184,8 +265,9 @@ def main():
     
     # 搜索
     if args.query:
-        results = search.search(args.query, args.limit)
-        print(f"🔍 搜索：{args.query}\n")
+        results = search.search(args.query, args.limit, semantic=args.semantic)
+        mode = " (向量语义)" if args.semantic else ""
+        print(f"🔍 搜索：{args.query}{mode}\n")
         if not results:
             print("  未找到相关记忆")
         else:

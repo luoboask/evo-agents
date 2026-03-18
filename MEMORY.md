@@ -16,13 +16,15 @@
   - `main.sqlite` - main session (exists, empty - 0 chunks)
   - `sandbox-agent.sqlite` - sandbox-agent workspace
 - Workspace memory: `/Users/dhr/.openclaw/workspace-ai-baby/memory/`
-  - `ai-baby_memory_stream.db` - **Active! 3+ memories** ✅
+  - `ai-baby_memory_stream.db` - **Active! 4+ memories** ✅
   - `ai-baby_knowledge_base.db` - Knowledge base (empty)
   - `ai-baby_knowledge_graph.json` - Knowledge graph (empty)
   - `vector_db/ai-baby/embedding_cache.pkl` - Vector cache ✅
-- FTS-only mode active (no vector embeddings yet)
-- `memory_search` returns `provider: "none"` - semantic search not activated
-- **Local search:** Use `skills/memory-search/search_sqlite.py` ✅
+- **Vector Semantic Search:** ✅ Active via Ollama (nomic-embed-text)
+- **Local search:** `skills/memory-search/search_sqlite.py`
+  - Keywords: `python3 search_sqlite.py "query"`
+  - Semantic: `python3 search_sqlite.py --semantic "query"`
+  - Add with embedding: `python3 search_sqlite.py --add "content" --with-embedding`
 
 ## Self-Evolution Discovery (2026-03-19)
 
