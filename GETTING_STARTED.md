@@ -12,7 +12,7 @@
 ```bash
 cd /Users/dhr/.openclaw/workspace-ai-baby
 
-# 初始化和验证系统
+# 完整初始化（推荐新用户）
 python3 init_system.py
 ```
 
@@ -28,6 +28,34 @@ python3 init_system.py
 ```
 🎉 系统初始化完成！所有检查通过！
 ```
+
+---
+
+### 模块化初始化（高级）
+
+如果只想初始化特定模块：
+
+```bash
+# 列出可用模块
+python3 init_system.py --list
+
+# 只初始化记忆搜索
+python3 init_system.py -m memory-search
+
+# 只初始化 RAG 评估
+python3 init_system.py -m rag
+
+# 只初始化自进化核心
+python3 init_system.py -m self-evolution
+
+# 初始化所有模块
+python3 init_system.py -m all
+```
+
+**适用场景：**
+- 只使用部分功能
+- 某个模块出现问题需要重新初始化
+- 快速检查特定模块状态
 
 ---
 
