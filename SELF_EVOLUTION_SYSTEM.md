@@ -227,15 +227,38 @@ add(content, memory_type='knowledge', details={}, source_url=None)
 
 **功能：** 分形思考 + 夜间循环 + 记忆流
 
-**核心模块：**
+**目录结构：** (已整理 - 2026-03-23)
+```
+self-evolution-5.0/
+├── 📄 核心模块（7 个）
+│   ├── main.py                  # 统一入口 CLI
+│   ├── memory_stream.py         # 记忆流系统
+│   ├── fractal_thinking.py      # 分形思考引擎
+│   ├── nightly_cycle.py         # 夜间循环
+│   ├── knowledge_base.py        # 知识库
+│   ├── self_evolution_real.py   # 真实进化记录
+│   └── install.py               # 安装脚本
+│
+├── 📄 辅助模块（6 个）
+│   ├── advanced_learning.py
+│   ├── causal_reasoning_enhanced.py
+│   └── ...
+│
+├── 📄 配置文件
+│   ├── config.yaml.example
+│   └── skill.json
+│
+├── 📄 核心文档（5 个）
+│   ├── ARCHITECTURE.md
+│   ├── README_FINAL.md
+│   ├── INSTALL.md
+│   ├── SETUP.md
+│   └── INITIAL_SETUP.md
+│
+└── 📂 _archive/ (归档 20 个历史文件)
+```
 
-| 模块 | 功能 | 状态 |
-|------|------|------|
-| `memory_stream.py` | 记忆流系统 | ✅ 完成 |
-| `fractal_thinking.py` | 分形思考引擎 | ✅ 完成 |
-| `nightly_cycle.py` | 夜间循环 | ✅ 完成 |
-| `knowledge_base.py` | 知识库 | ✅ 完成 |
-| `main.py` | 统一 CLI 入口 | ✅ 完成 |
+**详见：** `skills/self-evolution-5.0/DIRECTORY_STRUCTURE.md`
 
 **分形思考 4 层：**
 ```
