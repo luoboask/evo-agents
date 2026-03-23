@@ -7,9 +7,14 @@ Memory Hub - 记忆中心
 from pathlib import Path
 from typing import List, Dict, Optional
 
-from .storage import StorageManager
-from .knowledge import KnowledgeInterface
-from .evaluation import EvaluationInterface
+try:
+    from .storage import StorageManager
+    from .knowledge import KnowledgeInterface
+    from .evaluation import EvaluationInterface
+except ImportError:
+    from storage import StorageManager
+    from knowledge import KnowledgeInterface
+    from evaluation import EvaluationInterface
 
 
 class MemoryHub:
