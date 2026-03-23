@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-ai-baby 系统初始化和验证工具
+evo-agents 系统初始化和验证工具
 自动配置环境、检查依赖、验证功能
 """
 
@@ -54,9 +54,10 @@ def print_step(step, text):
 class SystemInitializer:
     """系统初始化和验证"""
     
-    def __init__(self):
-        self.workspace = Path("/Users/dhr/.openclaw/workspace-ai-baby")
-        self.config_dir = Path.home() / ".openclaw" / "workspace-ai-baby-config"
+    def __init__(self, workspace: Path, agent: str):
+        self.workspace = workspace.resolve()
+        self.agent = agent
+        self.config_dir = self.workspace / "data" / agent / "config"
         self.results = {
             "checks": [],
             "fixes": [],
@@ -136,7 +137,7 @@ class SystemInitializer:
     
     def create_config_file(self):
         """创建配置文件模板"""
-        config_content = f"""# ai-baby 个人配置
+        config_content = f"""# evo-agents 个人配置
 # ⚠️  此文件包含敏感信息，不会上传到 Git
 # 创建时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
@@ -151,8 +152,8 @@ ollama:
 
 # 数据库路径
 database:
-  memory_stream: {self.config_dir}/memory/ai-baby_memory_stream.db
-  knowledge_base: {self.config_dir}/memory/ai-baby_knowledge_base.db
+  memory_stream: {self.config_dir}/memory/memory_stream.db
+  knowledge_base: {self.config_dir}/memory/knowledge_base.db
 
 # RAG 配置
 rag:
@@ -176,8 +177,8 @@ rag:
         print_step(4, "检查数据库")
         
         db_checks = [
-            ("记忆流", self.config_dir / "memory" / "ai-baby_memory_stream.db"),
-            ("知识库", self.config_dir / "memory" / "ai-baby_knowledge_base.db"),
+            ("记忆流", self.config_dir / "memory" / "memory_stream.db"),
+            ("知识库", self.config_dir / "memory" / "knowledge_base.db"),
         ]
         
         all_ok = True
@@ -331,9 +332,9 @@ rag:
         print(f"  配置目录：{self.config_dir}")
         
         print("\n🚀 下一步:")
-        print("  1. 编辑配置文件：~/.openclaw/workspace-ai-baby-config/config.yaml")
-        print("  2. 运行系统状态：./start.sh")
-        print("  3. 开始使用：python3 skills/memory-search/search_sqlite.py \"查询\"")
+        print(f"  1. 编辑配置文件：{self.config_dir / 'config.yaml'}")
+        print(f"  2. 运行系统状态：./start.sh --workspace {self.workspace} --agent {self.agent}")
+        print(f"  3. 开始使用：python3 skills/memory-search/search_sqlite.py \"查询\" --agent {self.agent}")
         
         print("\n" + "=" * 70)
         if not self.results["warnings"]:
@@ -510,7 +511,7 @@ def main():
     """主函数"""
     import argparse
     
-    parser = argparse.ArgumentParser(description="ai-baby 系统初始化和验证")
+    parser = argparse.ArgumentParser(description="evo-agents 系统初始化和验证")
     parser.add_argument(
         "--module", "-m",
         choices=["memory-search", "rag", "self-evolution", "all"],
@@ -522,6 +523,8 @@ def main():
         action="store_true",
         help="列出可用模块"
     )
+    parser.add_argument("--workspace", type=str, default=str(Path(__file__).resolve().parent), help="Workspace 路径")
+    parser.add_argument("--agent", type=str, default="demo-agent", help="Agent 名称")
     
     args = parser.parse_args()
     
@@ -535,8 +538,8 @@ def main():
   all             - 所有模块（默认）
 
 使用示例:
-  python3 init_system.py                  # 完整初始化
-  python3 init_system.py -m rag          # 只初始化 RAG
+  python3 init_system.py --workspace . --agent demo-agent                  # 完整初始化
+  python3 init_system.py --workspace . --agent demo-agent -m rag          # 只初始化 RAG
   python3 init_system.py --list          # 列出模块
 """)
         return
@@ -547,12 +550,13 @@ def main():
         sys.exit(0 if success else 1)
     
     # 默认：完整初始化
-    print_header("🍼 ai-baby 系统初始化和验证")
-    print(f"工作区：{Path('/Users/dhr/.openclaw/workspace-ai-baby')}")
-    print(f"配置目录：{Path.home() / '.openclaw' / 'workspace-ai-baby-config'}")
+    workspace = Path(args.workspace).expanduser().resolve()
+    print_header("🤖 evo-agents 系统初始化和验证")
+    print(f"工作区：{workspace}")
+    print(f"配置目录：{workspace / 'data' / args.agent / 'config'}")
     print(f"时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
-    initializer = SystemInitializer()
+    initializer = SystemInitializer(workspace=workspace, agent=args.agent)
     
     # 执行检查
     initializer.check_python()

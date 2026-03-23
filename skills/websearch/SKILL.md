@@ -1,7 +1,7 @@
 ---
 name: web_search
 description: 网页搜索技能，基于 Bing 搜索
-homepage: https://github.com/ai-baby/workspace-ai-baby
+homepage: https://github.com/your-org/evo-agents
 metadata:
   emoji: "🌐"
   category: search

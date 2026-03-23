@@ -108,11 +108,12 @@ def test_embedding():
         return False
 
 
-def check_config():
+def check_config(workspace: Path, agent: str):
     """检查配置文件"""
     print("\n4️⃣ 配置文件检查:")
+    default_config_dir = workspace / 'data' / agent / 'config'
     config_paths = [
-        Path.home() / '.openclaw' / 'workspace-ai-baby-config' / 'config.yaml',
+        default_config_dir / 'config.yaml',
         Path('config/config.yaml'),
     ]
     
@@ -141,6 +142,14 @@ def main():
     print("🔍 Embedding 模型检查")
     print("=" * 70)
     
+    import argparse
+    parser = argparse.ArgumentParser(description="Embedding 模型检查")
+    parser.add_argument("--workspace", default=str(Path(__file__).resolve().parents[1]), help="Workspace 路径")
+    parser.add_argument("--agent", default="demo-agent", help="Agent 名称")
+    args = parser.parse_args()
+
+    workspace = Path(args.workspace).expanduser().resolve()
+
     ollama_ok = check_ollama()
     if not ollama_ok:
         print("\n❌ Ollama 服务未运行，无法继续检查")
@@ -152,7 +161,7 @@ def main():
         sys.exit(1)
     
     test_ok = test_embedding()
-    config_ok = check_config()
+    config_ok = check_config(workspace, args.agent)
     
     print("\n" + "=" * 70)
     print("📊 检查总结")

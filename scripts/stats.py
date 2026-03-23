@@ -21,7 +21,7 @@ sys.path.insert(0, str(LIBS_DIR))
 from memory_hub import MemoryHub
 
 
-def print_stats(agent_name='ai-baby', days=7):
+def print_stats(agent_name='demo-agent', days=7):
     """打印统计信息"""
     hub = MemoryHub(agent_name)
     
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     import argparse
     
     parser = argparse.ArgumentParser(description='记忆&知识系统调用统计')
-    parser.add_argument('--agent', default='ai-baby', help='Agent 名称')
+    parser.add_argument('--agent', default='demo-agent', help='Agent 名称')
     parser.add_argument('--days', type=int, default=7, help='统计天数')
     
     args = parser.parse_args()

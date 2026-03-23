@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-ai-baby 完整功能测试
+evo-agents 完整功能测试
 验证所有核心功能正常工作
 """
 
 import sys
 import time
+import argparse
 from pathlib import Path
 from datetime import datetime
 
@@ -33,6 +34,9 @@ def print_success(text):
 def print_error(text):
     cprint(f"❌ {text}", Colors.FAIL)
 
+def print_warning(text):
+    cprint(f"⚠️  {text}", Colors.WARNING)
+
 def print_info(text):
     cprint(f"ℹ️  {text}", Colors.OKCYAN)
 
@@ -40,8 +44,10 @@ def print_info(text):
 class TestSuite:
     """测试套件"""
     
-    def __init__(self):
-        self.workspace = Path("/Users/dhr/.openclaw/workspace-ai-baby")
+    def __init__(self, workspace: Path, agent_name: str):
+        self.workspace = workspace.resolve()
+        self.agent_name = agent_name
+        self.config_dir = self.workspace / "data" / self.agent_name / "config"
         self.results = {
             "passed": 0,
             "failed": 0,
@@ -91,7 +97,7 @@ class TestSuite:
         """测试 3: 配置加载"""
         try:
             import yaml
-            config_path = Path.home() / ".openclaw" / "workspace-ai-baby-config" / "config.yaml"
+            config_path = self.config_dir / "config.yaml"
             
             if not config_path.exists():
                 print_info("配置文件不存在，使用默认配置")
@@ -119,12 +125,7 @@ class TestSuite:
             sys.path.insert(0, str(self.workspace / "skills" / "memory-search"))
             from search_sqlite import SQLiteMemorySearch
             
-            search = SQLiteMemorySearch()
-            
-            # 检查数据库
-            if not search.db_path.exists():
-                print_info("数据库不存在，首次使用会自动创建")
-                return True
+            search = SQLiteMemorySearch(agent_name=self.agent_name)
             
             # 测试搜索
             results = search.search("测试", top_k=3, semantic=False)
@@ -148,7 +149,7 @@ class TestSuite:
             sys.path.insert(0, str(self.workspace / "skills" / "rag"))
             from evaluate import RAGEvaluator, EVALUATIONS_FILE
             
-            evaluator = RAGEvaluator()
+            evaluator = RAGEvaluator(agent_name=self.agent_name)
             
             # 检查日志文件
             if not EVALUATIONS_FILE.exists():
@@ -241,7 +242,7 @@ class TestSuite:
             import sqlite3
             from pathlib import Path
             
-            db_path = Path.home() / ".openclaw" / "workspace-ai-baby-config" / "memory" / "ai-baby_memory_stream.db"
+            db_path = self.workspace / "data" / self.agent_name / "memory" / "memory_stream.db"
             
             if not db_path.exists():
                 print_info("数据库不存在，首次使用会自动创建")
@@ -302,12 +303,12 @@ class TestSuite:
         try:
             import subprocess
             
-            result = subprocess.run(
-                ["python3", str(self.workspace / "quick_verify.py")],
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
+            quick_verify = self.workspace / "quick_verify.py"
+            if not quick_verify.exists():
+                print_info("quick_verify.py 不存在，跳过")
+                return True
+
+            result = subprocess.run(["python3", str(quick_verify)], capture_output=True, text=True, timeout=30)
             
             if "所有功能验证通过" in result.stdout:
                 print_success("快速验证脚本正常")
@@ -351,12 +352,20 @@ class TestSuite:
 
 def main():
     """主函数"""
+    parser = argparse.ArgumentParser(description="evo-agents 完整功能测试")
+    parser.add_argument("--workspace", default=str(Path(__file__).resolve().parent), help="Workspace 路径")
+    parser.add_argument("--agent", default="demo-agent", help="Agent 名称")
+    args = parser.parse_args()
+
+    workspace = Path(args.workspace).expanduser().resolve()
     print("\n" + "🧪" * 30)
-    print(f"  ai-baby 完整功能测试")
+    print(f"  evo-agents 完整功能测试")
+    print(f"  工作区：{workspace}")
+    print(f"  Agent：{args.agent}")
     print(f"  时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("🧪" * 30)
     
-    suite = TestSuite()
+    suite = TestSuite(workspace=workspace, agent_name=args.agent)
     
     # 运行所有测试
     suite.run_test("Python 环境", suite.test_python_environment)

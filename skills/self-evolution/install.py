@@ -10,9 +10,9 @@
 5. 验证安装
 """
 
-import os
 import sys
 import sqlite3
+import argparse
 from pathlib import Path
 from datetime import datetime
 
@@ -63,7 +63,7 @@ def check_sqlite3():
         return False
 
 
-def create_config():
+def create_config(workspace: Path):
     """创建配置文件"""
     config_file = Path(__file__).parent / 'config.yaml'
     config_template = Path(__file__).parent / 'config.yaml.example'
@@ -71,10 +71,6 @@ def create_config():
     if config_file.exists():
         print_info(f"配置文件已存在：{config_file}")
         return True
-    
-    # 获取用户 home 目录
-    home = Path.home()
-    workspace = home / '.openclaw' / 'workspace'
     
     if config_template.exists():
         # 读取模板并替换 workspace
@@ -129,16 +125,13 @@ fractal:
         return True
 
 
-def create_directories():
+def create_directories(workspace: Path, agent: str):
     """创建目录结构"""
-    home = Path.home()
-    workspace = home / '.openclaw' / 'workspace'
-    
     dirs = [
         workspace,
         workspace / 'memory',
-        workspace / 'memory' / 'vector_db',
-        workspace / 'evolution',
+        workspace / 'data' / agent / 'memory',
+        workspace / 'data' / agent / 'evolution',
     ]
     
     for dir_path in dirs:
@@ -151,13 +144,11 @@ def create_directories():
     return True
 
 
-def create_databases():
+def create_databases(workspace: Path, agent: str):
     """创建空数据库"""
-    home = Path.home()
-    workspace = home / '.openclaw' / 'workspace'
-    
+    data_root = workspace / 'data' / agent
     databases = {
-        workspace / 'memory' / 'memory_stream.db': '''
+        data_root / 'memory' / 'memory_stream.db': '''
             -- 记忆流数据库
             CREATE TABLE IF NOT EXISTS memories (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -173,7 +164,7 @@ def create_databases():
             CREATE INDEX IF NOT EXISTS idx_memory_type ON memories(memory_type);
             CREATE INDEX IF NOT EXISTS idx_created_at ON memories(created_at);
         ''',
-        workspace / 'memory' / 'knowledge_base.db': '''
+        data_root / 'memory' / 'knowledge_base.db': '''
             -- 知识库数据库
             CREATE TABLE IF NOT EXISTS knowledge (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -193,7 +184,7 @@ def create_databases():
             CREATE INDEX IF NOT EXISTS idx_domain ON knowledge(domain);
             CREATE INDEX IF NOT EXISTS idx_timestamp ON knowledge(timestamp);
         ''',
-        workspace / 'evolution' / 'evolution.db': '''
+        data_root / 'evolution' / 'evolution.db': '''
             -- 进化事件数据库
             CREATE TABLE IF NOT EXISTS evolution_events (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -226,18 +217,16 @@ def create_databases():
     return True
 
 
-def verify_installation():
+def verify_installation(workspace: Path, agent: str):
     """验证安装"""
     print_header("验证安装")
-    
-    home = Path.home()
-    workspace = home / '.openclaw' / 'workspace'
-    
+    data_root = workspace / 'data' / agent
+
     checks = [
-        ("配置文件", workspace.parent / 'skills' / 'self-evolution' / 'config.yaml'),
-        ("记忆流数据库", workspace / 'memory' / 'memory_stream.db'),
-        ("知识库数据库", workspace / 'memory' / 'knowledge_base.db'),
-        ("进化事件数据库", workspace / 'evolution' / 'evolution.db'),
+        ("配置文件", Path(__file__).parent / 'config.yaml'),
+        ("记忆流数据库", data_root / 'memory' / 'memory_stream.db'),
+        ("知识库数据库", data_root / 'memory' / 'knowledge_base.db'),
+        ("进化事件数据库", data_root / 'evolution' / 'evolution.db'),
     ]
     
     all_ok = True
@@ -251,25 +240,25 @@ def verify_installation():
     return all_ok
 
 
-def print_next_steps():
+def print_next_steps(workspace: Path, agent: str):
     """打印下一步指引"""
     print_header("安装完成！下一步")
     
-    print("""
+    print(f"""
 📝 配置（可选）:
    编辑 config.yaml 调整配置
-   位置：~/.openclaw/workspace/skills/self-evolution/config.yaml
+   位置：{Path(__file__).parent / 'config.yaml'}
 
 🔍 查看系统状态:
-   cd ~/.openclaw/workspace/skills/self-evolution
-   python3 main.py status
+   cd {workspace}/skills/self-evolution
+   python3 main.py --agent {agent} status
 
 📝 记录第一个事件:
-   python3 main.py evolve --type KNOWLEDGE_GAINED --content "系统安装完成"
+   python3 main.py --agent {agent} evolve --type KNOWLEDGE_GAINED --content "系统安装完成"
 
 ⏰ 配置定时任务（可选）:
    crontab -e
-   添加：0 2 * * * cd ~/.openclaw/workspace/skills/self-evolution && python3 main.py nightly
+   添加：0 2 * * * cd {workspace}/skills/self-evolution && python3 main.py --agent {agent} nightly
 
 📚 阅读文档:
    - INSTALL.md - 安装指南（本文档）
@@ -280,9 +269,17 @@ def print_next_steps():
 
 def main():
     """主函数"""
+    parser = argparse.ArgumentParser(description="自进化系统安装程序")
+    parser.add_argument("--workspace", default=str(Path(__file__).resolve().parents[2]), help="Workspace 路径")
+    parser.add_argument("--agent", default="demo-agent", help="Agent 名称")
+    args = parser.parse_args()
+    workspace = Path(args.workspace).expanduser().resolve()
+    agent = args.agent
+
     print_header("自进化系统 v5.0 - 安装程序")
     print_info(f"安装时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print_info(f"目标目录：{Path.home()}/.openclaw/workspace")
+    print_info(f"目标目录：{workspace}")
+    print_info(f"目标 Agent：{agent}")
     
     # 检查依赖
     print_header("检查依赖")
@@ -297,23 +294,23 @@ def main():
     
     # 创建配置和目录
     print_header("创建配置文件")
-    create_config()
+    create_config(workspace)
     
     print_header("创建目录结构")
-    create_directories()
+    create_directories(workspace, agent)
     
     print_header("创建数据库")
-    if not create_databases():
+    if not create_databases(workspace, agent):
         print_error("数据库创建失败")
         sys.exit(1)
     
     # 验证安装
-    if not verify_installation():
+    if not verify_installation(workspace, agent):
         print_error("安装验证失败")
         sys.exit(1)
     
     # 打印下一步
-    print_next_steps()
+    print_next_steps(workspace, agent)
     
     print("\n" + "=" * 50)
     print("🎉 安装成功！开始你的自进化之旅吧！")

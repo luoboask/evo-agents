@@ -1,71 +1,17 @@
-# ai-baby Agent 配置
+# Agent Configuration
+#
+# Define your agent(s) here.
+# Each agent gets its own data directory under data/<name>/
 
 # ───────────────────────────────────────────────────────
-# 主 Agent - ai-baby
+# Main Agent
 # ───────────────────────────────────────────────────────
-ai-baby:
-  name: ai-baby
+demo-agent:
+  name: demo-agent
   role: assistant
-  emoji: "🍼"
-  description: "主 Agent - 日常 AI 助手"
-  data_path: data/ai-baby
-  
-  # 技能配置（自动共享，无需声明）
-  # 所有 Agent 自动共享 workspace-ai-baby/skills/
-  
-  # 特定配置
+  description: "Demo agent"
+  data_path: data/demo-agent
+
   settings:
     max_memories: 1000
     auto_cleanup: false
-
-# ───────────────────────────────────────────────────────
-# baby1 - 沙箱测试 Agent
-# ───────────────────────────────────────────────────────
-baby1:
-  name: baby1-sandbox
-  role: tester
-  emoji: "🧪"
-  description: "沙箱 Agent - 测试和实验"
-  data_path: data/baby1
-  parent: ai-baby
-  
-  # 沙箱特定配置
-  sandbox:
-    auto_cleanup: true
-    max_memories: 100
-    max_age_days: 7
-    isolated: true
-
-# ───────────────────────────────────────────────────────
-# baby2 - 电商运营 Agent
-# ───────────────────────────────────────────────────────
-baby2:
-  name: baby2-ecommerce
-  role: ecommerce
-  emoji: "🛒"
-  description: "电商 Agent - 自营平台运营"
-  data_path: data/baby2
-  parent: ai-baby
-  
-  # 电商特定配置
-  ecommerce:
-    platform: taobao
-    auto_sync: true
-    max_memories: 500
-
-# ───────────────────────────────────────────────────────
-# baby3 - 内容创作 Agent
-# ───────────────────────────────────────────────────────
-baby3:
-  name: baby3-content
-  role: creator
-  emoji: "✍️"
-  description: "内容 Agent - 内容创作"
-  data_path: data/baby3
-  parent: ai-baby
-  
-  # 内容创作配置
-  content:
-    auto_save: true
-    style: creative
-    max_memories: 300

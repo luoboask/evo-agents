@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ai-baby 事件同步脚本
+事件同步脚本
 从每日记忆文件提取事件，同步到 SQLite 记忆流数据库
 """
 
@@ -10,14 +10,14 @@ import json
 import sqlite3
 import subprocess
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Dict, Tuple
 
 
-# 配置
-WORKSPACE = Path('/Users/dhr/.openclaw/workspace-ai-baby')
+# 运行时配置（由 main 注入）
+WORKSPACE = Path.cwd()
 MEMORY_DIR = WORKSPACE / 'memory'
-DB_PATH = MEMORY_DIR / 'ai-baby_memory_stream.db'
+DB_PATH = WORKSPACE / 'data' / 'demo-agent' / 'memory' / 'memory_stream.db'
 OLLAMA_URL = 'http://localhost:11434/api/embeddings'
 
 
@@ -236,20 +236,31 @@ def sync_event(db_path: Path, event: Dict) -> Tuple[int, bool]:
 
 def main():
     """主函数"""
+    import argparse
+    parser = argparse.ArgumentParser(description="同步 daily memory 到 agent 数据库")
+    parser.add_argument("--workspace", required=True, help="Workspace 路径")
+    parser.add_argument("--agent", default="demo-agent", help="Agent 名称")
+    parser.add_argument("--date", help="指定日期 YYYY-MM-DD")
+    args = parser.parse_args()
+
+    global WORKSPACE, MEMORY_DIR, DB_PATH
+    WORKSPACE = Path(args.workspace).expanduser().resolve()
+    MEMORY_DIR = WORKSPACE / 'memory'
+    DB_PATH = WORKSPACE / 'data' / args.agent / 'memory' / 'memory_stream.db'
+
     print("=" * 60)
-    print("🍼 ai-baby 事件同步")
+    print(f"🤖 事件同步 (agent={args.agent})")
     print("=" * 60)
     
     # 确定要同步的文件
-    if len(sys.argv) > 1:
-        # 指定日期
-        date_str = sys.argv[1]
+    if args.date:
+        date_str = args.date
         daily_file = MEMORY_DIR / f"{date_str}.md"
         files_to_sync = [daily_file]
     else:
         # 同步今天和昨天
         today = datetime.now().strftime('%Y-%m-%d')
-        yesterday = (datetime.now()).strftime('%Y-%m-%d')  # 简单处理
+        yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
         files_to_sync = [
             MEMORY_DIR / f"{today}.md",
             MEMORY_DIR / f"{yesterday}.md"

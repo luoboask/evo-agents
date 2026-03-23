@@ -22,7 +22,7 @@ class SmartSearchEngine:
     """智能搜索引擎 - v4 进化版"""
     
     def __init__(self):
-        self.workspace = Path("/Users/dhr/.openclaw/workspace")
+        self.workspace = Path(__file__).resolve().parents[2]
         self.learning_dir = self.workspace / "memory" / "learning"
         
         # 搜索引擎健康状态

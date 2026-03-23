@@ -2,7 +2,7 @@
   "name": "自进化系统 v5.0",
   "version": "5.0.0",
   "description": "基于 Generative Agents 和 TinkerClaw 的自进化系统，实现记忆流、分形思考、夜间循环的完整架构",
-  "author": "ai-baby",
+  "author": "evo-agents",
   "tags": ["自进化", "记忆系统", "自动化", "AI 架构"],
   "category": "系统工具",
   "repository": "待开源",

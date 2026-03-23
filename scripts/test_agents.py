@@ -3,8 +3,8 @@
 测试多 Agent 配置
 """
 
-import os
 import sys
+import argparse
 from pathlib import Path
 
 # 添加 libs 目录到路径以支持 Memory Hub 导入
@@ -24,9 +24,6 @@ def test_agent(agent_name: str):
     print(f"\n{'='*60}")
     print(f"🤖 测试 Agent: {agent_name}")
     print(f"{'='*60}")
-    
-    # 设置环境变量
-    os.environ['OPENCLAW_AGENT'] = agent_name
     
     # 创建 Memory Hub
     hub = MemoryHub(agent_name)
@@ -78,7 +75,25 @@ def test_agent(agent_name: str):
 
 def main():
     """测试所有 Agent"""
-    agents = ['ai-baby', 'baby1', 'baby2', 'baby3']
+    parser = argparse.ArgumentParser(description="多 Agent 配置测试")
+    parser.add_argument("--workspace", default=str(Path(__file__).resolve().parents[1]), help="Workspace 路径")
+    parser.add_argument("--agent", help="仅测试指定 Agent")
+    args = parser.parse_args()
+
+    workspace = Path(args.workspace).expanduser().resolve()
+    config_path = workspace / 'config' / 'agents.yaml'
+    agents = ['demo-agent']
+    if config_path.exists():
+        try:
+            import yaml
+            config = yaml.safe_load(config_path.read_text(encoding='utf-8')) or {}
+            if isinstance(config, dict) and config:
+                agents = list(config.keys())
+        except Exception:
+            pass
+
+    if args.agent:
+        agents = [args.agent]
     
     print("🚀 开始多 Agent 测试...")
     
@@ -92,7 +107,7 @@ def main():
     # 验证数据隔离
     print("\n📊 验证数据隔离...")
     for agent in agents:
-        data_path = Path('/Users/dhr/.openclaw/workspace-ai-baby/data') / agent
+        data_path = workspace / 'data' / agent
         memory_path = data_path / 'memory'
         
         if memory_path.exists():

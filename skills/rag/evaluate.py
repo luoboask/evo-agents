@@ -6,7 +6,6 @@ RAG 评估框架 - 使用 Memory Hub
 """
 
 import json
-import os
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -34,16 +33,13 @@ EVALUATIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
 class RAGEvaluator:
     """RAG 评估器 - 使用 Memory Hub"""
     
-    def __init__(self, agent_name=None):
+    def __init__(self, agent_name='demo-agent'):
         """
         初始化 RAG 评估器
         
         Args:
             agent_name: Agent 名称（默认从环境变量获取）
         """
-        if agent_name is None:
-            agent_name = os.environ.get('OPENCLAW_AGENT', 'ai-baby')
-        
         self.agent_name = agent_name
         self.config = self._load_config()
         self.evaluations = []
@@ -280,9 +276,10 @@ def main():
     parser.add_argument("--days", type=int, default=7, help="报告天数")
     parser.add_argument("--top-k", type=int, help="Top-K 值")
     parser.add_argument("--similarity", type=float, help="相似度分数")
+    parser.add_argument("--agent", type=str, default="demo-agent", help="Agent 名称")
     
     args = parser.parse_args()
-    evaluator = RAGEvaluator()
+    evaluator = RAGEvaluator(agent_name=args.agent)
     
     if args.record:
         if not args.query:

@@ -25,16 +25,16 @@ def cmd_status(args):
     sys.path.insert(0, str(Path(__file__).parent.parent))
     
     # 检查数据库
-    import os
-    agent_name = os.environ.get('OPENCLAW_AGENT', 'ai-baby')
+    agent_name = args.agent
     db_files = [
-        f'data/{agent_name}/memory/{agent_name}_memory_stream.db',
-        f'data/{agent_name}/memory/{agent_name}_knowledge_base.db',
+        f'data/{agent_name}/memory/memory_stream.db',
+        f'data/{agent_name}/memory/knowledge_base.db',
     ]
     
     print("\n📊 数据库状态:")
+    workspace_root = Path(__file__).resolve().parents[2]
     for db in db_files:
-        full_path = Path('/Users/dhr/.openclaw/workspace-ai-baby') / db
+        full_path = workspace_root / db
         if full_path.exists():
             size_mb = full_path.stat().st_size / 1024 / 1024
             print(f"   ✅ {db} ({size_mb:.2f}MB)")
@@ -93,7 +93,7 @@ def cmd_memory(args):
     """管理记忆流"""
     from memory_stream import MemoryStream
     
-    ms = MemoryStream()
+    ms = MemoryStream(agent_name=args.agent)
     
     if args.action == 'add':
         memory_id = ms.add_memory(
@@ -151,7 +151,7 @@ def cmd_evolve(args):
     """记录进化事件"""
     from self_evolution_real import RealSelfEvolution
     
-    evolution = RealSelfEvolution()
+    evolution = RealSelfEvolution(agent_id=args.agent)
     
     event = evolution.record_evolution(
         event_type=args.type,
@@ -214,6 +214,7 @@ def main():
   python3 main.py embedding "修复 Bug" "修复错误"  # 测试相似度
         """
     )
+    parser.add_argument('--agent', default='demo-agent', help='Agent 名称')
     
     subparsers = parser.add_subparsers(dest='command', help='可用命令')
     

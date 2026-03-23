@@ -5,7 +5,6 @@ SQLite 记忆搜索 - 使用 Memory Hub
 """
 
 import argparse
-import os
 from pathlib import Path
 
 # 导入 Memory Hub (共享库)
@@ -24,16 +23,13 @@ except ImportError:
 class SQLiteMemorySearch:
     """SQLite 记忆搜索 - 使用 Memory Hub"""
     
-    def __init__(self, agent_name=None):
+    def __init__(self, agent_name='demo-agent'):
         """
         初始化记忆搜索
         
         Args:
             agent_name: Agent 名称（默认从环境变量获取）
         """
-        if agent_name is None:
-            agent_name = os.environ.get('OPENCLAW_AGENT', 'ai-baby')
-        
         if MEMORY_HUB_ENABLED:
             self.hub = MemoryHub(agent_name)
             # 验证数据库连接
@@ -125,12 +121,11 @@ def main():
     parser.add_argument('--stats', '-s', action='store_true', help='统计信息')
     parser.add_argument('--limit', '-n', type=int, default=10, help='返回数量')
     parser.add_argument('--semantic', action='store_true', help='使用语义搜索')
+    parser.add_argument('--agent', default='demo-agent', help='Agent 名称')
     
     args = parser.parse_args()
     
-    # 获取 Agent 名称
-    agent_name = os.environ.get('OPENCLAW_AGENT', 'ai-baby')
-    search = SQLiteMemorySearch(agent_name=agent_name)
+    search = SQLiteMemorySearch(agent_name=args.agent)
     
     # 添加记忆
     if args.add:

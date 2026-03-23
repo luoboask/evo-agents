@@ -8,11 +8,11 @@
 
 ```bash
 # 1. 复制技能到你的 workspace
-mkdir -p ~/.openclaw/workspace/skills
-cp -r /path/to/self-evolution ~/.openclaw/workspace/skills/
+mkdir -p <workspace-root>/skills
+cp -r /path/to/self-evolution <workspace-root>/skills/
 
 # 2. 进入目录
-cd ~/.openclaw/workspace/skills/self-evolution
+cd <workspace-root>/skills/self-evolution
 
 # 3. 运行自动安装脚本
 python3 install.py
@@ -48,9 +48,9 @@ python3 install.py
 ### Step 1: 复制技能
 
 ```bash
-mkdir -p ~/.openclaw/workspace/skills
-cp -r /path/to/self-evolution ~/.openclaw/workspace/skills/
-cd ~/.openclaw/workspace/skills/self-evolution
+mkdir -p <workspace-root>/skills
+cp -r /path/to/self-evolution <workspace-root>/skills/
+cd <workspace-root>/skills/self-evolution
 ```
 
 ### Step 2: 创建配置
@@ -59,8 +59,8 @@ cd ~/.openclaw/workspace/skills/self-evolution
 # 创建配置文件
 cat > config.yaml << 'EOF'
 # 自进化系统配置
-working_directory: ~/.openclaw/workspace
-agent_name: ai-baby
+working_directory: <workspace-root>
+agent_name: main
 
 # Embedding 配置
 embedding:
@@ -140,6 +140,6 @@ self-evolution/
 
 ---
 
-**维护者：** ai-baby  
+**维护者：** evo-agents  
 **版本：** v5.0  
 **更新时间：** 2026-03-23

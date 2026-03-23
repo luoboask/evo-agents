@@ -138,14 +138,14 @@ def test_rag(hub):
         return True
 
 
-def test_skill():
+def test_skill(agent_name: str):
     """测试记忆搜索技能"""
     print("\n6️⃣ 记忆搜索技能:")
     try:
         sys.path.insert(0, str(Path('skills') / 'memory-search'))
         from search_sqlite import SQLiteMemorySearch
         
-        search = SQLiteMemorySearch()
+        search = SQLiteMemorySearch(agent_name=agent_name)
         results = search.search("测试", top_k=3)
         print(f"   ✅ 技能导入：成功")
         print(f"   ✅ 技能搜索：找到 {len(results)} 条")
@@ -158,11 +158,20 @@ def test_skill():
 def test_multi_agent():
     """测试多 Agent 隔离"""
     print("\n7️⃣ 多 Agent 数据隔离:")
-    agents = ['ai-baby', 'baby1', 'baby2', 'baby3']
+    config_path = Path('config/agents.yaml')
+    agents = ['demo-agent']
+    if config_path.exists():
+        try:
+            import yaml
+            cfg = yaml.safe_load(config_path.read_text(encoding='utf-8')) or {}
+            if isinstance(cfg, dict) and cfg:
+                agents = list(cfg.keys())
+        except Exception:
+            pass
     results = {}
     
     for agent in agents:
-        db_path = Path(f'data/{agent}/memory/{agent}_memory_stream.db')
+        db_path = Path(f'data/{agent}/memory/memory_stream.db')
         if db_path.exists():
             conn = sqlite3.connect(db_path)
             cur = conn.cursor()
@@ -180,6 +189,11 @@ def test_multi_agent():
 
 def main():
     """主函数"""
+    import argparse
+    parser = argparse.ArgumentParser(description="知识系统 & 语义搜索完整功能测试")
+    parser.add_argument("--agent", default="demo-agent", help="Agent 名称")
+    args = parser.parse_args()
+
     print("=" * 70)
     print("🧪 知识系统 & 语义搜索完整功能测试")
     print("=" * 70)
@@ -190,7 +204,7 @@ def main():
         sys.exit(1)
     
     from memory_hub import MemoryHub
-    hub = MemoryHub('ai-baby')
+    hub = MemoryHub(args.agent)
     
     # 2. CRUD
     test_crud(hub)
@@ -205,7 +219,7 @@ def main():
     test_rag(hub)
     
     # 6. 技能
-    test_skill()
+    test_skill(args.agent)
     
     # 7. 多 Agent
     agent_results = test_multi_agent()

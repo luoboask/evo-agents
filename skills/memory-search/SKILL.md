@@ -1,7 +1,7 @@
 ---
 name: memory_search
 description: 记忆搜索技能，支持关键词和语义搜索
-homepage: https://github.com/ai-baby/workspace-ai-baby
+homepage: https://github.com/your-org/evo-agents
 metadata:
   emoji: "🧠"
   category: memory
@@ -79,12 +79,11 @@ stats()
 
 ## 数据存储
 
-记忆数据存储在：
+记忆数据默认存储在：
 ```
-~/.openclaw/workspace-ai-baby-config/memory/
+data/demo-agent/memory/
 ├── memory_stream.db      # 记忆流数据库
-├── knowledge_base.db     # 知识库
-└── vector_db/            # 向量数据库（语义搜索）
+└── knowledge_base.db     # 知识库
 ```
 
 ## 依赖

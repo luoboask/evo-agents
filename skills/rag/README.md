@@ -1,6 +1,6 @@
 # RAG 评估框架
 
-基于 AutoRAG 理念，为 ai-baby 定制的轻量级 RAG 评估系统。
+基于 AutoRAG 理念的轻量级 RAG 评估系统。
 
 ## 核心指标
 
