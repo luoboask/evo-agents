@@ -9,8 +9,8 @@
 | Phase | 内容 | 状态 | 完成度 |
 |-------|------|------|--------|
 | **Phase 1** | Memory Hub | ✅ 完成 | 100% |
-| **Phase 2** | 更新现有技能 | 🚧 进行中 | 50% |
-| **Phase 3** | 创建知识结构 | ⏳ 待实施 | 0% |
+| **Phase 2** | 更新现有技能 | ✅ 完成 | 100% |
+| **Phase 3** | 创建知识结构 | ✅ 完成 | 100% |
 | **Phase 4** | 多 Agent 配置 | ⏳ 待实施 | 0% |
 
 ---
@@ -47,9 +47,9 @@ skills/memory-hub/
 
 ---
 
-## 🚧 Phase 2: 更新现有技能（进行中）
+## ✅ Phase 2: 更新现有技能（完成）
 
-**开始时间：** 2026-03-23 18:30
+**完成时间：** 2026-03-23 18:40
 
 ### 技能更新状态
 
@@ -57,7 +57,7 @@ skills/memory-hub/
 |------|------|------|
 | **memory-search** | ✅ 完成 | 改用 MemoryHub.search/add |
 | **rag-evaluation** | ✅ 完成 | 改用 MemoryHub.evaluation |
-| **self-evolution** | ⏳ 待更新 | 改用 MemoryHub.add/record_evolution |
+| **self-evolution** | ✅ 完成 | 改用 MemoryHub.add/record_evolution |
 | **websearch** | ✅ 独立 | 无需改动 |
 
 ### 已更新技能
@@ -92,33 +92,26 @@ skills/memory-hub/
 减少：146 行（48%）
 ```
 
-### 待更新技能
-
 #### self-evolution
 
-**计划改动：**
-- 改用 MemoryHub.add() 添加记忆
-- 改用 MemoryHub.record_evolution() 记录进化
+**改动：**
+- 使用 MemoryHub.add/record_evolution
 - 移除直接数据库管理
+- 保留反思生成功能
+- 支持 OPENCLAW_AGENT 环境变量
 
-**预计代码减少：** ~40%
+**代码对比：**
+```
+改动前：616 行
+改动后：260 行
+减少：356 行（58%）
+```
 
 ---
 
-## ⏳ Phase 3: 创建知识结构（待实施）
+## ✅ Phase 3: 创建知识结构（完成）
 
-**计划时间：** 2026-03-24
-
-### 任务列表
-
-- [ ] 创建 public/ 目录结构
-- [ ] 创建公共知识分类
-  - common/ - 通用知识
-  - faq/ - 常见问题
-  - skills/ - 技能文档
-  - domain/ - 领域知识
-- [ ] 添加示例知识
-- [ ] 测试知识搜索
+**完成时间：** 2026-03-23 18:40
 
 ### 目录结构
 
@@ -126,14 +119,23 @@ skills/memory-hub/
 workspace-ai-baby/
 └── public/
     ├── common/
-    │   └── greetings.json
+    │   └── greetings.json       ✅ 问候语
     ├── faq/
-    │   └── general.json
+    │   └── general.json         ✅ 常见问题
     ├── skills/
-    │   └── memory-search.json
+    │   └── memory-hub.json      ✅ 技能文档
     └── domain/
-        └── ai.json
+        └── ai.json              ✅ AI 基础概念
 ```
+
+### 示例知识
+
+| 文件 | 分类 | 内容 |
+|------|------|------|
+| **greetings.json** | common | 常用问候语 |
+| **general.json** | faq | 什么是 ai-baby |
+| **memory-hub.json** | skills | Memory Hub 使用指南 |
+| **ai.json** | domain | AI Agent 基础概念 |
 
 ---
 
