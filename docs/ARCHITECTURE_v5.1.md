@@ -885,6 +885,240 @@ clawhub install memory-search
 
 ---
 
+## 外部使用方式
+
+### 使用场景
+
+| 用户类型 | 使用方式 | 难度 |
+|----------|---------|------|
+| **普通用户** | OpenClaw 对话 | ⭐ 简单 |
+| **高级用户** | ClawHub 安装 | ⭐⭐ 中等 |
+| **开发者** | Python 导入 | ⭐⭐⭐ 需要编程 |
+| **集成商** | OpenClaw SDK | ⭐⭐⭐ 需要编程 |
+
+---
+
+### 普通用户：OpenClaw 对话
+
+**无需编程，直接对话使用：**
+
+```bash
+# 1. 启动 OpenClaw
+openclaw start
+
+# 2. 对话中使用技能
+用户："搜索 RAG 相关的记忆"
+Agent：自动调用 memory_search 技能
+      返回搜索结果
+
+用户："添加一条记忆：今天学习了 Python"
+Agent：自动调用 add 技能
+      确认添加成功
+```
+
+**OpenClaw 自动：**
+1. 加载 skills/ 目录下的技能
+2. 读取 SKILL.md 了解可用工具
+3. 根据对话内容调用相应技能
+4. 返回结果给用户
+
+---
+
+### 高级用户：ClawHub 安装
+
+**通过 ClawHub 安装技能：**
+
+```bash
+# 1. 安装 ClawHub CLI
+npm i -g clawhub
+
+# 2. 登录
+clawhub login
+
+# 3. 搜索技能
+clawhub search "memory"
+
+# 4. 安装技能
+clawhub install memory-hub
+clawhub install memory-search
+
+# 5. 重启 OpenClaw
+openclaw restart
+
+# 技能自动可用
+```
+
+---
+
+### 开发者：Python 导入
+
+#### 方式 A：直接使用 memory-hub
+
+```python
+# 安装
+pip install -e ./skills/memory-hub
+
+# 使用
+from memory_hub import MemoryHub
+
+hub = MemoryHub(agent_name='my-agent')
+
+# 添加记忆
+hub.add(content="今天学习了 Python", memory_type='knowledge')
+
+# 搜索记忆
+results = hub.search("Python", top_k=5)
+for r in results:
+    print(r['content'])
+
+# 添加知识
+hub.knowledge.add(
+    title="Python 教程",
+    content="Python 是一种编程语言...",
+    category='tutorial',
+    is_public=True
+)
+
+# 搜索知识
+knowledge = hub.knowledge.search("Python 教程")
+print(knowledge[0]['content'])
+
+# 记录评估
+hub.evaluation.record(
+    query="Python",
+    retrieved_count=5,
+    latency_ms=95.0,
+    feedback="positive"
+)
+
+# 生成报告
+report = hub.evaluation.generate_report(days=7)
+print(report)
+```
+
+#### 方式 B：使用独立技能
+
+```python
+# 安装
+pip install -e ./skills/memory-search
+
+# 使用
+from memory_search import SQLiteMemorySearch
+
+search = SQLiteMemorySearch(agent_name='my-agent')
+
+# 搜索
+results = search.search("Python", top_k=5)
+
+# 添加
+search.add(content="Python 学习笔记", memory_type='observation')
+
+# 统计
+stats = search.stats()
+print(f"总记忆数：{stats['total']}")
+```
+
+#### 方式 C：使用 OpenClaw SDK
+
+```python
+from openclaw import Client
+
+# 连接 OpenClaw
+client = Client()
+
+# 调用技能
+response = client.execute_skill(
+    agent='ai-baby',
+    skill='memory_search',
+    action='search',
+    params={'query': 'Python', 'top_k': 5}
+)
+
+print(response)
+```
+
+---
+
+### 集成商：OpenClaw SDK
+
+**将技能集成到其他应用：**
+
+```python
+from openclaw import Client
+
+class MyApplication:
+    def __init__(self):
+        self.client = Client()
+    
+    def search_memory(self, query):
+        """搜索记忆"""
+        return self.client.execute_skill(
+            agent='ai-baby',
+            skill='memory_search',
+            action='search',
+            params={'query': query, 'top_k': 5}
+        )
+    
+    def add_memory(self, content):
+        """添加记忆"""
+        return self.client.execute_skill(
+            agent='ai-baby',
+            skill='memory_search',
+            action='add',
+            params={'content': content}
+        )
+    
+    def get_knowledge(self, topic):
+        """获取知识"""
+        return self.client.execute_skill(
+            agent='ai-baby',
+            skill='memory_hub',
+            action='knowledge_search',
+            params={'query': topic}
+        )
+
+# 使用
+app = MyApplication()
+results = app.search_memory("RAG")
+knowledge = app.get_knowledge("Python")
+```
+
+---
+
+### 技能包结构（对外发布）
+
+```
+skills/memory-search/
+├── SKILL.md               # OpenClaw 技能定义
+├── skill.json             # 元数据
+├── setup.py               # Python 包安装
+├── README.md              # 使用说明
+└── memory_search/         # Python 包
+    ├── __init__.py
+    └── search_sqlite.py
+```
+
+**setup.py：**
+```python
+from setuptools import setup, find_packages
+
+setup(
+    name="memory-search",
+    version="1.0.0",
+    packages=find_packages(),
+    install_requires=[
+        "sqlite3",
+    ],
+    entry_points={
+        "openclaw.skills": [
+            "memory_search = memory_search:SQLiteMemorySearch"
+        ]
+    }
+)
+```
+
+---
+
 ## 数据模型
 
 ### Memory 模型
