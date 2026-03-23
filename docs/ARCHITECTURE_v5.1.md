@@ -334,6 +334,70 @@ baby2:
 
 ## 技能系统
 
+### 技能格式
+
+**统一使用 OpenClaw 原生技能格式（SKILL.md）**
+
+```
+skills/
+├── memory-search/
+│   ├── SKILL.md          # ⭐ 技能说明和工具定义
+│   ├── skill.json        # ⭐ 元数据
+│   ├── search_sqlite.py  # 技能实现
+│   └── ...
+├── rag-evaluation/
+│   ├── SKILL.md
+│   ├── skill.json
+│   ├── evaluate.py
+│   └── ...
+└── ...
+```
+
+**SKILL.md 结构：**
+
+```markdown
+---
+name: memory_search
+description: 记忆搜索技能，支持关键词和语义搜索
+homepage: https://...
+metadata:
+  emoji: "🧠"
+  category: memory
+  api_base: "local"
+---
+
+# 记忆搜索技能
+
+## 功能
+- 关键词搜索记忆
+- 向量语义搜索（需要 Ollama）
+- 添加/删除/修改记忆
+- 统计分析
+
+## 可用工具
+- search(query, top_k=5, semantic=false)
+- add(content, type="observation", tags=[])
+- delete(memory_id)
+- stats()
+
+## 使用方法
+当用户要搜索记忆时，使用 search 工具...
+```
+
+**skill.json 结构：**
+
+```json
+{
+  "name": "memory-search",
+  "version": "1.0.0",
+  "description": "记忆搜索技能",
+  "homepage": "https://...",
+  "updated_at": "2026-03-23"
+}
+```
+
+---
+
 ### 技能分类
 
 ```
@@ -358,73 +422,60 @@ skills/
 
 **位置：** `skills/memory-search/`
 
-**功能：**
-- 关键词搜索
+**SKILL.md 示例：**
+
+```markdown
+---
+name: memory_search
+description: 记忆搜索技能，支持关键词和语义搜索
+metadata:
+  emoji: "🧠"
+  category: memory
+---
+
+# 记忆搜索技能
+
+## 功能
+- 关键词搜索记忆
 - 向量语义搜索（需要 Ollama）
-- 记忆添加/删除/修改
+- 添加/删除/修改记忆
 - 统计分析
+
+## 可用工具
+- search(query, top_k=5, semantic=false)
+- add(content, type="observation", tags=[])
+- delete(memory_id)
+- stats()
+
+## 数据存储
+~/.openclaw/workspace-ai-baby-config/memory/
+```
 
 **文件结构：**
 ```
 skills/memory-search/
-├── __init__.py              # 技能入口
-├── search_sqlite.py         # SQLite 搜索实现
-├── semantic_search.py       # 语义搜索（Ollama）
-├── daily_review.py          # 每日回顾
-└── README.md                # 技能说明
+├── SKILL.md              # ⭐ 技能说明
+├── skill.json            # ⭐ 元数据
+├── search_sqlite.py      # SQLite 搜索实现
+├── semantic_search.py    # 语义搜索（Ollama）
+└── daily_review.py       # 每日回顾
 ```
 
-**核心接口：**
-```python
-from skills.memory_search import SQLiteMemorySearch
-
-search = SQLiteMemorySearch()
-
-# 搜索记忆
-results = search.search(
-    query="RAG 优化",
-    top_k=5,
-    semantic=True  # 使用语义搜索
-)
-
-# 添加记忆
-search.add(
-    content="今天学习了 RAG 评估系统",
-    memory_type="knowledge",
-    importance=8.0,
-    tags=["RAG", "学习"],
-    details={"source": "实践总结"}
-)
-
-# 获取统计
-stats = search.stats()
-# 返回：{'total': 23, 'by_type': {...}, 'avg_importance': 6.85}
-```
-
-**数据存储：**
-```
-~/.openclaw/workspace-ai-baby-config/memory/
-├── memory_stream.db         # 记忆流数据库
-├── knowledge_base.db        # 知识库
-└── vector_db/               # 向量数据库
-    └── embedding_cache.pkl  # 嵌入缓存
-```
-
-**MCP 工具定义：**
-```python
-Tool(
-    name="memory_search",
-    description="搜索记忆库，支持关键词和语义搜索",
-    inputSchema={
-        "type": "object",
-        "properties": {
-            "query": {"type": "string", "description": "搜索关键词"},
-            "top_k": {"type": "integer", "description": "返回数量", "default": 5},
-            "semantic": {"type": "boolean", "description": "是否语义搜索", "default": False}
-        },
-        "required": ["query"]
+**OpenClaw 配置：**
+```json
+// ~/.openclaw/openclaw.json
+{
+  "skills": {
+    "load": {
+      "extraDirs": ["~/.openclaw/workspace-ai-baby/skills"]
+    },
+    "entries": {
+      "memory-search": {
+        "enabled": true
+      }
     }
-)
+  }
+}
 ```
 
 ---
@@ -433,86 +484,44 @@ Tool(
 
 **位置：** `skills/rag-evaluation/`
 
-**功能：**
+**SKILL.md 示例：**
+
+```markdown
+---
+name: rag_evaluation
+description: RAG 检索质量评估与优化
+metadata:
+  emoji: "📊"
+  category: evaluation
+---
+
+# RAG 评估技能
+
+## 功能
 - 检索质量评估
 - 自动调优
 - 检索记录
 - 报告生成
 
+## 可用工具
+- rag_report(days=7)
+- rag_auto_tune(min_samples=10)
+- rag_record(query, retrieved_count, latency_ms)
+
+## 评估指标
+- 延迟：< 50ms 优秀
+- 正面反馈率：> 70% 优秀
+- 检索使用率：> 80% 优秀
+```
+
 **文件结构：**
 ```
 skills/rag-evaluation/
-├── __init__.py              # 技能入口
-├── evaluate.py              # 评估框架
-├── auto_tune.py             # 自动调优
-├── recorder.py              # 检索记录器
-├── test_integration.py      # 集成测试
-└── README.md                # 技能说明
-```
-
-**核心接口：**
-```python
-from skills.rag_evaluation import RAGEvaluator, RetrievalRecorder
-
-# 记录检索
-recorder = RetrievalRecorder()
-recorder.start_recording("用户的问题")
-
-# 执行检索...
-results = search(...)
-
-# 完成记录
-recorder.finish_recording(
-    retrieved_count=5,
-    similarity_score=0.85,
-    latency_ms=95.0,
-    feedback="positive"
-)
-
-# 生成报告
-evaluator = RAGEvaluator()
-report = evaluator.generate_report(days=7)
-print(report)
-# 输出：RAG 评估报告（包含延迟、反馈率、相似度等）
-
-# 自动调优
-from skills.rag_evaluation import AutoTuner
-tuner = AutoTuner()
-analysis = tuner.analyze_results()
-recommendation = tuner.recommend()
-```
-
-**评估指标：**
-| 指标 | 说明 | 优秀标准 |
-|------|------|----------|
-| **延迟** | 检索响应时间 | < 50ms |
-| **正面反馈率** | 用户满意度 | > 70% |
-| **检索使用率** | 检索结果使用比例 | > 80% |
-| **平均相似度** | 语义相似度 | > 0.8 |
-
-**MCP 工具定义：**
-```python
-Tool(
-    name="rag_report",
-    description="生成 RAG 评估报告",
-    inputSchema={
-        "type": "object",
-        "properties": {
-            "days": {"type": "integer", "description": "报告天数", "default": 7}
-        }
-    }
-)
-
-Tool(
-    name="rag_auto_tune",
-    description="分析 RAG 配置并推荐最优方案",
-    inputSchema={
-        "type": "object",
-        "properties": {
-            "min_samples": {"type": "integer", "description": "最小样本数", "default": 10}
-        }
-    }
-)
+├── SKILL.md
+├── skill.json
+├── evaluate.py
+├── auto_tune.py
+└── recorder.py
 ```
 
 ---
@@ -521,83 +530,45 @@ Tool(
 
 **位置：** `skills/self-evolution/`
 
-**功能：**
+**SKILL.md 示例：**
+
+```markdown
+---
+name: self_evolution
+description: 自进化系统，分形思考和夜间循环
+metadata:
+  emoji: "🧬"
+  category: evolution
+---
+
+# 自进化技能
+
+## 功能
 - 分形思考（4 层分析）
 - 夜间循环（4 个任务）
 - 记忆流管理
 - 进化事件记录
 
-**文件结构：**
-```
-skills/self-evolution/
-├── __init__.py              # 技能入口
-├── fractal_thinking.py      # 分形思考引擎
-├── nightly_cycle.py         # 夜间循环
-├── memory_stream.py         # 记忆流管理
-├── knowledge_base.py        # 知识库
-└── main.py                  # CLI 入口
-```
+## 可用工具
+- run_fractal_analysis(limit=10)
+- run_nightly_cycle(tasks=[])
+- record_evolution(event_type, content)
 
-**核心功能：**
-
-**分形思考（4 层分析）：**
-```
-Level 0: Solve      → 问题是什么？如何解决的？
+## 分形思考 4 层
+Level 0: Solve      → 问题是什么？
 Level 1: Pattern    → 是孤立事件还是重复模式？
-Level 2: Correction → 什么规则导致了问题？如何修正？
+Level 2: Correction → 什么规则导致了问题？
 Level 3: Meta-Rule  → 如何防止类似问题再发生？
 ```
 
-**夜间循环（4 个任务）：**
-- 🍷 Wind Down - 每日复盘
-- 😴 Memory Consolidation - 记忆整合（49% 压缩）
-- 🧹 Cleaning Lady - 上下文清理
-- 🔍 Auto-Evolution - 扫描改进机会
-
-**核心接口：**
-```python
-from skills.self_evolution import FractalThinkingEngine, NightlyEvolutionCycle
-
-# 运行分形思考
-engine = FractalThinkingEngine()
-results = engine.process_events(limit=10)
-
-# 运行夜间循环
-cycle = NightlyEvolutionCycle()
-cycle.run_full_cycle()
-
-# 记录进化事件
-from skills.self_evolution import RealSelfEvolution
-evolution = RealSelfEvolution()
-evolution.record(
-    event_type="KNOWLEDGE_GAINED",
-    content="学习了 MCP 协议"
-)
+**文件结构：**
 ```
-
-**MCP 工具定义：**
-```python
-Tool(
-    name="run_fractal_analysis",
-    description="运行分形思考分析",
-    inputSchema={
-        "type": "object",
-        "properties": {
-            "limit": {"type": "integer", "description": "分析事件数量", "default": 10}
-        }
-    }
-)
-
-Tool(
-    name="run_nightly_cycle",
-    description="运行夜间进化循环",
-    inputSchema={
-        "type": "object",
-        "properties": {
-            "tasks": {"type": "array", "items": {"type": "string"}, "description": "执行的任务"}
-        }
-    }
-)
+skills/self-evolution/
+├── SKILL.md
+├── skill.json
+├── fractal_thinking.py
+├── nightly_cycle.py
+└── memory_stream.py
 ```
 
 ---
@@ -606,72 +577,82 @@ Tool(
 
 **位置：** `skills/websearch/`
 
-**功能：**
+**SKILL.md 示例：**
+
+```markdown
+---
+name: web_search
+description: 网页搜索技能，基于 Bing
+metadata:
+  emoji: "🌐"
+  category: search
+---
+
+# 网页搜索技能
+
+## 功能
 - 基于 Bing 的网页搜索
 - 无需 API key
 - 自动提取页面内容
 
-**核心接口：**
-```python
-from skills.websearch import search_web
-
-results = search_web(
-    query="RAG 优化方法",
-    count=10,
-    freshness="week"  # 只搜索最近一周
-)
-```
-
-**MCP 工具定义：**
-```python
-Tool(
-    name="web_search",
-    description="搜索互联网获取最新信息",
-    inputSchema={
-        "type": "object",
-        "properties": {
-            "query": {"type": "string", "description": "搜索关键词"},
-            "count": {"type": "integer", "description": "结果数量", "default": 10},
-            "freshness": {"type": "string", "description": "时间范围", "enum": ["day", "week", "month", "year"]}
-        },
-        "required": ["query"]
-    }
-)
+## 可用工具
+- web_search(query, count=10, freshness="week")
 ```
 
 ---
 
-### 技能接口
+### 技能配置
 
-```python
-# skills/base.py
+**OpenClaw 配置：**
 
-class BaseSkill:
-    """技能基类"""
-    
-    name = "base"
-    version = "1.0"
-    description = "基础技能"
-    
-    def __init__(self, config):
-        self.config = config
-        self.initialized = False
-    
-    def initialize(self):
-        """初始化技能"""
-        self.initialized = True
-    
-    def cleanup(self):
-        """清理资源"""
-        pass
-    
-    def get_capabilities(self):
-        """返回技能能力列表"""
-        return []
-    
-    def execute(self, action, **kwargs):
-        """执行技能动作"""
-        raise NotImplementedError
+```json
+// ~/.openclaw/openclaw.json
+{
+  "skills": {
+    "load": {
+      "extraDirs": [
+        "~/.openclaw/workspace-ai-baby/skills"
+      ],
+      "watch": true,
+      "watchDebounceMs": 250
+    },
+    "entries": {
+      "memory-search": {
+        "enabled": true
+      },
+      "rag-evaluation": {
+        "enabled": true
+      },
+      "self-evolution": {
+        "enabled": true
+      },
+      "websearch": {
+        "enabled": true
+      }
+    }
+  }
+}
+```
+
+**Agent 特定配置：**
+
+```json
+// ~/.openclaw/openclaw.json
+{
+  "skills": {
+    "entries": {
+      "memory-search": {
+        "enabled": true,
+        "env": {
+          "MAX_MEMORIES": "100"
+        }
+      },
+      "self-evolution": {
+        "enabled": false  // baby1 禁用自进化
+      }
+    }
+  }
+}
 ```
 
 ### 技能上下文
