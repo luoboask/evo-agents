@@ -1,0 +1,14 @@
+{
+  "id": "ced148ba-dfd7-4f86-aabc-377bce5bfc4d",
+  "title": "Web 学习：LLM prompt engineering advanced techniques",
+  "content": "\n搜索主题：LLM prompt engineering advanced techniques\n搜索时间：2026-03-24 02:11:27\n结果数量：5 条\n\n搜索结果:\n\n1. zhihu.comhttps://www.zhihu.com › question\n   URL: https://www.zhihu.com/question/12292274612\n   摘要：自问自答，安放学习笔记。主要参考了综述文章： Advancing Reasoning in Large Language Models: Promising Methods and Approaches 一、什么是 LLM 推理（Reasoning）？ 1.1 避免中文翻译的混淆 在 …...\n\n2. zhihu.comhttps://www.zhihu.com › tardis › bd › art\n   URL: https://www.zhihu.com/tardis/bd/art/32829727368\n   摘要：2025年3月26日&ensp;&#0183;&ensp;一文读懂：大语言模型（LLM)...\n\n3. zhihu.comhttps://www.zhihu.com › question\n   URL: https://www.zhihu.com/question/11285951981\n   摘要：2025年2月7日&ensp;&#0183;&ensp;写在前面：三个让我夜不能寐的矛盾 作为一个在大模型领域摸爬滚打了几年的老韭菜，我觉得当前LLM技术发展正面临着三个核心矛盾，搞清楚这些，后面的技术方向才好理解。 。 今年接了几个单 …...\n\n4. zhihu.comhttps://www.zhihu.com › question\n   URL: https://www.zhihu.com/question/627723839\n   摘要：2025年8月21日&ensp;&#0183;&ensp;LLM作答：AI 把你的问题和搜到的纪要内容，一起在脑子里过一遍，然后生成一段条理清晰的总结，甚至还能告诉你“该结论出自第3页第5段”。 看到没？ RAG解决了LLM两大痛点。 减少胡说八道：答 …...\n\n5. zhihu.comhttps://www.zhihu.com › question\n   URL: https://www.zhihu.com/question/1946336396039131915\n   摘要：在LLM架构上， Agentic LLM 和 高效MoE 是另外两个重点。 现在的Agent研究不再满足于简单的工具调用，而是认为模型拥有独立的记忆、目标和角色；底层的模型架构方面，MoE架构进一步成为主流，DeepSeek …...\n",
+  "category": "web_learning",
+  "tags": [
+    "Web 搜索",
+    "外部学习",
+    "prompt-engineering"
+  ],
+  "is_public": true,
+  "created_at": "2026-03-24T02:11:27.695824",
+  "updated_at": "2026-03-24T02:11:27.695831"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "c51fcd35-cd51-4c6d-9558-552d38a547af",
+  "title": "Web 学习：API 设计",
+  "content": "API 设计\n\n搜索查询：API design REST GraphQL\n搜索时间：2026-03-24 02:27:52\n\n1. zhihu.comhttps://www.zhihu.com › question\n   URL: https://www.zhihu.com/question/634768908\n   摘要：API 是什么 官方定义：API 英文全称 Application Programming Interface，翻译过来为程序之间的接口。也是程序与外部世界的桥梁，实现了服务拆分与解藕的核心机制 大白话：按照规则提供输入，它帮你得到对应的 …...\n\n2. zhihu.comhttps://www.zhihu.com › question\n   URL: https://www.zhihu.com/question/38594466\n   摘要：2016年11月12日&ensp;&#0183;&ensp;一直看到很多关于接API以及API接口的问题，但是不明白具体的意思。看了一下百度上给的答案也不太明白。哪…...\n\n3. zhihu.comhttps://www.zhihu.com › question › answers › updated\n   URL: https://www.zhihu.com/question/21430743/answers/updated\n   摘要：2025年3月4日&ensp;&#0183;&ensp;API，全称为应用程序编程接口（Application Programming Interface），是一种允许不同软件应用程序之间相互通信和互相合作的方式。用通俗易懂的方式解释，可以将API想象成是一种桥梁，允许不 …...\n\n",
+  "category": "coding",
+  "tags": [
+    "Web 搜索",
+    "coding",
+    "API 设计"
+  ],
+  "is_public": true,
+  "created_at": "2026-03-24T02:27:52.422085",
+  "updated_at": "2026-03-24T02:27:52.422101"
+}

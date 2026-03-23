@@ -1,0 +1,15 @@
+{
+  "id": "44c45535-2978-4d59-a6ca-4a2acacafdc8",
+  "title": "AI Agent 架构设计最佳实践",
+  "content": "\nAI Agent 架构设计核心原则 (2025):\n\n1. 模块化设计\n   - 技能 (Skills): 独立功能模块，有明确的 SKILL.md\n   - 库 (Libs): 共享基础设施，被多个技能依赖\n   - 脚本 (Scripts): 独立工具，直接执行\n\n2. 数据隔离\n   - 每个 Agent 独立的数据目录：data/<agent>/memory/\n   - 共享知识：public/ 目录\n   - 私有知识：data/<agent>/knowledge/\n\n3. 记忆管理\n   - 短期记忆：SQLite 数据库存储\n   - 长期记忆：定期总结到 MEMORY.md\n   - 语义搜索：使用 Embedding 向量\n\n4. 自进化机制\n   - 分形思考：4 层分析 (Solve→Pattern→Correction→Meta-Rule)\n   - 夜间循环：每日自动整理和反思\n   - RAG 评估：持续优化检索质量\n\n5. 定时任务\n   - 短期：每 15 分钟同步事件\n   - 每日：早晨检查、分形思考、夜间总结\n   - 每周：深度分形、RAG 调优、记忆维护\n",
+  "category": "architecture",
+  "tags": [
+    "AI Agent",
+    "架构设计",
+    "最佳实践",
+    "模块化"
+  ],
+  "is_public": true,
+  "created_at": "2026-03-24T02:01:35.808207",
+  "updated_at": "2026-03-24T02:01:35.808215"
+}

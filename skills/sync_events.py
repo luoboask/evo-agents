@@ -1,0 +1,1 @@
+/Users/dhr/.openclaw/workspace-ai-baby/scripts/sync_events.py
