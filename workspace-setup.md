@@ -32,7 +32,7 @@ export AGENT="demo-agent"
 If repo does not exist:
 
 ```bash
-git clone "https://gitlab.alibaba-inc.com/haoran.dhr/evo-agents.git" "$WORKSPACE"
+git clone "https://github.com/luoboask/evo-agents.git" "$WORKSPACE"
 ```
 
 If repo already exists:
@@ -44,7 +44,7 @@ cd "$WORKSPACE" && git pull --rebase
 Alternative (SSH):
 
 ```bash
-git clone "git@gitlab.alibaba-inc.com:haoran.dhr/evo-agents.git" "$WORKSPACE"
+git clone "git@github.com:luoboask/evo-agents.git" "$WORKSPACE"
 ```
 
 ## 1) Install Agent Workspace
@@ -132,7 +132,7 @@ export WORKSPACE="/absolute/path/to/evo-agents"
 export AGENT="demo-agent"
 
 if [ ! -d "$WORKSPACE/.git" ]; then
-  git clone "https://gitlab.alibaba-inc.com/haoran.dhr/evo-agents.git" "$WORKSPACE"
+  git clone "https://github.com/luoboask/evo-agents.git" "$WORKSPACE"
 else
   cd "$WORKSPACE" && git pull --rebase
 fi
