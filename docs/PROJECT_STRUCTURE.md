@@ -197,15 +197,17 @@ metadata:
 **特点：**
 - ❌ 不需要 SKILL.md
 - ✅ 直接执行
-- ✅ 使用下划线或连字符均可
+- ✅ 长期保留
+- ✅ 需要版本控制
 
 **示例：**
 ```
 scripts/
-├── test_agents.py       # Agent 测试
-├── migrate_data.py      # 数据迁移
+├── test_agents.py       # Agent 集成测试
 └── ...
 ```
+
+**注意：** 临时脚本不应放在 `scripts/`，应使用 `temp/` 目录。
 
 ---
 
@@ -318,3 +320,288 @@ from skills.memory_search import SQLiteMemorySearch
 
 **维护者：** ai-baby  
 **最后更新：** 2026-03-23
+
+---
+
+## 📝 临时脚本管理
+
+### Temp/ (临时脚本目录)
+
+**定位：** 临时脚本、测试代码、一次性工具
+
+**特点：**
+- ❌ 不需要 SKILL.md
+- ✅ 用完即删
+- ✅ 定期清理（建议每周）
+- ✅ Git 自动忽略
+
+**命名规范：**
+
+| 方式 | 示例 | 说明 |
+|------|------|------|
+| **日期命名** | `2026-03-23_test.py` | ✅ 推荐，清晰 |
+| **.tmp 后缀** | `debug.tmp.py` | ✅ 明确临时 |
+| **描述性** | `test_feature.py` | ⚠️ 需加日期 |
+
+**使用场景：**
+- ✅ 临时修复脚本
+- ✅ 测试/实验代码
+- ✅ 调试工具
+- ✅ 一次性数据转换
+- ✅ 快速原型验证
+
+**清理规则：**
+```bash
+# 删除超过 7 天的临时脚本
+find temp/ -name "*.py" -mtime +7 -delete
+
+# 删除所有 .tmp 文件
+rm temp/*.tmp.py
+
+# 查看临时脚本
+ls -lt temp/
+```
+
+**工作流：**
+```
+创建 → 测试 → (有用→迁移 | 无用→删除)
+          ↓           ↓
+      scripts/    rm temp/xxx.py
+```
+
+**示例：**
+```bash
+# 1. 创建临时脚本
+touch temp/2026-03-23_test_embedding.py
+
+# 2. 测试
+python3 temp/2026-03-23_test_embedding.py
+
+# 3. 清理
+# 有用 → 移到 scripts/
+mv temp/2026-03-23_test_embedding.py scripts/test_embedding.py
+
+# 无用 → 删除
+rm temp/2026-03-23_test_embedding.py
+```
+
+---
+
+---
+
+## 📝 临时脚本管理 (Temp/)
+
+### 定位
+
+**Temp/** 目录专门用于存放临时脚本、测试代码和一次性工具。
+
+| 特性 | 说明 |
+|------|------|
+| **用途** | 临时脚本、测试代码、调试工具 |
+| **保留时间** | < 7 天（建议） |
+| **Git** | ❌ 自动忽略（不提交） |
+| **清理** | 定期手动或自动清理 |
+
+---
+
+### 命名规范
+
+| 方式 | 示例 | 推荐度 | 说明 |
+|------|------|--------|------|
+| **日期命名** | `2026-03-23_test_embedding.py` | ⭐⭐⭐ | 最推荐，清晰知道创建时间 |
+| **.tmp 后缀** | `debug_memory.tmp.py` | ⭐⭐ | 明确标识为临时文件 |
+| **描述性** | `test_new_feature.py` | ⭐ | 建议加上日期前缀 |
+
+**推荐格式：**
+```
+temp/
+├── 2026-03-23_test_embedding.py    # ✅ 日期 + 用途
+├── 2026-03-24_migrate_data.tmp.py  # ✅ 日期 + 用途 + .tmp
+├── debug_memory.tmp.py             # ✅ 用途 + .tmp
+└── test_feature.py                 # ⚠️ 无日期，难判断时效
+```
+
+---
+
+### 使用场景
+
+#### ✅ 适合放在 temp/
+
+- 🔧 **临时修复脚本** - 紧急 bug 修复，验证后移到正式位置
+- 🧪 **测试/实验代码** - 测试新功能、新 API
+- 🐛 **调试工具** - 临时调试脚本、日志分析
+- 📝 **一次性数据转换** - 数据迁移、格式转换
+- 🚀 **快速原型验证** - PoC、概念验证
+
+#### ❌ 不适合放在 temp/
+
+- 长期使用的工具脚本 → 移到 `scripts/`
+- 正式功能代码 → 移到 `skills/` 或 `libs/`
+- 重要数据文件 → 移到 `data/`
+- 文档 → 移到 `docs/`
+
+---
+
+### 清理规则
+
+#### 自动清理（推荐配置 cron）
+
+```bash
+# 每周清理一次，删除超过 7 天的 .py 文件
+0 2 * * 0 find /path/to/workspace/temp/ -name "*.py" -mtime +7 -delete
+
+# 每天删除所有 .tmp 文件
+0 3 * * * find /path/to/workspace/temp/ -name "*.tmp.py" -delete
+```
+
+#### 手动清理
+
+```bash
+# 查看临时脚本（按时间排序）
+ls -lt temp/
+
+# 查看超过 7 天的文件
+find temp/ -name "*.py" -mtime +7 -ls
+
+# 删除超过 7 天的文件
+find temp/ -name "*.py" -mtime +7 -delete
+
+# 删除所有 .tmp 文件
+rm temp/*.tmp.py
+
+# 清空整个目录
+rm temp/*.py
+```
+
+---
+
+### 工作流
+
+```
+┌──────────────┐
+│ 1. 创建脚本   │
+│ temp/xxx.py  │
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│ 2. 测试/执行 │
+│ python3      │
+└──────┬───────┘
+       │
+       ▼
+   ┌───┴───┐
+   │ 有用？ │
+   └───┬───┘
+       │
+   ┌───┴───┐
+   │       │
+  是       否
+   │       │
+   ▼       ▼
+┌─────┐ ┌──────┐
+│迁移 │ │删除  │
+│到   │ │rm    │
+│scri │ │temp/ │
+│pts/ │ │xxx.py│
+└─────┘ └──────┘
+```
+
+**示例：**
+
+```bash
+# 1. 创建临时脚本（测试 Embedding）
+cat > temp/2026-03-23_test_embedding.py << 'EOF'
+from libs.memory_hub import MemoryHub
+hub = MemoryHub('ai-baby')
+print(hub.stats())
+EOF
+
+# 2. 执行测试
+python3 temp/2026-03-23_test_embedding.py
+
+# 3a. 有用 → 移到 scripts/
+mv temp/2026-03-23_test_embedding.py scripts/test_embedding.py
+
+# 3b. 无用 → 删除
+rm temp/2026-03-23_test_embedding.py
+```
+
+---
+
+### Git 配置
+
+`.gitignore` 已配置：
+
+```gitignore
+# 临时文件
+temp/
+*.tmp
+*.bak
+*.cache
+```
+
+**例外：** `temp/README.md` 可以提交，用于说明目录用途。
+
+---
+
+### 目录结构
+
+```
+temp/
+├── README.md              # ✅ 提交：使用说明
+├── 2026-03-23_test.py     # ❌ 忽略：临时脚本
+├── debug.tmp.py           # ❌ 忽略：临时调试
+└── data_convert.py        # ❌ 忽略：一次性工具
+```
+
+---
+
+### 最佳实践
+
+1. **始终使用日期命名**
+   - 方便判断文件时效
+   - 便于批量清理（`rm temp/2026-03-*.py`）
+
+2. **添加注释说明用途**
+   ```python
+   # temp/2026-03-23_test_embedding.py
+   # 用途：测试 Memory Hub 的 Embedding 功能
+   # 创建：2026-03-23
+   # 预计清理：2026-03-30
+   ```
+
+3. **定期清理（建议每周）**
+   ```bash
+   # 周日晚清理
+   find temp/ -name "*.py" -mtime +7 -delete
+   ```
+
+4. **有用的代码及时迁移**
+   - 测试脚本 → `scripts/`
+   - 工具函数 → `libs/`
+   - 功能模块 → `skills/`
+
+---
+
+### 检查清单
+
+创建临时脚本前：
+
+- [ ] 确认是临时需求（< 7 天）
+- [ ] 使用日期命名（`YYYY-MM-DD_xxx.py`）
+- [ ] 添加用途注释
+- [ ] 执行后及时清理或迁移
+
+每周清理时：
+
+- [ ] 检查超过 7 天的文件
+- [ ] 删除无用的临时脚本
+- [ ] 迁移有用的代码到正式位置
+- [ ] 更新 `temp/README.md`（可选）
+
+---
+
+**最后更新：** 2026-03-23  
+**维护者：** ai-baby
+
