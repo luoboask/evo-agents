@@ -1,92 +1,116 @@
 # evo-agents
 
-A self-evolving AI agent workspace.
+[English](./README.md) | [简体中文](./README.zh-CN.md)
 
----
+Reusable self-evolving agent workspace with explicit runtime context (`--workspace`, `--agent`), strict per-agent data isolation, and shared capability layers.
+
+## Why This Repository
+
+`evo-agents` is designed to make one workspace reusable across multiple agents while keeping runtime behavior deterministic:
+
+- explicit context passing over implicit environment coupling
+- code/data separation by design
+- workspace-local runtime metadata
+- clean boundary with platform-owned lifecycle
+
+Detailed design docs:
+
+- `docs/ARCHITECTURE_GENERIC_EN.md`
+- `docs/PROJECT_STRUCTURE_GENERIC_EN.md`
+
+## Architecture Snapshot
+
+Layered model:
+
+- **Interaction**: OpenClaw / external callers
+- **Orchestration**: `start.sh`, install/upgrade scripts, CLI argument parsing
+- **Capabilities**: `skills/*` + `libs/memory_hub`
+- **Data/Config**: `data/<agent>/...` + `public/`
+
+Core rules:
+
+- **Code/Data Separation**: code in `skills/`, `libs/`, `scripts/`; runtime data in `data/<agent>/...`
+- **Explicit Runtime Context**: pass `--workspace` and `--agent` to entrypoints
+- **Workspace-local Runtime**: metadata in `.agent-runtime/<agent>/`
+- **Boundary Safety**: do not manage `~/.openclaw/agents`
+
+## Repository Layout
+
+```text
+evo-agents/
+├── start.sh
+├── init_system.py
+├── skills/                      # callable capability modules
+├── libs/memory_hub/             # shared infra library
+├── scripts/                     # install/upgrade/uninstall/test helpers
+├── data/<agent>/                # isolated runtime data per agent
+├── .agent-runtime/<agent>/      # run.sh + install metadata
+├── public/                      # shared knowledge assets
+├── docs/                        # architecture and structure docs
+└── workspace-setup.md           # OpenClaw bootstrap playbook
+```
+
+Dependency direction:
+
+- `skills/*` -> `libs/*`: allowed
+- `skills/*` -> `skills/*`: avoid (extract shared logic to `libs/`)
+- `libs/*` -> `skills/*`: forbidden
 
 ## Quick Start
 
 ```bash
-# Check system status
-./start.sh --workspace <workspace-root> --agent demo-agent
-
-# Initialize (first time)
+# 1) Initialize (first run)
 python3 init_system.py --workspace <workspace-root> --agent demo-agent
+
+# 2) Health check / status
+./start.sh --workspace <workspace-root> --agent demo-agent
 ```
 
-For OpenClaw bootstrap (clone -> install -> healthcheck -> tests), see `workspace-setup.md`.
-
----
-
-## Structure
-
-```
-evo-agents/
-├── AGENTS.md          # Workspace rules and behavior
-├── SOUL.md            # Core values
-├── IDENTITY.md        # Who you are (fill in)
-├── USER.md            # Who you're helping (fill in)
-├── MEMORY.md          # Long-term memory
-├── HEARTBEAT.md       # Periodic task checklist
-├── TOOLS.md           # Environment-specific notes
-│
-├── skills/
-│   ├── memory-search/ # SQLite + vector semantic search
-│   ├── rag/           # RAG evaluation & auto-tuning
-│   ├── self-evolution/ # Fractal thinking + nightly cycle
-│   └── websearch/     # Web search
-│
-├── libs/
-│   └── memory_hub/    # Shared memory library
-│
-├── memory/            # Daily logs (YYYY-MM-DD.md)
-├── data/              # Per-agent data (db, logs, cache)
-├── config/            # Agent configuration
-└── scripts/           # Utility scripts
-```
-
----
-
-## Skills
-
-### Memory Search
+## Agent Runtime Lifecycle
 
 ```bash
-# Keyword search
-python3 skills/memory-search/search_sqlite.py "query"
+# Install runtime entrypoint for one agent
+python3 scripts/install_agent_workspace.py \
+  --workspace <workspace-root> \
+  --agent demo-agent
 
-# Semantic search (requires Ollama)
-python3 skills/memory-search/search_sqlite.py "query" --semantic
+# Upgrade/check
+python3 scripts/upgrade_agent_workspace.py \
+  --workspace <workspace-root> \
+  --agent demo-agent
 
-# Add a memory
-python3 skills/memory-search/search_sqlite.py --add "content" \
-  --type knowledge --details '{"key": "value"}'
+# Uninstall (optional data purge)
+python3 scripts/uninstall_agent_workspace.py \
+  --workspace <workspace-root> \
+  --agent demo-agent \
+  --purge-data \
+  --yes
 ```
 
-### Self-Evolution
+## Common Commands
 
 ```bash
-cd skills/self-evolution
+# Memory search
+python3 skills/memory-search/search_sqlite.py "query" --agent demo-agent
+python3 skills/memory-search/search_sqlite.py "query" --semantic --agent demo-agent
 
-python3 main.py status
-python3 main.py fractal --limit 10
-python3 main.py nightly
+# RAG evaluation
+python3 skills/rag/evaluate.py --report --days 7 --agent demo-agent
+
+# Self-evolution
+python3 skills/self-evolution/main.py --agent demo-agent status
+python3 skills/self-evolution/main.py --agent demo-agent fractal --limit 10
+python3 skills/self-evolution/main.py --agent demo-agent nightly
 ```
 
-### RAG Evaluation
+## Verification
 
 ```bash
-python3 skills/rag/evaluate.py --report --days 7
-python3 skills/rag/auto_tune.py --next
+python3 scripts/test_features.py --agent demo-agent
+python3 test_all.py --workspace <workspace-root> --agent demo-agent
+python3 scripts/test_agents.py --workspace <workspace-root> --agent demo-agent
 ```
 
----
+## OpenClaw Bootstrap
 
-## Session Startup
-
-See `AGENTS.md` for the full startup protocol. Short version:
-
-1. Read `SOUL.md`
-2. Read `USER.md`
-3. Read `memory/YYYY-MM-DD.md` (today + yesterday)
-4. Read `MEMORY.md` (main session only)
+For clone -> install -> healthcheck -> full verification in one flow, use `workspace-setup.md`.
