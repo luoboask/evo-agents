@@ -197,22 +197,51 @@
 ai-baby (主 Agent)
 ├─ baby1 (沙箱测试)
 │   - 角色：tester
-│   - 技能：memory-search, rag-evaluation
+│   - 技能：共享 workspace 技能
 │   - 数据：data/baby1/
 │   - 特点：限制记忆数量，自动清理
 │
 ├─ baby2 (电商运营)
 │   - 角色：ecommerce
-│   - 技能：memory-search, rag-evaluation, self-evolution, ecommerce
+│   - 技能：共享 workspace 技能
 │   - 数据：data/baby2/
 │   - 特点：电商平台集成
 │
 └─ baby3 (内容创作)
     - 角色：creator
-    - 技能：memory-search, rag-evaluation, self-evolution, websearch, content
+    - 技能：共享 workspace 技能
     - 数据：data/baby3/
     - 特点：内容创作工具
 ```
+
+### 技能共享机制
+
+**同一 workspace 下的多 Agent 自动共享技能**
+
+```
+workspace-ai-baby/
+└── skills/                # ⭐ 所有 Agent 共享
+    ├── memory-search/     # 所有 Agent 可用
+    ├── rag-evaluation/    # 所有 Agent 可用
+    ├── self-evolution/    # 所有 Agent 可用
+    └── websearch/         # 所有 Agent 可用
+```
+
+**OpenClaw 技能加载顺序：**
+
+```
+1. workspace/skills/        (最高优先级)
+   ↓
+2. ~/.openclaw/skills/      (共享技能)
+   ↓
+3. Bundled skills           (内置技能)
+```
+
+**多 Agent 技能共享：**
+
+- ✅ **同一 workspace** - 所有 Agent 自动共享 skills/
+- ✅ **技能配置** - 可在 config/agents.yaml 中启用/禁用
+- ✅ **数据隔离** - 每个 Agent 独立 data/<agent>/
 
 ### Agent 配置示例
 
@@ -227,32 +256,6 @@ main:
   role: assistant
   emoji: "🍼"
   description: "主 Agent - 日常 AI 助手"
-  
-  # OpenClaw Agent 名称
-  openclaw_agent: main
-  
-  # 技能配置
-  skills:
-    memory-search:
-      enabled: true
-      config:
-        semantic_search: true
-    
-    rag-evaluation:
-      enabled: true
-      config:
-        auto_record: true
-    
-    self-evolution:
-      enabled: true
-      config:
-        fractal_thinking: true
-        nightly_cycle: false
-    
-    websearch:
-      enabled: true
-  
-  # 数据路径（相对于 workspace）
   data_path: data/main
 
 # ───────────────────────────────────────────────────────
@@ -264,27 +267,6 @@ baby1:
   emoji: "🧪"
   description: "沙箱 Agent - 测试和实验"
   parent: main
-  
-  openclaw_agent: baby1
-  
-  skills:
-    memory-search:
-      enabled: true
-      config:
-        max_memories: 100  # 限制记忆数量
-    
-    rag-evaluation:
-      enabled: true
-    
-    # 禁用的技能
-    self-evolution:
-      enabled: false
-      reason: "沙箱环境不需要自进化"
-    
-    websearch:
-      enabled: false
-      reason: "沙箱环境不需要联网"
-  
   data_path: data/baby1
   
   # 沙箱特定配置
@@ -292,7 +274,6 @@ baby1:
     auto_cleanup: true
     max_memories: 100
     max_age_days: 7
-    isolated: true
 
 # ───────────────────────────────────────────────────────
 # baby2 - 电商运营 Agent
@@ -303,25 +284,6 @@ baby2:
   emoji: "🛒"
   description: "电商 Agent - 自营平台运营"
   parent: main
-  
-  openclaw_agent: baby2
-  
-  skills:
-    memory-search:
-      enabled: true
-    
-    rag-evaluation:
-      enabled: true
-    
-    self-evolution:
-      enabled: true
-    
-    specialized/ecommerce:
-      enabled: true
-      config:
-        platform: taobao
-        auto_sync: true
-  
   data_path: data/baby2
   
   # 电商特定配置
@@ -330,6 +292,11 @@ baby2:
     auto_sync: true
 ```
 
+**说明：**
+- 所有 Agent 共享同一套 skills/
+- 不需要在配置中声明技能（自动共享）
+- 只需配置数据路径和特定配置
+
 ---
 
 ## 技能系统
@@ -337,6 +304,11 @@ baby2:
 ### 技能格式
 
 **统一使用 OpenClaw 原生技能格式（SKILL.md）**
+
+**技能共享机制：**
+- ✅ 同一 workspace 下的所有 Agent 自动共享 skills/
+- ✅ 不需要额外配置
+- ✅ OpenClaw 自动发现并加载
 
 ```
 skills/
@@ -462,21 +434,22 @@ skills/memory-search/
 ```
 
 **OpenClaw 配置：**
+
 ```json
 // ~/.openclaw/openclaw.json
 {
   "skills": {
     "load": {
       "extraDirs": ["~/.openclaw/workspace-ai-baby/skills"]
-    },
-    "entries": {
-      "memory-search": {
-        "enabled": true
-      }
     }
   }
 }
 ```
+
+**说明：**
+- skills/ 目录下的所有技能自动对所有 Agent 可见
+- 不需要在配置中声明每个技能
+- OpenClaw 自动扫描和加载
 
 ---
 
@@ -601,112 +574,6 @@ metadata:
 
 ---
 
-### 技能配置
-
-**OpenClaw 配置：**
-
-```json
-// ~/.openclaw/openclaw.json
-{
-  "skills": {
-    "load": {
-      "extraDirs": [
-        "~/.openclaw/workspace-ai-baby/skills"
-      ],
-      "watch": true,
-      "watchDebounceMs": 250
-    },
-    "entries": {
-      "memory-search": {
-        "enabled": true
-      },
-      "rag-evaluation": {
-        "enabled": true
-      },
-      "self-evolution": {
-        "enabled": true
-      },
-      "websearch": {
-        "enabled": true
-      }
-    }
-  }
-}
-```
-
-**Agent 特定配置：**
-
-```json
-// ~/.openclaw/openclaw.json
-{
-  "skills": {
-    "entries": {
-      "memory-search": {
-        "enabled": true,
-        "env": {
-          "MAX_MEMORIES": "100"
-        }
-      },
-      "self-evolution": {
-        "enabled": false  // baby1 禁用自进化
-      }
-    }
-  }
-}
-```
-
-### 技能上下文
-
-```python
-# skills/skill_context.py
-
-from pathlib import Path
-import os
-
-class SkillContext:
-    """技能上下文 - 自动适配当前 Agent"""
-    
-    WORKSPACE_ROOT = Path(__file__).parent.parent
-    
-    @staticmethod
-    def get_current_agent():
-        """获取当前 Agent 名称"""
-        return os.environ.get('OPENCLAW_AGENT', 'main')
-    
-    @staticmethod
-    def get_config():
-        """加载当前 Agent 的配置"""
-        agent_name = SkillContext.get_current_agent()
-        
-        config_file = SkillContext.WORKSPACE_ROOT / "config" / "agents.yaml"
-        import yaml
-        with open(config_file, 'r') as f:
-            all_config = yaml.safe_load(f)
-        
-        return all_config.get(agent_name, {})
-    
-    @staticmethod
-    def get_data_path():
-        """获取当前 Agent 的数据路径"""
-        config = SkillContext.get_config()
-        data_path_rel = config.get('data_path', f'data/{SkillContext.get_current_agent()}')
-        
-        return SkillContext.WORKSPACE_ROOT / data_path_rel
-    
-    @staticmethod
-    def is_skill_enabled(skill_name):
-        """检查技能是否启用"""
-        config = SkillContext.get_config()
-        skills = config.get('skills', {})
-        skill_config = skills.get(skill_name, {})
-        
-        if isinstance(skill_config, dict):
-            return skill_config.get('enabled', True)
-        return bool(skill_config)
-```
-
----
-
 ## 数据管理
 
 ### 数据存储结构
@@ -754,24 +621,17 @@ workspace-ai-baby/data/
 
 ```
 config/
-├── agents.yaml              # ⭐ 所有 Agent 配置
-└── skills/                  # 技能配置
-    ├── memory-search.yaml
-    ├── rag-evaluation.yaml
-    ├── self-evolution.yaml
-    └── websearch.yaml
+└── agents.yaml    # ⭐ Agent 配置（数据路径、特定配置）
 ```
 
 ### 配置加载顺序
 
 ```
-1. 默认配置 (skills/*/config.example.yaml)
+1. 环境变量 (最高优先级)
    ↓
-2. 技能配置 (config/skills/*.yaml)
+2. config/agents.yaml
    ↓
-3. Agent 配置 (config/agents.yaml)
-   ↓
-4. 环境变量 (覆盖所有配置)
+3. OpenClaw 默认配置
 ```
 
 ---
