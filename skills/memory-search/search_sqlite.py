@@ -55,7 +55,28 @@ class SQLiteMemorySearch:
     
     def __init__(self, db_path=None):
         if db_path is None:
-            db_path = Path("/Users/dhr/.openclaw/workspace-ai-baby/memory/ai-baby_memory_stream.db")
+            # 优先从配置文件加载数据库路径
+            config_paths = [
+                Path.home() / ".openclaw" / "workspace-ai-baby-config" / "config.yaml",
+                Path("config.yaml"),
+            ]
+            
+            for config_path in config_paths:
+                if config_path.exists():
+                    try:
+                        import yaml
+                        with open(config_path, 'r') as f:
+                            config = yaml.safe_load(f)
+                        db_path = config.get('database', {}).get('memory_stream')
+                        if db_path:
+                            break
+                    except:
+                        pass
+            
+            # fallback 到默认路径
+            if not db_path:
+                db_path = Path.home() / ".openclaw" / "workspace-ai-baby-config" / "memory" / "ai-baby_memory_stream.db"
+        
         self.db_path = Path(db_path)
     
     def search(self, query, top_k=10, memory_type=None, semantic=False, record_rag=True):

@@ -14,15 +14,22 @@ echo ""
 
 # 检查数据库
 echo "📊 检查数据库状态..."
-if [ ! -f "memory/ai-baby_memory_stream.db" ]; then
-    echo "   ⚠️  记忆流数据库不存在，运行初始化..."
-    python3 skills/memory-search/search_sqlite.py --stats
-fi
+python3 skills/memory-search/search_sqlite.py --stats 2>&1 | head -5
 
-if [ ! -f "skills/rag/logs/evaluations.jsonl" ]; then
-    echo "   ⚠️  RAG 评估日志不存在，创建中..."
-    mkdir -p skills/rag/logs
-    touch skills/rag/logs/evaluations.jsonl
+# 检查 RAG 日志
+RAG_LOG=$(python3 -c "
+from pathlib import Path
+import yaml
+config_path = Path.home() / '.openclaw' / 'workspace-ai-baby-config' / 'config.yaml'
+if config_path.exists():
+    config = yaml.safe_load(open(config_path))
+    print(config.get('rag', {}).get('log_path', ''))
+" 2>/dev/null)
+
+if [ -n "$RAG_LOG" ] && [ ! -f "$RAG_LOG" ]; then
+    echo "   ⚠️  RAG 日志不存在，创建中..."
+    mkdir -p "$(dirname "$RAG_LOG")"
+    touch "$RAG_LOG"
 fi
 
 echo "   ✅ 数据库检查完成"
@@ -38,8 +45,17 @@ python3 skills/memory-search/search_sqlite.py --stats 2>/dev/null | grep -E "总
 echo ""
 
 # RAG 统计
-if [ -f "skills/rag/logs/evaluations.jsonl" ]; then
-    RAG_COUNT=$(wc -l < skills/rag/logs/evaluations.jsonl)
+RAG_LOG=$(python3 -c "
+from pathlib import Path
+import yaml
+config_path = Path.home() / '.openclaw' / 'workspace-ai-baby-config' / 'config.yaml'
+if config_path.exists():
+    config = yaml.safe_load(open(config_path))
+    print(config.get('rag', {}).get('log_path', ''))
+" 2>/dev/null)
+
+if [ -n "$RAG_LOG" ] && [ -f "$RAG_LOG" ]; then
+    RAG_COUNT=$(wc -l < "$RAG_LOG")
     echo "   RAG 评估:"
     echo "      总记录数：$RAG_COUNT"
     if [ "$RAG_COUNT" -ge 10 ]; then

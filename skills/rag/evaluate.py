@@ -17,9 +17,33 @@ import statistics
 
 # 配置
 SKILLS_DIR = Path(__file__).parent
-LOGS_DIR = SKILLS_DIR / "logs"
 CONFIG_FILE = SKILLS_DIR / "config.json"
-EVALUATIONS_FILE = LOGS_DIR / "evaluations.jsonl"
+
+# 从个人配置加载日志路径
+def get_evaluations_file():
+    """获取评估日志文件路径（从配置文件）"""
+    config_paths = [
+        Path.home() / ".openclaw" / "workspace-ai-baby-config" / "config.yaml",
+        Path("config.yaml"),
+    ]
+    
+    for config_path in config_paths:
+        if config_path.exists():
+            try:
+                import yaml
+                with open(config_path, 'r') as f:
+                    config = yaml.safe_load(f)
+                log_path = config.get('rag', {}).get('log_path')
+                if log_path:
+                    return Path(log_path)
+            except:
+                pass
+    
+    # fallback 到默认路径
+    return SKILLS_DIR / "logs" / "evaluations.jsonl"
+
+EVALUATIONS_FILE = get_evaluations_file()
+LOGS_DIR = EVALUATIONS_FILE.parent
 
 # 确保目录存在
 LOGS_DIR.mkdir(exist_ok=True)
