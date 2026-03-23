@@ -700,6 +700,238 @@ openclaw agent baby1 "测试记忆搜索"
 
 ---
 
+## 记忆中心 (Memory Hub)
+
+### 架构设计
+
+```
+skills/memory-hub/
+├── __init__.py           # 包初始化
+├── hub.py                # ⭐ 核心记忆管理
+├── knowledge.py          # ⭐ 知识管理接口
+├── evaluation.py         # ⭐ 评估接口
+├── storage.py            # ⭐ 存储管理
+└── models.py             # ⭐ 数据模型
+```
+
+### 核心功能
+
+**MemoryHub 类：**
+- `add()` - 添加记忆
+- `search()` - 搜索记忆
+- `get()` - 获取记忆
+- `delete()` - 删除记忆
+- `stats()` - 统计信息
+
+**KnowledgeInterface 类：**
+- `add()` - 添加知识（公共/私有）
+- `search()` - 搜索知识
+- `get_by_id()` - 根据 ID 获取
+- `list_categories()` - 列出分类
+
+**EvaluationInterface 类：**
+- `record()` - 记录检索评估
+- `generate_report()` - 生成评估报告
+- `analyze()` - 分析并推荐最优配置
+
+### 使用示例
+
+```python
+from memory_hub import MemoryHub
+
+hub = MemoryHub(agent_name='ai-baby')
+
+# 添加记忆
+hub.add(content="用户喜欢简洁回复", memory_type='observation')
+
+# 搜索记忆
+results = hub.search("简洁", top_k=5)
+
+# 添加知识
+hub.knowledge.add(
+    title="RAG 优化技巧",
+    content="使用缓存可以显著提升检索速度...",
+    category='tips',
+    tags=['RAG', '优化'],
+    is_public=True
+)
+
+# 搜索知识
+knowledge = hub.knowledge.search("RAG 优化", limit=10)
+
+# 记录评估
+hub.evaluation.record(
+    query="RAG",
+    retrieved_count=5,
+    latency_ms=95.0,
+    feedback="positive"
+)
+
+# 生成报告
+report = hub.evaluation.generate_report(days=7)
+```
+
+---
+
+## 知识管理
+
+### 知识分类
+
+```
+workspace-ai-baby/
+├── public/                    # ⭐ 公共知识（所有 Agent 共享）
+│   ├── common/                # 通用知识
+│   ├── faq/                   # 常见问题
+│   ├── skills/                # 技能文档
+│   └── domain/                # 领域知识
+│
+└── data/
+    └── <agent>/
+        └── knowledge/
+            └── private/       # ⭐ 私有知识（Agent 独有）
+                ├── user_prefs/    # 用户偏好
+                ├── learned_skills/# 学到的技能
+                └── notes/         # 笔记
+```
+
+### 知识共享策略
+
+| 策略 | 说明 | 适用场景 |
+|------|------|---------|
+| **公共知识** | 所有 Agent 共享 | 通用常识、技能文档、FAQ |
+| **私有知识** | Agent 独有 | 用户偏好、对话历史、敏感信息 |
+
+### 知识 vs 记忆
+
+| 维度 | 知识 | 记忆 |
+|------|------|------|
+| **存储方式** | JSON 文件 | SQLite 数据库 |
+| **更新频率** | 低（长期稳定） | 高（动态变化） |
+| **结构化** | 高（分类明确） | 低（按时间顺序） |
+| **共享性** | 可公共可私有 | 通常私有 |
+
+---
+
+## 技能依赖
+
+### 依赖关系图
+
+```
+memory-hub (基础层)
+    ↑
+    ├── memory-search (依赖 memory-hub)
+    ├── rag-evaluation (依赖 memory-hub)
+    └── self-evolution (依赖 memory-hub)
+```
+
+### SKILL.md 声明
+
+```markdown
+---
+name: memory_search
+description: 记忆搜索技能
+dependencies:
+  - memory-hub
+---
+
+# 记忆搜索技能
+
+## 依赖
+- memory-hub (必需)
+
+## 安装
+先安装 memory-hub：
+clawhub install memory-hub
+```
+
+### 依赖处理策略
+
+| 场景 | 策略 |
+|------|------|
+| **内部使用** | memory-hub + 技能一起使用 |
+| **公开发布** | 先发布 memory-hub，再发布技能 |
+| **打包发布** | 将 memory-hub 打包到技能中 |
+
+---
+
+## 技能发布
+
+### 发布流程
+
+```bash
+# 1. 发布基础依赖
+clawhub publish ./skills/memory-hub \
+  --slug memory-hub \
+  --name "Memory Hub" \
+  --version 1.0.0
+
+# 2. 发布技能
+clawhub publish ./skills/memory-search \
+  --slug memory-search \
+  --name "Memory Search" \
+  --version 1.0.0 \
+  --dependencies memory-hub
+```
+
+### 用户安装
+
+```bash
+# 安装依赖
+clawhub install memory-hub
+
+# 安装技能
+clawhub install memory-search
+```
+
+---
+
+## 数据模型
+
+### Memory 模型
+
+```python
+@dataclass
+class Memory:
+    id: Optional[int] = None
+    content: str = ''
+    memory_type: MemoryType = MemoryType.OBSERVATION
+    importance: float = 5.0
+    tags: List[str] = None
+    embedding: List[float] = None
+    metadata: Dict = None
+    created_at: Optional[datetime] = None
+    last_accessed: Optional[datetime] = None
+```
+
+### MemoryType 枚举
+
+```python
+class MemoryType(str, Enum):
+    OBSERVATION = 'observation'    # 观察记忆
+    REFLECTION = 'reflection'      # 反思记忆
+    KNOWLEDGE = 'knowledge'        # 知识记忆
+    GOAL = 'goal'                  # 目标记忆
+```
+
+### Knowledge 模型
+
+```python
+@dataclass
+class Knowledge:
+    id: str = ''
+    title: str = ''
+    content: str = ''
+    category: str = 'general'
+    tags: List[str] = None
+    is_public: bool = False
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+```
+
+---
+
+## 实施计划
+
 ### Phase 2: 多 Agent 支持（待实施 ⏳）
 
 - [ ] 创建 `config/agents.yaml`
