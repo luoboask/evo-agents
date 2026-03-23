@@ -1,60 +1,52 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-RAG 评估框架 - ai-baby 专用
+RAG 评估框架 - 使用 Memory Hub
 记录、分析、优化检索增强生成系统
 """
 
 import json
 import os
 import sys
-import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Any
-import sqlite3
 import statistics
+
+# 导入 Memory Hub
+try:
+    from memory_hub import MemoryHub
+    MEMORY_HUB_ENABLED = True
+except ImportError:
+    MEMORY_HUB_ENABLED = False
 
 # 配置
 SKILLS_DIR = Path(__file__).parent
 CONFIG_FILE = SKILLS_DIR / "config.json"
 
-# 从个人配置加载日志路径
-def get_evaluations_file():
-    """获取评估日志文件路径（从配置文件）"""
-    config_paths = [
-        Path.home() / ".openclaw" / "workspace-ai-baby-config" / "config.yaml",
-        Path("config.yaml"),
-    ]
-    
-    for config_path in config_paths:
-        if config_path.exists():
-            try:
-                import yaml
-                with open(config_path, 'r') as f:
-                    config = yaml.safe_load(f)
-                log_path = config.get('rag', {}).get('log_path')
-                if log_path:
-                    return Path(log_path)
-            except:
-                pass
-    
-    # fallback 到默认路径
-    return SKILLS_DIR / "logs" / "evaluations.jsonl"
-
-EVALUATIONS_FILE = get_evaluations_file()
-LOGS_DIR = EVALUATIONS_FILE.parent
-
-# 确保目录存在
-LOGS_DIR.mkdir(exist_ok=True)
-
 
 class RAGEvaluator:
-    """RAG 评估器"""
+    """RAG 评估器 - 使用 Memory Hub"""
     
-    def __init__(self):
+    def __init__(self, agent_name=None):
+        """
+        初始化 RAG 评估器
+        
+        Args:
+            agent_name: Agent 名称（默认从环境变量获取）
+        """
+        if agent_name is None:
+            agent_name = os.environ.get('OPENCLAW_AGENT', 'ai-baby')
+        
+        self.agent_name = agent_name
         self.config = self._load_config()
         self.evaluations = []
+        
+        # 使用 Memory Hub
+        if MEMORY_HUB_ENABLED:
+            self.hub = MemoryHub(agent_name)
+        else:
+            self.hub = None
         
     def _load_config(self) -> Dict:
         """加载配置文件"""
@@ -94,12 +86,28 @@ class RAGEvaluator:
             query: 检索查询
             retrieved_count: 检索到的结果数
             latency_ms: 延迟（毫秒）
-            feedback: 用户反馈 (positive/negative/neutral)
+            feedback: 用户反馈
             used_in_response: 是否用于最终回复
             top_k: 使用的 top-k 值
             similarity_score: 最高相似度分数
             token_cost: token 消耗
+        
+        Returns:
+            评估记录
         """
+        # 使用 Memory Hub
+        if self.hub:
+            return self.hub.evaluation.record(
+                query=query,
+                retrieved_count=retrieved_count,
+                latency_ms=latency_ms,
+                feedback=feedback,
+                similarity_score=similarity_score,
+                top_k=top_k or self.config["current_config"]["top_k"],
+                used_in_response=used_in_response
+            )
+        
+        # Fallback: 直接记录
         evaluation = {
             "timestamp": datetime.now().isoformat(),
             "query": query,
@@ -109,16 +117,10 @@ class RAGEvaluator:
             "used_in_response": used_in_response,
             "config": {
                 "top_k": top_k or self.config["current_config"]["top_k"],
-                "similarity_threshold": similarity_score or self.config["current_config"]["similarity_threshold"],
-                "chunk_size": self.config["current_config"]["chunk_size"]
             },
             "similarity_score": similarity_score,
             "token_cost": token_cost
         }
-        
-        # 追加到日志文件
-        with open(EVALUATIONS_FILE, 'a', encoding='utf-8') as f:
-            f.write(json.dumps(evaluation, ensure_ascii=False) + '\n')
         
         self.evaluations.append(evaluation)
         return evaluation
@@ -196,62 +198,14 @@ class RAGEvaluator:
     
     def generate_report(self, days: int = 7) -> str:
         """生成评估报告"""
-        evaluations = self.load_evaluations(days)
-        metrics = self.calculate_metrics(evaluations)
+        if self.hub:
+            return self.hub.evaluation.generate_report(days=days)
         
-        if "error" in metrics:
-            return f"❌ {metrics['error']}"
+        # Fallback: 简单报告
+        if not self.evaluations:
+            return "❌ No evaluations found"
         
-        report = []
-        report.append("=" * 60)
-        report.append("📊 RAG 评估报告")
-        report.append(f"   周期：过去 {days} 天")
-        report.append("=" * 60)
-        report.append("")
-        
-        # 基础统计
-        report.append("📈 基础统计")
-        report.append(f"   总查询数：{metrics['total_queries']}")
-        report.append(f"   检索使用率：{metrics['retrieval']['usage_rate']}%")
-        report.append("")
-        
-        # 延迟
-        report.append("⏱️  延迟性能")
-        report.append(f"   平均：{metrics['latency']['avg_ms']}ms")
-        report.append(f"   中位数：{metrics['latency']['median_ms']}ms")
-        report.append(f"   范围：{metrics['latency']['min_ms']} - {metrics['latency']['max_ms']}ms")
-        report.append("")
-        
-        # 检索
-        report.append("🔍 检索效果")
-        report.append(f"   平均结果数：{metrics['retrieval']['avg_results']}")
-        report.append("")
-        
-        # 反馈
-        report.append("💬 用户反馈")
-        report.append(f"   正面：{metrics['feedback']['positive']} ({metrics['feedback']['positive_rate']}%)")
-        report.append(f"   中性：{metrics['feedback']['neutral']}")
-        report.append(f"   负面：{metrics['feedback']['negative']}")
-        report.append("")
-        
-        # 相似度
-        if metrics['similarity']['avg_score']:
-            report.append("📏 相似度")
-            report.append(f"   平均：{metrics['similarity']['avg_score']}")
-            report.append(f"   范围：{metrics['similarity']['min_score']} - {metrics['similarity']['max_score']}")
-            report.append("")
-        
-        # 当前配置
-        report.append("⚙️  当前配置")
-        current = self.config["current_config"]
-        report.append(f"   Top-K: {current['top_k']}")
-        report.append(f"   相似度阈值：{current['similarity_threshold']}")
-        report.append(f"   Chunk 大小：{current['chunk_size']}")
-        report.append("")
-        
-        report.append("=" * 60)
-        
-        return "\n".join(report)
+        return f"📊 RAG 评估报告\n   周期：过去 {days} 天\n   总查询数：{len(self.evaluations)}"
     
     def compare_configs(self) -> Dict:
         """比较不同配置的表现"""
