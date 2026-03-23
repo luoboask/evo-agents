@@ -199,7 +199,7 @@ class TestSuite:
     def test_self_evolution_core(self):
         """测试 7: 自进化核心模块"""
         try:
-            se_dir = self.workspace / "skills" / "self-evolution-5.0"
+            se_dir = self.workspace / "skills" / "self-evolution"
             sys.path.insert(0, str(se_dir))
             
             # 测试核心文件

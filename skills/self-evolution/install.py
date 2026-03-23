@@ -234,7 +234,7 @@ def verify_installation():
     workspace = home / '.openclaw' / 'workspace'
     
     checks = [
-        ("配置文件", workspace.parent / 'skills' / 'self-evolution-5.0' / 'config.yaml'),
+        ("配置文件", workspace.parent / 'skills' / 'self-evolution' / 'config.yaml'),
         ("记忆流数据库", workspace / 'memory' / 'memory_stream.db'),
         ("知识库数据库", workspace / 'memory' / 'knowledge_base.db'),
         ("进化事件数据库", workspace / 'evolution' / 'evolution.db'),
@@ -258,10 +258,10 @@ def print_next_steps():
     print("""
 📝 配置（可选）:
    编辑 config.yaml 调整配置
-   位置：~/.openclaw/workspace/skills/self-evolution-5.0/config.yaml
+   位置：~/.openclaw/workspace/skills/self-evolution/config.yaml
 
 🔍 查看系统状态:
-   cd ~/.openclaw/workspace/skills/self-evolution-5.0
+   cd ~/.openclaw/workspace/skills/self-evolution
    python3 main.py status
 
 📝 记录第一个事件:
@@ -269,7 +269,7 @@ def print_next_steps():
 
 ⏰ 配置定时任务（可选）:
    crontab -e
-   添加：0 2 * * * cd ~/.openclaw/workspace/skills/self-evolution-5.0 && python3 main.py nightly
+   添加：0 2 * * * cd ~/.openclaw/workspace/skills/self-evolution && python3 main.py nightly
 
 📚 阅读文档:
    - INSTALL.md - 安装指南（本文档）

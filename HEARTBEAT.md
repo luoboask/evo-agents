@@ -36,7 +36,7 @@ python3 skills/rag/auto_tune.py --next
 
 ### 自进化检查（每周日）
 ```bash
-cd skills/self-evolution-5.0
+cd skills/self-evolution
 python3 main.py status
 python3 main.py fractal --limit 10
 ```

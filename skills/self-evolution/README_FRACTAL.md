@@ -75,7 +75,7 @@ Level 3 - Meta-Rule (编码元规则)
 ### 手动运行
 
 ```bash
-cd /Users/dhr/.openclaw/workspace/skills/self-evolution-5.0
+cd /Users/dhr/.openclaw/workspace/skills/self-evolution
 python3 fractal_thinking.py
 ```
 

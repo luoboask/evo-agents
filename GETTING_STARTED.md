@@ -157,7 +157,7 @@ python3 skills/rag/auto_tune.py --next
 ### 自进化功能
 
 ```bash
-cd skills/self-evolution-5.0
+cd skills/self-evolution
 
 # 查看状态
 python3 main.py status
@@ -191,7 +191,7 @@ workspace-ai-baby/
 ├── 📂 skills/
 │   ├── rag/                   RAG 评估系统
 │   ├── memory-search/         记忆搜索
-│   └── self-evolution-5.0/    自进化核心
+│   └── self-evolution/    自进化核心
 │
 └── 📂 ~/.openclaw/workspace-ai-baby-config/  # 个人配置（Git 忽略）
     ├── config.yaml

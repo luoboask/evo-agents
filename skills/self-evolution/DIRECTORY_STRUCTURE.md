@@ -8,7 +8,7 @@
 ## 📁 完整目录结构
 
 ```
-self-evolution-5.0/
+self-evolution/
 │
 ├── 📄 核心模块（7 个）
 │   ├── main.py                    ⭐ 统一入口 CLI

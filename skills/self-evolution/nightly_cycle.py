@@ -483,7 +483,7 @@ class NightlyEvolutionCycle:
             before='循环前状态',
             after=f'完成 4 个任务：Wind Down, Memory Consolidation, Cleaning, Auto-Evolution',
             lesson_learned='夜间循环是持续改进的关键机制，自动化复盘和清理保持系统健康',
-            files_changed=['skills/self-evolution-5.0/nightly_cycle.py']
+            files_changed=['skills/self-evolution/nightly_cycle.py']
         )
 
 

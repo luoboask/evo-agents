@@ -9,10 +9,10 @@
 ```bash
 # 1. 复制技能到你的 workspace
 mkdir -p ~/.openclaw/workspace/skills
-cp -r /path/to/self-evolution-5.0 ~/.openclaw/workspace/skills/
+cp -r /path/to/self-evolution ~/.openclaw/workspace/skills/
 
 # 2. 进入目录
-cd ~/.openclaw/workspace/skills/self-evolution-5.0
+cd ~/.openclaw/workspace/skills/self-evolution
 
 # 3. 运行自动安装脚本
 python3 install.py
@@ -49,8 +49,8 @@ python3 install.py
 
 ```bash
 mkdir -p ~/.openclaw/workspace/skills
-cp -r /path/to/self-evolution-5.0 ~/.openclaw/workspace/skills/
-cd ~/.openclaw/workspace/skills/self-evolution-5.0
+cp -r /path/to/self-evolution ~/.openclaw/workspace/skills/
+cd ~/.openclaw/workspace/skills/self-evolution
 ```
 
 ### Step 2: 创建配置
@@ -117,7 +117,7 @@ python3 main.py status
 ## 📚 目录结构
 
 ```
-self-evolution-5.0/
+self-evolution/
 ├── main.py                  # 主入口
 ├── memory_stream.py         # 记忆流管理
 ├── self_evolution_real.py   # 进化引擎

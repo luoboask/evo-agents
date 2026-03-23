@@ -430,7 +430,7 @@ def init_self_evolution() -> bool:
     """初始化自进化核心模块"""
     print("\n[1/3] 检查自进化核心依赖...")
     try:
-        se_dir = Path(__file__).parent / "skills" / "self-evolution-5.0"
+        se_dir = Path(__file__).parent / "skills" / "self-evolution"
         
         # 检查核心文件
         core_files = [

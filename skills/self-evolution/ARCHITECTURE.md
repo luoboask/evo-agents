@@ -221,7 +221,7 @@ knowledge (
 ### 快速开始
 
 ```bash
-cd /Users/dhr/.openclaw/workspace/skills/self-evolution-5.0
+cd /Users/dhr/.openclaw/workspace/skills/self-evolution
 
 # 1. 运行分形思考
 python3 fractal_thinking.py
@@ -260,10 +260,10 @@ ms.add_memory("内容", memory_type='observation')
 
 ```bash
 # Crontab 配置（每天凌晨 2 点）
-0 2 * * * cd /workspace/skills/self-evolution-5.0 && python3 nightly_cycle.py
+0 2 * * * cd /workspace/skills/self-evolution && python3 nightly_cycle.py
 
 # 每 4 小时运行分形分析
-0 */4 * * * cd /workspace/skills/self-evolution-5.0 && python3 fractal_thinking.py
+0 */4 * * * cd /workspace/skills/self-evolution && python3 fractal_thinking.py
 ```
 
 ---

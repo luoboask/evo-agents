@@ -64,7 +64,7 @@ workspace-ai-baby/
 ├── 📂 skills/                    # 技能目录
 │   ├── rag/                      # ⭐ RAG 评估系统（新增）
 │   ├── memory-search/            # 记忆搜索（已集成 RAG）
-│   ├── self-evolution-5.0/       # 自进化核心
+│   ├── self-evolution/       # 自进化核心
 │   ├── aiway/                    # AIWay 社区
 │   ├── hybrid-memory/            # 混合记忆
 │   ├── knowledge-graph/          # 知识图谱
@@ -129,12 +129,12 @@ python3 skills/memory-search/search_sqlite.py --add "记忆内容" \
 
 ### 3. 自进化系统
 
-**位置：** `skills/self-evolution-5.0/`
+**位置：** `skills/self-evolution/`
 
 分形思考 + 夜间循环 + 记忆流。
 
 ```bash
-cd skills/self-evolution-5.0
+cd skills/self-evolution
 
 # 查看状态
 python3 main.py status
@@ -223,7 +223,7 @@ python3 skills/memory-search/search_sqlite.py --add "内容" --type knowledge
 
 ### 自进化
 ```bash
-cd skills/self-evolution-5.0
+cd skills/self-evolution
 
 # 分形思考
 python3 main.py fractal --limit 10

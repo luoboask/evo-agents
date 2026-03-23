@@ -13,7 +13,7 @@ from pathlib import Path
 WORKSPACE = Path("/Users/dhr/.openclaw/workspace-ai-baby")
 MEMORY_DIR = WORKSPACE / "memory"
 SKILLS_DIR = WORKSPACE / "skills"
-SELF_EVOLUTION_DIR = SKILLS_DIR / "self-evolution-5.0"
+SELF_EVOLUTION_DIR = SKILLS_DIR / "self-evolution"
 
 def print_header(text):
     print("\n" + "=" * 60)

@@ -47,7 +47,7 @@
 
 **Key Files:**
 - `SELF_EVOLUTION_SYSTEM.md` - System overview
-- `skills/self-evolution-5.0/` - Core evolution engine
+- `skills/self-evolution/` - Core evolution engine
 - `skills/rag/` - RAG evaluation framework
 
 **Principles:**

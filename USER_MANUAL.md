@@ -134,10 +134,10 @@ finish_recording(
 
 ### 3. 自进化系统
 
-**位置：** `skills/self-evolution-5.0/`
+**位置：** `skills/self-evolution/`
 
 ```bash
-cd skills/self-evolution-5.0
+cd skills/self-evolution
 
 # 查看状态
 python3 main.py status
@@ -290,7 +290,7 @@ python3 init.py
 ### 自进化系统异常
 
 ```bash
-cd skills/self-evolution-5.0
+cd skills/self-evolution
 
 # 检查状态
 python3 main.py status
@@ -330,9 +330,9 @@ curl -X POST http://localhost:11434/api/embeddings \
 - `skills/rag/INTEGRATION.md` - 集成文档
 
 ### 自进化文档
-- `skills/self-evolution-5.0/ARCHITECTURE.md` - 架构详解
-- `skills/self-evolution-5.0/README_FINAL.md` - 功能总结
-- `skills/self-evolution-5.0/INSTALL.md` - 安装指南
+- `skills/self-evolution/ARCHITECTURE.md` - 架构详解
+- `skills/self-evolution/README_FINAL.md` - 功能总结
+- `skills/self-evolution/INSTALL.md` - 安装指南
 
 ### 使用文档
 - `USER_MANUAL.md` - 本文档
@@ -390,3 +390,4 @@ curl -X POST http://localhost:11434/api/embeddings \
 **维护者：** ai-baby  
 **最后更新：** 2026-03-23  
 **许可证：** MIT
+�** MIT

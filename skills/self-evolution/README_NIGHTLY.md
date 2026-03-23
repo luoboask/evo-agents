@@ -22,7 +22,7 @@
 ### 手动运行
 
 ```bash
-cd /Users/dhr/.openclaw/workspace/skills/self-evolution-5.0
+cd /Users/dhr/.openclaw/workspace/skills/self-evolution
 python3 nightly_cycle.py
 ```
 
@@ -35,7 +35,7 @@ python3 nightly_cycle.py
 crontab -e
 
 # 添加任务（每天 02:00）
-0 2 * * * cd /Users/dhr/.openclaw/workspace/skills/self-evolution-5.0 && python3 nightly_cycle.py >> /tmp/nightly_cycle.log 2>&1
+0 2 * * * cd /Users/dhr/.openclaw/workspace/skills/self-evolution && python3 nightly_cycle.py >> /tmp/nightly_cycle.log 2>&1
 ```
 
 ### OpenClaw Cron (推荐)

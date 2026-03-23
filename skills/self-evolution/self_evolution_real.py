@@ -211,7 +211,7 @@ if __name__ == '__main__':
         lesson_learned='RESTful API 设计：新增端点需要在路由中注册，返回数据结构要包含分页和统计信息',
         files_changed=[
             'skills/evolution-workbench/integrated_server.py',
-            'skills/self-evolution-5.0/knowledge_base.py'
+            'skills/self-evolution/knowledge_base.py'
         ]
     )
     

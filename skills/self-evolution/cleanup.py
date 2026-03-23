@@ -11,7 +11,7 @@ from pathlib import Path
 from datetime import datetime
 
 # 配置
-SELF_EVOLUTION_DIR = Path("/Users/dhr/.openclaw/workspace-ai-baby/skills/self-evolution-5.0")
+SELF_EVOLUTION_DIR = Path("/Users/dhr/.openclaw/workspace-ai-baby/skills/self-evolution")
 ARCHIVE_DIR = SELF_EVOLUTION_DIR / "_archive"
 
 # 核心文件（保留）
@@ -134,7 +134,7 @@ def show_directory_structure():
     core_files = [f for f in CORE_FILES if (SELF_EVOLUTION_DIR / f).exists()]
     helper_files = [f for f in HELPER_FILES if (SELF_EVOLUTION_DIR / f).exists()]
     
-    print("\n📁 self-evolution-5.0/")
+    print("\n📁 self-evolution/")
     print("   ├── 📄 核心模块")
     for f in sorted(core_files):
         if f.endswith('.py'):

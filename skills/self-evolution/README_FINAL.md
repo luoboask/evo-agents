@@ -137,7 +137,7 @@
 **问题：** 之前存在多个版本的自进化系统（2.0/3.0/4.0/5.0）
 
 **解决：**
-1. **统一使用 v5.0** - `self-evolution-5.0/` 目录
+1. **统一使用 v5.0** - `self-evolution/` 目录
 2. **归档旧版本** - 保留但不维护
 3. **单一入口** - `main.py` 作为唯一 CLI
 
@@ -174,7 +174,7 @@
 ### 快速开始
 
 ```bash
-cd /Users/dhr/.openclaw/workspace/skills/self-evolution-5.0
+cd /Users/dhr/.openclaw/workspace/skills/self-evolution
 
 # 查看系统状态
 python3 main.py status
@@ -199,10 +199,10 @@ python3 main.py embedding "修复 Bug" "修复错误"
 crontab -e
 
 # 每天凌晨 2 点运行夜间循环
-0 2 * * * cd /workspace/skills/self-evolution-5.0 && python3 main.py nightly >> /tmp/nightly.log 2>&1
+0 2 * * * cd /workspace/skills/self-evolution && python3 main.py nightly >> /tmp/nightly.log 2>&1
 
 # 每 4 小时运行分形分析
-0 */4 * * * cd /workspace/skills/self-evolution-5.0 && python3 main.py fractal --limit 5 >> /tmp/fractal.log 2>&1
+0 */4 * * * cd /workspace/skills/self-evolution && python3 main.py fractal --limit 5 >> /tmp/fractal.log 2>&1
 ```
 
 ---

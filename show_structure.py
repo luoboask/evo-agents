@@ -67,7 +67,7 @@ workspace-ai-baby/
 │   │   ├── semantic_search.py        # 语义搜索
 │   │   └── daily_review.py           # 每日回顾
 │   │
-│   ├── self-evolution-5.0/           ⭐ 自进化核心
+│   ├── self-evolution/           ⭐ 自进化核心
 │   │   ├── main.py                   # 统一入口
 │   │   ├── memory_stream.py          # 记忆流
 │   │   ├── fractal_thinking.py       # 分形思考
@@ -112,7 +112,7 @@ def show_component_stats():
     print(f"   状态：✅ 活跃")
     
     # 自进化核心
-    self_evo_dir = WORKSPACE / "skills" / "self-evolution-5.0"
+    self_evo_dir = WORKSPACE / "skills" / "self-evolution"
     core_files = count_files(self_evo_dir, "*.py")
     doc_files = count_files(self_evo_dir, "*.md")
     print(f"\n🧬 自进化核心")
@@ -166,7 +166,7 @@ python3 skills/rag/auto_tune.py --report  # 需要 10+ 条数据
 python3 skills/memory-search/search_sqlite.py "查询" --semantic
 
 # 自进化功能
-cd skills/self-evolution-5.0 && python3 main.py status
+cd skills/self-evolution && python3 main.py status
 python3 main.py fractal --limit 10
 python3 main.py nightly
     """)
