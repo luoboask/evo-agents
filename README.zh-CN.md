@@ -4,6 +4,10 @@
 
 可复用的自进化 Agent 工作区模板，强调显式运行上下文（`--workspace`、`--agent`）、多 Agent 数据隔离、以及能力层共享复用。
 
+## 🦞 OpenClaw 一键引导
+
+如果需要从拉库到安装、健康检查、全量验收的一条龙流程，请直接使用 `workspace-setup.md`。
+
 ## 仓库定位
 
 `evo-agents` 的目标是让一份 workspace 代码稳定服务多个 agent 实例，同时保持运行可控、边界清晰：
@@ -111,6 +115,3 @@ python3 test_all.py --workspace <workspace-root> --agent demo-agent
 python3 scripts/test_agents.py --workspace <workspace-root> --agent demo-agent
 ```
 
-## OpenClaw 一键引导
-
-如果需要从拉库到安装、健康检查、全量验收的一条龙流程，请直接使用 `workspace-setup.md`。

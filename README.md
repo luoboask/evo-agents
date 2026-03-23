@@ -4,6 +4,10 @@
 
 Reusable self-evolving agent workspace with explicit runtime context (`--workspace`, `--agent`), strict per-agent data isolation, and shared capability layers.
 
+## 🦞 OpenClaw One-Click Bootstrap
+
+For clone -> install -> healthcheck -> full verification in one flow, use `workspace-setup.md`.
+
 ## Why This Repository
 
 `evo-agents` is designed to make one workspace reusable across multiple agents while keeping runtime behavior deterministic:
@@ -111,6 +115,3 @@ python3 test_all.py --workspace <workspace-root> --agent demo-agent
 python3 scripts/test_agents.py --workspace <workspace-root> --agent demo-agent
 ```
 
-## OpenClaw Bootstrap
-
-For clone -> install -> healthcheck -> full verification in one flow, use `workspace-setup.md`.
