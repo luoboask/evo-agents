@@ -1,0 +1,10 @@
+{
+  "name": "self-evolution",
+  "version": "1.0.0",
+  "description": "自进化系统，分形思考和夜间循环",
+  "homepage": "https://github.com/ai-baby/workspace-ai-baby",
+  "author": "ai-baby",
+  "license": "MIT",
+  "updated_at": "2026-03-23",
+  "changelog": "1.0.0: 初始版本，支持分形思考、夜间循环和进化记录"
+}

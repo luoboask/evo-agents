@@ -1,85 +1,126 @@
 ---
-name: memory-search
-description: 'Hybrid memory system with 3-layer architecture: working memory + vector memory + knowledge graph. Auto-records and retrieves context.'
+name: memory_search
+description: 记忆搜索技能，支持关键词和语义搜索
+homepage: https://github.com/ai-baby/workspace-ai-baby
+metadata:
+  emoji: "🧠"
+  category: memory
+  version: "1.0.0"
+  updated_at: "2026-03-23"
 ---
 
-# Memory Search Skill (Hybrid v2)
+# 记忆搜索技能
 
-三层混合记忆系统，自动记录和智能检索。
+记忆搜索技能提供记忆存储、检索和管理功能。
 
-## Architecture
+## 功能
 
+- **关键词搜索** - 快速查找相关记忆
+- **语义搜索** - 使用 Ollama 向量搜索（需要本地 Ollama 服务）
+- **记忆管理** - 添加、删除、修改记忆
+- **统计分析** - 查看记忆数量、类型分布等
+
+## 可用工具
+
+### search(query, top_k=5, semantic=false)
+
+搜索记忆库。
+
+**参数：**
+- `query` (string, required): 搜索关键词
+- `top_k` (integer, default=5): 返回结果数量
+- `semantic` (boolean, default=false): 是否使用语义搜索
+
+**示例：**
 ```
-┌─────────────────────────────────────────┐
-│         三层混合记忆系统                 │
-├─────────────────────────────────────────┤
-│ L3: Knowledge Graph (长期)              │
-│     - 实体关系网络                       │
-│     - 结构化知识                         │
-├─────────────────────────────────────────┤
-│ L2: Vector Memory (语义)                │
-│     - Ollama 嵌入                        │
-│     - 语义相似度检索                     │
-├─────────────────────────────────────────┤
-│ L1: Working Memory (短期)               │
-│     - 最近50条交互                       │
-│     - 关键词匹配                         │
-└─────────────────────────────────────────┘
-```
-
-## Features
-
-- ✅ **自动记录** - 智能评估重要性，自动分发到三层
-- ✅ **语义检索** - 理解意图，不只是关键词匹配
-- ✅ **混合搜索** - 三层联合检索，综合排序
-- ✅ **智能评估** - critical/high/medium/low 自动分级
-- ✅ **持久化** - 自动保存到文件
-
-## Usage
-
-### 记录记忆
-
-```python
-from integrated_memory import IntegratedHybridMemory
-
-memory = IntegratedHybridMemory()
-
-# 自动记录（评估重要性）
-memory.record_interaction("user", "用户说的话")
-memory.record_interaction("assistant", "AI的回复")
+search(query="RAG 优化", top_k=5, semantic=true)
 ```
 
-### 搜索记忆
+### add(content, type="observation", importance=5.0, tags=[])
 
-```python
-# 混合检索
-results = memory.search("查询内容", context="medium")
+添加新记忆。
 
-# context: small (L1) / medium (L1+L2) / large (L1+L2+L3)
+**参数：**
+- `content` (string, required): 记忆内容
+- `type` (string, default="observation"): 记忆类型 (observation/reflection/knowledge/goal)
+- `importance` (float, default=5.0): 重要性 (1-10)
+- `tags` (array, default=[]): 标签列表
+
+**示例：**
+```
+add(content="今天学习了 RAG 评估系统", type="knowledge", importance=8.0, tags=["RAG", "学习"])
 ```
 
-### 命令行
+### delete(memory_id)
 
-```bash
-# 记录
-python3 search.py --record "内容" --role user
+删除记忆。
 
-# 搜索
-python3 search.py "查询内容"
+**参数：**
+- `memory_id` (integer, required): 记忆 ID
 
-# 统计
-python3 search.py --stats
+**示例：**
+```
+delete(memory_id=123)
 ```
 
-## Importance Levels
+### stats()
 
-自动评估：
-- **critical** - 规则、决策、敏感信息
-- **high** - 偏好、习惯、技能
-- **medium** - 一般信息
-- **low** - 简短对话
+获取记忆统计信息。
 
-## Evolution
+**返回：**
+- total: 总记忆数
+- by_type: 按类型分布
+- avg_importance: 平均重要性
 
-- v1: Basic keyword search
-- v2: Hybrid 3-layer memory with semantic search (2026-03-16)
+**示例：**
+```
+stats()
+```
+
+## 数据存储
+
+记忆数据存储在：
+```
+~/.openclaw/workspace-ai-baby-config/memory/
+├── memory_stream.db      # 记忆流数据库
+├── knowledge_base.db     # 知识库
+└── vector_db/            # 向量数据库（语义搜索）
+```
+
+## 依赖
+
+- **SQLite3** - 数据库（必需）
+- **Ollama** - 语义搜索（可选，需要 nomic-embed-text 模型）
+
+## 配置
+
+在 `~/.openclaw/openclaw.json` 中配置：
+
+```json
+{
+  "skills": {
+    "entries": {
+      "memory-search": {
+        "enabled": true,
+        "env": {
+          "OLLAMA_URL": "http://localhost:11434",
+          "EMBEDDING_MODEL": "nomic-embed-text"
+        }
+      }
+    }
+  }
+}
+```
+
+## 使用场景
+
+1. **日常回顾** - 搜索特定日期的记忆
+2. **知识检索** - 查找相关知识点
+3. **模式识别** - 分析重复出现的主题
+4. **统计分析** - 了解记忆分布
+
+## 注意事项
+
+- 语义搜索需要本地 Ollama 服务
+- 建议定期备份记忆数据库
+- 敏感信息不要存储在记忆中
