@@ -14,6 +14,8 @@ A self-evolving AI agent workspace.
 python3 init_system.py --workspace <workspace-root> --agent demo-agent
 ```
 
+For OpenClaw bootstrap (clone -> install -> healthcheck -> tests), see `workspace-setup.md`.
+
 ---
 
 ## Structure

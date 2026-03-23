@@ -32,13 +32,19 @@ export AGENT="demo-agent"
 If repo does not exist:
 
 ```bash
-git clone <repo-url> "$WORKSPACE"
+git clone "https://gitlab.alibaba-inc.com/haoran.dhr/evo-agents.git" "$WORKSPACE"
 ```
 
 If repo already exists:
 
 ```bash
-cd "$WORKSPACE" && git pull
+cd "$WORKSPACE" && git pull --rebase
+```
+
+Alternative (SSH):
+
+```bash
+git clone "git@gitlab.alibaba-inc.com:haoran.dhr/evo-agents.git" "$WORKSPACE"
 ```
 
 ## 1) Install Agent Workspace
@@ -117,3 +123,25 @@ If still failing, collect and report:
 - exit code
 - stderr/stdout snippet
 - current `WORKSPACE` and `AGENT`
+
+## 7) One-shot Execution (recommended for OpenClaw)
+
+```bash
+set -e
+export WORKSPACE="/absolute/path/to/evo-agents"
+export AGENT="demo-agent"
+
+if [ ! -d "$WORKSPACE/.git" ]; then
+  git clone "https://gitlab.alibaba-inc.com/haoran.dhr/evo-agents.git" "$WORKSPACE"
+else
+  cd "$WORKSPACE" && git pull --rebase
+fi
+
+cd "$WORKSPACE"
+python3 scripts/install_agent_workspace.py --workspace "$WORKSPACE" --agent "$AGENT" --force
+python3 init_system.py --workspace "$WORKSPACE" --agent "$AGENT"
+./start.sh --workspace "$WORKSPACE" --agent "$AGENT"
+python3 scripts/test_features.py --agent "$AGENT"
+python3 test_all.py --workspace "$WORKSPACE" --agent "$AGENT"
+python3 scripts/test_agents.py --workspace "$WORKSPACE" --agent "$AGENT"
+```
