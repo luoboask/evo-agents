@@ -5,7 +5,7 @@ Libs - 共享库
 统一导入方式:
     
     from libs import memory_hub
-    from libs.memory_hub import MemoryHub
+    from memory_hub import MemoryHub
     
 或者:
     
@@ -13,7 +13,7 @@ Libs - 共享库
     from pathlib import Path
     sys.path.insert(0, str(Path(__file__).parent))
     
-    from libs.memory_hub import MemoryHub
+    from memory_hub import MemoryHub
 """
 
 import sys
@@ -26,7 +26,7 @@ if str(_libs_dir) not in sys.path:
 
 # 预加载常用库
 try:
-    from libs.memory_hub import MemoryHub
+    from memory_hub import MemoryHub
 except Exception as e:
     print(f"⚠️  Warning: Could not preload memory_hub: {e}")
     MemoryHub = None

@@ -22,16 +22,16 @@ import sqlite3
 import urllib.request
 from pathlib import Path
 
-# 添加 workspace 根目录到路径
-WORKSPACE_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(WORKSPACE_ROOT))
+# 添加 libs 目录到路径
+LIBS_DIR = Path(__file__).parent.parent / 'libs'
+sys.path.insert(0, str(LIBS_DIR))
 
 
 def test_memory_hub():
     """测试 Memory Hub 导入"""
     print("\n1️⃣ Memory Hub 导入:")
     try:
-        from libs.memory_hub import MemoryHub
+        from memory_hub import MemoryHub
         print(f"   ✅ Memory Hub 导入成功")
         return True
     except Exception as e:
@@ -189,7 +189,7 @@ def main():
         print("\n❌ Memory Hub 导入失败，无法继续测试")
         sys.exit(1)
     
-    from libs.memory_hub import MemoryHub
+    from memory_hub import MemoryHub
     hub = MemoryHub('ai-baby')
     
     # 2. CRUD

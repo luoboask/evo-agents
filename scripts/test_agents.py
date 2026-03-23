@@ -7,13 +7,13 @@ import os
 import sys
 from pathlib import Path
 
-# 添加 workspace 根目录到路径以支持 libs 导入
-WORKSPACE_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(WORKSPACE_ROOT))
+# 添加 libs 目录到路径以支持 Memory Hub 导入
+LIBS_DIR = Path(__file__).parent.parent / 'libs'
+sys.path.insert(0, str(LIBS_DIR))
 
 # 使用标准导入 (memory_hub 现在是合法的 Python 包名)
 try:
-    from libs.memory_hub import MemoryHub
+    from memory_hub import MemoryHub
 except ImportError as e:
     print(f"❌ 导入 Memory Hub 失败：{e}")
     sys.exit(1)

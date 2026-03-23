@@ -14,11 +14,11 @@ import json
 import sys
 from pathlib import Path
 
-# 添加 workspace 根目录到路径
-WORKSPACE_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(WORKSPACE_ROOT))
+# 添加 libs 目录到路径
+LIBS_DIR = Path(__file__).parent.parent / 'libs'
+sys.path.insert(0, str(LIBS_DIR))
 
-from libs.memory_hub import MemoryHub
+from memory_hub import MemoryHub
 
 
 def print_stats(agent_name='ai-baby', days=7):

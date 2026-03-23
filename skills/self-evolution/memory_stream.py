@@ -16,7 +16,7 @@ sys.path.insert(0, str(LIBS_DIR))
 
 # 导入 Memory Hub (共享库)
 try:
-    from libs.memory_hub import MemoryHub
+    from memory_hub import MemoryHub
     MEMORY_HUB_ENABLED = True
 except ImportError:
     MEMORY_HUB_ENABLED = False

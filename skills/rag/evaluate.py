@@ -19,7 +19,7 @@ LIBS_DIR = Path(__file__).parent.parent.parent / 'libs'
 sys.path.insert(0, str(LIBS_DIR))
 
 try:
-    from libs.memory_hub import MemoryHub
+    from memory_hub import MemoryHub
     MEMORY_HUB_ENABLED = True
 except ImportError:
     MEMORY_HUB_ENABLED = False
