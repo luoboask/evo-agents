@@ -7,6 +7,9 @@ set -e
 WORKSPACE="/Users/dhr/.openclaw/workspace-ai-baby"
 cd "$WORKSPACE"
 
+# 设置默认 Agent
+export OPENCLAW_AGENT="ai-baby"
+
 echo "========================================"
 echo "🍼 ai-baby 自进化系统 v5.1"
 echo "========================================"
@@ -71,7 +74,7 @@ echo ""
 # 自进化系统状态
 echo "   自进化系统:"
 if command -v python3 &> /dev/null; then
-    cd skills/self-evolution-5.0
+    cd skills/self-evolution
     python3 main.py status 2>&1 | grep -E "记忆 | 进化 | 知识库" | sed 's/^/      /' || echo "      ⚠️  需要初始化"
     cd ../..
 fi
@@ -88,10 +91,13 @@ echo "   # 记忆搜索"
 echo "   python3 skills/memory-search/search_sqlite.py \"查询\" --semantic"
 echo ""
 echo "   # 自进化功能"
-echo "   cd skills/self-evolution-5.0 && python3 main.py fractal --limit 10"
+echo "   cd skills/self-evolution && python3 main.py fractal --limit 10"
 echo ""
-echo "   # 自动调优（需要 10+ 条 RAG 数据）"
-echo "   python3 skills/rag/auto_tune.py --report"
+echo "   # 系统统计"
+echo "   python3 scripts/stats.py"
+echo ""
+echo "   # 功能测试"
+echo "   python3 scripts/test_features.py"
 echo ""
 echo "========================================"
 echo "✨ 准备就绪"

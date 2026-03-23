@@ -10,11 +10,12 @@ from pathlib import Path
 
 # 导入 Memory Hub (共享库)
 # 添加 libs 目录到路径
+import sys
 LIBS_DIR = Path(__file__).parent.parent.parent / 'libs'
 sys.path.insert(0, str(LIBS_DIR))
 
 try:
-    from libs.memory_hub import MemoryHub
+    from memory_hub import MemoryHub
     MEMORY_HUB_ENABLED = True
 except ImportError:
     MEMORY_HUB_ENABLED = False
@@ -35,6 +36,10 @@ class SQLiteMemorySearch:
         
         if MEMORY_HUB_ENABLED:
             self.hub = MemoryHub(agent_name)
+            # 验证数据库连接
+            stats = self.hub.stats()
+            if stats.get('total', 0) == 0:
+                print(f"⚠️  警告：{agent_name} 的记忆数据库为空")
         else:
             self.hub = None
     
@@ -89,7 +94,13 @@ class SQLiteMemorySearch:
     def stats(self):
         """获取统计信息"""
         if self.hub:
-            return self.hub.stats()
+            hub_stats = self.hub.stats()
+            # 转换格式以匹配旧接口
+            return {
+                'total': hub_stats.get('total', 0),
+                'by_type': hub_stats.get('by_type', {}),
+                'avg_importance': hub_stats.get('avg_importance', 0)
+            }
         return {'total': 0, 'by_type': {}, 'avg_importance': 0}
     
     def list_all(self, limit=20):
@@ -130,11 +141,15 @@ def main():
     
     # 统计信息
     if args.stats:
-        stats = search.stats()
-        print("📊 记忆统计:")
-        print(f"  总数：{stats.get('total', 0)}")
-        print(f"  按类型：{stats.get('by_type', {})}")
-        print(f"  平均重要性：{stats.get('avg_importance', 0)}")
+        # 直接从 Memory Hub 获取统计
+        if search.hub:
+            stats = search.hub.stats()
+            print("📊 记忆统计:")
+            print(f"  总数：{stats.get('total', 0)}")
+            print(f"  按类型：{stats.get('by_type', {})}")
+            print(f"  平均重要性：{stats.get('avg_importance', 0)}")
+        else:
+            print("⚠️  Memory Hub 不可用")
         return
     
     # 列出所有
