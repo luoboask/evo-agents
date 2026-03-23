@@ -2,7 +2,7 @@
 
 **版本：** v5.1  
 **最后更新：** 2026-03-23  
-**状态：** ✅ RAG 评估系统集成完成
+**状态：** ✅ RAG 评估系统集成完成 · 🔐 配置分离完成
 
 ---
 
@@ -17,7 +17,34 @@ cd /Users/dhr/.openclaw/workspace-ai-baby
 
 # 初始化（第一次使用）
 python3 init.py
+
+# 配置分离（保护个人数据）
+python3 separate_config.py
 ```
+
+---
+
+## 🔐 配置分离
+
+**重要：** 个人数据和敏感信息存储在 Git 忽略的安全位置。
+
+```
+~/.openclaw/workspace-ai-baby-config/   # 个人配置（Git 忽略）
+├── config.yaml                         # 个人配置
+├── credentials.json                    # API 凭证
+├── memory/                             # 数据库
+│   ├── ai-baby_memory_stream.db
+│   └── ai-baby_knowledge_base.db
+└── logs/                               # 日志
+    └── evaluations.jsonl
+
+~/workspace-ai-baby/                    # 代码和文档（可提交 Git）
+├── skills/                             # 技能代码
+├── *.md                                # 文档
+└── *.py                                # 脚本
+```
+
+**详见：** `CONFIG_SEPARATION.md`
 
 ---
 
