@@ -14,12 +14,12 @@ from typing import Dict, List, Optional, Any
 import statistics
 
 # 导入 Memory Hub
-# 添加 skills 目录到路径以支持 memory_hub 导入
+# 添加 skills 目录到路径以支持统一导入
 SKILLS_DIR = Path(__file__).parent.parent
 sys.path.insert(0, str(SKILLS_DIR))
 
 try:
-    from memory_hub import MemoryHub
+    from skills import MemoryHub
     MEMORY_HUB_ENABLED = True
 except ImportError:
     MEMORY_HUB_ENABLED = False

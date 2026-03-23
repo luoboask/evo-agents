@@ -7,11 +7,17 @@ import os
 import sys
 from pathlib import Path
 
-# 添加 skills/memory_hub 到 Python 路径
-sys.path.insert(0, str(Path(__file__).parent.parent / 'skills' / 'memory_hub'))
+# 添加 skills 目录到路径以支持统一导入
+SKILLS_DIR = Path(__file__).parent.parent / 'skills'
+sys.path.insert(0, str(SKILLS_DIR))
 
-# 直接导入 Memory Hub
-from hub import MemoryHub
+# 使用 importlib 导入 memory-hub (带连字符的目录名)
+import importlib.util
+memory_hub_init = SKILLS_DIR / 'memory-hub' / '__init__.py'
+spec = importlib.util.spec_from_file_location('memory_hub', memory_hub_init)
+memory_hub = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(memory_hub)
+MemoryHub = memory_hub.MemoryHub
 
 
 def test_agent(agent_name: str):
