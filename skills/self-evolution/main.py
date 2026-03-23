@@ -43,7 +43,7 @@ def cmd_status(args):
     
     # 显示统计（使用 Memory Hub）
     try:
-        from skills import MemoryHub
+        from libs.memory_hub import MemoryHub
         hub = MemoryHub(agent_name)
         stats = hub.stats()
         print(f"\n🧠 记忆流:")

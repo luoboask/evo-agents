@@ -10,13 +10,13 @@ from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Optional
 
-# 添加 skills 目录到路径以支持统一导入
-SKILLS_DIR = Path(__file__).parent.parent
-sys.path.insert(0, str(SKILLS_DIR))
+# 添加 libs 目录到路径以支持 Memory Hub 导入
+LIBS_DIR = Path(__file__).parent.parent.parent / 'libs'
+sys.path.insert(0, str(LIBS_DIR))
 
-# 导入 Memory Hub
+# 导入 Memory Hub (共享库)
 try:
-    from skills import MemoryHub
+    from libs.memory_hub import MemoryHub
     MEMORY_HUB_ENABLED = True
 except ImportError:
     MEMORY_HUB_ENABLED = False

@@ -7,17 +7,16 @@ import os
 import sys
 from pathlib import Path
 
-# 添加 skills 目录到路径以支持统一导入
-SKILLS_DIR = Path(__file__).parent.parent / 'skills'
-sys.path.insert(0, str(SKILLS_DIR))
+# 添加 workspace 根目录到路径以支持 libs 导入
+WORKSPACE_ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(WORKSPACE_ROOT))
 
-# 使用 importlib 导入 memory-hub (带连字符的目录名)
-import importlib.util
-memory_hub_init = SKILLS_DIR / 'memory-hub' / '__init__.py'
-spec = importlib.util.spec_from_file_location('memory_hub', memory_hub_init)
-memory_hub = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(memory_hub)
-MemoryHub = memory_hub.MemoryHub
+# 使用标准导入 (memory_hub 现在是合法的 Python 包名)
+try:
+    from libs.memory_hub import MemoryHub
+except ImportError as e:
+    print(f"❌ 导入 Memory Hub 失败：{e}")
+    sys.exit(1)
 
 
 def test_agent(agent_name: str):
