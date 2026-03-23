@@ -817,14 +817,10 @@ cd ~/.openclaw/workspace-ai-baby
 
 python3 scripts/create_agent.py baby1 tester --emoji "🧪"
 
-# Step 3: 配置 MCP（如果需要）
-# 编辑 ~/.openclaw/openclaw.json
-# 添加 mcp.servers[]
-
-# Step 4: 验证
+# Step 3: 验证
 openclaw agents list
 
-# Step 5: 测试
+# Step 4: 测试
 openclaw agent baby1 "测试记忆搜索"
 ```
 
@@ -878,10 +874,10 @@ openclaw agent baby3 "测试"
 
 ### Phase 3: 技能优化（待实施 ⏳）
 
-- [ ] 实现 MCP 服务器
-- [ ] 注册所有技能
-- [ ] 测试工具调用
-- [ ] 性能优化
+- [ ] 优化技能性能
+- [ ] 完善技能文档
+- [ ] 测试技能调用
+- [ ] 添加更多工具
 
 **时间：** 2026-04-01 ~ 2026-04-15  
 **优先级：** P1
@@ -995,7 +991,7 @@ openclaw agent baby3 "测试"
 ### 下一步行动
 
 1. **Phase 2** - 实施多 Agent 支持（本周）
-2. **Phase 3** - 技能优化与 MCP 集成（下周）
+2. **Phase 3** - 技能优化（下周）
 3. **Phase 4** - 知识共享机制（下月）
 
 ### 成功标准
