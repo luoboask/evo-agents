@@ -7,8 +7,8 @@ import os
 import sys
 from pathlib import Path
 
-# 添加 skills/memory-hub 到 Python 路径
-sys.path.insert(0, str(Path(__file__).parent.parent / 'skills' / 'memory-hub'))
+# 添加 skills/memory_hub 到 Python 路径
+sys.path.insert(0, str(Path(__file__).parent.parent / 'skills' / 'memory_hub'))
 
 # 直接导入 Memory Hub
 from hub import MemoryHub

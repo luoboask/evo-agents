@@ -5,8 +5,14 @@
 """
 
 import os
+import sys
+from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Optional
+
+# 添加 skills 目录到路径以支持 memory_hub 导入
+SKILLS_DIR = Path(__file__).parent.parent
+sys.path.insert(0, str(SKILLS_DIR))
 
 # 导入 Memory Hub
 try:

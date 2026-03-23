@@ -14,6 +14,10 @@ from typing import Dict, List, Optional, Any
 import statistics
 
 # 导入 Memory Hub
+# 添加 skills 目录到路径以支持 memory_hub 导入
+SKILLS_DIR = Path(__file__).parent.parent
+sys.path.insert(0, str(SKILLS_DIR))
+
 try:
     from memory_hub import MemoryHub
     MEMORY_HUB_ENABLED = True
@@ -23,6 +27,8 @@ except ImportError:
 # 配置
 SKILLS_DIR = Path(__file__).parent
 CONFIG_FILE = SKILLS_DIR / "config.json"
+EVALUATIONS_FILE = SKILLS_DIR / "logs" / "evaluations.jsonl"
+EVALUATIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 
 class RAGEvaluator:
@@ -130,6 +136,22 @@ class RAGEvaluator:
         evaluations = []
         cutoff = datetime.now() - timedelta(days=days)
         
+        # 优先使用 Memory Hub 的评估数据
+        if self.hub and hasattr(self.hub, 'evaluation'):
+            eval_path = self.hub.evaluation.evaluations_path
+            if eval_path.exists():
+                with open(eval_path, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        try:
+                            eval_data = json.loads(line.strip())
+                            eval_time = datetime.fromisoformat(eval_data["timestamp"])
+                            if eval_time >= cutoff:
+                                evaluations.append(eval_data)
+                        except:
+                            continue
+                return evaluations
+        
+        # Fallback: 本地文件
         if not EVALUATIONS_FILE.exists():
             return []
         
