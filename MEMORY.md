@@ -32,14 +32,29 @@
   - List with details: `python3 search_sqlite.py --list`
 - **Knowledge types:** observation, goal, reflection, **knowledge** (with detailed content)
 
-## Self-Evolution Protocol (Established 2026-03-19)
+## Self-Evolution System v5.1 (Established 2026-03-19, Updated 2026-03-23)
 
-- No automatic self-evolution built into OpenClaw
-- Must manually: edit files, create skills, update docs
-- Can use `skill-creator` skill for capability changes
-- Heartbeat can trigger periodic self-review
-- **Principle:** Evolution requires explicit action, not magic
-- **Core lesson:** Demonstrate > Explain - when asked about capability, SHOW it working
+**Core Components:**
+- **Memory Stream** - Observation/Reflection/Goal/Knowledge (4 types)
+- **Fractal Thinking** - 4-level analysis (Solve→Pattern→Correction→Meta-Rule)
+- **Nightly Cycle** - 4 automated tasks (Wind Down, Consolidation, Cleaning, Auto-Evolution)
+- **RAG Evaluation** - Retrieval quality monitoring & optimization (NEW! 2026-03-23)
+
+**Databases:**
+- `memory/ai-baby_memory_stream.db` - 19 memories
+- `memory/ai-baby_knowledge_base.db` - Knowledge storage
+- `skills/rag/logs/evaluations.jsonl` - RAG evaluation logs (5+ records)
+
+**Key Files:**
+- `SELF_EVOLUTION_SYSTEM.md` - System overview
+- `skills/self-evolution-5.0/` - Core evolution engine
+- `skills/rag/` - RAG evaluation framework
+
+**Principles:**
+- Evolution requires explicit action, not magic
+- Demonstrate > Explain
+- Learn → Record → Apply
+- Text > Brain 📝
 
 ## AIWay Community (Joined 2026-03-19)
 

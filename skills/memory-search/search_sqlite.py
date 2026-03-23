@@ -2,14 +2,23 @@
 """
 SQLite 记忆搜索 - 直接查询 ai-baby_memory_stream.db
 支持关键词匹配 + Ollama 向量语义搜索
+集成 RAG 评估记录器
 """
 
 import argparse
 import sqlite3
 import json
 import subprocess
+import time
 from pathlib import Path
 from datetime import datetime
+
+# 导入 RAG 记录器
+try:
+    from ..rag.recorder import start_recording, finish_recording
+    RAG_RECORDING_ENABLED = True
+except ImportError:
+    RAG_RECORDING_ENABLED = False
 
 
 def get_embedding(text):
@@ -49,7 +58,7 @@ class SQLiteMemorySearch:
             db_path = Path("/Users/dhr/.openclaw/workspace-ai-baby/memory/ai-baby_memory_stream.db")
         self.db_path = Path(db_path)
     
-    def search(self, query, top_k=10, memory_type=None, semantic=False):
+    def search(self, query, top_k=10, memory_type=None, semantic=False, record_rag=True):
         """
         搜索记忆
         
@@ -58,8 +67,16 @@ class SQLiteMemorySearch:
             top_k: 返回数量
             memory_type: 过滤类型 (observation/goal/reflection/etc)
             semantic: 是否使用向量语义搜索 (需要 Ollama)
+            record_rag: 是否记录 RAG 评估指标
         """
+        # 开始 RAG 记录
+        if record_rag and RAG_RECORDING_ENABLED:
+            start_recording(query)
+            start_time = time.time()
+        
         if not self.db_path.exists():
+            if record_rag and RAG_RECORDING_ENABLED:
+                finish_recording(retrieved_count=0, latency_ms=0, used_in_response=False)
             return []
         
         conn = sqlite3.connect(self.db_path)
@@ -111,6 +128,19 @@ class SQLiteMemorySearch:
                     conn.commit()
                 
                 conn.close()
+                
+                # 完成 RAG 记录
+                if record_rag and RAG_RECORDING_ENABLED:
+                    latency_ms = (time.time() - start_time) * 1000
+                    max_similarity = max((r.get('score', 0) for r in final_results), default=0)
+                    finish_recording(
+                        retrieved_count=len(final_results),
+                        latency_ms=latency_ms,
+                        similarity_score=max_similarity,
+                        used_in_response=len(final_results) > 0,
+                        top_k=top_k
+                    )
+                
                 return final_results
         
         # 关键词匹配 (fallback)
@@ -135,6 +165,19 @@ class SQLiteMemorySearch:
             conn.commit()
         
         conn.close()
+        
+        # 完成 RAG 记录
+        if record_rag and RAG_RECORDING_ENABLED:
+            latency_ms = (time.time() - start_time) * 1000
+            max_score = max((r.get('score', 0) for r in final_results), default=0)
+            finish_recording(
+                retrieved_count=len(final_results),
+                latency_ms=latency_ms,
+                similarity_score=max_score if semantic else None,
+                used_in_response=len(final_results) > 0,
+                top_k=top_k
+            )
+        
         return final_results
     
     def add(self, content, memory_type='observation', importance=5.0, tags=None, with_embedding=False, details=None, source_url=None):
@@ -247,6 +290,7 @@ def main():
     parser.add_argument('--with-embedding', action='store_true', help='添加时生成向量嵌入')
     parser.add_argument('--details', '-d', help='知识详情 (长文本或 JSON)')
     parser.add_argument('--source', help='来源 URL')
+    parser.add_argument('--no-record', action='store_true', help='禁用 RAG 评估记录')
     
     args = parser.parse_args()
     search = SQLiteMemorySearch()
@@ -314,9 +358,10 @@ def main():
     
     # 搜索
     if args.query:
-        results = search.search(args.query, args.limit, semantic=args.semantic)
+        results = search.search(args.query, args.limit, semantic=args.semantic, record_rag=not args.no_record)
         mode = " (向量语义)" if args.semantic else ""
-        print(f"🔍 搜索：{args.query}{mode}\n")
+        rag_status = "[RAG 记录：OFF]" if args.no_record else "[RAG 记录：ON]"
+        print(f"🔍 搜索：{args.query}{mode} {rag_status}\n")
         if not results:
             print("  未找到相关记忆")
         else:

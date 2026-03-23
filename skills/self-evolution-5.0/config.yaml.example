@@ -1,0 +1,46 @@
+# 自进化系统 v5.0 配置文件
+
+# 你的工作目录（必填）
+# 数据库和记忆文件将创建在此目录下
+workspace: /your/path/to/workspace
+
+# Ollama 配置（可选）
+# 用于更好的语义 Embedding，如不配置会自动降级到 TF-IDF
+ollama:
+  enabled: false
+  url: http://localhost:11434
+  model: nomic-embed-text
+
+# 记忆压缩配置
+memory:
+  # 多少天后的记忆可以被压缩
+  compress_after_days: 7
+  # 重要性高于此值的记忆不会被压缩
+  keep_high_importance: 7.0
+  # 目标压缩率（0.49 = 压缩到原来的 49%）
+  target_compression_rate: 0.49
+
+# 模式识别阈值
+patterns:
+  # 重复 Bug 判定阈值（出现多少次算重复）
+  recurring_bug_threshold: 2
+  # 功能膨胀判定阈值
+  feature_bloat_threshold: 3
+  # 最小语义相似度（0-1 之间）
+  min_similarity: 0.35
+
+# 夜间循环配置
+nightly:
+  # 是否启用夜间循环
+  enabled: true
+  # 保留最近多少个学习文件
+  max_learning_files: 30
+  # 日志文件最大大小（MB）
+  max_log_size_mb: 100
+
+# 分形思考配置
+fractal:
+  # 每次分析的事件数量
+  default_limit: 10
+  # 是否生成详细报告
+  verbose_report: true
