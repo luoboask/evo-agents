@@ -23,13 +23,44 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict
 
 sys.path.insert(0, str(Path(__file__).parent))
-sys.path.insert(0, str(Path(__file__).parent.parent / 'memory-search'))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'libs'))
 
 from memory_stream import MemoryStream
 from self_evolution_real import RealSelfEvolution
 
-# 复用 memory-search 的 Ollama embedding
-from semantic_search import get_embedding as ollama_embed, cosine_similarity
+# 使用 Ollama API 直接获取 embedding
+import urllib.request
+import json as json_lib
+
+def get_embedding(text):
+    """获取 Ollama embedding"""
+    try:
+        payload = {
+            "model": "nomic-embed-text",
+            "prompt": text
+        }
+        req = urllib.request.Request(
+            'http://localhost:11434/api/embeddings',
+            data=json_lib.dumps(payload).encode('utf-8'),
+            headers={'Content-Type': 'application/json'}
+        )
+        response = urllib.request.urlopen(req, timeout=10)
+        data = json_lib.loads(response.read().decode())
+        return data.get('embedding', [])
+    except Exception as e:
+        print(f"⚠️  Embedding 失败：{e}")
+        return []
+
+def cosine_similarity(a, b):
+    """计算余弦相似度"""
+    if not a or not b:
+        return 0.0
+    dot_product = sum(x * y for x, y in zip(a, b))
+    norm_a = math.sqrt(sum(x * x for x in a))
+    norm_b = math.sqrt(sum(x * x for x in b))
+    if norm_a == 0 or norm_b == 0:
+        return 0.0
+    return dot_product / (norm_a * norm_b)
 
 
 @dataclass
