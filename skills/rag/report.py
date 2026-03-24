@@ -9,7 +9,9 @@ from pathlib import Path
 from datetime import datetime, timedelta
 
 SKILLS_DIR = Path(__file__).parent
-LOGS_DIR = SKILLS_DIR / "logs"
+# 使用统一路径：data/ai-baby/logs/evaluations.jsonl
+DATA_DIR = SKILLS_DIR.parent.parent / "data" / "ai-baby"
+LOGS_DIR = DATA_DIR / "logs"
 EVALUATIONS_FILE = LOGS_DIR / "evaluations.jsonl"
 
 def generate_report(days=7):
@@ -40,6 +42,11 @@ def generate_report(days=7):
         feedback[fb] = feedback.get(fb, 0) + 1
         latencies.append(e.get('latency_ms', 0))
         retrieved_counts.append(e.get('retrieved_count', 0))
+    
+    # 处理空数据情况
+    if total == 0:
+        print("⚠️ 没有评估数据，无法生成报告")
+        return None
     
     # 生成 HTML
     html = f"""

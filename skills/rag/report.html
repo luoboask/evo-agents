@@ -22,7 +22,7 @@
 <body>
     <div class="container">
         <h1>📊 RAG 评估报告</h1>
-        <p>周期：过去 7 天 | 生成时间：2026-03-24 02:41:28</p>
+        <p>周期：过去 7 天 | 生成时间：2026-03-24 02:43:54</p>
         
         <h2>核心指标</h2>
         <div class="metrics">
@@ -70,6 +70,13 @@
             <tr><td>平均检索数</td><td>3.6条</td></tr>
             <tr><td>零结果率</td><td class="warning">13.3%</td></tr>
         </table>
+        
+        <h2>💡 优化建议</h2>
+        <ul>
+            <li class="warning">零结果率：13.3% - 建议降低相似度阈值</li>
+            <li class="warning">Precision@5: 63.3% - 建议调整 top_k 参数</li>
+            <li class="good">用户满意度：83.3% - 优秀</li>
+        </ul>
     </div>
 </body>
 </html>

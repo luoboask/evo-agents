@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 存储管理器 - 负责数据库操作
+支持关键词搜索 + Ollama 语义搜索
 """
 
 from pathlib import Path
 import sqlite3
 import json
+import urllib.request
 from typing import List, Dict, Optional
 
 
@@ -200,16 +202,102 @@ class StorageManager:
             'avg_importance': round(avg_importance, 2)
         }
     
+    def _get_embedding(self, text: str) -> List[float]:
+        """获取 Ollama embedding"""
+        try:
+            payload = {
+                "model": "nomic-embed-text",
+                "prompt": text
+            }
+            req = urllib.request.Request(
+                'http://localhost:11434/api/embeddings',
+                data=json.dumps(payload).encode('utf-8'),
+                headers={'Content-Type': 'application/json'}
+            )
+            response = urllib.request.urlopen(req, timeout=10)
+            data = json.loads(response.read().decode())
+            return data.get('embedding', [])
+        except Exception as e:
+            print(f"⚠️  Ollama Embedding 失败：{e}")
+            return []
+    
+    def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
+        """计算余弦相似度"""
+        if not vec1 or not vec2 or len(vec1) != len(vec2):
+            return 0.0
+        
+        dot_product = sum(a * b for a, b in zip(vec1, vec2))
+        norm1 = sum(a * a for a in vec1) ** 0.5
+        norm2 = sum(b * b for b in vec2) ** 0.5
+        
+        if norm1 == 0 or norm2 == 0:
+            return 0.0
+        
+        return dot_product / (norm1 * norm2)
+    
     def _semantic_search(self, query: str, candidates: List[Dict]) -> List[Dict]:
-        """语义搜索（简化版）"""
-        # TODO: 集成 Ollama 语义搜索
-        # 目前返回关键词匹配结果
-        query_lower = query.lower()
+        """
+        语义搜索 - 使用 Ollama embedding + 余弦相似度
+        
+        Args:
+            query: 查询文本
+            candidates: 候选记忆列表
+        
+        Returns:
+            按相似度排序的结果
+        """
+        if not candidates:
+            return []
+        
+        # 获取查询的 embedding
+        query_embedding = self._get_embedding(query)
+        if not query_embedding:
+            # Ollama 不可用，降级到关键词匹配
+            query_lower = query.lower()
+            return [c for c in candidates if query_lower in c.get('content', '').lower()]
+        
+        # 计算每个候选的相似度
         results = []
-        
         for candidate in candidates:
-            content = candidate.get('content', '').lower()
-            if query_lower in content:
-                results.append(candidate)
+            content = candidate.get('content', '')
+            
+            # 尝试使用缓存的 embedding
+            embedding_str = candidate.get('embedding', '[]')
+            if isinstance(embedding_str, str):
+                try:
+                    candidate_embedding = json.loads(embedding_str)
+                except:
+                    candidate_embedding = []
+            else:
+                candidate_embedding = embedding_str
+            
+            # 如果没有缓存，实时计算并缓存
+            if not candidate_embedding:
+                candidate_embedding = self._get_embedding(content)
+                if candidate_embedding:
+                    self._cache_embedding(candidate['id'], candidate_embedding)
+            
+            # 计算相似度
+            similarity = self._cosine_similarity(query_embedding, candidate_embedding)
+            candidate_with_score = {**candidate, 'similarity_score': similarity}
+            results.append(candidate_with_score)
         
-        return results if results else candidates
+        # 按相似度排序
+        results.sort(key=lambda x: x.get('similarity_score', 0), reverse=True)
+        
+        return results
+    
+    def _cache_embedding(self, memory_id: int, embedding: List[float]):
+        """缓存 embedding 到数据库"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cur = conn.cursor()
+            cur.execute('''
+                UPDATE memories
+                SET embedding = ?
+                WHERE id = ?
+            ''', (json.dumps(embedding), memory_id))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"⚠️  缓存 embedding 失败：{e}")

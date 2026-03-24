@@ -1,7 +1,20 @@
 {
-  "top_k_options": [3, 5, 10],
-  "similarity_thresholds": [0.6, 0.7, 0.8],
-  "chunk_sizes": [256, 512, 1024],
+  "top_k_options": [
+    3,
+    5,
+    7,
+    10
+  ],
+  "similarity_thresholds": [
+    0.6,
+    0.7,
+    0.8
+  ],
+  "chunk_sizes": [
+    256,
+    512,
+    1024
+  ],
   "weights": {
     "accuracy": 0.6,
     "latency": 0.3,
@@ -9,7 +22,7 @@
   },
   "current_config": {
     "top_k": 5,
-    "similarity_threshold": 0.7,
+    "similarity_threshold": 0.6,
     "chunk_size": 512
   },
   "experiment_mode": false,

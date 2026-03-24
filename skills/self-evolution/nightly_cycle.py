@@ -196,14 +196,13 @@ class NightlyEvolutionCycle:
         print("\n📊 分析记忆状态...")
         
         stats = self.memory_stream.get_stats()
-        total = stats['total_memories']
+        total = stats.get('total', 0)
         print(f"   当前记忆总数：{total}")
         
         # 获取所有观察记忆
-        all_observations = self.memory_stream.get_memories(
-            memory_type='observation',
-            limit=1000
-        )
+        all_observations = self.memory_stream.list_memories(limit=1000)
+        # 过滤出 observation 类型
+        all_observations = [m for m in all_observations if m.get('type') == 'observation']
         
         # 分类：保留 vs 压缩
         to_keep = []
@@ -390,10 +389,10 @@ class NightlyEvolutionCycle:
         memory_stats = self.memory_stream.get_stats()
         
         # 检查反思比例
-        reflection_ratio = (
-            memory_stats['by_type'].get('reflection', {}).get('count', 0) /
-            max(1, memory_stats['total_memories'])
-        )
+        total = memory_stats.get('total', 1)
+        by_type = memory_stats.get('by_type', {})
+        reflection_count = by_type.get('reflection', 0) if isinstance(by_type.get('reflection'), int) else by_type.get('reflection', {}).get('count', 0)
+        reflection_ratio = reflection_count / max(1, total)
         
         if reflection_ratio < 0.2:
             improvements.append({
@@ -403,8 +402,9 @@ class NightlyEvolutionCycle:
             })
         
         # 3. 检查学习目标
-        goals = self.memory_stream.get_memories(memory_type='goal', limit=10)
-        completed_goals = [g for g in goals if '完成' in g.content]
+        all_memories = self.memory_stream.list_memories(limit=100)
+        goals = [m for m in all_memories if m.get('type') == 'goal'][:10]
+        completed_goals = [g for g in goals if '完成' in g.get('content', '')]
         
         if len(goals) > 5 and len(completed_goals) < 2:
             improvements.append({
