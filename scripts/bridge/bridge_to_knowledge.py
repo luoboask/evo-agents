@@ -66,9 +66,17 @@ def ensure_db(db_path: Path):
     conn.close()
 
 
+def normalize_content(content: str) -> str:
+    """标准化内容，去掉装饰性前缀，用于去重比较"""
+    s = content.strip()
+    # 去掉 ⭐ ❌ ✅ 等 emoji 前缀
+    s = re.sub(r'^[⭐❌✅❗🔨📌📚💭☐🎯📝\s]+', '', s)
+    return s.strip()
+
+
 def content_hash(content: str) -> str:
-    """生成内容哈希，用于去重"""
-    return hashlib.md5(content.strip().encode("utf-8")).hexdigest()
+    """生成内容哈希，用于去重（标准化后再 hash）"""
+    return hashlib.md5(normalize_content(content).encode("utf-8")).hexdigest()
 
 
 def get_existing_hashes(db_path: Path) -> set:

@@ -182,7 +182,12 @@ def sync_to_markdown(agent_name: str, since: str) -> dict:
             # 去重：检查文件中是否已有相同内容
             filepath = MEMORY_DIR / f"{date_str}.md"
             existing = filepath.read_text(encoding="utf-8") if filepath.exists() else ""
-            new_entries = [e for e in entries if e.lstrip("- ⭐ ").strip() not in existing]
+            # 标准化去重：去掉 emoji 装饰后比较核心内容
+            def normalize(s):
+                s = re.sub(r'^[-\s⭐❌✅❗🔨📌📚💭☐🎯📝]+', '', s)
+                return s.strip()
+            existing_normalized = normalize(existing)
+            new_entries = [e for e in entries if normalize(e) not in existing_normalized]
             if new_entries:
                 append_to_daily(date_str, section_name, new_entries)
                 print(f"  📝 {date_str} [{section_name}]: +{len(new_entries)} 条")

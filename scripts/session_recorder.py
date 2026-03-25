@@ -40,8 +40,10 @@ def get_today_file() -> Path:
 def ensure_daily_file(filepath: Path) -> str:
     if filepath.exists():
         return filepath.read_text(encoding="utf-8")
-    today = datetime.now()
-    header = f"# {today.strftime('%Y-%m-%d')} - 会话记录\n\n"
+    # 从文件名提取日期，而不是用当前时间
+    match = re.search(r"(\d{4}-\d{2}-\d{2})", filepath.name)
+    date_str = match.group(1) if match else datetime.now().strftime("%Y-%m-%d")
+    header = f"# {date_str} - 会话记录\n\n"
     filepath.parent.mkdir(parents=True, exist_ok=True)
     filepath.write_text(header, encoding="utf-8")
     return header
