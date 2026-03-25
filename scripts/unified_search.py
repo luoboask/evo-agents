@@ -2,25 +2,30 @@
 """
 unified_search.py - 统一搜索
 
-同时搜索 markdown 文件和 SQLite 知识系统，合并结果。
+同时搜索 markdown 文件、SQLite 知识系统和语义向量索引。
 
 用法:
     python3 scripts/unified_search.py '关键词'
+    python3 scripts/unified_search.py '如何改进记忆系统' --semantic
     python3 scripts/unified_search.py '记忆系统' --limit 5
-    python3 scripts/unified_search.py '改造' --source all
-    python3 scripts/unified_search.py '知识' --source knowledge  # 只搜 SQLite
-    python3 scripts/unified_search.py '知识' --source markdown   # 只搜文件
+    python3 scripts/unified_search.py '知识' --source knowledge --agent demo-agent
+    python3 scripts/unified_search.py '知识' --source markdown
 """
 
 import argparse
 import json
+import math
 import sqlite3
-import sys
+import struct
+import subprocess
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 WORKSPACE = Path(__file__).resolve().parent.parent
 MEMORY_DIR = WORKSPACE / "memory"
+INDEX_DB = WORKSPACE / "data" / "index" / "memory_index.db"
+OLLAMA_URL = "http://localhost:11434/api/embeddings"
+EMBED_MODEL = "nomic-embed-text"
 
 
 def search_markdown(query: str, limit: int = 10) -> List[Dict]:
@@ -28,12 +33,9 @@ def search_markdown(query: str, limit: int = 10) -> List[Dict]:
     results = []
     search_paths = []
 
-    # MEMORY.md
     memory_md = WORKSPACE / "MEMORY.md"
     if memory_md.exists():
         search_paths.append(memory_md)
-
-    # memory/ 下所有 md
     if MEMORY_DIR.exists():
         search_paths.extend(sorted(MEMORY_DIR.rglob("*.md")))
 
@@ -53,6 +55,7 @@ def search_markdown(query: str, limit: int = 10) -> List[Dict]:
                         "path": rel_path,
                         "line": i,
                         "content": context[:200],
+                        "score": 1.0,
                     })
                     if len(results) >= limit:
                         return results
@@ -71,7 +74,6 @@ def search_knowledge(query: str, agent_name: str = "demo-agent",
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
     try:
-        # 用 LIKE 做模糊搜索
         rows = conn.execute("""
             SELECT id, content, memory_type, importance, created_at
             FROM memories
@@ -80,75 +82,171 @@ def search_knowledge(query: str, agent_name: str = "demo-agent",
             LIMIT ?
         """, (f"%{query}%", limit)).fetchall()
 
-        results = []
-        for row in rows:
-            results.append({
-                "source": "knowledge",
-                "id": row["id"],
-                "content": row["content"][:200],
-                "type": row["memory_type"],
-                "importance": row["importance"],
-                "date": str(row["created_at"])[:10],
-            })
-        return results
+        return [{
+            "source": "knowledge",
+            "id": row["id"],
+            "content": row["content"][:200],
+            "type": row["memory_type"],
+            "importance": row["importance"],
+            "date": str(row["created_at"])[:10],
+            "score": row["importance"] / 10.0,
+        } for row in rows]
     except Exception:
         return []
     finally:
         conn.close()
 
 
-def format_results(md_results: List[Dict], kb_results: List[Dict]) -> str:
-    lines = []
+def get_embedding(text: str) -> Optional[List[float]]:
+    """使用 Ollama 生成嵌入向量"""
+    try:
+        result = subprocess.run(
+            ["curl", "-s", OLLAMA_URL,
+             "-H", "Content-Type: application/json",
+             "-d", json.dumps({"model": EMBED_MODEL, "prompt": text[:500]})],
+            capture_output=True, text=True, timeout=30
+        )
+        if result.returncode == 0:
+            data = json.loads(result.stdout)
+            if "embedding" in data:
+                return data["embedding"]
+    except Exception:
+        pass
+    return None
 
-    if md_results:
-        lines.append(f"📂 Markdown 结果 ({len(md_results)} 条)")
+
+def cosine_similarity(a: List[float], b: List[float]) -> float:
+    dot = sum(x * y for x, y in zip(a, b))
+    norm_a = math.sqrt(sum(x * x for x in a))
+    norm_b = math.sqrt(sum(x * x for x in b))
+    if norm_a == 0 or norm_b == 0:
+        return 0.0
+    return dot / (norm_a * norm_b)
+
+
+def search_semantic(query: str, limit: int = 10) -> List[Dict]:
+    """语义搜索（需要 Ollama + 已建索引的向量）"""
+    if not INDEX_DB.exists():
+        print("  ⚠️  索引不存在，请先运行: python3 scripts/memory_indexer.py --full --embed")
+        return []
+
+    query_vec = get_embedding(query)
+    if not query_vec:
+        print("  ⚠️  Ollama 不可用，退回关键词搜索")
+        return search_markdown(query, limit)
+
+    conn = sqlite3.connect(str(INDEX_DB))
+    conn.row_factory = sqlite3.Row
+
+    try:
+        rows = conn.execute("""
+            SELECT d.id, d.path, d.line_start, d.line_end, d.content, d.type, d.date,
+                   e.vector
+            FROM embeddings e
+            JOIN documents d ON d.id = e.doc_id
+        """).fetchall()
+
+        if not rows:
+            print("  ⚠️  没有语义向量，请运行: python3 scripts/memory_indexer.py --full --embed")
+            return search_markdown(query, limit)
+
+        scored = []
+        for row in rows:
+            vec_bytes = row["vector"]
+            dim = len(vec_bytes) // 4
+            doc_vec = list(struct.unpack(f"{dim}f", vec_bytes))
+            sim = cosine_similarity(query_vec, doc_vec)
+            scored.append((sim, row))
+
+        scored.sort(key=lambda x: x[0], reverse=True)
+
+        results = []
+        for sim, row in scored[:limit]:
+            results.append({
+                "source": "semantic",
+                "path": row["path"],
+                "line": row["line_start"],
+                "content": row["content"][:200],
+                "type": row["type"],
+                "date": row["date"],
+                "score": round(sim, 4),
+            })
+        return results
+    finally:
+        conn.close()
+
+
+def format_results(results: List[Dict]) -> str:
+    if not results:
+        return "没有找到匹配结果。"
+
+    lines = []
+    # 按 source 分组
+    by_source = {}
+    for r in results:
+        src = r["source"]
+        if src not in by_source:
+            by_source[src] = []
+        by_source[src].append(r)
+
+    source_labels = {
+        "markdown": "📂 Markdown",
+        "knowledge": "🧠 知识系统",
+        "semantic": "🔮 语义搜索",
+    }
+
+    for src, items in by_source.items():
+        label = source_labels.get(src, src)
+        lines.append(f"{label} ({len(items)} 条)")
         lines.append("-" * 40)
-        for i, r in enumerate(md_results, 1):
-            lines.append(f"  [{i}] {r['path']}:{r['line']}")
+        for i, r in enumerate(items, 1):
+            header = f"  [{i}]"
+            if r.get("path"):
+                header += f" {r['path']}:{r.get('line', '?')}"
+            if r.get("type") and r["type"] != "unknown":
+                header += f" [{r['type']}]"
+            if r.get("importance"):
+                header += f" ★{r['importance']}"
+            if r.get("date"):
+                header += f" ({r['date']})"
+            header += f"  score={r.get('score', '-')}"
+
             content = r["content"].replace("\n", "\n      ")
+            lines.append(header)
             lines.append(f"      {content}")
             lines.append("")
-
-    if kb_results:
-        lines.append(f"🧠 知识系统结果 ({len(kb_results)} 条)")
-        lines.append("-" * 40)
-        for i, r in enumerate(kb_results, 1):
-            meta = f"[{r['type']}] ★{r['importance']}"
-            if r.get("date"):
-                meta += f" ({r['date']})"
-            lines.append(f"  [{i}] {meta}")
-            lines.append(f"      {r['content']}")
-            lines.append("")
-
-    if not md_results and not kb_results:
-        lines.append("没有找到匹配结果。")
 
     return "\n".join(lines)
 
 
 def main():
     parser = argparse.ArgumentParser(description="统一记忆搜索")
-    parser.add_argument("query", help="搜索关键词")
+    parser.add_argument("query", help="搜索关键词或自然语言查询")
+    parser.add_argument("--semantic", action="store_true",
+                        help="使用语义搜索（需要 Ollama + 向量索引）")
     parser.add_argument("--limit", "-n", type=int, default=10)
-    parser.add_argument("--source", choices=["all", "markdown", "knowledge"],
+    parser.add_argument("--source", choices=["all", "markdown", "knowledge", "semantic"],
                         default="all", help="搜索范围")
     parser.add_argument("--agent", default="demo-agent")
     args = parser.parse_args()
 
-    print(f"🔍 搜索: \"{args.query}\" (范围: {args.source})\n")
+    mode = "语义" if (args.semantic or args.source == "semantic") else "关键词"
+    print(f"🔍 搜索: \"{args.query}\" (模式: {mode}, 范围: {args.source})\n")
 
-    md_results = []
-    kb_results = []
+    all_results = []
 
-    if args.source in ("all", "markdown"):
-        md_results = search_markdown(args.query, args.limit)
+    if args.semantic or args.source == "semantic":
+        # 语义搜索模式
+        print("🔮 语义搜索中...")
+        all_results.extend(search_semantic(args.query, args.limit))
+    else:
+        if args.source in ("all", "markdown"):
+            all_results.extend(search_markdown(args.query, args.limit))
+        if args.source in ("all", "knowledge"):
+            all_results.extend(search_knowledge(args.query, args.agent, args.limit))
 
-    if args.source in ("all", "knowledge"):
-        kb_results = search_knowledge(args.query, args.agent, args.limit)
-
-    total = len(md_results) + len(kb_results)
-    print(f"找到 {total} 条结果:\n")
-    print(format_results(md_results, kb_results))
+    print(f"找到 {len(all_results)} 条结果:\n")
+    print(format_results(all_results))
 
 
 if __name__ == "__main__":
