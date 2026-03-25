@@ -10,20 +10,57 @@
 >
 > Markdown as primary source. SQLite as search index. Bidirectional sync. Semantic search. Zero external API keys required.
 
+**⚠️ This is a Workspace Template, not a Skill.** For SubAgent/Skill installation, use [unified-memory-skill](https://github.com/luoboask/unified-memory-skill) instead.
+
 **Unified Memory System** bridges OpenClaw's native Markdown memory with a high-performance SQLite backend, enabling semantic search, automatic compression, and concurrent-safe multi-session operation — all running locally with Ollama.
 
-## 🚀 Quick Start
+## 🚀 Installation
+
+### Option 1: One-Click Install (Recommended)
 
 ```bash
-# One-line install
 curl -s https://raw.githubusercontent.com/luoboask/evo-agents/test-agents/init-agent.sh | bash -s my-agent
+```
 
-# Or manually
+This will:
+1. Clone the template to `~/.openclaw/workspace-my-agent`
+2. Create directory structure
+3. Register the agent with OpenClaw
+4. Run a quick test
+
+### Option 2: Manual Install
+
+```bash
+# 1. Clone the template
 git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
+
+# 2. Create directory structure
 cd ~/.openclaw/workspace-my-agent
+mkdir -p memory/weekly memory/monthly memory/archive data/index
+
+# 3. Register with OpenClaw
+openclaw agents add my-agent --workspace $(pwd) --non-interactive
+
+# 4. Test
 python3 scripts/session_recorder.py -t event -c 'Hello world'
 python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
 ```
+
+## ❌ Not for SubAgent/Skill Use
+
+This repository is a **complete Workspace Template** that includes:
+- Agent lifecycle files (AGENTS.md, SOUL.md, MEMORY.md, USER.md)
+- Multiple integrated skills (self-evolution, rag, websearch)
+- Full directory structure for agent runtime
+
+**For SubAgent or Skill-only installation**, use the lightweight skill repository instead:
+
+```bash
+cd ~/.openclaw/workspace/skills
+git clone https://github.com/luoboask/unified-memory-skill.git unified-memory
+```
+
+See [unified-memory-skill](https://github.com/luoboask/unified-memory-skill) for SubAgent/Skill usage.
 
 ## ✨ Why This?
 

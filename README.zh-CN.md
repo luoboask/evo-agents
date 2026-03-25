@@ -10,20 +10,57 @@
 >
 > Markdown 为主数据源。SQLite 为搜索索引。双向同步。语义搜索。无需外部 API Key。
 
+**⚠️ 这是 Workspace 模板，不是 Skill。** 如需 SubAgent/Skill 安装，请使用 [unified-memory-skill](https://github.com/luoboask/unified-memory-skill)。
+
 **统一记忆系统**将 OpenClaw 原生 Markdown 记忆与高性能 SQLite 后端桥接，实现语义搜索、自动压缩、并发安全的多会话操作——全部本地运行，只需 Ollama。
 
-## 🚀 快速开始
+## 🚀 安装
+
+### 方式一：一键安装（推荐）
 
 ```bash
-# 一行命令安装
 curl -s https://raw.githubusercontent.com/luoboask/evo-agents/test-agents/init-agent.sh | bash -s my-agent
+```
 
-# 或手动安装
+这将自动完成：
+1. 克隆模板到 `~/.openclaw/workspace-my-agent`
+2. 创建目录结构
+3. 注册 OpenClaw agent
+4. 运行快速测试
+
+### 方式二：手动安装
+
+```bash
+# 1. 克隆模板
 git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
+
+# 2. 创建目录结构
 cd ~/.openclaw/workspace-my-agent
+mkdir -p memory/weekly memory/monthly memory/archive data/index
+
+# 3. 注册 OpenClaw agent
+openclaw agents add my-agent --workspace $(pwd) --non-interactive
+
+# 4. 测试
 python3 scripts/session_recorder.py -t event -c 'Hello world'
 python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
 ```
+
+## ❌ 不适合 SubAgent/Skill 使用
+
+本仓库是**完整的 Workspace 模板**，包含：
+- Agent 生命周期文件（AGENTS.md, SOUL.md, MEMORY.md, USER.md）
+- 多个集成的技能（self-evolution, rag, websearch）
+- Agent 运行时的完整目录结构
+
+**如需 SubAgent 或纯 Skill 安装**，请使用轻量级的 Skill 仓库：
+
+```bash
+cd ~/.openclaw/workspace/skills
+git clone https://github.com/luoboask/unified-memory-skill.git unified-memory
+```
+
+SubAgent/Skill 用法详见 [unified-memory-skill](https://github.com/luoboask/unified-memory-skill)。
 
 ## ✨ 为什么需要这个？
 
