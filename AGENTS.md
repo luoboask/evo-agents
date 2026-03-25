@@ -26,6 +26,48 @@ You wake up fresh each session. These files are your continuity:
 
 Capture what matters. Decisions, context, things to remember. Skip the secrets unless asked to keep them.
 
+### 🔄 双系统架构
+
+本 workspace 有两套记忆系统，通过桥接互通：
+
+```
+OpenClaw (markdown)  ←桥→  知识系统 (SQLite + skills)
+  MEMORY.md                  libs/memory_hub/
+  memory/*.md                skills/self-evolution/
+                             skills/memory-search/
+                             data/<agent>/memory/memory_stream.db
+```
+
+**桥接脚本（scripts/bridge/）：**
+```bash
+# 双向同步（推荐）
+python3 scripts/bridge/bridge_sync.py --agent demo-agent
+
+# 知识系统 → markdown（让 OpenClaw 看到知识系统的洞察）
+python3 scripts/bridge/bridge_to_markdown.py --agent demo-agent
+
+# markdown → 知识系统（让知识系统检索对话记录）
+python3 scripts/bridge/bridge_to_knowledge.py --agent demo-agent
+```
+
+**记录对话事件：**
+```bash
+python3 scripts/session_recorder.py --type event --content '做了什么'
+python3 scripts/session_recorder.py --type decision --content '决定了什么'
+python3 scripts/session_recorder.py --type learning --content '学到了什么'
+```
+
+**统一搜索（同时搜两个系统）：**
+```bash
+python3 scripts/unified_search.py '关键词'
+python3 scripts/unified_search.py '关键词' --source knowledge  # 只搜知识系统
+python3 scripts/unified_search.py '关键词' --source markdown   # 只搜文件
+```
+
+**Session 结束时必做：**
+1. 用 session_recorder 记录关键事件
+2. 运行 bridge_sync 同步两个系统
+
 ### 🧠 MEMORY.md - Your Long-Term Memory
 
 - **ONLY load in main session** (direct chats with your human)
