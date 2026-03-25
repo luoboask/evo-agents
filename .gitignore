@@ -1,6 +1,6 @@
 # =============================================================================
-# evo-agents - .gitignore
-# 目的：保护个人信息和敏感数据，只提交代码和文档
+# Unified Memory System - .gitignore
+# Purpose: Protect personal data and runtime files
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -16,7 +16,7 @@ __pycache__/
 dist/
 build/
 
-# 虚拟环境
+# Virtual environments
 env/
 venv/
 ENV/
@@ -31,10 +31,59 @@ ENV/
 .DS_Store
 
 # -----------------------------------------------------------------------------
-# ⚠️  个人配置文件（敏感 - 不包含在 Git 中）
+# ⚠️  Runtime Data (per-agent, do not commit)
 # -----------------------------------------------------------------------------
 
-# 配置和凭证
+# Agent data directories
+data/*/
+!data/.gitkeep
+
+# Search indexes
+data/index/
+
+# Lock files
+data/.locks/
+
+# OpenClaw runtime
+.openclaw/
+.agent-runtime/
+
+# Daily memory files (agent-specific)
+memory/????-??-??.md
+memory/weekly/
+memory/monthly/
+memory/archive/
+memory/knowledge/
+
+# Knowledge JSON (agent learned)
+public/ai/
+public/architecture/
+public/coding/
+public/data/
+public/devops/
+public/ml/
+public/web_learning/
+public/operations/
+public/prompt/
+public/rag/
+public/security/
+public/tutorial/
+public/openclaw/
+
+# Optimization logs
+OPTIMIZATION_*.md
+
+# Bridge sync state
+.bridge_sync.json
+
+# Local backups
+*.local
+*.bak
+
+# -----------------------------------------------------------------------------
+# ⚠️  Personal Config (sensitive - not in Git)
+# -----------------------------------------------------------------------------
+
 config.yaml
 config.local.yaml
 credentials.json
@@ -42,36 +91,35 @@ user_profile.json
 *.secret
 *.secrets
 
-# 数据库文件（包含个人记忆和知识）
+# Databases (personal memory & knowledge)
 *.db
 *.sqlite
 *.sqlite3
 
-# 日志文件（包含个人使用记录）
+# Logs (personal usage)
 *.log
 *.jsonl
 logs/
 log/
 
-# 学习记录（个人数据）
+# Learning records
 memory/learning/
 memory/realtime_learning_*.jsonl
 
 # -----------------------------------------------------------------------------
-# 外部配置目录（整个目录在 Git 外）
+# External Config Directories
 # -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
-# 临时文件
+# Temp Files
 # -----------------------------------------------------------------------------
 tmp/
 temp/
 *.tmp
-*.bak
 *.cache
 
 # -----------------------------------------------------------------------------
-# 测试和覆盖率
+# Testing
 # -----------------------------------------------------------------------------
 .coverage
 htmlcov/
@@ -79,14 +127,12 @@ htmlcov/
 .tox/
 
 # -----------------------------------------------------------------------------
-# 文档构建
+# Documentation Build
 # -----------------------------------------------------------------------------
 docs/_build/
 site/
 
 # -----------------------------------------------------------------------------
-# 注意事项
+# Lock files from scripts
 # -----------------------------------------------------------------------------
-# 1. 提交前请运行：git status 检查是否有敏感文件
-# 2. 公开模板保持在 Git 中（如 config.yaml.example）
 *.lock
