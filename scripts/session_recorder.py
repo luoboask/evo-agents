@@ -3,17 +3,17 @@
 session_recorder.py - 会话记录器
 
 将对话事件写入 memory/YYYY-MM-DD.md，按类型分组。
-这是 OpenClaw 侧的记忆入口。
+支持文件锁防并发写入冲突。
 
 用法:
-    python3 scripts/session_recorder.py --type event --content '记忆系统改造完成'
-    python3 scripts/session_recorder.py --type decision --content '采用统一记忆架构'
-    python3 scripts/session_recorder.py --type learning --content '数据源必须统一'
-    python3 scripts/session_recorder.py --type reflection --content '今天效率很高'
-    python3 scripts/session_recorder.py --type todo --content '测试记忆压缩功能'
+    python3 scripts/session_recorder.py -t event -c '记忆系统改造完成'
+    python3 scripts/session_recorder.py -t decision -c '采用统一架构' --sync
+    python3 scripts/session_recorder.py -b '[{"type":"event","content":"A"},{"type":"learning","content":"B"}]' --sync
 """
 
 import argparse
+import fcntl
+import json
 import re
 from datetime import datetime
 from pathlib import Path
@@ -38,13 +38,28 @@ def get_today_file() -> Path:
 
 
 def ensure_daily_file(filepath: Path) -> str:
-    if filepath.exists():
-        return filepath.read_text(encoding="utf-8")
-    # 从文件名提取日期，而不是用当前时间
+    """确保文件存在且有正确的标题头"""
+    # 从文件名提取日期
     match = re.search(r"(\d{4}-\d{2}-\d{2})", filepath.name)
     date_str = match.group(1) if match else datetime.now().strftime("%Y-%m-%d")
-    header = f"# {date_str} - 会话记录\n\n"
+    expected_header = f"# {date_str} - 会话记录"
+
     filepath.parent.mkdir(parents=True, exist_ok=True)
+
+    if filepath.exists():
+        content = filepath.read_text(encoding="utf-8")
+        # 检查标题是否完整
+        if content.strip() and content.strip().startswith("#"):
+            return content
+        # 文件存在但标题损坏/缺失 → 修复标题
+        if content.strip():
+            # 有内容但没标题，加上标题
+            return f"{expected_header}\n\n{content.lstrip()}"
+        # 文件为空或只有空白
+        pass
+
+    # 创建新文件
+    header = f"{expected_header}\n\n"
     filepath.write_text(header, encoding="utf-8")
     return header
 
@@ -53,7 +68,6 @@ def append_to_section(content: str, section_title: str, entry: str) -> str:
     lines = content.split("\n")
     pattern = rf"^## {re.escape(section_title)}"
 
-    # 找 section
     section_start = -1
     for i, line in enumerate(lines):
         if re.match(pattern, line):
@@ -71,7 +85,6 @@ def append_to_section(content: str, section_title: str, entry: str) -> str:
         lines.append(new_line)
         lines.append("")
     else:
-        # 找 section 末尾
         insert_pos = len(lines)
         for i in range(section_start + 1, len(lines)):
             if lines[i].startswith("## "):
@@ -90,84 +103,110 @@ def record(entry_type: str, content: str, date: str = None, sync: bool = False) 
 
     filepath = MEMORY_DIR / f"{date}.md" if date else get_today_file()
     section_title = TYPE_MAP[entry_type][0]
-    file_content = ensure_daily_file(filepath)
 
-    if content in file_content:
-        return f"⏭️  跳过（已存在）: {content[:50]}..."
+    # 用文件锁防止并发写入冲突
+    # 锁住 md 文件本身，确保 read-modify-write 原子性
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    # 确保文件存在
+    if not filepath.exists():
+        # 先创建空文件
+        match = re.search(r"(\d{4}-\d{2}-\d{2})", filepath.name)
+        date_str = match.group(1) if match else datetime.now().strftime("%Y-%m-%d")
+        filepath.write_text(f"# {date_str} - 会话记录\n\n", encoding="utf-8")
 
-    updated = append_to_section(file_content, section_title, content)
-    filepath.write_text(updated, encoding="utf-8")
+    with open(filepath, "r+", encoding="utf-8") as f:
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+        try:
+            file_content = f.read()
+            # 检查标题完整性
+            if not file_content.strip() or not file_content.strip().startswith("#"):
+                match = re.search(r"(\d{4}-\d{2}-\d{2})", filepath.name)
+                date_str = match.group(1) if match else datetime.now().strftime("%Y-%m-%d")
+                if file_content.strip():
+                    file_content = f"# {date_str} - 会话记录\n\n{file_content.lstrip()}"
+                else:
+                    file_content = f"# {date_str} - 会话记录\n\n"
+
+            if content in file_content:
+                return f"⏭️  跳过（已存在）: {content[:50]}..."
+
+            updated = append_to_section(file_content, section_title, content)
+            f.seek(0)
+            f.truncate()
+            f.write(updated)
+        finally:
+            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
     result = f"✅ 已记录 [{entry_type}]: {content[:80]}"
 
-    # 自动触发同步
     if sync:
-        import subprocess
-        # 双向同步
-        bridge = WORKSPACE / "scripts" / "bridge" / "bridge_sync.py"
-        if bridge.exists():
-            try:
-                subprocess.run(
-                    ["python3", str(bridge), "--agent", "demo-agent", "--days", "1"],
-                    capture_output=True, timeout=30, cwd=str(WORKSPACE)
-                )
-            except Exception:
-                pass
-        # 增量索引更新
-        indexer = WORKSPACE / "scripts" / "memory_indexer.py"
-        if indexer.exists():
-            try:
-                subprocess.run(
-                    ["python3", str(indexer), "--incremental", "--embed"],
-                    capture_output=True, timeout=60, cwd=str(WORKSPACE)
-                )
-                result += " (+ 已同步+索引)"
-            except Exception:
-                result += " (+ 已同步)"
+        result = _do_sync(result)
+
+    return result
+
+
+def _do_sync(result: str) -> str:
+    """执行同步 + 索引更新"""
+    import subprocess
+    synced = False
+    indexed = False
+
+    bridge = WORKSPACE / "scripts" / "bridge" / "bridge_sync.py"
+    if bridge.exists():
+        try:
+            subprocess.run(
+                ["python3", str(bridge), "--agent", "demo-agent", "--days", "1"],
+                capture_output=True, timeout=30, cwd=str(WORKSPACE)
+            )
+            synced = True
+        except Exception:
+            pass
+
+    indexer = WORKSPACE / "scripts" / "memory_indexer.py"
+    if indexer.exists():
+        try:
+            subprocess.run(
+                ["python3", str(indexer), "--incremental", "--embed"],
+                capture_output=True, timeout=60, cwd=str(WORKSPACE)
+            )
+            indexed = True
+        except Exception:
+            pass
+
+    if synced and indexed:
+        result += " (+ 已同步+索引)"
+    elif synced:
+        result += " (+ 已同步)"
+    elif indexed:
+        result += " (+ 已索引)"
 
     return result
 
 
 def batch_record(entries: list, sync: bool = False) -> str:
-    """批量记录多条记忆
-    entries: [{"type": "event", "content": "..."}, ...]
-    """
+    """批量记录"""
     results = []
     for entry in entries:
         r = record(entry["type"], entry["content"], entry.get("date"), sync=False)
         results.append(r)
 
     if sync:
-        import subprocess
-        bridge = WORKSPACE / "scripts" / "bridge" / "bridge_sync.py"
-        if bridge.exists():
-            try:
-                subprocess.run(
-                    ["python3", str(bridge), "--agent", "demo-agent", "--days", "1"],
-                    capture_output=True, timeout=30, cwd=str(WORKSPACE)
-                )
-                results.append("🔄 已同步")
-            except Exception:
-                results.append("⚠️ 同步失败")
+        results.append(_do_sync("🔄"))
 
     return "\n".join(results)
 
 
 def main():
     parser = argparse.ArgumentParser(description="会话记录器")
-    parser.add_argument("--type", "-t", choices=VALID_TYPES,
-                        help="记忆类型（单条模式）")
-    parser.add_argument("--content", "-c",
-                        help="记忆内容（单条模式）")
+    parser.add_argument("--type", "-t", choices=VALID_TYPES)
+    parser.add_argument("--content", "-c")
     parser.add_argument("--batch", "-b",
-                        help='批量模式，JSON 格式: \'[{"type":"event","content":"xxx"},...]\'')
+                        help='批量 JSON: \'[{"type":"event","content":"xxx"}]\'')
     parser.add_argument("--date", "-d", default=None)
-    parser.add_argument("--sync", "-s", action="store_true",
-                        help="记录后自动触发双向同步")
+    parser.add_argument("--sync", "-s", action="store_true")
     args = parser.parse_args()
 
     if args.batch:
-        import json
         entries = json.loads(args.batch)
         print(batch_record(entries, args.sync))
     elif args.type and args.content:

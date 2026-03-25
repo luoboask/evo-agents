@@ -142,13 +142,13 @@ def sync_to_markdown(agent_name: str, since: str) -> dict:
     new_count = 0
     skip_count = 0
 
+    # 预加载所有 daily md 文件内容用于验证
+    md_cache = {}
+
     # 按日期分组
     by_date = {}
     for mem in memories:
         mem_id = mem["id"]
-        if mem_id in synced_ids:
-            skip_count += 1
-            continue
 
         # 提取日期
         created = mem["created_at"]
@@ -156,6 +156,19 @@ def sync_to_markdown(agent_name: str, since: str) -> dict:
             date_str = str(created).split("T")[0]
         else:
             date_str = str(created).split(" ")[0]
+
+        # 即使 ID 已标记为同步，也要验证文件中是否真的存在内容
+        # 防止文件被清空后数据无法恢复
+        if mem_id in synced_ids:
+            if date_str not in md_cache:
+                md_file = MEMORY_DIR / f"{date_str}.md"
+                md_cache[date_str] = md_file.read_text("utf-8") if md_file.exists() else ""
+            content_clean = re.sub(r'^[-\s⭐❌✅❗🔨📌📚💭☐🎯📝]+', '', mem["content"].strip()).strip()
+            if content_clean in md_cache[date_str]:
+                skip_count += 1
+                continue
+            # 文件中不存在 → 需要重新写入
+            synced_ids.discard(mem_id)
 
         if date_str not in by_date:
             by_date[date_str] = {}
