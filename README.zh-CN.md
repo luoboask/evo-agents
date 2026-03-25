@@ -19,14 +19,31 @@
 ### 方式一：一键安装（推荐）
 
 ```bash
-curl -s https://raw.githubusercontent.com/luoboask/evo-agents/test-agents/init-agent.sh | bash -s my-agent
+# 使用默认名称 'my-agent' 安装
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash
+
+# 或指定你自己的 agent 名称
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash -s your-agent-name
+```
+
+示例：
+```bash
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash -s growth-assistant
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash -s demo-agent
 ```
 
 这将自动完成：
-1. 克隆模板到 `~/.openclaw/workspace-my-agent`
+1. 克隆模板到 `~/.openclaw/workspace-{agent-name}`
 2. 创建目录结构
-3. 注册 OpenClaw agent
+3. 注册 OpenClaw agent（`openclaw agents add`）
 4. 运行快速测试
+
+**OpenClaw 识别：**
+安装后，OpenClaw 会自动识别你的 agent：
+```bash
+openclaw agents list  # 显示: your-agent-name
+openclaw agent --agent your-agent-name --message "你好"
+```
 
 ### 方式二：手动安装
 

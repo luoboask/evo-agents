@@ -19,14 +19,31 @@
 ### Option 1: One-Click Install (Recommended)
 
 ```bash
-curl -s https://raw.githubusercontent.com/luoboask/evo-agents/test-agents/init-agent.sh | bash -s my-agent
+# Install with default name 'my-agent'
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash
+
+# Or specify your own agent name
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash -s your-agent-name
+```
+
+Examples:
+```bash
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash -s growth-assistant
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash -s demo-agent
 ```
 
 This will:
-1. Clone the template to `~/.openclaw/workspace-my-agent`
+1. Clone the template to `~/.openclaw/workspace-{agent-name}`
 2. Create directory structure
-3. Register the agent with OpenClaw
+3. Register the agent with OpenClaw (`openclaw agents add`)
 4. Run a quick test
+
+**OpenClaw Recognition:**
+After installation, OpenClaw will recognize your agent:
+```bash
+openclaw agents list  # Shows: your-agent-name
+openclaw agent --agent your-agent-name --message "Hello"
+```
 
 ### Option 2: Manual Install
 

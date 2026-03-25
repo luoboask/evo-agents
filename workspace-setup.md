@@ -2,7 +2,82 @@
 
 统一记忆系统的安装和配置指南。
 
-## 快速开始（最小安装）
+## 安装方式选择
+
+| 方式 | 适用场景 | 命令 |
+|------|---------|------|
+| **一键安装** | 快速创建新 agent | `curl \| bash -s <name>` |
+| **手动安装** | 自定义配置 | `git clone` + 手动设置 |
+| **Skill 安装** | 嵌入现有 agent | [unified-memory-skill](https://github.com/luoboask/unified-memory-skill) |
+
+## 方式一：一键安装（推荐）
+
+```bash
+# 使用默认名称 'my-agent'
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash
+
+# 或指定自定义名称
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash -s your-agent-name
+```
+
+### OpenClaw 如何识别你的 Agent
+
+一键安装脚本会自动完成以下步骤：
+
+1. **创建 Workspace**：`~/.openclaw/workspace-{agent-name}/`
+2. **注册 Agent**：`openclaw agents add {agent-name} --workspace {path}`
+3. **配置识别**：OpenClaw 通过 `~/.openclaw/openclaw.json` 中的 `agents.list` 识别
+
+安装后验证：
+```bash
+# 查看所有 agent
+openclaw agents list
+
+# 应该显示：
+# - your-agent-name
+#   Workspace: ~/.openclaw/workspace-your-agent-name
+#   Agent dir: ~/.openclaw/agents/your-agent-name/agent
+
+# 使用你的 agent
+openclaw agent --agent your-agent-name --message "Hello"
+```
+
+### Agent 名称规范
+
+- 只能包含：字母、数字、连字符 `-`、下划线 `_`
+- 不能以数字开头
+- 建议：小写字母，如 `my-agent`, `growth-assistant`, `demo-agent`
+
+## 方式二：手动安装
+
+如果一键安装不满足需求，可以手动配置：
+
+```bash
+# 1. 设置变量
+export AGENT_NAME="your-agent-name"
+export WORKSPACE_ROOT="${HOME}/.openclaw/workspace-${AGENT_NAME}"
+
+# 2. Clone 模板
+git clone --depth 1 https://github.com/luoboask/evo-agents.git "${WORKSPACE_ROOT}"
+
+# 3. 创建目录结构
+cd "${WORKSPACE_ROOT}"
+mkdir -p memory/weekly memory/monthly memory/archive data/index "data/${AGENT_NAME}/memory"
+
+# 4. 修改脚本中的默认 agent 名称
+for f in scripts/bridge/*.py scripts/*.py; do
+    sed -i '' "s/demo-agent/${AGENT_NAME}/g" "$f" 2>/dev/null || true
+done
+
+# 5. 注册 OpenClaw agent
+openclaw agents add "${AGENT_NAME}" --workspace "${WORKSPACE_ROOT}" --non-interactive
+
+# 6. 测试
+python3 scripts/session_recorder.py -t event -c '系统初始化完成'
+python3 scripts/unified_search.py '初始化' --agent "${AGENT_NAME}"
+```
+
+## 最小安装（零依赖）
 
 只需要 Python 3.10+ 和标准库，不需要任何额外依赖。
 
