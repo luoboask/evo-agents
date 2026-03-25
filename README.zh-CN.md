@@ -1,36 +1,31 @@
-# 统一记忆系统
+# OpenClaw 统一记忆系统
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Platform: macOS](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
 
 [English](./README.md) | [简体中文](./README.zh-CN.md)
 
-**OpenClaw 统一记忆系统** — 让 AI 真正拥有记忆。
+> **让你的 OpenClaw Agent 真正拥有记忆。**
+>
+> Markdown 为主数据源。SQLite 为搜索索引。双向同步。语义搜索。无需外部 API Key。
 
-Markdown 为主数据源，SQLite 为搜索索引，双向桥接，语义搜索，自动压缩。
+**统一记忆系统**将 OpenClaw 原生 Markdown 记忆与高性能 SQLite 后端桥接，实现语义搜索、自动压缩、并发安全的多会话操作——全部本地运行，只需 Ollama。
 
-## 🚀 一键安装
+## 🚀 快速开始
 
 ```bash
+# 一行命令安装
 curl -s https://raw.githubusercontent.com/luoboask/evo-agents/test-agents/init-agent.sh | bash -s my-agent
-```
 
-或手动：
-
-```bash
-# 1. Clone 模板
+# 或手动安装
 git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
-
-# 2. 初始化
 cd ~/.openclaw/workspace-my-agent
-mkdir -p memory/weekly memory/monthly memory/archive data/index
-
-# 3. 注册 agent
-openclaw agents add my-agent --workspace $(pwd) --non-interactive
-
-# 4. 测试
-python3 scripts/session_recorder.py -t event -c '系统初始化完成'
-python3 scripts/unified_search.py '初始化' --agent my-agent
+python3 scripts/session_recorder.py -t event -c 'Hello world'
+python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
 ```
 
-## ✨ 核心特性
+## ✨ 为什么需要这个？
 
 | 特性 | 说明 |
 |------|------|

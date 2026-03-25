@@ -1,36 +1,31 @@
-# Unified Memory System
+# Unified Memory System for OpenClaw
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Platform: macOS](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
 
 [English](./README.md) | [简体中文](./README.zh-CN.md)
 
-**OpenClaw Unified Memory System** — Give AI real memory.
+> **Give your OpenClaw agent real memory.**
+>
+> Markdown as primary source. SQLite as search index. Bidirectional sync. Semantic search. Zero external API keys required.
 
-Markdown as primary data source, SQLite as search index, bidirectional bridge, semantic search, automatic compression.
+**Unified Memory System** bridges OpenClaw's native Markdown memory with a high-performance SQLite backend, enabling semantic search, automatic compression, and concurrent-safe multi-session operation — all running locally with Ollama.
 
-## 🚀 One-Click Install
+## 🚀 Quick Start
 
 ```bash
+# One-line install
 curl -s https://raw.githubusercontent.com/luoboask/evo-agents/test-agents/init-agent.sh | bash -s my-agent
-```
 
-Or manually:
-
-```bash
-# 1. Clone template
+# Or manually
 git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
-
-# 2. Initialize
 cd ~/.openclaw/workspace-my-agent
-mkdir -p memory/weekly memory/monthly memory/archive data/index
-
-# 3. Register agent
-openclaw agents add my-agent --workspace $(pwd) --non-interactive
-
-# 4. Test
-python3 scripts/session_recorder.py -t event -c 'System initialized'
-python3 scripts/unified_search.py 'initialized' --agent my-agent
+python3 scripts/session_recorder.py -t event -c 'Hello world'
+python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
 ```
 
-## ✨ Core Features
+## ✨ Why This?
 
 | Feature | Description |
 |---------|-------------|
