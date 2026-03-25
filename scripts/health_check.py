@@ -14,6 +14,7 @@ import hashlib
 import re
 import sqlite3
 from pathlib import Path
+import sys
 
 WORKSPACE = Path(__file__).resolve().parent.parent
 MEMORY_DIR = WORKSPACE / "memory"
@@ -54,7 +55,9 @@ def check(agent_name: str, fix: bool = False):
     # 2. SQLite 重复检查
     if db_path.exists():
         print("\n🔍 重复数据检查")
-        conn = sqlite3.connect(str(db_path))
+        conn = sqlite3.connect(str(db_path), timeout=30)
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA busy_timeout=10000")
 
         # 精确重复
         exact_dupes = conn.execute(
@@ -105,7 +108,9 @@ def check(agent_name: str, fix: bool = False):
     # 3. 索引一致性
     if index_db.exists():
         print("\n🔍 索引一致性")
-        conn = sqlite3.connect(str(index_db))
+        conn = sqlite3.connect(str(index_db), timeout=30)
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA busy_timeout=10000")
         doc_count = conn.execute("SELECT COUNT(*) FROM documents").fetchone()[0]
         vec_count = conn.execute("SELECT COUNT(*) FROM embeddings").fetchone()[0]
         conn.close()
@@ -144,7 +149,9 @@ def check(agent_name: str, fix: bool = False):
         for md_file in MEMORY_DIR.glob("????-??-??.md"):
             md_count += sum(1 for l in md_file.read_text("utf-8").split("\n")
                            if l.strip().startswith("- "))
-        conn = sqlite3.connect(str(db_path))
+        conn = sqlite3.connect(str(db_path), timeout=30)
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA busy_timeout=10000")
         db_count = conn.execute("SELECT COUNT(*) FROM memories").fetchone()[0]
         conn.close()
         diff = abs(md_count - db_count)

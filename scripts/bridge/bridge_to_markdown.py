@@ -18,12 +18,16 @@ import argparse
 import json
 import re
 import sqlite3
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict
 
 WORKSPACE = Path(__file__).resolve().parent.parent.parent
 MEMORY_DIR = WORKSPACE / "memory"
+
+sys.path.insert(0, str(WORKSPACE / "scripts"))
+from lock_utils import file_lock, md_file_lock, open_db
 
 # 记忆类型映射
 TYPE_MAP = {
@@ -44,7 +48,7 @@ def fetch_new_memories(db_path: Path, since: str) -> List[Dict]:
         print(f"  ⚠️  数据库不存在: {db_path}")
         return []
 
-    conn = sqlite3.connect(str(db_path))
+    conn = open_db(db_path)
     conn.row_factory = sqlite3.Row
     try:
         rows = conn.execute("""
@@ -130,7 +134,12 @@ def append_to_daily(date_str: str, section: str, entries: List[str]):
 
 
 def sync_to_markdown(agent_name: str, since: str) -> dict:
-    """执行同步：SQLite → Markdown"""
+    """执行同步：SQLite → Markdown（带全局锁）"""
+    with file_lock("bridge_to_markdown"):
+        return _sync_to_markdown_inner(agent_name, since)
+
+
+def _sync_to_markdown_inner(agent_name: str, since: str) -> dict:
     db_path = get_db_path(agent_name)
     sync_file = WORKSPACE / "data" / agent_name / ".bridge_sync.json"
 

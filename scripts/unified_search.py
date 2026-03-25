@@ -19,6 +19,7 @@ import sqlite3
 import struct
 import subprocess
 from pathlib import Path
+import sys
 from typing import List, Dict, Optional
 
 try:
@@ -55,7 +56,9 @@ def search_fts(query: str, limit: int = 10) -> List[Dict]:
     else:
         tokens = query
 
-    conn = sqlite3.connect(str(INDEX_DB))
+    conn = sqlite3.connect(str(INDEX_DB), timeout=30)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=10000")
     conn.row_factory = sqlite3.Row
     try:
         rows = conn.execute("""
@@ -128,7 +131,9 @@ def search_knowledge(query: str, agent_name: str = "demo-agent",
     if not db_path.exists():
         return []
 
-    conn = sqlite3.connect(str(db_path))
+    conn = sqlite3.connect(str(db_path), timeout=30)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=10000")
     conn.row_factory = sqlite3.Row
     try:
         rows = conn.execute("""
@@ -192,7 +197,9 @@ def search_semantic(query: str, limit: int = 10) -> List[Dict]:
         print("  ⚠️  Ollama 不可用，退回关键词搜索")
         return search_markdown(query, limit)
 
-    conn = sqlite3.connect(str(INDEX_DB))
+    conn = sqlite3.connect(str(INDEX_DB), timeout=30)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=10000")
     conn.row_factory = sqlite3.Row
 
     try:

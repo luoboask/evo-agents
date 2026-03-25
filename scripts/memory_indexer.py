@@ -16,6 +16,7 @@ import re
 import sqlite3
 import struct
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
@@ -28,6 +29,9 @@ except ImportError:
     HAS_JIEBA = False
 
 WORKSPACE = Path(__file__).resolve().parent.parent
+
+sys.path.insert(0, str(WORKSPACE / "scripts"))
+from lock_utils import file_lock, open_db
 MEMORY_DIR = WORKSPACE / "memory"
 INDEX_DIR = WORKSPACE / "data" / "index"
 DB_PATH = INDEX_DIR / "memory_index.db"
@@ -210,8 +214,14 @@ def index_file(conn: sqlite3.Connection, filepath: Path, embed: bool = False) ->
 
 
 def run_index(full: bool = False, embed: bool = False):
+    """执行索引（带全局锁）"""
+    with file_lock("memory_indexer"):
+        _run_index_inner(full, embed)
+
+
+def _run_index_inner(full: bool = False, embed: bool = False):
     INDEX_DIR.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = open_db(DB_PATH)
     init_db(conn)
 
     files = collect_md_files()

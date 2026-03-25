@@ -19,12 +19,17 @@ import hashlib
 import json
 import re
 import sqlite3
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Tuple
 
 WORKSPACE = Path(__file__).resolve().parent.parent.parent
 MEMORY_DIR = WORKSPACE / "memory"
+
+# 加载锁工具
+sys.path.insert(0, str(WORKSPACE / "scripts"))
+from lock_utils import file_lock, open_db
 
 # Markdown section → 知识系统类型映射
 SECTION_TYPE_MAP = {
@@ -85,8 +90,7 @@ def get_db_path(agent_name: str) -> Path:
 
 def ensure_db(db_path: Path):
     """确保数据库和表存在"""
-    db_path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(db_path))
+    conn = open_db(db_path)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS memories (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -123,7 +127,7 @@ def get_existing_hashes(db_path: Path) -> set:
     """获取已存在的内容哈希"""
     if not db_path.exists():
         return set()
-    conn = sqlite3.connect(str(db_path))
+    conn = open_db(db_path)
     try:
         rows = conn.execute("SELECT content FROM memories").fetchall()
         return {content_hash(r[0]) for r in rows}
@@ -178,7 +182,12 @@ def parse_daily_file(filepath: Path) -> List[Dict]:
 
 
 def sync_to_knowledge(agent_name: str, since: str) -> dict:
-    """执行同步：Markdown → SQLite"""
+    """执行同步：Markdown → SQLite（带全局锁）"""
+    with file_lock("bridge_to_knowledge"):
+        return _sync_to_knowledge_inner(agent_name, since)
+
+
+def _sync_to_knowledge_inner(agent_name: str, since: str) -> dict:
     db_path = get_db_path(agent_name)
     ensure_db(db_path)
 
@@ -197,7 +206,7 @@ def sync_to_knowledge(agent_name: str, since: str) -> dict:
     new_count = 0
     skip_count = 0
 
-    conn = sqlite3.connect(str(db_path))
+    conn = open_db(db_path)
     try:
         for filepath in files:
             entries = parse_daily_file(filepath)

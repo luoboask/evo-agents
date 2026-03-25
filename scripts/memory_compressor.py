@@ -16,11 +16,15 @@ memory_compressor.py - 记忆压缩器
 import argparse
 import re
 import shutil
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Tuple
 
 WORKSPACE = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(WORKSPACE / "scripts"))
+from lock_utils import file_lock
+
 MEMORY_DIR = WORKSPACE / "memory"
 WEEKLY_DIR = MEMORY_DIR / "weekly"
 MONTHLY_DIR = MEMORY_DIR / "monthly"

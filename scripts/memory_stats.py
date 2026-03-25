@@ -11,6 +11,7 @@ import argparse
 import sqlite3
 from datetime import datetime
 from pathlib import Path
+import sys
 
 WORKSPACE = Path(__file__).resolve().parent.parent
 MEMORY_DIR = WORKSPACE / "memory"
@@ -70,7 +71,9 @@ def main():
     # SQLite 知识系统
     db_path = WORKSPACE / "data" / args.agent / "memory" / "memory_stream.db"
     if db_path.exists():
-        conn = sqlite3.connect(str(db_path))
+        conn = sqlite3.connect(str(db_path), timeout=30)
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA busy_timeout=10000")
         total = conn.execute("SELECT COUNT(*) FROM memories").fetchone()[0]
         types = conn.execute(
             "SELECT memory_type, COUNT(*) FROM memories GROUP BY memory_type"
@@ -93,7 +96,9 @@ def main():
 
     # 搜索索引
     if INDEX_DB.exists():
-        conn = sqlite3.connect(str(INDEX_DB))
+        conn = sqlite3.connect(str(INDEX_DB), timeout=30)
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA busy_timeout=10000")
         docs = conn.execute("SELECT COUNT(*) FROM documents").fetchone()[0]
         vecs = conn.execute("SELECT COUNT(*) FROM embeddings").fetchone()[0]
         last = conn.execute("SELECT MAX(indexed_at) FROM file_state").fetchone()
