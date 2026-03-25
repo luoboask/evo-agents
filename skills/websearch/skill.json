@@ -1,0 +1,10 @@
+{
+  "name": "websearch",
+  "version": "1.0.0",
+  "description": "网页搜索技能，基于 Bing 搜索",
+  "homepage": "https://github.com/your-org/evo-agents",
+  "author": "evo-agents",
+  "license": "MIT",
+  "updated_at": "2026-03-23",
+  "changelog": "1.0.0: 初始版本，支持网页搜索和内容提取"
+}

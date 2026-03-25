@@ -1,0 +1,28 @@
+{
+  "name": "自进化系统 v5.0",
+  "version": "5.0.0",
+  "description": "基于 Generative Agents 和 TinkerClaw 的自进化系统，实现记忆流、分形思考、夜间循环的完整架构",
+  "author": "evo-agents",
+  "tags": ["自进化", "记忆系统", "自动化", "AI 架构"],
+  "category": "系统工具",
+  "repository": "待开源",
+  "license": "MIT",
+  "requirements": [
+    "Python 3.9+",
+    "SQLite3",
+    "Ollama (可选，用于 Embedding)"
+  ],
+  "initial_state": {
+    "memory_stream.db": "空数据库，运行后自动创建",
+    "knowledge_base.db": "空数据库，运行后自动创建",
+    "evolution.db": "空数据库，运行后自动创建",
+    "config.yaml": "需手动创建，配置工作目录和 Ollama 地址"
+  },
+  "quickstart": [
+    "1. 复制技能到你的 workspace",
+    "2. 编辑 config.yaml 设置你的工作目录",
+    "3. 运行 python3 main.py status 检查状态",
+    "4. 运行 python3 main.py evolve --type KNOWLEDGE_GAINED --content '初次使用' 记录第一个事件",
+    "5. 配置 crontab 定时任务（可选）"
+  ]
+}
