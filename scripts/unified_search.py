@@ -294,7 +294,6 @@ def main():
     all_results = []
 
     if args.semantic or args.source == "semantic":
-        # 语义搜索模式
         print("🔮 语义搜索中...")
         all_results.extend(search_semantic(args.query, args.limit))
     else:
@@ -302,6 +301,17 @@ def main():
             all_results.extend(search_markdown(args.query, args.limit))
         if args.source in ("all", "knowledge"):
             all_results.extend(search_knowledge(args.query, args.agent, args.limit))
+
+    # 综合排序：按 score 降序，去除内容重复
+    seen_content = set()
+    deduped = []
+    for r in sorted(all_results, key=lambda x: x.get("score", 0), reverse=True):
+        # 取前 60 字符做去重 key
+        key = r["content"][:60].strip()
+        if key not in seen_content:
+            seen_content.add(key)
+            deduped.append(r)
+    all_results = deduped[:args.limit]
 
     print(f"找到 {len(all_results)} 条结果:\n")
     print(format_results(all_results))

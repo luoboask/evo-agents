@@ -38,6 +38,46 @@ SECTION_TYPE_MAP = {
     "待办": "goal",
 }
 
+# 重要性关键词权重
+IMPORTANCE_KEYWORDS = {
+    # 高重要性 (8-10)
+    "决定": 2.0, "选择": 1.5, "采用": 1.5, "确定": 1.5, "方案": 1.5,
+    "架构": 2.0, "重构": 1.5, "迁移": 1.5, "部署": 1.0,
+    "⭐": 3.0, "❗": 2.0, "重要": 2.0, "关键": 2.0, "核心": 1.5,
+    "教训": 2.0, "错误": 1.5, "bug": 1.5, "修复": 1.0,
+    # 中等重要性 (6-7)
+    "完成": 1.0, "实现": 1.0, "优化": 1.0, "改进": 1.0,
+    "发现": 1.0, "学到": 1.0, "原来": 0.5,
+    "❌": 1.5, "失败": 1.5,
+    "✅": 0.5,
+    # 降低重要性
+    "测试": -0.5, "调试": -0.5, "临时": -1.0, "暂时": -0.5,
+}
+
+
+def estimate_importance(content: str, memory_type: str) -> float:
+    """基于关键词和类型估算重要性 (1-10)"""
+    base = {
+        "knowledge": 6.0,   # 决定/学习天然更重要
+        "reflection": 6.0,  # 反思有价值
+        "goal": 5.5,        # 待办一般
+        "observation": 5.0, # 事件默认最低
+    }.get(memory_type, 5.0)
+
+    bonus = 0.0
+    for keyword, weight in IMPORTANCE_KEYWORDS.items():
+        if keyword in content:
+            bonus += weight
+
+    # 内容长度加分（详细的更重要）
+    if len(content) > 100:
+        bonus += 0.5
+    if len(content) > 200:
+        bonus += 0.5
+
+    score = base + bonus
+    return max(1.0, min(10.0, round(score, 1)))
+
 
 def get_db_path(agent_name: str) -> Path:
     return WORKSPACE / "data" / agent_name / "memory" / "memory_stream.db"
@@ -123,14 +163,8 @@ def parse_daily_file(filepath: Path) -> List[Dict]:
             if len(item) < 3:
                 continue
 
-            # 判断重要性
-            importance = 5.0
-            if "⭐" in item or "❗" in item:
-                importance = 8.0
-            elif "✅" in item:
-                importance = 6.0
-            elif "❌" in item:
-                importance = 7.0
+            # 智能重要性评分
+            importance = estimate_importance(item, current_type)
 
             entries.append({
                 "content": item,

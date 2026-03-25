@@ -235,17 +235,86 @@ def archive_old_dailies(keep_days: int = 14):
     print(f"  共归档 {archived} 个" if archived else f"  无需归档（保留最近 {keep_days} 天）")
 
 
+def sediment_to_memory_md():
+    """从周/月摘要中提取关键内容，沉淀到 MEMORY.md"""
+    MEMORY_MD = WORKSPACE / "MEMORY.md"
+    if not MEMORY_MD.exists():
+        return
+
+    existing = MEMORY_MD.read_text(encoding="utf-8")
+    additions = []
+
+    # 从最新的周摘要提取决定和教训
+    weeklies = sorted(WEEKLY_DIR.glob("*.md"), reverse=True)
+    for wf in weeklies[:2]:  # 最近2周
+        content = wf.read_text(encoding="utf-8")
+        in_section = False
+        for line in content.split("\n"):
+            if "关键决定" in line or "学习" in line:
+                in_section = True
+                continue
+            if line.startswith("## "):
+                in_section = False
+                continue
+            if in_section and line.startswith("- "):
+                item = line[2:].strip()
+                # 跳过测试相关和已存在的
+                if any(k in item for k in ["测试", "全量"]):
+                    continue
+                if item not in existing and len(item) > 10:
+                    additions.append(item)
+
+    if not additions:
+        print("  ⏭️  无需更新 MEMORY.md")
+        return
+
+    # 追加到 Key Context section
+    lines = existing.split("\n")
+    insert_idx = None
+    for i, line in enumerate(lines):
+        if "Key Context" in line or "关键上下文" in line:
+            # 找到 section 后的插入点
+            for j in range(i + 1, len(lines)):
+                if lines[j].startswith("## "):
+                    insert_idx = j
+                    break
+            if insert_idx is None:
+                insert_idx = len(lines)
+            break
+
+    if insert_idx is None:
+        # 没找到 Key Context section，追加到末尾
+        lines.append("")
+        lines.append("## Key Context")
+        lines.append("")
+        insert_idx = len(lines)
+
+    # 去掉插入点前的空行
+    while insert_idx > 0 and not lines[insert_idx - 1].strip():
+        insert_idx -= 1
+
+    added = 0
+    for item in additions[:5]:  # 最多5条
+        lines.insert(insert_idx, f"- {item}")
+        insert_idx += 1
+        added += 1
+
+    MEMORY_MD.write_text("\n".join(lines), encoding="utf-8")
+    print(f"  ✅ MEMORY.md 新增 {added} 条沉淀")
+
+
 def main():
     parser = argparse.ArgumentParser(description="记忆压缩器")
     parser.add_argument("--weekly", action="store_true")
     parser.add_argument("--monthly", action="store_true")
     parser.add_argument("--archive", action="store_true")
+    parser.add_argument("--sediment", action="store_true", help="沉淀关键内容到 MEMORY.md")
     parser.add_argument("--all", action="store_true")
     parser.add_argument("--keep-days", type=int, default=14)
     parser.add_argument("--target-date", help="指定日期 (YYYY-MM-DD)")
     args = parser.parse_args()
 
-    if not any([args.weekly, args.monthly, args.archive, args.all]):
+    if not any([args.weekly, args.monthly, args.archive, args.sediment, args.all]):
         parser.print_help()
         return
 
@@ -259,6 +328,10 @@ def main():
     if args.monthly or args.all:
         print("📅 月摘要...")
         generate_monthly(target)
+        print()
+    if args.sediment or args.all:
+        print("📝 沉淀到 MEMORY.md...")
+        sediment_to_memory_md()
         print()
     if args.archive or args.all:
         print("📦 归档...")

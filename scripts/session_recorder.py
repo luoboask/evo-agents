@@ -117,15 +117,52 @@ def record(entry_type: str, content: str, date: str = None, sync: bool = False) 
     return result
 
 
+def batch_record(entries: list, sync: bool = False) -> str:
+    """批量记录多条记忆
+    entries: [{"type": "event", "content": "..."}, ...]
+    """
+    results = []
+    for entry in entries:
+        r = record(entry["type"], entry["content"], entry.get("date"), sync=False)
+        results.append(r)
+
+    if sync:
+        import subprocess
+        bridge = WORKSPACE / "scripts" / "bridge" / "bridge_sync.py"
+        if bridge.exists():
+            try:
+                subprocess.run(
+                    ["python3", str(bridge), "--agent", "demo-agent", "--days", "1"],
+                    capture_output=True, timeout=30, cwd=str(WORKSPACE)
+                )
+                results.append("🔄 已同步")
+            except Exception:
+                results.append("⚠️ 同步失败")
+
+    return "\n".join(results)
+
+
 def main():
     parser = argparse.ArgumentParser(description="会话记录器")
-    parser.add_argument("--type", "-t", required=True, choices=VALID_TYPES)
-    parser.add_argument("--content", "-c", required=True)
+    parser.add_argument("--type", "-t", choices=VALID_TYPES,
+                        help="记忆类型（单条模式）")
+    parser.add_argument("--content", "-c",
+                        help="记忆内容（单条模式）")
+    parser.add_argument("--batch", "-b",
+                        help='批量模式，JSON 格式: \'[{"type":"event","content":"xxx"},...]\'')
     parser.add_argument("--date", "-d", default=None)
     parser.add_argument("--sync", "-s", action="store_true",
                         help="记录后自动触发双向同步")
     args = parser.parse_args()
-    print(record(args.type, args.content, args.date, args.sync))
+
+    if args.batch:
+        import json
+        entries = json.loads(args.batch)
+        print(batch_record(entries, args.sync))
+    elif args.type and args.content:
+        print(record(args.type, args.content, args.date, args.sync))
+    else:
+        parser.print_help()
 
 
 if __name__ == "__main__":
