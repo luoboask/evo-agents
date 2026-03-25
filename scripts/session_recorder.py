@@ -146,39 +146,36 @@ def record(entry_type: str, content: str, date: str = None, sync: bool = False) 
 
 
 def _do_sync(result: str) -> str:
-    """执行同步 + 索引更新"""
+    """后台异步执行同步 + 索引更新，不阻塞主流程"""
     import subprocess
-    synced = False
-    indexed = False
+    import os
 
     bridge = WORKSPACE / "scripts" / "bridge" / "bridge_sync.py"
-    if bridge.exists():
-        try:
-            subprocess.run(
-                ["python3", str(bridge), "--agent", "demo-agent", "--days", "1"],
-                capture_output=True, timeout=30, cwd=str(WORKSPACE)
-            )
-            synced = True
-        except Exception:
-            pass
-
     indexer = WORKSPACE / "scripts" / "memory_indexer.py"
-    if indexer.exists():
+
+    # fork 子进程在后台执行，主进程立即返回
+    pid = os.fork()
+    if pid == 0:
+        # 子进程：静默执行同步和索引
         try:
-            subprocess.run(
-                ["python3", str(indexer), "--incremental", "--embed"],
-                capture_output=True, timeout=60, cwd=str(WORKSPACE)
-            )
-            indexed = True
+            os.setsid()  # 脱离终端
+            if bridge.exists():
+                subprocess.run(
+                    ["python3", str(bridge), "--agent", "demo-agent", "--days", "1"],
+                    capture_output=True, timeout=30, cwd=str(WORKSPACE)
+                )
+            if indexer.exists():
+                subprocess.run(
+                    ["python3", str(indexer), "--incremental", "--embed"],
+                    capture_output=True, timeout=60, cwd=str(WORKSPACE)
+                )
         except Exception:
             pass
-
-    if synced and indexed:
-        result += " (+ 已同步+索引)"
-    elif synced:
-        result += " (+ 已同步)"
-    elif indexed:
-        result += " (+ 已索引)"
+        finally:
+            os._exit(0)
+    else:
+        # 父进程：立即返回
+        result += " (+ 后台同步中)"
 
     return result
 
