@@ -12,6 +12,7 @@ _(Projects, preferences, decisions worth remembering long-term.)_
 - FTS5 对中文分词支持有限，grep fallback 是必要的
 - 学到了 FTS5 中文搜索的局限性
 - 知识图谱新增实体：bridge_sync 与 memory_hub 存在依赖关系
+- Python sqlite3 模块支持 FTS5 全文搜索
 
 ## Core Principles
 
