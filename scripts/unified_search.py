@@ -45,16 +45,20 @@ def search_markdown(query: str, limit: int = 10) -> List[Dict]:
         try:
             lines = filepath.read_text(encoding="utf-8").split("\n")
             rel_path = str(filepath.relative_to(WORKSPACE))
+            covered_until = 0  # 去重：跳过已覆盖的行范围
             for i, line in enumerate(lines, 1):
+                if i <= covered_until:
+                    continue
                 if query.lower() in line.lower():
-                    start = max(0, i - 3)
-                    end = min(len(lines), i + 2)
+                    start = max(0, i - 2)
+                    end = min(len(lines), i + 3)
                     context = "\n".join(lines[start:end]).strip()
+                    covered_until = end  # 标记这段已覆盖
                     results.append({
                         "source": "markdown",
                         "path": rel_path,
                         "line": i,
-                        "content": context[:200],
+                        "content": context[:300],
                         "score": 1.0,
                     })
                     if len(results) >= limit:
