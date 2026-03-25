@@ -159,13 +159,13 @@ def search_knowledge(query: str, agent_name: str = "demo-agent",
         conn.close()
 
 
-def get_embedding(text: str) -> Optional[List[float]]:
-    """使用 Ollama 生成嵌入向量"""
+def get_embedding(text: str, prefix: str = "search_query: ") -> Optional[List[float]]:
+    """使用 Ollama 生成嵌入向量，查询用 search_query: 前缀"""
     try:
         result = subprocess.run(
             ["curl", "-s", OLLAMA_URL,
              "-H", "Content-Type: application/json",
-             "-d", json.dumps({"model": EMBED_MODEL, "prompt": text[:500]})],
+             "-d", json.dumps({"model": EMBED_MODEL, "prompt": prefix + text[:500]})],
             capture_output=True, text=True, timeout=30
         )
         if result.returncode == 0:

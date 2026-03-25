@@ -111,50 +111,57 @@ def extract_date_from_path(filepath: Path) -> Optional[str]:
 
 
 def parse_md_chunks(filepath: Path) -> List[dict]:
+    """将 markdown 拆分为细粒度块：每个列表项独立成块，提升语义搜索精度"""
     content = filepath.read_text(encoding="utf-8")
     lines = content.split("\n")
     chunks = []
-    current_chunk = []
-    current_start = 1
     current_type = "unknown"
+    current_section = ""
     file_date = extract_date_from_path(filepath)
 
     for i, line in enumerate(lines, 1):
         if line.startswith("## "):
-            if current_chunk:
-                text = "\n".join(current_chunk).strip()
-                if text and len(text) > 5:
-                    chunks.append({
-                        "content": text, "line_start": current_start,
-                        "line_end": i - 1, "type": current_type, "date": file_date,
-                    })
-            current_chunk = [line]
-            current_start = i
             current_type = detect_type(line)
-        elif line.startswith("# ") and not current_chunk:
-            current_start = i + 1
-        else:
-            current_chunk.append(line)
-            lt = detect_type(line)
-            if lt != "unknown":
-                current_type = lt
+            current_section = line.strip()
+            continue
+        if line.startswith("# "):
+            continue
 
-    if current_chunk:
-        text = "\n".join(current_chunk).strip()
-        if text and len(text) > 5:
+        stripped = line.strip()
+        # 列表项：每条独立成块
+        if stripped.startswith("- "):
+            item = stripped[2:].strip()
+            # 去掉时间前缀和 checkbox
+            item_clean = re.sub(r'^\[\d{2}:\d{2}\]\s*', '', item)
+            item_clean = re.sub(r'^\[[ x]\]\s*', '', item_clean)
+            if item_clean and len(item_clean) > 3:
+                chunks.append({
+                    "content": item_clean,
+                    "line_start": i,
+                    "line_end": i,
+                    "type": current_type,
+                    "date": file_date,
+                })
+        # 非列表的有内容段落（标题、描述等）
+        elif stripped and len(stripped) > 10 and not stripped.startswith("**"):
             chunks.append({
-                "content": text, "line_start": current_start,
-                "line_end": len(lines), "type": current_type, "date": file_date,
+                "content": stripped,
+                "line_start": i,
+                "line_end": i,
+                "type": current_type,
+                "date": file_date,
             })
+
     return chunks
 
 
-def get_embedding(text: str) -> Optional[bytes]:
+def get_embedding(text: str, prefix: str = "search_document: ") -> Optional[bytes]:
+    """使用 Ollama 生成嵌入向量，加 nomic 推荐的 task prefix"""
     try:
         result = subprocess.run(
             ["curl", "-s", OLLAMA_URL,
              "-H", "Content-Type: application/json",
-             "-d", json.dumps({"model": EMBED_MODEL, "prompt": text[:500]})],
+             "-d", json.dumps({"model": EMBED_MODEL, "prompt": prefix + text[:500]})],
             capture_output=True, text=True, timeout=30
         )
         if result.returncode == 0:
