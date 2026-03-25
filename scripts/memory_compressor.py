@@ -263,9 +263,12 @@ def sediment_to_memory_md():
                     continue
                 if item not in existing and len(item) > 10:
                     additions.append(item)
+                elif item in existing:
+                    pass  # 已在 MEMORY.md 中
 
     if not additions:
-        print("  ⏭️  无需更新 MEMORY.md")
+        print("  ⏭️  无需更新 MEMORY.md（关键内容已存在或不符合沉淀条件）")
+        print("  💡 沉淀条件：来自周摘要的「关键决定」和「学习」，排除测试内容，>10字，不重复")
         return
 
     # 追加到 Key Context section

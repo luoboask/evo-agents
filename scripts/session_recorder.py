@@ -103,6 +103,7 @@ def record(entry_type: str, content: str, date: str = None, sync: bool = False) 
     # 自动触发同步
     if sync:
         import subprocess
+        # 双向同步
         bridge = WORKSPACE / "scripts" / "bridge" / "bridge_sync.py"
         if bridge.exists():
             try:
@@ -110,9 +111,19 @@ def record(entry_type: str, content: str, date: str = None, sync: bool = False) 
                     ["python3", str(bridge), "--agent", "demo-agent", "--days", "1"],
                     capture_output=True, timeout=30, cwd=str(WORKSPACE)
                 )
-                result += " (+ 已同步)"
             except Exception:
-                result += " (⚠️ 同步失败)"
+                pass
+        # 增量索引更新
+        indexer = WORKSPACE / "scripts" / "memory_indexer.py"
+        if indexer.exists():
+            try:
+                subprocess.run(
+                    ["python3", str(indexer), "--incremental", "--embed"],
+                    capture_output=True, timeout=60, cwd=str(WORKSPACE)
+                )
+                result += " (+ 已同步+索引)"
+            except Exception:
+                result += " (+ 已同步)"
 
     return result
 
