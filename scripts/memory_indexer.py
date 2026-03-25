@@ -36,7 +36,7 @@ MEMORY_DIR = WORKSPACE / "memory"
 INDEX_DIR = WORKSPACE / "data" / "index"
 DB_PATH = INDEX_DIR / "memory_index.db"
 OLLAMA_URL = "http://localhost:11434/api/embeddings"
-EMBED_MODEL = "nomic-embed-text"
+EMBED_MODEL = "bge-m3"
 
 
 def tokenize(text: str) -> str:

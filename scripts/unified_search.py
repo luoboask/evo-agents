@@ -33,7 +33,7 @@ WORKSPACE = Path(__file__).resolve().parent.parent
 MEMORY_DIR = WORKSPACE / "memory"
 INDEX_DB = WORKSPACE / "data" / "index" / "memory_index.db"
 OLLAMA_URL = "http://localhost:11434/api/embeddings"
-EMBED_MODEL = "nomic-embed-text"
+EMBED_MODEL = "bge-m3"
 
 
 def search_markdown(query: str, limit: int = 10) -> List[Dict]:
