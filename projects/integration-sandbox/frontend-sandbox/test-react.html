@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Test React</title>
+</head>
+<body>
+<h1>React 测试</h1>
+<div id="root"></div>
+
+<script src="/cdn/react-bundle.js"></script>
+<script>
+console.log('=== React 检查 ===');
+console.log('React:', typeof window.React);
+console.log('ReactDOM:', typeof window.ReactDOM);
+console.log('mtop:', typeof window.mtop);
+
+if (window.React) {
+  console.log('✅ React 已加载');
+  document.body.innerHTML += '<div style="color:green">✅ React 加载成功</div>';
+} else {
+  console.log('❌ React 未加载');
+  document.body.innerHTML += '<div style="color:red">❌ React 加载失败</div>';
+}
+
+if (window.mtop) {
+  console.log('✅ mtop 已加载');
+  document.body.innerHTML += '<div style="color:green">✅ mtop 加载成功</div>';
+} else {
+  console.log('❌ mtop 未加载');
+  document.body.innerHTML += '<div style="color:red">❌ mtop 加载失败</div>';
+}
+</script>
+</body>
+</html>

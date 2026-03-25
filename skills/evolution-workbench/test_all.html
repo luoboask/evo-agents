@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>🔍 完整诊断</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #1a1a2e; color: #fff; }
+        .test { background: rgba(255,255,255,0.1); padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .pass { border-left: 4px solid #4ade80; }
+        .fail { border-left: 4px solid #f87171; }
+        pre { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; font-size: 12px; max-height: 200px; overflow-y: auto; }
+        h2 { margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 dashboard_final.html 完整诊断</h1>
+    <div id="results"></div>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        function addTest(name, passed, details) {
+            results.innerHTML += `
+                <div class="test ${passed ? 'pass' : 'fail'}">
+                    <h3>${passed ? '✅' : '❌'} ${name}</h3>
+                    <pre>${details}</pre>
+                </div>
+            `;
+        }
+        
+        async function runAllTests() {
+            // Test 1: 页面加载
+            addTest('1. 页面 HTML 加载', true, '页面成功加载');
+            
+            // Test 2: Fetch API
+            addTest('2. Fetch API', typeof fetch !== 'undefined', fetch ? '可用' : '不可用');
+            
+            // Test 3-7: 所有 API
+            const apis = [
+                {name: '/api/overview', url: '/api/overview'},
+                {name: '/api/instances', url: '/api/instances'},
+                {name: '/api/bugs', url: '/api/bugs'},
+                {name: '/api/evolution/history', url: '/api/evolution/history'},
+                {name: '/api/intelligence-report', url: '/api/intelligence-report'}
+            ];
+            
+            for (const api of apis) {
+                try {
+                    const res = await fetch(api.url);
+                    const data = await res.json();
+                    addTest(`3-7. API: ${api.name}`, res.ok, 
+                        `状态：${res.status}\n数据：${JSON.stringify(data).substring(0, 300)}...`);
+                } catch (error) {
+                    addTest(`3-7. API: ${api.name}`, false, 
+                        `错误：${error.message}`);
+                }
+            }
+            
+            // Test 8: 检查 DOM 元素
+            setTimeout(() => {
+                const coreStats = document.getElementById('core-stats');
+                addTest('8. DOM 元素：core-stats', coreStats !== null, 
+                    coreStats ? '存在' : '不存在 - 可能页面还没加载完');
+                
+                const instancesBody = document.getElementById('instances-body');
+                addTest('9. DOM 元素：instances-body', instancesBody !== null,
+                    instancesBody ? '存在' : '不存在');
+                
+                const bugsBody = document.getElementById('bugs-body');
+                addTest('10. DOM 元素：bugs-body', bugsBody !== null,
+                    bugsBody ? '存在' : '不存在');
+            }, 1000);
+            
+            // Test 11: 最终状态
+            setTimeout(() => {
+                addTest('📊 最终状态', true, 
+                    '所有测试完成！请检查上面的结果。\n\n' +
+                    '如果所有 API 都通过但页面仍不显示数据，\n' +
+                    '可能是 JavaScript 执行错误或浏览器缓存问题。\n\n' +
+                    '解决方法：\n' +
+                    '1. 按 Cmd+Shift+R 强制刷新\n' +
+                    '2. 清除浏览器缓存\n' +
+                    '3. 查看浏览器控制台（F12）的错误信息');
+            }, 2000);
+        }
+        
+        runAllTests();
+    </script>
+</body>
+</html>

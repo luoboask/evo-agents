@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+ <head>
+ <meta charSet="utf-8"/>
+ <meta name="description" content="A new ice.js project."/>
+ <meta name="referrer" content="no-referrer-when-downgrade"/>
+ <meta name="aplus-core" content="aplus.js"/>
+ <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
+ <link href="/cdn/jp-fe/jp-new-homepage-category-page/0.0.41/assets/gujiatu.ee7891da.gif" rel="shortcut icon" type="image/x-icon"/>
+ <link rel="stylesheet" href="/cdn/g/ae-fe/cosmos/0.0.254/pc/index.css"/>
+ <meta name="aplus-rhost-v" content="sg.mmstat.com"/>
+ <meta name="aplus-rhost-g" content="sg.mmstat.com"/>
+ <meta name="ice-meta-count" content="0"/>
+ <title></title>
+ <link rel="stylesheet" type="text/css" href="/cdn/jp-fe/jp-new-homepage-category-page/0.0.41/css/main.css"/>
+ <link rel="stylesheet" type="text/css" href="/cdn/jp-fe/jp-new-homepage-category-page/0.0.41/css/962.css"/>
+ <link rel="stylesheet" type="text/css" href="/cdn/jp-fe/jp-new-homepage-category-page/0.0.41/css/p_category.css"/>
+
+<!-- MTOP Mock 拦截器 -->
+<script>
+(function() {
+  console.log('[MTOP Mock] 拦截器初始化...');
+  
+  const MOCK_DATA = {
+    'mtop.relationrecommend.tiantaojprecommend.recommend': {
+      ret: ['SUCCESS::调用成功'],
+      v: '1.0',
+      traceId: 'mock_' + Date.now(),
+      data: {
+        result: [{
+          layoutInfo: { listHeader: ['rcmdTitle'] },
+          mods: {
+            listItems: [
+              {
+                image: { imgUrl: 'https://pic-cdn-jp.tao-media.co/kf/S23c00cde0a4649579fe0d5a39a401533o.jpg', imgType: '3:4' },
+                itemType: 'rmdproductV3',
+                productId: '1001006085354675',
+                title: { displayTitle: '極上の柔らかさのランニングパンツ【夏用・薄手・通気性】', rowNum: 1 },
+                prices: {
+                  originalPrice: { formattedPrice: '¥ 3,712', minPrice: 3712, currencyCode: 'JPY' },
+                  salePrice: { formattedPrice: '¥ 2,341', minPrice: 2341, discount: 36, currencyCode: 'JPY' }
+                }
+              },
+              {
+                image: { imgUrl: 'https://pic-cdn-jp.tao-media.co/kf/S68032c6541fe46a4aa47fd1cdf913443A.jpg', imgType: '3:4' },
+                itemType: 'rmdproductV3',
+                productId: '1001006091442084',
+                title: { displayTitle: 'ベッドサイドテーブル 可動式 昇降式', rowNum: 1 },
+                prices: {
+                  originalPrice: { formattedPrice: '¥ 2,614', minPrice: 2614, currencyCode: 'JPY' },
+                  salePrice: { formattedPrice: '¥ 1,353', minPrice: 1353, discount: 48, currencyCode: 'JPY' }
+                }
+              }
+            ]
+          }
+        }],
+        rcmdTitle: { title: 'RECOMMEND' }
+      }
+    },
+    'mtop.alibaba.jp.guide.page.get': {
+      ret: ['SUCCESS::调用成功'],
+      v: '1.0',
+      traceId: 'mock_' + Date.now(),
+      data: { pageCode: '541699', pageName: '新分类 - 女性穿搭', cards: [] }
+    },
+    'mtop.jptao.ug.popx.check': {
+      ret: ['SUCCESS::调用成功'],
+      v: '1.0',
+      data: { result: true, success: true, uuid: 'mock_uuid' }
+    },
+    'mtop.jptao.ug.popx.list': {
+      ret: ['SUCCESS::调用成功'],
+      v: '1.0',
+      data: { success: true, activities: [], actions: [], traces: [] }
+    },
+    'mtop.jp.wishlist.item.add': {
+      ret: ['SUCCESS::调用成功'],
+      v: '1.0',
+      data: { result: 'true' }
+    },
+    'mtop.jp.interaction.execute': {
+      ret: ['SUCCESS::调用成功'],
+      data: { result: 'true' }
+    }
+  };
+  
+  window.__MTOP_MOCK_STATUS__ = {
+    enabled: true,
+    interceptedCount: 0,
+    mockedAPIs: Object.keys(MOCK_DATA),
+    logs: []
+  };
+  
+  const setupInterceptor = () => {
+    if (!window.mtop || !window.mtop.request) {
+      setTimeout(setupInterceptor, 100);
+      return;
+    }
+    
+    const originalRequest = window.mtop.request;
+    
+    window.mtop.request = function(api, params, callback) {
+      const apiName = typeof api === 'object' ? api.api : api;
+      const cb = typeof api === 'object' ? params : callback;
+      
+      console.log('[MTOP Mock] 拦截请求:', apiName);
+      
+      const status = window.__MTOP_MOCK_STATUS__;
+      status.interceptedCount++;
+      status.lastAPI = apiName;
+      status.logs.unshift({ time: new Date().toLocaleTimeString(), api: apiName });
+      if (status.logs.length > 20) status.logs.pop();
+      
+      if (MOCK_DATA[apiName]) {
+        console.log('[MTOP Mock] ✅ 返回 mock:', apiName);
+        
+        const mockResponse = MOCK_DATA[apiName];
+        
+        setTimeout(() => {
+          if (typeof cb === 'function') cb(null, mockResponse);
+          window.dispatchEvent(new CustomEvent('mtop-mock-response', { 
+            detail: { api: apiName, data: mockResponse } 
+          }));
+        }, 100 + Math.random() * 200);
+        
+        return Promise.resolve(mockResponse);
+      }
+      
+      console.log('[MTOP Mock] ⚠️ 未配置，走真实请求:', apiName);
+      return originalRequest.call(this, api, params, cb);
+    };
+    
+    console.log('[MTOP Mock] ✅ 拦截器已激活');
+  };
+  
+  setupInterceptor();
+})();
+</script>
+
+<!-- Mock 调试面板 -->
+<style>
+#mock-debug-panel {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #fff;
+  border: 2px solid #0af;
+  padding: 15px;
+  z-index: 999999;
+  font-size: 12px;
+  min-width: 280px;
+  max-width: 400px;
+  max-height: 400px;
+  overflow: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  font-family: monospace;
+}
+#mock-debug-panel h3 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: #0af;
+}
+#mock-debug-panel .status { margin-bottom: 10px; }
+#mock-debug-panel .logs { 
+  background: #f5f5f5; 
+  padding: 8px; 
+  border-radius: 4px; 
+  max-height: 200px; 
+  overflow: auto;
+}
+#mock-debug-panel .log-item {
+  padding: 2px 0;
+  border-bottom: 1px solid #eee;
+}
+#mock-debug-panel button {
+  width: 100%;
+  padding: 8px;
+  background: #1890ff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+#mock-debug-panel button:hover { background: #40a9ff; }
+</style>
+<script>
+(function() {
+  function createPanel() {
+    const panel = document.createElement('div');
+    panel.id = 'mock-debug-panel';
+    panel.innerHTML = `
+      <h3>🔌 MTOP Mock 状态</h3>
+      <div class="status" id="mock-status">初始化中...</div>
+      <div class="logs" id="mock-logs"></div>
+      <button onclick="testMock()">🧪 测试 Mock</button>
+    `;
+    document.body.appendChild(panel);
+    updateStatus();
+    setInterval(updateStatus, 1000);
+  }
+  
+  function updateStatus() {
+    const s = window.__MTOP_MOCK_STATUS__;
+    const statusEl = document.getElementById('mock-status');
+    const logsEl = document.getElementById('mock-logs');
+    
+    if (statusEl && s) {
+      statusEl.innerHTML = `
+        <div><strong>状态:</strong> ${s.enabled ? '<span style="color:#52c41a">✅ 已激活</span>' : '<span style="color:#ff4d4f">❌ 未激活</span>'}</div>
+        <div><strong>拦截次数:</strong> <span style="color:#1890ff;font-weight:bold">${s.interceptedCount || 0}</span></div>
+        <div><strong>API:</strong> ${s.mockedAPIs ? s.mockedAPIs.length : 0} 个</div>
+        <div><strong>最后:</strong> ${s.lastAPI || '-'}</div>
+      `;
+    }
+    
+    if (logsEl && s && s.logs) {
+      logsEl.innerHTML = s.logs.map(l => 
+        `<div class="log-item">[${l.time}] ${l.api}</div>`
+      ).join('');
+    }
+  }
+  
+  window.testMock = function() {
+    const statusEl = document.getElementById('mock-status');
+    if (window.mtop && window.mtop.request) {
+      mtop.request('mtop.relationrecommend.tiantaojprecommend.recommend', {}, (err, data) => {
+        if (err) {
+          alert('❌ Mock 失败：' + JSON.stringify(err));
+        } else {
+          const count = data?.data?.result?.[0]?.mods?.listItems?.length || 0;
+          alert('✅ Mock 成功！\\n\\n收到 ' + count + ' 个商品数据');
+        }
+        updateStatus();
+      });
+    } else {
+      alert('❌ mtop 不可用');
+    }
+  };
+  
+  if (document.body) {
+    createPanel();
+  } else {
+    document.addEventListener('DOMContentLoaded', createPanel);
+  }
+})();
+</script>
+
+ <script type="text/javascript">
+ (function(w, d, s, q) {
+ w[q] = w[q] || [];
+ var f = d.getElementsByTagName(s)[0]
+ , j = d.createElement(s);
+ j.async = true;
+ j.id = 'beacon-aplus';
+ j.setAttribute('exparams', 'aplus&sidx=aplusSidex&ckx=aplusCkx');
+ j.src = "/cdn/alilog/mlog/aplus_v2.js";
+ j.crossorigin = 'anonymous';
+ f.parentNode.insertBefore(j, f);
+ }
+ )(window, document, 'script', 'aplus_queue');
+ </script>
+ </head>
+ <body>
+ <div id="ice-container"></div>
+ <script src="/cdn/mtb/lib-mtop/2.7.2/mtop.js"></script>
+ <script src="/cdn/react-bundle.js"></script>
+ <script>
+ !(function() {
+ var a = window.__ICE_APP_CONTEXT__ || {};
+ var b = {
+ "appData": null,
+ "loaderData": {
+ "category": {
+ "pageConfig": {}
+ }
+ },
+ "routePath": "/category",
+ "matchedIds": ["category"],
+ "documentOnly": true,
+ "renderMode": "CSR"
+ };
+ for (var k in a) {
+ b[k] = a[k]
+ }
+ window.__ICE_APP_CONTEXT__ = b;
+ }
+ )();
+ </script>
+ <script src="/cdn/jp-fe/jp-new-homepage-category-page/0.0.41/js/962.js"></script>
+ <script src="/cdn/jp-fe/jp-new-homepage-category-page/0.0.41/js/p_category.js"></script>
+ <script src="/cdn/jp-fe/jp-new-homepage-category-page/0.0.41/js/framework.js"></script>
+ <script src="/cdn/jp-fe/jp-new-homepage-category-page/0.0.41/js/178.js"></script>
+ <script src="/cdn/jp-fe/jp-new-homepage-category-page/0.0.41/js/main.js"></script>
+ <script src="/cdn/mtb/lib-windvane/3.0.7/windvane.js" crossorigin="anonymous"></script>
+ <script src="/cdn/jp-fe/jp-fsp-analyser/0.0.4/sfsp_v2.js" crossorigin="anonymous"></script>
+ </body>
+</html>

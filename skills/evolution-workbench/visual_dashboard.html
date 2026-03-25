@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧬 智能进化工作台 - 可视化版</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            color: #eee;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header h1 { font-size: 2em; margin-bottom: 5px; }
+        .header .status { font-size: 0.9em; opacity: 0.8; }
+        
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(0,0,0,0.5);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .nav button {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .nav button:hover, .nav button.active {
+            background: #e94560;
+            border-color: #e94560;
+        }
+        
+        .content {
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        .card {
+            background: rgba(20, 25, 40, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .card h2 {
+            color: #e94560;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e94560;
+            font-size: 1.3em;
+        }
+        
+        .card h3 {
+            color: #4ecca3;
+            margin: 15px 0 10px 0;
+            font-size: 1.1em;
+        }
+        
+        /* 流程图样式 */
+        .flow-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .flow-step {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.2);
+            border-radius: 10px;
+            border: 2px solid #667eea;
+            position: relative;
+        }
+        
+        .flow-step.active {
+            background: rgba(78, 204, 163, 0.3);
+            border-color: #4ecca3;
+        }
+        
+        .flow-step::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5em;
+            color: #667eea;
+        }
+        
+        .flow-step:last-child::after { display: none; }
+        
+        .flow-step .step-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4ecca3;
+        }
+        
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        th {
+            background: rgba(102, 126, 234, 0.3);
+            color: #4ecca3;
+            font-weight: 600;
+        }
+        
+        tr:hover { background: rgba(255,255,255,0.05); }
+        
+        /* 知识图谱容器 */
+        #knowledge-graph-container {
+            width: 100%;
+            height: 600px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #4ecca3;
+        }
+        
+        .stat-card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #4ecca3;
+        }
+        
+        .stat-card .label {
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        /* 时间线 */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            background: #e94560;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+        
+        .timeline-item.success::before { background: #4ecca3; }
+        .timeline-item.warning::before { background: #f9a825; }
+        
+        /* 图表容器 */
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        /* 标签 */
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            margin: 2px;
+        }
+        
+        .tag-critical { background: rgba(233, 69, 96, 0.3); color: #e94560; }
+        .tag-high { background: rgba(249, 168, 37, 0.3); color: #f9a825; }
+        .tag-medium { background: rgba(102, 126, 234, 0.3); color: #667eea; }
+        .tag-low { background: rgba(78, 204, 163, 0.3); color: #4ecca3; }
+        
+        /* 加载动画 */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #888;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #e94560;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .flow-container { flex-direction: column; }
+            .flow-step::after { display: none; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧬 智能进化工作台</h1>
+        <div class="status">可视化版 - 深度展示记忆系统与进化过程</div>
+    </div>
+    
+    <div class="nav">
+        <button class="active" onclick="showSection('overview')">📊 概览</button>
+        <button onclick="showSection('memory-flow')">🔄 记忆流程</button>
+        <button onclick="showSection('knowledge-graph')">🕸️ 知识图谱</button>
+        <button onclick="showSection('evolution-timeline')">⏱️ 进化时间线</button>
+        <button onclick="showSection('intelligence-chart')">📈 智能成长</button>
+        <button onclick="showSection('detailed-tables')">📋 详细数据</button>
+    </div>
+    
+    <div class="content">
+        <!-- 概览 -->
+        <div id="overview" class="section active">
+            <div class="card">
+                <h2>系统概览</h2>
+                <div class="stats-grid" id="overview-stats">
+                    <div class="loading"><div class="spinner"></div>加载中...</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>三层记忆架构</h2>
+                <div id="memory-architecture">
+                    <div class="loading"><div class="spinner"></div>加载中...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 记忆流程 -->
+        <div id="memory-flow" class="section">
+            <div class="card">
+                <h2>记忆处理流程</h2>
+                <div class="flow-container" id="memory-flow-diagram">
+                    <div class="flow-step active">
+                        <div class="step-number">1</div>
+                        <h4>输入感知</h4>
+                        <p>接收用户输入<br>工具调用结果</p>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">2</div>
+                        <h4>重要性评估</h4>
+                        <p>critical / high<br>medium / low</p>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">3</div>
+                        <h4>分层存储</h4>
+                        <p>L1 工作记忆<br>L2 向量记忆<br>L3 知识图谱</p>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">4</div>
+                        <h4>检索使用</h4>
+                        <p>关键词匹配<br>语义搜索<br>图谱查询</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>当前工作记忆</h3>
+                <table id="working-memory-table">
+                    <thead>
+                        <tr><th>时间</th><th>角色</th><th>重要性</th><th>内容</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 知识图谱 -->
+        <div id="knowledge-graph" class="section">
+            <div class="card">
+                <h2>知识图谱可视化</h2>
+                <div id="knowledge-graph-container"></div>
+            </div>
+            
+            <div class="card">
+                <h3>实体统计</h3>
+                <table id="entities-table">
+                    <thead>
+                        <tr><th>类型</th><th>名称</th><th>提及次数</th><th>相关关系</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 进化时间线 -->
+        <div id="evolution-timeline" class="section">
+            <div class="card">
+                <h2>进化事件时间线</h2>
+                <div class="timeline" id="evolution-timeline-container">
+                    <div class="loading"><div class="spinner"></div>加载中...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 智能成长 -->
+        <div id="intelligence-chart" class="section">
+            <div class="card">
+                <h2>智能评分成长曲线</h2>
+                <div id="intelligence-chart-container" class="chart-container"></div>
+            </div>
+            
+            <div class="card">
+                <h3>五维度能力雷达</h3>
+                <div id="radar-chart-container" class="chart-container"></div>
+            </div>
+        </div>
+        
+        <!-- 详细数据 -->
+        <div id="detailed-tables" class="section">
+            <div class="card">
+                <h2>实例列表</h2>
+                <table id="instances-table">
+                    <thead>
+                        <tr><th>ID</th><th>需求</th><th>状态</th><th>端口</th><th>结果</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <div class="card">
+                <h2>Bug 追踪</h2>
+                <table id="bugs-table">
+                    <thead>
+                        <tr><th>ID</th><th>类型</th><th>严重程度</th><th>描述</th><th>状态</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <div class="card">
+                <h2>预测分析</h2>
+                <table id="predictions-table">
+                    <thead>
+                        <tr><th>类型</th><th>预测内容</th><th>置信度</th><th>建议行动</th><th>状态</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 切换页面
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+            
+            // 加载对应数据
+            if (sectionId === 'knowledge-graph') loadKnowledgeGraph();
+            if (sectionId === 'intelligence-chart') loadIntelligenceCharts();
+        }
+        
+        // 加载概览数据
+        async function loadOverview() {
+            try {
+                const response = await fetch('/api/overview');
+                const data = await response.json();
+                
+                // 统计卡片
+                document.getElementById('overview-stats').innerHTML = `
+                    <div class="stat-card">
+                        <div class="number">${data.memory.working_count}</div>
+                        <div class="label">工作记忆</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">${data.memory.vector_count}</div>
+                        <div class="label">向量记忆</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">${data.memory.kg_entities}</div>
+                        <div class="label">知识实体</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">${data.memory.kg_relations}</div>
+                        <div class="label">知识关系</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">${data.evolution.total_events}</div>
+                        <div class="label">进化事件</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">${data.intelligence.percentage}%</div>
+                        <div class="label">智能评分 [${data.intelligence.grade}]</div>
+                    </div>
+                `;
+                
+                // 记忆架构
+                document.getElementById('memory-architecture').innerHTML = `
+                    <div class="flow-container">
+                        <div class="flow-step active">
+                            <h4>L1 工作记忆</h4>
+                            <p>短期存储<br>微秒级访问<br>${data.memory.working_count} 条记录</p>
+                        </div>
+                        <div class="flow-step">
+                            <h4>L2 向量记忆</h4>
+                            <p>语义嵌入<br>毫秒级访问<br>${data.memory.vector_count} 条记录</p>
+                        </div>
+                        <div class="flow-step">
+                            <h4>L3 知识图谱</h4>
+                            <p>长期存储<br>${data.memory.kg_entities} 实体<br>${data.memory.kg_relations} 关系</p>
+                        </div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        // 加载知识图谱
+        async function loadKnowledgeGraph() {
+            try {
+                const response = await fetch('/api/memory/knowledge-graph');
+                const data = await response.json();
+                
+                // 使用 vis.js 创建网络图
+                const nodes = [];
+                const edges = [];
+                
+                // 添加实体节点
+                Object.entries(data.by_type || {}).forEach(([type, entities]) => {
+                    entities.forEach((entity, idx) => {
+                        nodes.push({
+                            id: entity.id,
+                            label: entity.name,
+                            group: type,
+                            value: entity.mentions
+                        });
+                    });
+                });
+                
+                // 添加关系边
+                (data.recent_relations || []).forEach(rel => {
+                    edges.push({
+                        from: rel.source,
+                        to: rel.target,
+                        label: rel.relation
+                    });
+                });
+                
+                // 创建网络
+                const container = document.getElementById('knowledge-graph-container');
+                const network = new vis.Network(container, { nodes, edges }, {
+                    nodes: {
+                        shape: 'dot',
+                        size: 16,
+                        font: { size: 14, color: '#fff' }
+                    },
+                    edges: {
+                        width: 2,
+                        color: { color: '#667eea' }
+                    },
+                    physics: {
+                        stabilization: false
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        // 加载智能图表
+        async function loadIntelligenceCharts() {
+            try {
+                const response = await fetch('/api/intelligence/timeline');
+                const data = await response.json();
+                
+                // 使用 D3.js 创建成长曲线
+                const container = document.getElementById('intelligence-chart-container');
+                container.innerHTML = '';
+                
+                const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+                const width = container.clientWidth - margin.left - margin.right;
+                const height = 350 - margin.top - margin.bottom;
+                
+                const svg = d3.select('#intelligence-chart-container')
+                    .append('svg')
+                    .attr('width', width + margin.left + margin.right)
+                    .attr('height', height + margin.top + margin.bottom)
+                    .append('g')
+                    .attr('transform', `translate(${margin.left},${margin.top})`);
+                
+                // 绘制代码...
+                
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        // 加载详细表格
+        async function loadTables() {
+            try {
+                // 加载实例
+                const instancesRes = await fetch('/api/instances');
+                const instances = await instancesRes.json();
+                document.querySelector('#instances-table tbody').innerHTML = instances.map(i => `
+                    <tr>
+                        <td>${i.id}</td>
+                        <td>${i.requirement_id}</td>
+                        <td><span class="tag tag-${i.status.toLowerCase()}">${i.status}</span></td>
+                        <td>${i.port}</td>
+                        <td>${i.results ? JSON.stringify(i.results) : '-'}</td>
+                    </tr>
+                `).join('');
+                
+                // 加载 Bug
+                const bugsRes = await fetch('/api/bugs');
+                const bugs = await bugsRes.json();
+                document.querySelector('#bugs-table tbody').innerHTML = bugs.map(b => `
+                    <tr>
+                        <td>${b.id}</td>
+                        <td>${b.bug_type}</td>
+                        <td><span class="tag tag-${b.severity.toLowerCase()}">${b.severity}</span></td>
+                        <td>${b.description}</td>
+                        <td>${b.fixed ? '✅ 已修复' : '⏳ 待修复'}</td>
+                    </tr>
+                `).join('');
+                
+                // 加载预测
+                const predRes = await fetch('/api/predictions');
+                const predictions = await predRes.json();
+                document.querySelector('#predictions-table tbody').innerHTML = predictions.map(p => `
+                    <tr>
+                        <td>${p.prediction_type}</td>
+                        <td>${p.prediction_text}</td>
+                        <td>${p.confidence}%</td>
+                        <td>${p.action}</td>
+                        <td>${p.fulfilled ? '✅ 已实现' : '⏳ 进行中'}</td>
+                    </tr>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        // 初始加载
+        loadOverview();
+        loadTables();
+        
+        // 自动刷新
+        setInterval(() => {
+            loadOverview();
+            loadTables();
+        }, 30000);
+    </script>
+</body>
+</html>

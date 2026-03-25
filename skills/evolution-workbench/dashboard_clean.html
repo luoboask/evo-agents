@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能进化工作台 v2.1 - 含学习内容</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f23;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 30px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        .header h1 { font-size: 2em; margin-bottom: 10px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .card {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid rgba(100, 181, 246, 0.2);
+        }
+        h2 {
+            color: #64b5f6;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #64b5f6;
+            font-size: 1.2em;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .stat-item {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: 300;
+            color: #4fc3f7;
+        }
+        .stat-label {
+            color: #90a4ae;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+            table-layout: fixed;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        th:nth-child(1), td:nth-child(1) { width: 25%; }
+        th:nth-child(2), td:nth-child(2) { width: 25%; }
+        th:nth-child(3), td:nth-child(3) { width: 50%; }
+        th {
+            color: #64b5f6;
+            font-weight: 500;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+        .badge-success { background: rgba(76, 175, 80, 0.2); color: #81c784; }
+        .badge-info { background: rgba(33, 150, 243, 0.2); color: #64b5f6; }
+        .badge-warning { background: rgba(255, 152, 0, 0.2); color: #ffb74d; }
+        .badge-error { background: rgba(244, 67, 54, 0.2); color: #e57373; }
+        .timeline {
+            position: relative;
+            padding-left: 25px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #64b5f6;
+        }
+        .timeline-item {
+            position: relative;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            border-left: 3px solid #4fc3f7;
+        }
+        .timeline-time {
+            font-size: 0.8em;
+            color: #90a4ae;
+            margin-bottom: 5px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #607d8b;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #607d8b;
+            margin-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧬 智能进化工作台</h1>
+        <div>AI Self-Evolution Dashboard</div>
+    </div>
+    
+    <div class="grid">
+        <div class="card">
+            <h2>📊 核心指标</h2>
+            <div class="stat-grid" id="core-stats">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>🧠 记忆系统</h2>
+            <div class="stat-grid" id="memory-stats">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>📦 沙箱实例</h2>
+            <table id="instances-table">
+                <thead><tr><th>需求</th><th>状态</th><th>结果</th></tr></thead>
+                <tbody id="instances-body">
+                    <tr><td colspan="3" class="loading">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="card">
+            <h2>🐛 Bug 追踪</h2>
+            <table id="bugs-table">
+                <thead><tr><th>类型</th><th>严重度</th><th>描述</th></tr></thead>
+                <tbody id="bugs-body">
+                    <tr><td colspan="3" class="loading">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        
+        <div class="card" style="grid-column: 1 / -1;">
+            <h2>📚 学习内容</h2>
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;" id="learning-content">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+        
+<div class="card" style="grid-column: 1 / -1;">
+            <h2>⏱️ 进化时间线</h2>
+            <div class="timeline" id="timeline">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        自动刷新 (10 秒) | 最后更新：<span id="time">--:--:--</span>
+    </div>
+    
+    <script>
+        function safeGet(obj, path, defaultVal) {
+            const keys = path.split('.');
+            let result = obj;
+            for (const key of keys) {
+                if (result === null || result === undefined) return defaultVal;
+                result = result[key];
+            }
+            return result !== undefined && result !== null ? result : defaultVal;
+        }
+        
+        async function loadDashboard() {
+            try {
+                const [overviewRes, instancesRes, bugsRes, eventsRes] = await Promise.all([
+                    fetch('/api/overview'),
+                    fetch('/api/instances'),
+                    fetch('/api/bugs'),
+                    fetch('/api/evolution/history')
+                ]);
+                
+                const overview = await overviewRes.json();
+                const instances = await instancesRes.json();
+                const bugs = await bugsRes.json();
+                const events = await eventsRes.json();
+                
+                // 核心指标
+                document.getElementById('core-stats').innerHTML = `
+                    <div class="stat-item">
+                        <div class="stat-value">${safeGet(overview, 'memory.total_size_mb', 0)}</div>
+                        <div class="stat-label">记忆大小 (MB)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${safeGet(overview, 'evolution.total_events', 0)}</div>
+                        <div class="stat-label">进化事件</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${safeGet(overview, 'intelligence.percentage', 0)}%</div>
+                        <div class="stat-label">智能评分</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${safeGet(overview, 'intelligence.grade', '-')}</div>
+                        <div class="stat-label">评级</div>
+                    </div>
+                `;
+                
+                // 记忆系统
+                document.getElementById('memory-stats').innerHTML = `
+                    <div class="stat-item">
+                        <div class="stat-value">${safeGet(overview, 'memory.working_count', 0)}</div>
+                        <div class="stat-label">工作记忆</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${safeGet(overview, 'memory.vector_count', 0)}</div>
+                        <div class="stat-label">向量记忆</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${safeGet(overview, 'memory.kg_entities', 0)}</div>
+                        <div class="stat-label">知识实体</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${safeGet(overview, 'memory.kg_relations', 0)}</div>
+                        <div class="stat-label">知识关系</div>
+                    </div>
+                `;
+                
+                // 实例列表
+                const instancesHtml = instances.slice(0, 10).map(i => {
+                    const status = safeGet(i, 'status', 'UNKNOWN');
+                    const badgeClass = status === 'RUNNING' ? 'success' : status === 'COMPLETED' ? 'info' : 'warning';
+                    const results = safeGet(i, 'results', {});
+                    const passed = safeGet(results, 'passed', 0);
+                    const failed = safeGet(results, 'failed', 0);
+                    return `
+                        <tr>
+                            <td>${safeGet(i, 'requirement_id', '-')}</td>
+                            <td><span class="badge badge-${badgeClass}">${status}</span></td>
+                            <td>${passed}/${passed + failed}</td>
+                        </tr>
+                    `;
+                }).join('');
+                document.getElementById('instances-body').innerHTML = instancesHtml || '<tr><td colspan="3" class="loading">无数据</td></tr>';
+                
+                // Bug 列表
+                const bugsHtml = bugs.slice(0, 10).map(b => {
+                    const severity = safeGet(b, 'severity', 'LOW');
+                    const badgeClass = severity === 'CRITICAL' ? 'error' : severity === 'HIGH' ? 'warning' : 'info';
+                    return `
+                        <tr>
+                            <td>${safeGet(b, 'bug_type', '-')}</td>
+                            <td><span class="badge badge-${badgeClass}">${severity}</span></td>
+                            <td>${safeGet(b, 'description', '-').substring(0, 50)}...</td>
+                        </tr>
+                    `;
+                }).join('');
+                document.getElementById('bugs-body').innerHTML = bugsHtml || '<tr><td colspan="3" class="loading">无数据</td></tr>';
+                
+                // 时间线
+                const timelineHtml = events.slice(0, 15).map(e => {
+                    const timestamp = safeGet(e, 'timestamp', '');
+                    const time = timestamp ? timestamp.substring(11, 19) : '--:--:--';
+                    return `
+                        <div class="timeline-item">
+                            <div class="timeline-time">${time}</div>
+                            <div>${safeGet(e, 'type', '-')}: ${safeGet(e, 'description', '-')}</div>
+                        </div>
+                    `;
+                }).join('');
+                document.getElementById('timeline').innerHTML = timelineHtml || '<div class="loading">无数据</div>';
+                
+                
+                // 加载学习内容
+                const learningHtml = `
+                    <div class="stat-item">
+                        <div class="stat-value" id="learning-scheduled">-</div>
+                        <div class="stat-label">定时学习</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="learning-evolution">-</div>
+                        <div class="stat-label">进化检查</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="learning-reflection">-</div>
+                        <div class="stat-label">每日反思</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="learning-insights">-</div>
+                        <div class="stat-label">洞察生成</div>
+                    </div>
+                `;
+                document.getElementById('learning-content').innerHTML = learningHtml;
+                
+                // 从 API 加载学习数据
+                fetch('/api/learning-stats')
+                    .then(r => r.json())
+                    .then(stats => {
+                        document.getElementById('learning-scheduled').textContent = stats.scheduled || 0;
+                        document.getElementById('learning-evolution').textContent = stats.evolution || 0;
+                        document.getElementById('learning-reflection').textContent = stats.reflection || 0;
+                        document.getElementById('learning-insights').textContent = stats.insights || 0;
+                    })
+                    .catch(e => console.error('Error loading learning stats:', e));
+                
+
+                document.getElementById('time').textContent = new Date().toLocaleTimeString();
+            } catch (e) {
+                console.error('Error:', e);
+            }
+        }
+        
+        loadDashboard();
+        setInterval(loadDashboard, 10000);
+    </script>
+</body>
+</html>

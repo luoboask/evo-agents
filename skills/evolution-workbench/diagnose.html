@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>诊断页面</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #1a1a2e; color: #fff; }
+        .test { background: rgba(255,255,255,0.1); padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .pass { border-left: 4px solid #4ade80; }
+        .fail { border-left: 4px solid #f87171; }
+        pre { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 数据加载诊断</h1>
+    <div id="tests"></div>
+    
+    <script>
+        const tests = document.getElementById('tests');
+        let results = [];
+        
+        function addTest(name, passed, details) {
+            results.push({name, passed, details});
+            tests.innerHTML += `
+                <div class="test ${passed ? 'pass' : 'fail'}">
+                    <h3>${passed ? '✅' : '❌'} ${name}</h3>
+                    <pre>${details}</pre>
+                </div>
+            `;
+        }
+        
+        async function runTests() {
+            // Test 1: Fetch API available
+            addTest('Fetch API', typeof fetch !== 'undefined', fetch ? 'Available' : 'Not available');
+            
+            // Test 2: Intelligence Report API
+            try {
+                const res = await fetch('/api/intelligence-report');
+                addTest('API /api/intelligence-report', res.ok, `Status: ${res.status} ${res.statusText}`);
+                
+                const data = await res.json();
+                addTest('API Response JSON', true, JSON.stringify(data, null, 2).substring(0, 500) + '...');
+                
+                // Test 3: Data structure
+                const hasKnowledge = data.knowledge && data.knowledge.total;
+                addTest('Data: knowledge', hasKnowledge, hasKnowledge ? `Total: ${data.knowledge.total}` : 'Missing');
+                
+                const hasEvents = data.events && data.events.total;
+                addTest('Data: events', hasEvents, hasEvents ? `Total: ${data.events.total}` : 'Missing');
+                
+                const hasMemory = data.memory && data.memory.total;
+                addTest('Data: memory', hasMemory, hasMemory ? `Total: ${data.memory.total}` : 'Missing');
+                
+                const hasIQ = data.iq_score;
+                addTest('Data: iq_score', hasIQ !== undefined, hasIQ ? `Score: ${data.iq_score}` : 'Missing');
+                
+                // Test 4: DOM elements
+                const intelData = {
+                    knowledge: data.knowledge.total,
+                    events: data.events.total,
+                    memory: data.memory.total,
+                    iq: data.iq_score
+                };
+                addTest('📊 最终数据', true, JSON.stringify(intelData, null, 2));
+                
+            } catch (error) {
+                addTest('API /api/intelligence-report', false, `${error.name}: ${error.message}`);
+            }
+        }
+        
+        runTests();
+    </script>
+</body>
+</html>

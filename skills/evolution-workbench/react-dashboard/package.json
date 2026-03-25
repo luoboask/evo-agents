@@ -1,0 +1,30 @@
+{
+  "name": "evolution-dashboard",
+  "version": "2.0.0",
+  "description": "\u667a\u80fd\u8fdb\u5316\u5de5\u4f5c\u53f0 - React + Ant Design",
+  "private": true,
+  "dependencies": {
+    "antd": "^5.12.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "^5.0.1",
+    "recharts": "^2.10.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "proxy": "http://127.0.0.1:3003"
+}

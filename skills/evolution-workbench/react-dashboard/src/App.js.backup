@@ -1,0 +1,198 @@
+import React, { useState, useEffect } from 'react';
+import { Layout, Row, Col, Card, Statistic, Progress, Timeline, Tag, Badge, Alert } from 'antd';
+import {
+  DashboardOutlined,
+  DatabaseOutlined,
+  RocketOutlined,
+  LineChartOutlined,
+  ClockCircleOutlined,
+  BulbOutlined,
+  TrophyOutlined,
+} from '@ant-design/icons';
+import IntelligencePanel from './components/IntelligencePanel';
+import MemoryPanel from './components/MemoryPanel';
+import EvolutionPanel from './components/EvolutionPanel';
+import PredictionPanel from './components/PredictionPanel';
+import './App.css';
+
+const { Header, Content } = Layout;
+
+// 模拟数据获取
+const fetchDashboardData = () => {
+  return {
+    timestamp: new Date().toLocaleTimeString(),
+    intelligence: {
+      total: 24,
+      max: 25,
+      percentage: 96.0,
+      grade: 'S+',
+      dimensions: {
+        '基础能力': 5,
+        '学习能力': 5,
+        '自主能力': 4,
+        '认知能力': 5,
+        '交互能力': 5,
+      },
+    },
+    metrics: {
+      skills_count: 6,
+      memory_mb: 0.22,
+      working_count: 4,
+      kg_entities: 14,
+      kg_relations: 7,
+      health_score: 83,
+      success_rate: 87.0,
+    },
+    working_entries: [
+      { role: 'assistant', content: '我创建了混合记忆系统，支持三层架构', importance: 'high' },
+      { role: 'user', content: '我喜欢在晚上11点之后工作，这时候效率最高', importance: 'high' },
+      { role: 'assistant', content: '记住了，你偏好晚上工作，我会在这个时间段保持活跃', importance: 'high' },
+      { role: 'user', content: 'evolve', importance: 'critical' },
+    ],
+    predictions: [
+      {
+        type: 'memory_growth',
+        confidence: 70,
+        prediction: '记忆大小将在3天内超过5MB',
+        action: '建议启用自动归档',
+      },
+      {
+        type: 'skill_expansion',
+        confidence: 80,
+        prediction: '技能数量将在1周内达到12个',
+        action: '准备技能合并策略',
+      },
+      {
+        type: 'intelligence_growth',
+        confidence: 75,
+        prediction: '智能评分将在1周内达到A级(90%)',
+        action: '继续当前进化策略',
+      },
+    ],
+    evolution_history: [
+      { timestamp: '2026-03-16T15:54', decision: 'no_immediate_action', reason: '系统健康良好' },
+      { timestamp: '2026-03-16T14:45', decision: 'deploy_search_v4', reason: '网络健康度44%' },
+      { timestamp: '2026-03-16T11:30', decision: 'create_hybrid_memory', reason: '用户请求' },
+    ],
+  };
+};
+
+function App() {
+  const [data, setData] = useState(fetchDashboardData());
+  const [loading, setLoading] = useState(false);
+
+  // 自动刷新
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLoading(true);
+      setTimeout(() => {
+        setData(fetchDashboardData());
+        setLoading(false);
+      }, 500);
+    }, 10000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <Layout className="dashboard-layout">
+      <Header className="dashboard-header">
+        <div className="header-content">
+          <h1>
+            <RocketOutlined /> 智能进化工作台 v2
+          </h1>
+          <span className="update-time">
+            <ClockCircleOutlined /> 更新于: {data.timestamp}
+          </span>
+        </div>
+      </Header>
+
+      <Content className="dashboard-content">
+        {/* 顶部统计卡片 */}
+        <Row gutter={[16, 16]} className="stats-row">
+          <Col xs={24} sm={12} md={6}>
+            <Card className="stat-card" loading={loading}>
+              <Statistic
+                title="技能数量"
+                value={data.metrics.skills_count}
+                prefix={<DashboardOutlined />}
+                valueStyle={{ color: '#4ecca3' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card className="stat-card" loading={loading}>
+              <Statistic
+                title="记忆大小"
+                value={data.metrics.memory_mb}
+                suffix="MB"
+                prefix={<DatabaseOutlined />}
+                valueStyle={{ color: '#667eea' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card className="stat-card" loading={loading}>
+              <Statistic
+                title="健康评分"
+                value={data.metrics.health_score}
+                suffix="/100"
+                prefix={<LineChartOutlined />}
+                valueStyle={{ color: '#f9a825' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card className="stat-card" loading={loading}>
+              <Statistic
+                title="成功率"
+                value={data.metrics.success_rate}
+                suffix="%"
+                prefix={<BulbOutlined />}
+                valueStyle={{ color: '#e94560' }}
+              />
+            </Card>
+          </Col>
+        </Row>
+
+        {/* 主要内容区域 */}
+        <Row gutter={[16, 16]} className="main-row">
+          {/* 智能评估 */}
+          <Col xs={24} lg={12}>
+            <IntelligencePanel data={data.intelligence} loading={loading} />
+          </Col>
+
+          {/* 记忆详情 */}
+          <Col xs={24} lg={12}>
+            <MemoryPanel 
+              entries={data.working_entries} 
+              metrics={data.metrics}
+              loading={loading}
+            />
+          </Col>
+
+          {/* 进化历史 */}
+          <Col xs={24} lg={12}>
+            <EvolutionPanel history={data.evolution_history} loading={loading} />
+          </Col>
+
+          {/* 预测分析 */}
+          <Col xs={24} lg={12}>
+            <PredictionPanel predictions={data.predictions} loading={loading} />
+          </Col>
+        </Row>
+
+        {/* 底部提示 */}
+        <Alert
+          message="系统运行正常"
+          description="智能进化系统正在运行中，每10秒自动刷新数据。检测到 0 个问题，系统健康度良好。"
+          type="success"
+          showIcon
+          className="footer-alert"
+        />
+      </Content>
+    </Layout>
+  );
+}
+
+export default App;

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charSet="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Integration Sandbox - Frontend Mock</title>
+  
+  <!-- 注入 MTOP Mock 拦截器 (必须在 mtop.js 之前加载) -->
+  <script src="./mtop-mock.js"></script>
+  
+  <!-- 原始 CDN 资源 -->
+  <link href="https://pic-cdn-jp.tao-media.co/kf/Sd86651dc659d452283b767be206a4706v/64x64.png" rel="shortcut icon" type="image/x-icon"/>
+  <link rel="stylesheet" href="https://assets.alicdn.com/g/ae-fe/cosmos/0.0.254/pc/index.css"/>
+  <link rel="stylesheet" type="text/css" href="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/css/main.css"/>
+  <link rel="stylesheet" type="text/css" href="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/css/962.css"/>
+  <link rel="stylesheet" type="text/css" href="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/css/p_category.css"/>
+  
+  <script type="text/javascript">
+    (function(w, d, s, q) {
+      w[q] = w[q] || [];
+      var f = d.getElementsByTagName(s)[0], j = d.createElement(s);
+      j.async = true; j.id = 'beacon-aplus';
+      j.setAttribute('exparams', 'sidx=aplusSidex&ckx=aplusCkx');
+      j.src = "//g.alicdn.com/alilog/mlog/aplus_v2.js";
+      j.crossorigin = 'anonymous';
+      f.parentNode.insertBefore(j, f);
+    })(window, document, 'script', 'aplus_queue');
+  </script>
+</head>
+<body>
+  <div id="ice-container"></div>
+  
+  <!-- 核心依赖 -->
+  <script src="https://g.alicdn.com/??code/lib/react/18.3.1/umd/react.production.min.js,code/lib/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+  
+  <!-- MTOP 库 (会被 mock 拦截) -->
+  <script src="https://g.alicdn.com/mtb/lib-mtop/2.7.2/mtop.js"></script>
+  
+  <!-- 其他依赖 -->
+  <script src="https://g.alicdn.com/??aes/tracker/3.3.9/index.js,mtb/lib-windvane/3.0.7/windvane.js"></script>
+  <script src="https://g.alicdn.com/??aes/tracker-plugin-pv/3.0.6/index.js,aes/tracker-plugin-event/3.0.0/index.js"></script>
+  
+  <!-- 应用代码 -->
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/962.js"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/p_category.js"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/framework.js"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/178.js"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/main.js"></script>
+  
+  <!-- 调试面板 -->
+  <div id="mock-debug-panel" style="position:fixed;top:10px;right:10px;background:#fff;border:2px solid #0af;padding:10px;z-index:99999;font-size:12px;max-height:400px;overflow:auto;">
+    <h3 style="margin:0 0 10px;">🔌 MTOP Mock 状态</h3>
+    <div id="mock-status">初始化中...</div>
+  </div>
+  
+  <script>
+    // 显示 mock 状态
+    setTimeout(() => {
+      const statusEl = document.getElementById('mock-status');
+      if (window.__MTOP_MOCK_STATUS__) {
+        statusEl.innerHTML = '<pre>' + JSON.stringify(window.__MTOP_MOCK_STATUS__, null, 2) + '</pre>';
+      } else {
+        statusEl.innerHTML = '<span style="color:red;">Mock 未激活</span>';
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

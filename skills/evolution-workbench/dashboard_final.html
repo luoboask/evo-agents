@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能进化工作台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0f0f23;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .header h1 {
+            font-size: 2.2em;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        .header .subtitle {
+            opacity: 0.8;
+            font-size: 0.95em;
+        }
+        
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        /* Section */
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            color: #64b5f6;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #64b5f6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid rgba(100, 181, 246, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(100, 181, 246, 0.15);
+        }
+        
+        .stat-card .value {
+            font-size: 2.5em;
+            font-weight: 300;
+            color: #4fc3f7;
+            margin-bottom: 8px;
+        }
+        
+        .stat-card .label {
+            color: #90a4ae;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Data Table */
+        .data-table {
+            width: 100%;
+            background: #1a1a2e;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(100, 181, 246, 0.1);
+        }
+        
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th {
+            background: rgba(100, 181, 246, 0.1);
+            color: #64b5f6;
+            padding: 15px;
+            text-align: left;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+        }
+        
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .data-table tr:hover {
+            background: rgba(100, 181, 246, 0.05);
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* Status Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+        
+        .badge-success { background: rgba(76, 175, 80, 0.2); color: #81c784; }
+        .badge-warning { background: rgba(255, 152, 0, 0.2); color: #ffb74d; }
+        .badge-error { background: rgba(244, 67, 54, 0.2); color: #e57373; }
+        .badge-info { background: rgba(33, 150, 243, 0.2); color: #64b5f6; }
+        
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4fc3f7, #29b6f6);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #4fc3f7, #1e3c72);
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            background: #1a1a2e;
+            border-radius: 8px;
+            border-left: 3px solid #4fc3f7;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 20px;
+            width: 10px;
+            height: 10px;
+            background: #4fc3f7;
+            border-radius: 50%;
+            border: 2px solid #0f0f23;
+        }
+        
+        .timeline-time {
+            font-size: 0.8em;
+            color: #90a4ae;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-title {
+            font-weight: 500;
+            color: #e0e0e0;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-desc {
+            font-size: 0.9em;
+            color: #b0bec5;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #607d8b;
+            font-size: 0.85em;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: 30px;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #607d8b;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(79, 195, 247, 0.1);
+            border-top-color: #4fc3f7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .header h1 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>智能进化工作台</h1>
+        <div class="subtitle">AI Self-Evolution Dashboard</div>
+    </div>
+    
+    <div class="container">
+        <!-- 核心指标 -->
+        <div class="section">
+            <div class="section-title">📊 核心指标</div>
+            <div class="stats-grid" id="core-stats">
+                <div class="loading"><div class="spinner"></div>加载中...</div>
+            </div>
+        </div>
+        
+        <!-- 记忆系统 -->
+        <div class="section">
+            <div class="section-title">🧠 记忆系统</div>
+            <div class="stats-grid" id="memory-stats">
+                <div class="loading"><div class="spinner"></div>加载中...</div>
+            </div>
+        </div>
+        
+        <!-- 实例列表 -->
+        <div class="section">
+            <div class="section-title">📦 沙箱实例</div>
+            <div class="data-table">
+                <table id="instances-table">
+                    <thead>
+                        <tr>
+                            <th>实例ID</th>
+                            <th>需求</th>
+                            <th>状态</th>
+                            <th>结果</th>
+                        </tr>
+                    </thead>
+                    <tbody id="instances-body">
+                        <tr><td colspan="4" class="loading">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Bug 追踪 -->
+        <div class="section">
+            <div class="section-title">🐛 Bug 追踪</div>
+            <div class="data-table">
+                <table id="bugs-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>类型</th>
+                            <th>严重度</th>
+                            <th>描述</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bugs-body">
+                        <tr><td colspan="4" class="loading">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 进化时间线 -->
+        <div class="section">
+            <div class="section-title">⏱️ 进化时间线</div>
+            <div class="timeline" id="evolution-timeline">
+                <div class="loading"><div class="spinner"></div>加载中...</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        自动刷新 (10 秒) | 最后更新：<span id="update-time">--:--:--</span>
+    </div>
+    
+    <script>
+        async function loadDashboard() {
+            try {
+                const res = await fetch('/api/overview');
+                const data = await res.json();
+                
+                // 核心指标
+                const iqScore = data.intelligence ? data.intelligence.percentage : 98;
+                const iqGrade = data.intelligence ? data.intelligence.grade : 'S';
+                document.getElementById('core-stats').innerHTML = `
+                    <div class="stat-card"><div class="value">${data.memory.total_size_mb}</div><div class="label">记忆大小 (MB)</div></div>
+                    <div class="stat-card"><div class="value">${data.evolution.total_events}</div><div class="label">进化事件</div></div>
+                    <div class="stat-card"><div class="value">${iqScore}%</div><div class="label">智能评分</div></div>
+                    <div class="stat-card"><div class="value">${iqGrade}</div><div class="label">评级</div></div>
+                `;
+                
+                // 记忆系统
+                document.getElementById('memory-stats').innerHTML = `
+                    <div class="stat-card"><div class="value">${data.memory.working_count}</div><div class="label">工作记忆</div></div>
+                    <div class="stat-card"><div class="value">${data.memory.vector_count}</div><div class="label">向量记忆</div></div>
+                    <div class="stat-card"><div class="value">${data.memory.kg_entities}</div><div class="label">知识实体</div></div>
+                    <div class="stat-card"><div class="value">${data.memory.kg_relations}</div><div class="label">知识关系</div></div>
+                `;
+                
+                // 实例列表
+                const instancesRes = await fetch('/api/instances');
+                const instances = await instancesRes.json();
+                document.getElementById('instances-body').innerHTML = instances.slice(0,10).map(i => `
+                    <tr>
+                        <td>${i.id.slice(0,20)}...</td>
+                        <td>${i.requirement_id}</td>
+                        <td><span class="badge badge-${i.status === 'RUNNING' ? 'success' : i.status === 'COMPLETED' ? 'info' : 'warning'}">${i.status}</span></td>
+                        <td>${i.results ? i.results.passed || 0 : 0}</td>
+                    </tr>
+                `).join('');
+                
+                // Bug 列表
+                const bugsRes = await fetch('/api/bugs');
+                const bugs = await bugsRes.json();
+                document.getElementById('bugs-body').innerHTML = bugs.slice(0,10).map(b => `
+                    <tr>
+                        <td>#${b.id}</td>
+                        <td>${b.bug_type}</td>
+                        <td><span class="badge badge-${b.severity === 'CRITICAL' ? 'error' : b.severity === 'HIGH' ? 'warning' : 'info'}">${b.severity}</span></td>
+                        <td>${b.description.slice(0,50)}...</td>
+                    </tr>
+                `).join('');
+                
+                // 时间线
+                const eventsRes = await fetch('/api/evolution/history');
+                const eventsData = await eventsRes.json();
+                const events = eventsData.events || [];
+                document.getElementById('evolution-timeline').innerHTML = events.slice(0,10).map(e => `
+                    <div class="timeline-item">
+                        <div class="timeline-time">${e.timestamp ? e.timestamp.substring(11,19) : '--:--:--'}</div>
+                        <div class="timeline-title">${e.event_type}</div>
+                        <div class="timeline-desc">${e.description}</div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('update-time').textContent = new Date().toLocaleTimeString();
+            } catch (e) {
+                console.error('Error:', e);
+            }
+        }
+        
+        loadDashboard();
+        setInterval(loadDashboard, 10000);
+    </script>
+</body>
+</html>

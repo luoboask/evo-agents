@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charSet="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>淘宝日本 - 分类页面 (Mock 联调版)</title>
+  
+  <!-- 关键：在 mtop.js 之前加载 Mock 拦截器 -->
+  <script>
+  // 内联 Mock 拦截器 (避免外部文件加载问题)
+  (function() {
+    'use strict';
+    
+    console.log('[MTOP Mock] 拦截器初始化...');
+    
+    // Mock 数据
+    const MOCK_DATA = {
+      'mtop.relationrecommend.tiantaojprecommend.recommend': {
+        ret: ['SUCCESS::调用成功'],
+        v: '1.0',
+        traceId: 'mock_' + Date.now(),
+        data: {
+          result: [{
+            layoutInfo: { listHeader: ['rcmdTitle'] },
+            mods: {
+              listItems: [
+                {
+                  image: { imgUrl: 'https://pic-cdn-jp.tao-media.co/kf/S23c00cde0a4649579fe0d5a39a401533o.jpg', imgType: '3:4' },
+                  itemType: 'rmdproductV3',
+                  productId: '1001006085354675',
+                  title: { displayTitle: '極上の柔らかさのランニングパンツ【夏用・薄手・通気性】', rowNum: 1 },
+                  prices: {
+                    originalPrice: { formattedPrice: '¥ 3,712', minPrice: 3712, currencyCode: 'JPY' },
+                    salePrice: { formattedPrice: '¥ 2,341', minPrice: 2341, discount: 36, currencyCode: 'JPY' }
+                  }
+                },
+                {
+                  image: { imgUrl: 'https://pic-cdn-jp.tao-media.co/kf/S68032c6541fe46a4aa47fd1cdf913443A.jpg', imgType: '3:4' },
+                  itemType: 'rmdproductV3',
+                  productId: '1001006091442084',
+                  title: { displayTitle: 'ベッドサイドテーブル 可動式 昇降式 パソコンデスク', rowNum: 1 },
+                  prices: {
+                    originalPrice: { formattedPrice: '¥ 2,614', minPrice: 2614, currencyCode: 'JPY' },
+                    salePrice: { formattedPrice: '¥ 1,353', minPrice: 1353, discount: 48, currencyCode: 'JPY' }
+                  }
+                }
+              ]
+            }
+          }],
+          rcmdTitle: { title: 'RECOMMEND' }
+        }
+      },
+      'mtop.alibaba.jp.guide.page.get': {
+        ret: ['SUCCESS::调用成功'],
+        v: '1.0',
+        traceId: 'mock_' + Date.now(),
+        data: { pageCode: '541699', pageName: '新分类 - 女性穿搭', cards: [] }
+      },
+      'mtop.jptao.ug.popx.check': {
+        ret: ['SUCCESS::调用成功'],
+        v: '1.0',
+        data: { result: true, success: true, uuid: 'mock_uuid' }
+      },
+      'mtop.jptao.ug.popx.list': {
+        ret: ['SUCCESS::调用成功'],
+        v: '1.0',
+        data: { success: true, activities: [], actions: [], traces: [] }
+      },
+      'mtop.jp.wishlist.item.add': {
+        ret: ['SUCCESS::调用成功'],
+        v: '1.0',
+        data: { result: 'true' }
+      },
+      'mtop.jp.interaction.execute': {
+        ret: ['SUCCESS::调用成功'],
+        data: { result: 'true' }
+      }
+    };
+    
+    // 状态
+    window.__MTOP_MOCK_STATUS__ = {
+      enabled: true,
+      interceptedCount: 0,
+      mockedAPIs: Object.keys(MOCK_DATA),
+      startTime: Date.now()
+    };
+    
+    // 拦截 mtop.request
+    const originalMtop = window.mtop;
+    
+    // 等待 mtop 加载完成后拦截
+    function setupInterceptor() {
+      if (!window.mtop || !window.mtop.request) {
+        setTimeout(setupInterceptor, 100);
+        return;
+      }
+      
+      const originalRequest = window.mtop.request;
+      
+      window.mtop.request = function(api, params, callback) {
+        let apiName = typeof api === 'object' ? api.api : api;
+        let cb = typeof api === 'object' ? params : callback;
+        
+        console.log('[MTOP Mock] 拦截请求:', apiName);
+        
+        if (MOCK_DATA[apiName]) {
+          window.__MTOP_MOCK_STATUS__.interceptedCount++;
+          window.__MTOP_MOCK_STATUS__.lastAPI = apiName;
+          
+          console.log('[MTOP Mock] ✅ 返回 mock:', apiName);
+          
+          setTimeout(() => {
+            const mockResponse = MOCK_DATA[apiName];
+            if (typeof cb === 'function') cb(null, mockResponse);
+            window.dispatchEvent(new CustomEvent('mtop-mock-response', { detail: { api: apiName, data: mockResponse } }));
+          }, 50 + Math.random() * 100);
+          
+          return Promise.resolve(mockResponse);
+        }
+        
+        return originalRequest.call(this, api, params, cb);
+      };
+      
+      console.log('[MTOP Mock] ✅ 拦截器已激活');
+    }
+    
+    setupInterceptor();
+  })();
+  </script>
+  
+  <!-- CDN 资源 -->
+  <link href="https://pic-cdn-jp.tao-media.co/kf/Sd86651dc659d452283b767be206a4706v/64x64.png" rel="shortcut icon" type="image/x-icon"/>
+  <link rel="stylesheet" href="https://assets.alicdn.com/g/ae-fe/cosmos/0.0.254/pc/index.css"/>
+  <link rel="stylesheet" type="text/css" href="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/css/main.css"/>
+  <link rel="stylesheet" type="text/css" href="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/css/962.css"/>
+  <link rel="stylesheet" type="text/css" href="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/css/p_category.css"/>
+  
+  <script type="text/javascript">
+    (function(w, d, s, q) {
+      w[q] = w[q] || [];
+      var f = d.getElementsByTagName(s)[0], j = d.createElement(s);
+      j.async = true; j.id = 'beacon-aplus';
+      j.setAttribute('exparams', 'sidx=aplusSidex&ckx=aplusCkx');
+      j.src = "//g.alicdn.com/alilog/mlog/aplus_v2.js";
+      j.crossorigin = 'anonymous';
+      f.parentNode.insertBefore(j, f);
+    })(window, document, 'script', 'aplus_queue');
+  </script>
+  
+  <script>
+    window.__ICE_APP_CONTEXT__ = {
+      appData: null,
+      loaderData: { category: { pageConfig: {} } },
+      routePath: "/category",
+      matchedIds: ["category"],
+      documentOnly: true,
+      renderMode: "CSR"
+    };
+  </script>
+</head>
+<body>
+  <div id="ice-container"></div>
+  
+  <!-- 核心依赖 -->
+  <script src="https://g.alicdn.com/??code/lib/react/18.3.1/umd/react.production.min.js,code/lib/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+  
+  <!-- MTOP 库 (会被上面的拦截器拦截) -->
+  <script src="https://g.alicdn.com/mtb/lib-mtop/2.7.2/mtop.js"></script>
+  
+  <!-- 其他依赖 -->
+  <script src="https://g.alicdn.com/??aes/tracker/3.3.9/index.js,mtb/lib-windvane/3.0.7/windvane.js"></script>
+  <script src="https://g.alicdn.com/??aes/tracker-plugin-pv/3.0.6/index.js,aes/tracker-plugin-event/3.0.0/index.js"></script>
+  
+  <!-- 应用代码 -->
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/962.js"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/p_category.js"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/framework.js"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/178.js"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/main.js"></script>
+  <script src="//g.alicdn.com/mtb/lib-windvane/3.0.7/windvane.js" crossorigin="anonymous"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-fsp-analyser/0.0.4/sfsp_v2.js" crossorigin="anonymous"></script>
+  
+  <!-- 调试面板 -->
+  <div id="mock-debug-panel" style="position:fixed;top:10px;right:10px;background:#fff;border:2px solid #0af;padding:15px;z-index:99999;font-size:12px;max-height:500px;overflow:auto;min-width:320px;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:8px;">
+    <h3 style="margin:0 0 10px;font-size:14px;color:#0af;">🔌 MTOP Mock 状态 (联调版)</h3>
+    <div id="mock-status">
+      <div style="color:#999;">初始化中...</div>
+    </div>
+    <div style="margin-top:15px;padding-top:10px;border-top:1px solid #eee;">
+      <strong style="font-size:12px;">📝 请求日志:</strong>
+      <div id="mock-logs" style="margin-top:5px;max-height:200px;overflow:auto;font-family:monospace;font-size:11px;color:#666;"></div>
+    </div>
+    <div style="margin-top:15px;padding-top:10px;border-top:1px solid #eee;">
+      <button onclick="testMock()" style="width:100%;padding:8px;background:#1890ff;color:#fff;border:none;border-radius:4px;cursor:pointer;">🧪 测试 Mock</button>
+    </div>
+  </div>
+  
+  <script>
+    const mockLogs = [];
+    
+    function addLog(msg) {
+      const time = new Date().toLocaleTimeString('zh-CN', {hour12:false});
+      mockLogs.unshift(`[${time}] ${msg}`);
+      if (mockLogs.length > 30) mockLogs.pop();
+      updateLogs();
+    }
+    
+    function updateLogs() {
+      const el = document.getElementById('mock-logs');
+      if (el) el.innerHTML = mockLogs.map(l => `<div>${l}</div>`).join('');
+    }
+    
+    function updateStatus() {
+      const el = document.getElementById('mock-status');
+      if (!el) return;
+      
+      const s = window.__MTOP_MOCK_STATUS__;
+      if (s) {
+        el.innerHTML = `
+          <div style="margin-bottom:8px;"><strong>状态:</strong> <span style="color:${s.enabled?'#52c41a':'#ff4d4f'}">${s.enabled?'✅已激活':'❌未激活'}</span></div>
+          <div style="margin-bottom:8px;"><strong>拦截次数:</strong> <span style="color:#1890ff;font-weight:bold;">${s.interceptedCount||0}</span></div>
+          <div style="margin-bottom:8px;"><strong>API:</strong> ${(s.mockedAPIs||[]).length}个</div>
+          <div style="margin-bottom:8px;"><strong>最后:</strong> ${s.lastAPI||'-'}</div>
+        `;
+      } else {
+        el.innerHTML = '<div style="color:#ff4d4f;">❌ Mock 未激活</div>';
+      }
+    }
+    
+    function testMock() {
+      addLog('测试 Mock 请求...');
+      if (window.mtop && window.mtop.request) {
+        mtop.request('mtop.relationrecommend.tiantaojprecommend.recommend', {}, (err, data) => {
+          if (err) {
+            addLog('❌ 失败：'+JSON.stringify(err));
+          } else {
+            addLog('✅ 成功！收到 '+ (data?.data?.result?.[0]?.mods?.listItems?.length||0) +' 个商品');
+          }
+          updateStatus();
+        });
+      } else {
+        addLog('❌ mtop.request 不可用');
+      }
+    }
+    
+    // 监听 mock 事件
+    window.addEventListener('mtop-mock-response', (e) => {
+      addLog(`📨 ${e.detail.api}`);
+      updateStatus();
+    });
+    
+    // 定期检查
+    let count = 0;
+    const interval = setInterval(() => {
+      count++;
+      updateStatus();
+      addLog(`状态检查 (${count})`);
+      if (count >= 15) clearInterval(interval);
+    }, 1000);
+    
+    addLog('🚀 页面加载开始');
+    window.addEventListener('load', () => {
+      addLog('🎉 页面加载完成');
+      updateStatus();
+    });
+  </script>
+</body>
+</html>

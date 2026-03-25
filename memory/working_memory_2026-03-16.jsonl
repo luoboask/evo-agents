@@ -1,0 +1,4 @@
+{"role": "user", "content": "用户要求删除操作必须授权", "metadata": {}, "importance": "critical", "timestamp": "2026-03-16T15:30:54.768010"}
+{"role": "assistant", "content": "我创建了混合记忆系统", "metadata": {}, "importance": "high", "timestamp": "2026-03-16T15:31:09.099113"}
+{"role": "user", "content": "我喜欢在晚上11点之后工作，这时候效率最高", "metadata": {}, "importance": "high", "timestamp": "2026-03-16T15:45:16.910275"}
+{"role": "assistant", "content": "记住了，你偏好晚上工作，我会在这个时间段保持活跃", "metadata": {}, "importance": "high", "timestamp": "2026-03-16T15:45:34.891496"}

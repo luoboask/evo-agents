@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="10">
+    <title>🧬 智能进化工作台 v2</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #eee;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .header {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: rgba(22, 33, 62, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .card h2 {
+            color: #e94560;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            border-bottom: 2px solid #e94560;
+            padding-bottom: 10px;
+        }
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .metric-value {
+            font-weight: bold;
+            color: #4ecca3;
+        }
+        .intelligence-score {
+            text-align: center;
+            padding: 20px;
+            background: rgba(78, 204, 163, 0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .score-big {
+            font-size: 3em;
+            font-weight: bold;
+            color: #4ecca3;
+        }
+        .grade {
+            font-size: 1.5em;
+            color: #f9a825;
+            margin-top: 10px;
+        }
+        .dimension {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+        }
+        .dimension-name { width: 100px; }
+        .dimension-bar {
+            flex: 1;
+            height: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 10px;
+        }
+        .dimension-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecca3, #667eea);
+            border-radius: 10px;
+        }
+        .prediction {
+            background: rgba(233, 69, 96, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 3px solid #e94560;
+        }
+        .confidence {
+            display: inline-block;
+            padding: 3px 10px;
+            background: rgba(249, 168, 37, 0.2);
+            border-radius: 15px;
+            font-size: 0.85em;
+            color: #f9a825;
+            margin-top: 8px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧬 智能进化工作台 v2</h1>
+        <p>实时监控 AI 智能水平、记忆状态、进化预测</p>
+    </div>
+    
+    <div class="grid">
+        <!-- 智能评估 -->
+        <div class="card">
+            <h2>🧠 智能评估</h2>
+            <div class="intelligence-score">
+                <div class="score-big">96.0%</div>
+                <div class="grade">S+级</div>
+            </div>
+            <div class="dimension">
+                <span class="dimension-name">基础能力</span>
+                <div class="dimension-bar"><div class="dimension-fill" style="width: 100%"></div></div>
+                <span>5/5</span>
+            </div>
+            <div class="dimension">
+                <span class="dimension-name">学习能力</span>
+                <div class="dimension-bar"><div class="dimension-fill" style="width: 100%"></div></div>
+                <span>5/5</span>
+            </div>
+            <div class="dimension">
+                <span class="dimension-name">自主能力</span>
+                <div class="dimension-bar"><div class="dimension-fill" style="width: 80%"></div></div>
+                <span>4/5</span>
+            </div>
+            <div class="dimension">
+                <span class="dimension-name">认知能力</span>
+                <div class="dimension-bar"><div class="dimension-fill" style="width: 100%"></div></div>
+                <span>5/5</span>
+            </div>
+            <div class="dimension">
+                <span class="dimension-name">交互能力</span>
+                <div class="dimension-bar"><div class="dimension-fill" style="width: 100%"></div></div>
+                <span>5/5</span>
+            </div>
+        </div>
+        
+        <!-- 基础指标 -->
+        <div class="card">
+            <h2>📊 基础指标</h2>
+            <div class="metric"><span>技能数量</span><span class="metric-value">6</span></div>
+            <div class="metric"><span>记忆大小</span><span class="metric-value">0.22 MB</span></div>
+            <div class="metric"><span>今日交互</span><span class="metric-value">4</span></div>
+            <div class="metric"><span>成功率</span><span class="metric-value">87.0%</span></div>
+            <div class="metric"><span>健康评分</span><span class="metric-value">83/100</span></div>
+            <div class="metric"><span>知识图谱</span><span class="metric-value">14实体/7关系</span></div>
+        </div>
+        
+        <!-- 记忆详情 -->
+        <div class="card">
+            <h2>💾 记忆详情</h2>
+            <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin: 8px 0;">
+                <div style="font-size: 0.85em; color: #888;">[assistant] [high]</div>
+                <div>我创建了混合记忆系统...</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin: 8px 0;">
+                <div style="font-size: 0.85em; color: #888;">[user] [high]</div>
+                <div>我喜欢在晚上11点之后工作...</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin: 8px 0;">
+                <div style="font-size: 0.85em; color: #888;">[assistant] [high]</div>
+                <div>记住了，你偏好晚上工作...</div>
+            </div>
+        </div>
+        
+        <!-- 预测分析 -->
+        <div class="card">
+            <h2>🔮 预测分析</h2>
+            <div class="prediction">
+                <div style="font-weight: bold; color: #e94560;">[memory_growth]</div>
+                <div>记忆大小将在3天内超过5MB</div>
+                <div style="color: #4ecca3; font-size: 0.9em;">→ 建议启用自动归档</div>
+                <span class="confidence">置信度: 70%</span>
+            </div>
+            <div class="prediction">
+                <div style="font-weight: bold; color: #e94560;">[skill_expansion]</div>
+                <div>技能数量将在1周内达到12个</div>
+                <div style="color: #4ecca3; font-size: 0.9em;">→ 准备技能合并策略</div>
+                <span class="confidence">置信度: 80%</span>
+            </div>
+            <div class="prediction">
+                <div style="font-weight: bold; color: #e94560;">[intelligence_growth]</div>
+                <div>智能评分将在1周内达到A级(90%)</div>
+                <div style="color: #4ecca3; font-size: 0.9em;">→ 继续当前进化策略</div>
+                <span class="confidence">置信度: 75%</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>💡 自动刷新 (10秒) | 16:14:00</p>
+        <p>🚀 智能进化系统运行中</p>
+    </div>
+</body>
+</html>

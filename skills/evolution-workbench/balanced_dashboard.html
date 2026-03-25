@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能进化工作台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #4ecca3;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .card {
+            background: #16213e;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        h2 {
+            color: #e94560;
+            border-bottom: 2px solid #e94560;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .expand-btn {
+            background: transparent;
+            border: 1px solid #4ecca3;
+            color: #4ecca3;
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+        .expand-btn:hover {
+            background: rgba(78, 204, 163, 0.2);
+        }
+        .summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .summary-item {
+            flex: 1;
+            min-width: 120px;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .summary-item .number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #4ecca3;
+        }
+        .summary-item .label {
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 5px;
+        }
+        .detail {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .detail.show {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        th {
+            color: #4ecca3;
+            font-weight: 600;
+            background: rgba(0,0,0,0.2);
+        }
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+        .tag-running { background: rgba(78, 204, 163, 0.3); color: #4ecca3; }
+        .tag-completed { background: rgba(102, 126, 234, 0.3); color: #667eea; }
+        .tag-critical { background: rgba(233, 69, 96, 0.3); color: #e94560; }
+        .tag-high { background: rgba(249, 168, 37, 0.3); color: #f9a825; }
+        .tag-medium { background: rgba(102, 126, 234, 0.3); color: #667eea; }
+        .loading { text-align: center; padding: 40px; color: #888; }
+        .refresh {
+            text-align: center;
+            margin-top: 20px;
+            color: #888;
+        }
+        .memory-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+        .memory-step {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+        }
+        .memory-step h4 {
+            color: #4ecca3;
+            margin-bottom: 5px;
+        }
+        .memory-step p {
+            font-size: 0.85em;
+            color: #888;
+        }
+        .arrow {
+            color: #667eea;
+            font-size: 1.5em;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #667eea;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -17px;
+            top: 15px;
+            width: 8px;
+            height: 8px;
+            background: #e94560;
+            border-radius: 50%;
+        }
+        .timeline-item.success::before { background: #4ecca3; }
+        .timeline-time {
+            font-size: 0.8em;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧬 智能进化工作台</h1>
+    
+    <div class="grid">
+        <!-- 概览卡片 -->
+        <div class="card">
+            <h2>📊 系统概览 <button class="expand-btn" onclick="toggleDetail('overview-detail')">展开详情</button></h2>
+            <div class="summary" id="overview-summary">
+                <div class="loading">加载中...</div>
+            </div>
+            <div class="detail" id="overview-detail">
+                <h3>三层记忆架构</h3>
+                <div class="memory-flow">
+                    <div class="memory-step">
+                        <h4>L1 工作记忆</h4>
+                        <p>短期存储<br>微秒级访问</p>
+                    </div>
+                    <span class="arrow">→</span>
+                    <div class="memory-step">
+                        <h4>L2 向量记忆</h4>
+                        <p>语义嵌入<br>毫秒级访问</p>
+                    </div>
+                    <span class="arrow">→</span>
+                    <div class="memory-step">
+                        <h4>L3 知识图谱</h4>
+                        <p>长期存储<br>结构化查询</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 记忆系统 -->
+        <div class="card">
+            <h2>🧠 记忆系统 <button class="expand-btn" onclick="toggleDetail('memory-detail')">展开详情</button></h2>
+            <div class="summary" id="memory-summary">
+                <div class="loading">加载中...</div>
+            </div>
+            <div class="detail" id="memory-detail">
+                <table id="memory-table">
+                    <thead><tr><th>层级</th><th>数量</th><th>访问速度</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 实例列表 -->
+        <div class="card">
+            <h2>📦 沙箱实例 <button class="expand-btn" onclick="toggleDetail('instances-detail')">展开详情</button></h2>
+            <div class="summary" id="instances-summary">
+                <div class="loading">加载中...</div>
+            </div>
+            <div class="detail" id="instances-detail">
+                <table id="instances-table">
+                    <thead><tr><th>ID</th><th>需求</th><th>状态</th><th>结果</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Bug 追踪 -->
+        <div class="card">
+            <h2>🐛 Bug 追踪 <button class="expand-btn" onclick="toggleDetail('bugs-detail')">展开详情</button></2>
+            <div class="summary" id="bugs-summary">
+                <div class="loading">加载中...</div>
+            </div>
+            <div class="detail" id="bugs-detail">
+                <table id="bugs-table">
+                    <thead><tr><th>ID</th><th>类型</th><th>严重度</th><th>描述</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 进化时间线 -->
+        <div class="card">
+            <h2>⏱️ 进化时间线 <button class="expand-btn" onclick="toggleDetail('timeline-detail')">展开详情</button></h2>
+            <div class="summary" id="timeline-summary">
+                <div class="loading">加载中...</div>
+            </div>
+            <div class="detail" id="timeline-detail">
+                <div class="timeline" id="timeline-content"></div>
+            </div>
+        </div>
+        
+        <!-- 智能评分 -->
+        <div class="card">
+            <h2>📈 智能评分 <button class="expand-btn" onclick="toggleDetail('intelligence-detail')">展开详情</button></h2>
+            <div class="summary" id="intelligence-summary">
+                <div class="loading">加载中...</div>
+            </div>
+            <div class="detail" id="intelligence-detail">
+                <table id="intelligence-table">
+                    <thead><tr><th>维度</th><th>评分</th><th>进度</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="refresh">
+        自动刷新 (10秒) | 最后更新: <span id="time">--:--:--</span>
+    </div>
+    
+    <script>
+        function toggleDetail(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('show');
+            event.target.textContent = el.classList.contains('show') ? '收起详情' : '展开详情';
+        }
+        
+        async function loadAll() {
+            try {
+                // 加载概览
+                const res = await fetch('/api/overview');
+                const data = await res.json();
+                
+                // 概览摘要
+                document.getElementById('overview-summary').innerHTML = `
+                    <div class="summary-item"><div class="number">${data.memory.total_size_mb}</div><div class="label">记忆大小(MB)</div></div>
+                    <div class="summary-item"><div class="number">${data.evolution.total_events}</div><div class="label">总事件</div></div>
+                    <div class="summary-item"><div class="number">${data.intelligence.percentage}%</div><div class="label">智能评分</div></div>
+                `;
+                
+                // 记忆摘要
+                document.getElementById('memory-summary').innerHTML = `
+                    <div class="summary-item"><div class="number">${data.memory.working_count}</div><div class="label">工作记忆</div></div>
+                    <div class="summary-item"><div class="number">${data.memory.vector_count}</div><div class="label">向量记忆</div></div>
+                    <div class="summary-item"><div class="number">${data.memory.kg_entities}</div><div class="label">知识实体</div></div>
+                    <div class="summary-item"><div class="number">${data.memory.kg_relations}</div><div class="label">知识关系</div></div>
+                `;
+                
+                // 智能评分摘要
+                document.getElementById('intelligence-summary').innerHTML = `
+                    <div class="summary-item"><div class="number">${data.intelligence.percentage}%</div><div class="label">综合评分 [${data.intelligence.grade}]</div></div>
+                    <div class="summary-item"><div class="number">${data.intelligence.total}/${data.intelligence.max}</div><div class="label">总分</div></div>
+                `;
+                
+                // 填充详情表格
+                document.querySelector('#memory-table tbody').innerHTML = `
+                    <tr><td>L1 工作记忆</td><td>${data.memory.working_count}</td><td>微秒级</td></tr>
+                    <tr><td>L2 向量记忆</td><td>${data.memory.vector_count}</td><td>毫秒级</td></tr>
+                    <tr><td>L3 知识图谱</td><td>${data.memory.kg_entities} 实体 / ${data.memory.kg_relations} 关系</td><td>毫秒级</td></tr>
+                `;
+                
+                const dims = data.intelligence.dimensions;
+                document.querySelector('#intelligence-table tbody').innerHTML = Object.entries(dims).map(([k,v]) => `
+                    <tr>
+                        <td>${k}</td>
+                        <td>${v}/5</td>
+                        <td>${'█'.repeat(v)}${'░'.repeat(5-v)}</td>
+                    </tr>
+                `).join('');
+                
+            } catch (e) {
+                console.error(e);
+            }
+            
+            // 加载表格数据
+            try {
+                const [instRes, bugsRes, eventsRes] = await Promise.all([
+                    fetch('/api/instances'),
+                    fetch('/api/bugs'),
+                    fetch('/api/evolution/history')
+                ]);
+                
+                const instances = await instRes.json();
+                const bugs = await bugsRes.json();
+                const events = await eventsRes.json();
+                
+                // 实例摘要
+                const running = instances.filter(i => i.status === 'RUNNING').length;
+                const completed = instances.filter(i => i.status === 'COMPLETED').length;
+                document.getElementById('instances-summary').innerHTML = `
+                    <div class="summary-item"><div class="number">${instances.length}</div><div class="label">总实例</div></div>
+                    <div class="summary-item"><div class="number">${running}</div><div class="label">运行中</div></div>
+                    <div class="summary-item"><div class="number">${completed}</div><div class="label">已完成</div></div>
+                `;
+                
+                // 实例详情
+                document.querySelector('#instances-table tbody').innerHTML = instances.slice(0,10).map(i => `
+                    <tr>
+                        <td>${i.id.slice(0,15)}...</td>
+                        <td>${i.requirement_id}</td>
+                        <td><span class="tag tag-${i.status.toLowerCase()}">${i.status}</span></td>
+                        <td>${i.results ? `${i.results.passed || 0}/${(i.results.passed || 0) + (i.results.failed || 0)}` : '-'}</td>
+                    </tr>
+                `).join('');
+                
+                // Bug 摘要
+                const critical = bugs.filter(b => b.severity === 'CRITICAL').length;
+                const high = bugs.filter(b => b.severity === 'HIGH').length;
+                document.getElementById('bugs-summary').innerHTML = `
+                    <div class="summary-item"><div class="number">${bugs.length}</div><div class="label">未修复</div></div>
+                    <div class="summary-item"><div class="number">${critical}</div><div class="label">严重</div></div>
+                    <div class="summary-item"><div class="number">${high}</div><div class="label">高优先级</div></div>
+                `;
+                
+                // Bug 详情
+                document.querySelector('#bugs-table tbody').innerHTML = bugs.slice(0,10).map(b => `
+                    <tr>
+                        <td>#${b.id}</td>
+                        <td>${b.bug_type}</td>
+                        <td><span class="tag tag-${b.severity.toLowerCase()}">${b.severity}</span></td>
+                        <td>${b.description.slice(0,40)}...</td>
+                    </tr>
+                `).join('');
+                
+                // 时间线摘要
+                const todayEvents = events.filter(e => e.timestamp && e.timestamp.startsWith(new Date().toISOString().slice(0,10))).length;
+                document.getElementById('timeline-summary').

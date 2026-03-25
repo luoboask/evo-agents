@@ -1,0 +1,23 @@
+{
+  "skills": [
+    "web_search",
+    "memory_search",
+    "exec"
+  ],
+  "patterns": [
+    {
+      "type": "task",
+      "subtype": "search",
+      "timestamp": "2026-03-17T00:25:00",
+      "example": "搜索 openclaw 信息"
+    },
+    {
+      "type": "task",
+      "subtype": "search",
+      "timestamp": "2026-03-17T00:25:05",
+      "example": "使用 web_search 搜索..."
+    }
+  ],
+  "user_preferences": {},
+  "lessons_learned": []
+}

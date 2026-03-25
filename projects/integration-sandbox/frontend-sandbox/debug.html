@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Debug</title>
+<style>
+body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #fff; }
+.section { background: #2a2a2a; padding: 15px; margin: 10px 0; border-radius: 8px; }
+.ok { color: #52c41a; }
+.error { color: #ff4d4f; }
+</style>
+</head>
+<body>
+<h1>🔍 诊断页面</h1>
+
+<div class="section">
+<h2>1. 资源加载</h2>
+<div id="resource-status">检测中...</div>
+</div>
+
+<div class="section">
+<h2>2. Mock 状态</h2>
+<div id="mock-status">检测中...</div>
+</div>
+
+<div class="section">
+<h2>3. 控制台日志</h2>
+<pre id="logs" style="background:#000;padding:10px;max-height:300px;overflow:auto;"></pre>
+</div>
+
+<script>
+const logs = [];
+function log(msg, type='info') {
+  logs.push({ time: new Date().toLocaleTimeString(), msg, type });
+  document.getElementById('logs').innerHTML = logs.map(l => 
+    `<div style="color:${l.type==='error'?'#ff4d4f':'#52c41a'}">[${l.time}] ${l.msg}</div>`
+  ).join('');
+}
+
+// 检查资源
+function checkResources() {
+  const checks = [
+    { name: 'react-bundle.js', url: '/cdn/react-bundle.js' },
+    { name: '962.js', url: '/cdn/jp-fe/jp-new-homepage-category-page/0.0.41/js/962.js' },
+    { name: 'main.js', url: '/cdn/jp-fe/jp-new-homepage-category-page/0.0.41/js/main.js' },
+    { name: 'mtop', check: () => typeof window.mtop !== 'undefined' },
+    { name: 'React', check: () => typeof window.React !== 'undefined' },
+  ];
+  
+  let html = '';
+  checks.forEach(c => {
+    const ok = c.check ? c.check() : true;
+    html += `<div>${ok ? '<span class="ok">✅</span>' : '<span class="error">❌</span>'} ${c.name}</div>`;
+    log(`${ok ? '✅' : '❌'} ${c.name}`);
+  });
+  
+  document.getElementById('resource-status').innerHTML = html;
+}
+
+// 检查 Mock
+function checkMock() {
+  const s = window.__MTOP_MOCK_STATUS__;
+  const el = document.getElementById('mock-status');
+  if (s) {
+    el.innerHTML = `
+      <div><strong>状态:</strong> ${s.enabled ? '<span class="ok">✅ 已激活</span>' : '<span class="error">❌ 未激活</span>'}</div>
+      <div><strong>拦截次数:</strong> ${s.interceptedCount || 0}</div>
+      <div><strong>API:</strong> ${s.mockedAPIs ? s.mockedAPIs.length : 0}</div>
+    `;
+    log('✅ Mock 已激活');
+  } else {
+    el.innerHTML = '<span class="error">❌ Mock 未激活</span>';
+    log('❌ Mock 未激活');
+  }
+}
+
+// 测试 mtop
+function testMtop() {
+  if (window.mtop && window.mtop.request) {
+    log('🧪 测试 mtop.request...');
+    mtop.request('mtop.relationrecommend.tiantaojprecommend.recommend', {}, (err, data) => {
+      if (err) {
+        log('❌ Mock 失败：' + JSON.stringify(err), 'error');
+      } else {
+        const count = data?.data?.result?.[0]?.mods?.listItems?.length || 0;
+        log('✅ Mock 成功！收到 ' + count + ' 个商品', 'ok');
+      }
+      checkMock();
+    });
+  } else {
+    log('❌ mtop.request 不可用', 'error');
+  }
+}
+
+window.onload = function() {
+  log('页面加载完成');
+  checkResources();
+  setTimeout(() => {
+    checkMock();
+    testMtop();
+  }, 1000);
+};
+</script>
+</body>
+</html>

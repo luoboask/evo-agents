@@ -1,0 +1,297 @@
+[
+  {
+    "type": "log",
+    "text": "=== [MTOP Proxy] 初始化 ===",
+    "time": "2026-03-17T18:23:02.394Z"
+  },
+  {
+    "type": "log",
+    "text": "[MTOP Proxy] 检查 mtop...",
+    "time": "2026-03-17T18:23:02.395Z"
+  },
+  {
+    "type": "log",
+    "text": "[MTOP Proxy] window.lib: true",
+    "time": "2026-03-17T18:23:02.395Z"
+  },
+  {
+    "type": "log",
+    "text": "[MTOP Proxy] window.lib.mtop: true",
+    "time": "2026-03-17T18:23:02.395Z"
+  },
+  {
+    "type": "log",
+    "text": "[MTOP Proxy] ✅ mtop 已加载",
+    "time": "2026-03-17T18:23:02.396Z"
+  },
+  {
+    "type": "log",
+    "text": "[MTOP Proxy] ✅ 拦截器安装成功",
+    "time": "2026-03-17T18:23:02.396Z"
+  },
+  {
+    "type": "log",
+    "text": "========================================",
+    "time": "2026-03-17T18:23:02.396Z"
+  },
+  {
+    "type": "log",
+    "text": "=== [MTOP Proxy] 初始化完成 ===",
+    "time": "2026-03-17T18:23:02.396Z"
+  },
+  {
+    "type": "info",
+    "text": "[webpack-dev-server] Server started: Hot Module Replacement enabled, Live Reloading enabled, Progress disabled, Overlay enabled.",
+    "time": "2026-03-17T18:23:02.404Z"
+  },
+  {
+    "type": "log",
+    "text": "[HMR] Waiting for update signal from WDS...",
+    "time": "2026-03-17T18:23:02.407Z"
+  },
+  {
+    "type": "info",
+    "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+    "time": "2026-03-17T18:23:02.429Z"
+  },
+  {
+    "type": "warn",
+    "text": "spmb is empty, pls make sure the code in HTML body tag!",
+    "time": "2026-03-17T18:23:02.499Z"
+  },
+  {
+    "type": "error",
+    "text": "Warning: forwardRef render functions accept exactly two parameters: props and ref. %s Did you forget to use the ref parameter?",
+    "time": "2026-03-17T18:23:02.513Z"
+  },
+  {
+    "type": "error",
+    "text": "Warning: forwardRef render functions accept exactly two parameters: props and ref. %s Did you forget to use the ref parameter?",
+    "time": "2026-03-17T18:23:02.516Z"
+  },
+  {
+    "type": "error",
+    "text": "Warning: forwardRef render functions accept exactly two parameters: props and ref. %s Did you forget to use the ref parameter?",
+    "time": "2026-03-17T18:23:02.517Z"
+  },
+  {
+    "type": "error",
+    "text": "Warning: forwardRef render functions accept exactly two parameters: props and ref. %s Did you forget to use the ref parameter?",
+    "time": "2026-03-17T18:23:02.517Z"
+  },
+  {
+    "type": "log",
+    "text": "[Category] id: 541699",
+    "time": "2026-03-17T18:23:02.534Z"
+  },
+  {
+    "type": "log",
+    "text": "[Category] dataSource: [object Object]",
+    "time": "2026-03-17T18:23:02.536Z"
+  },
+  {
+    "type": "log",
+    "text": "[Category] cardGroups: [array Array]",
+    "time": "2026-03-17T18:23:02.536Z"
+  },
+  {
+    "type": "log",
+    "text": "[object Object]",
+    "time": "2026-03-17T18:23:02.539Z"
+  },
+  {
+    "type": "log",
+    "text": "[Category] 开始请求 pageId: 541699",
+    "time": "2026-03-17T18:23:02.540Z"
+  },
+  {
+    "type": "log",
+    "text": "[Category] mtop: undefined",
+    "time": "2026-03-17T18:23:02.540Z"
+  },
+  {
+    "type": "log",
+    "text": "[Category] 调用 getHomePageData",
+    "time": "2026-03-17T18:23:02.541Z"
+  },
+  {
+    "type": "log",
+    "text": "",
+    "time": "2026-03-17T18:23:02.541Z"
+  },
+  {
+    "type": "log",
+    "text": "========== [MTOP Proxy] 拦截请求 ==========",
+    "time": "2026-03-17T18:23:02.541Z"
+  },
+  {
+    "type": "log",
+    "text": "[MTOP Proxy] API: mtop.alibaba.jp.guide.page.get",
+    "time": "2026-03-17T18:23:02.541Z"
+  },
+  {
+    "type": "log",
+    "text": "[MTOP Proxy] URL: http://localhost:8090/mtop/comet/async.api?api=mtop.alibaba.jp.guide.page.get&v=1.0&t=1773771782540",
+    "time": "2026-03-17T18:23:02.541Z"
+  },
+  {
+    "type": "log",
+    "text": "[MTOP Proxy] 响应状态: 200",
+    "time": "2026-03-17T18:23:02.560Z"
+  },
+  {
+    "type": "log",
+    "text": "[MTOP Proxy] ✅ 收到 Java 服务响应",
+    "time": "2026-03-17T18:23:02.570Z"
+  },
+  {
+    "type": "log",
+    "text": "[Category] 请求成功: [object Object]",
+    "time": "2026-03-17T18:23:02.570Z"
+  },
+  {
+    "type": "log",
+    "text": "[Category] cardGroups: [array Array]",
+    "time": "2026-03-17T18:23:02.570Z"
+  },
+  {
+    "type": "log",
+    "text": "[Category] 准备设置 dataSource",
+    "time": "2026-03-17T18:23:02.570Z"
+  },
+  {
+    "type": "log",
+    "text": "[Category] dataSource 已设置",
+    "time": "2026-03-17T18:23:02.570Z"
+  },
+  {
+    "type": "log",
+    "text": "[Category] setLoading(false) 已调用",
+    "time": "2026-03-17T18:23:02.570Z"
+  },
+  {
+    "type": "log",
+    "text": "[Category] id: 541699",
+    "time": "2026-03-17T18:23:02.571Z"
+  },
+  {
+    "type": "log",
+    "text": "[Category] dataSource: [object Object]",
+    "time": "2026-03-17T18:23:02.571Z"
+  },
+  {
+    "type": "log",
+    "text": "[Category] cardGroups: [array Array]",
+    "time": "2026-03-17T18:23:02.571Z"
+  },
+  {
+    "type": "error",
+    "text": "Warning: Each child in a list should have a unique \"key\" prop.%s%s See https://reactjs.org/link/warning-keys for more information.%s \n\nCheck the render method of `CategoryPage`.  \n    at index (http://localhost:3000/js/p_category.js:1255:22)\n    at CategoryPage (http://localhost:3000/js/p_category.js:3897:28)\n    at span\n    at http://localhost:3000/js/vendors-node_modules_ali_odin-jp-recommend_es_index_js-node_modules_ali_virtual-list_esm_inde-26d2bc.js:68657:138\n    at RouteWrapper (http://localhost:3000/js/main.js:9572:13)\n    at Component (http://localhost:3000/js/main.js:8755:117)\n    at RenderedRoute (http://localhost:3000/framework.js:26777:11)\n    at RenderErrorBoundary (http://localhost:3000/framework.js:26728:9)\n    at DataRoutes (http://localhost:3000/framework.js:25562:11)\n    at Router (http://localhost:3000/framework.js:27306:21)\n    at RouterProvider (http://localhost:3000/framework.js:25339:11)\n    at App (http://localhost:3000/js/main.js:9122:16)\n    at ClientRouter (http://localhost:3000/js/main.js:9240:13)",
+    "time": "2026-03-17T18:23:02.573Z"
+  },
+  {
+    "type": "log",
+    "text": "",
+    "time": "2026-03-17T18:23:02.590Z"
+  },
+  {
+    "type": "log",
+    "text": "========== [MTOP Proxy] 拦截请求 ==========",
+    "time": "2026-03-17T18:23:02.590Z"
+  },
+  {
+    "type": "log",
+    "text": "[MTOP Proxy] API: mtop.relationrecommend.TianTaoJpRecommend.recommend",
+    "time": "2026-03-17T18:23:02.590Z"
+  },
+  {
+    "type": "log",
+    "text": "[MTOP Proxy] URL: http://localhost:8090/mtop/comet/async.api?api=mtop.relationrecommend.TianTaoJpRecommend.recommend&v=1.0&t=1773771782590",
+    "time": "2026-03-17T18:23:02.590Z"
+  },
+  {
+    "type": "log",
+    "text": "曝光点=== /jp-product.Pagecategory.pageExp",
+    "time": "2026-03-17T18:23:02.592Z"
+  },
+  {
+    "type": "warn",
+    "text": "Sorry, getMetaInfo is not supported in the current version of the SDK.",
+    "time": "2026-03-17T18:23:02.592Z"
+  },
+  {
+    "type": "warn",
+    "text": "[AES] 未监测到Aplus SDK",
+    "time": "2026-03-17T18:23:02.596Z"
+  },
+  {
+    "type": "log",
+    "text": "[MTOP Proxy] 响应状态: 200",
+    "time": "2026-03-17T18:23:02.619Z"
+  },
+  {
+    "type": "log",
+    "text": "[MTOP Proxy] ✅ 收到 Java 服务响应",
+    "time": "2026-03-17T18:23:02.620Z"
+  },
+  {
+    "type": "warn",
+    "text": "Failed to decode downloaded font: https://pic-cdn-jp.tao-media.co/kf/S5d15192052344117a0419b4f377ea78fu.ttf",
+    "time": "2026-03-17T18:23:02.934Z"
+  },
+  {
+    "type": "warn",
+    "text": "OTS parsing error: glyf: Invalid glyph id used in composite glyph: 673\nglyf: Failed to parse glyph 24\nglyf: Failed to parse table",
+    "time": "2026-03-17T18:23:02.934Z"
+  },
+  {
+    "type": "warn",
+    "text": "Failed to decode downloaded font: https://pic-cdn-jp.tao-media.co/kf/S5d15192052344117a0419b4f377ea78fu.ttf",
+    "time": "2026-03-17T18:23:02.934Z"
+  },
+  {
+    "type": "warn",
+    "text": "OTS parsing error: glyf: Invalid glyph id used in composite glyph: 673\nglyf: Failed to parse glyph 24\nglyf: Failed to parse table",
+    "time": "2026-03-17T18:23:02.934Z"
+  },
+  {
+    "type": "log",
+    "text": "%c [APLUS] -- APLUS INIT SUCCESS background:#3B82FE; padding: 4px; padding-right: 8px; border-radius: 4px; color: #fff;",
+    "time": "2026-03-17T18:23:03.071Z"
+  },
+  {
+    "type": "endGroup",
+    "text": "Error",
+    "time": "2026-03-17T18:23:03.822Z"
+  },
+  {
+    "type": "endGroup",
+    "text": "Error",
+    "time": "2026-03-17T18:23:03.861Z"
+  },
+  {
+    "type": "log",
+    "text": "[date Date]",
+    "time": "2026-03-17T18:23:03.866Z"
+  },
+  {
+    "type": "warn",
+    "text": "Failed to decode downloaded font: https://pic-cdn-jp.tao-media.co/kf/S5d15192052344117a0419b4f377ea78fu.ttf",
+    "time": "2026-03-17T18:23:14.526Z"
+  },
+  {
+    "type": "warn",
+    "text": "OTS parsing error: glyf: Invalid glyph id used in composite glyph: 673\nglyf: Failed to parse glyph 24\nglyf: Failed to parse table",
+    "time": "2026-03-17T18:23:14.526Z"
+  },
+  {
+    "type": "warn",
+    "text": "Failed to decode downloaded font: https://pic-cdn-jp.tao-media.co/kf/S5d15192052344117a0419b4f377ea78fu.ttf",
+    "time": "2026-03-17T18:23:14.535Z"
+  },
+  {
+    "type": "warn",
+    "text": "OTS parsing error: glyf: Invalid glyph id used in composite glyph: 673\nglyf: Failed to parse glyph 24\nglyf: Failed to parse table",
+    "time": "2026-03-17T18:23:14.536Z"
+  }
+]

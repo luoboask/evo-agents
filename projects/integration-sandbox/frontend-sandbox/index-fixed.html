@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charSet="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>淘宝日本 - 分类页面 (Mock 测试)</title>
+  
+  <!-- 注入 MTOP Mock 拦截器 (必须在 mtop.js 之前加载) -->
+  <script src="./mtop-mock.js"></script>
+  
+  <!-- CDN 资源 - 添加错误处理 -->
+  <link href="https://pic-cdn-jp.tao-media.co/kf/Sd86651dc659d452283b767be206a4706v/64x64.png" rel="shortcut icon" type="image/x-icon"/>
+  
+  <!-- 样式加载失败时使用备用样式 -->
+  <link rel="stylesheet" href="https://assets.alicdn.com/g/ae-fe/cosmos/0.0.254/pc/index.css" onerror="loadFallbackCSS()"/>
+  <link rel="stylesheet" type="text/css" href="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/css/main.css" onerror="this.disabled=true"/>
+  <link rel="stylesheet" type="text/css" href="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/css/962.css" onerror="this.disabled=true"/>
+  <link rel="stylesheet" type="text/css" href="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/css/p_category.css" onerror="this.disabled=true"/>
+  
+  <!-- 备用样式 -->
+  <script>
+    function loadFallbackCSS() {
+      const style = document.createElement('style');
+      style.textContent = `
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        #ice-container { max-width: 1200px; margin: 0 auto; background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .header { font-size: 24px; font-weight: bold; margin-bottom: 20px; color: #333; }
+        .loading { text-align: center; padding: 40px; color: #999; }
+      `;
+      document.head.appendChild(style);
+    }
+  </script>
+  
+  <script type="text/javascript">
+    // 错误处理的 aplus 加载
+    try {
+      (function(w, d, s, q) {
+        w[q] = w[q] || [];
+        var f = d.getElementsByTagName(s)[0], j = d.createElement(s);
+        j.async = true; j.id = 'beacon-aplus';
+        j.setAttribute('exparams', 'sidx=aplusSidex&ckx=aplusCkx');
+        j.src = "//g.alicdn.com/alilog/mlog/aplus_v2.js";
+        j.crossorigin = 'anonymous';
+        j.onerror = function() { console.log('[Mock] Aplus 加载失败，已忽略'); };
+        f.parentNode.insertBefore(j, f);
+      })(window, document, 'script', 'aplus_queue');
+    } catch(e) {
+      console.log('[Mock] Aplus 初始化失败:', e);
+    }
+  </script>
+  
+  <!-- 初始化数据 -->
+  <script>
+    window.__ICE_APP_CONTEXT__ = {
+      appData: null,
+      loaderData: { category: { pageConfig: {} } },
+      routePath: "/category",
+      matchedIds: ["category"],
+      documentOnly: true,
+      renderMode: "CSR"
+    };
+    
+    console.log('[Mock] ICE_APP_CONTEXT 已初始化');
+  </script>
+</head>
+<body>
+  <!-- 主容器 -->
+  <div id="ice-container">
+    <div class="loading">
+      <p>🔄 页面加载中...</p>
+      <p style="font-size:12px;color:#999;margin-top:10px;">如果长时间未加载，请检查网络连接或刷新页面</p>
+    </div>
+  </div>
+  
+  <!-- 核心依赖 - 带错误处理 -->
+  <script>
+    function loadScript(url, callback) {
+      const script = document.createElement('script');
+      script.src = url;
+      script.crossorigin = 'anonymous';
+      script.onload = () => { console.log('[Mock] ✅ 加载成功:', url); if(callback) callback(); };
+      script.onerror = () => { 
+        console.warn('[Mock] ⚠️ 加载失败:', url); 
+        if(callback) callback(null, url); 
+      };
+      document.head.appendChild(script);
+    }
+  </script>
+  
+  <!-- React -->
+  <script src="https://g.alicdn.com/??code/lib/react/18.3.1/umd/react.production.min.js,code/lib/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+  
+  <!-- MTOP 库 (会被 mock 拦截) -->
+  <script src="https://g.alicdn.com/mtb/lib-mtop/2.7.2/mtop.js"></script>
+  
+  <!-- 其他依赖 -->
+  <script src="https://g.alicdn.com/??aes/tracker/3.3.9/index.js,mtb/lib-windvane/3.0.7/windvane.js" onerror="this.disabled=true"></script>
+  <script src="https://g.alicdn.com/??aes/tracker-plugin-pv/3.0.6/index.js,aes/tracker-plugin-event/3.0.0/index.js" onerror="this.disabled=true"></script>
+  
+  <!-- 应用代码 -->
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/962.js" onerror="console.warn('[Mock] 962.js 加载失败')"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/p_category.js" onerror="console.warn('[Mock] p_category.js 加载失败')"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/framework.js" onerror="console.warn('[Mock] framework.js 加载失败')"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/178.js" onerror="console.warn('[Mock] 178.js 加载失败')"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/main.js" onerror="console.warn('[Mock] main.js 加载失败')"></script>
+  
+  <!-- WindVane -->
+  <script src="//g.alicdn.com/mtb/lib-windvane/3.0.7/windvane.js" crossorigin="anonymous" onerror="console.warn('[Mock] WindVane 加载失败')"></script>
+  
+  <!-- 分析脚本 -->
+  <script src="https://g.alicdn.com/jp-fe/jp-fsp-analyser/0.0.4/sfsp_v2.js" crossorigin="anonymous" onerror="console.warn('[Mock] 分析脚本加载失败')"></script>
+  
+  <!-- 调试面板 -->
+  <div id="mock-debug-panel" style="position:fixed;top:10px;right:10px;background:#fff;border:2px solid #0af;padding:15px;z-index:99999;font-size:12px;max-height:500px;overflow:auto;min-width:300px;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:8px;">
+    <h3 style="margin:0 0 10px;font-size:14px;color:#0af;">🔌 MTOP Mock 状态</h3>
+    <div id="mock-status">
+      <div style="color:#999;">初始化中...</div>
+    </div>
+    <div style="margin-top:15px;padding-top:10px;border-top:1px solid #eee;">
+      <strong style="font-size:12px;">📝 最近日志:</strong>
+      <div id="mock-logs" style="margin-top:5px;max-height:150px;overflow:auto;font-family:monospace;font-size:11px;color:#666;"></div>
+    </div>
+  </div>
+  
+  <script>
+    // 日志数组
+    const mockLogs = [];
+    
+    function addLog(message) {
+      const timestamp = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+      mockLogs.unshift(`[${timestamp}] ${message}`);
+      if (mockLogs.length > 20) mockLogs.pop();
+      updateLogs();
+    }
+    
+    function updateLogs() {
+      const logsEl = document.getElementById('mock-logs');
+      if (logsEl) {
+        logsEl.innerHTML = mockLogs.map(log => `<div>${log}</div>`).join('');
+      }
+    }
+    
+    // 显示 mock 状态
+    function updateMockStatus() {
+      const statusEl = document.getElementById('mock-status');
+      if (!statusEl) return;
+      
+      if (window.__MTOP_MOCK_STATUS__) {
+        const status = window.__MTOP_MOCK_STATUS__;
+        statusEl.innerHTML = `
+          <div style="margin-bottom:8px;"><strong>状态:</strong> <span style="color:${status.enabled ? '#52c41a' : '#ff4d4f'}">${status.enabled ? '✅ 已激活' : '❌ 未激活'}</span></div>
+          <div style="margin-bottom:8px;"><strong>拦截次数:</strong> <span style="color:#1890ff;font-weight:bold;">${status.interceptedCount || 0}</span></div>
+          <div style="margin-bottom:8px;"><strong>已配置 API:</strong> ${(status.mockedAPIs || []).length} 个</div>
+          <div style="margin-bottom:8px;"><strong>最后拦截:</strong> ${status.lastAPI || '-'}</div>
+          <div style="margin-top:10px;padding:8px;background:#f5f5f5;border-radius:4px;font-size:11px;">
+            <strong>API 列表:</strong><br/>
+            ${(status.mockedAPIs || []).map(api => `<div style="color:#666;margin:2px 0;">• ${api}</div>`).join('')}
+          </div>
+        `;
+        addLog('状态更新成功');
+      } else {
+        statusEl.innerHTML = '<div style="color:#ff4d4f;">❌ Mock 未激活 - 检查 mtop-mock.js 是否加载</div>';
+        addLog('Mock 未激活');
+      }
+    }
+    
+    // 页面加载后定期检查
+    let checkCount = 0;
+    const checkInterval = setInterval(() => {
+      checkCount++;
+      updateMockStatus();
+      addLog(`检查状态 (${checkCount})`);
+      
+      if (checkCount >= 10) {
+        clearInterval(checkInterval);
+        addLog('停止定期检查');
+      }
+    }, 1000);
+    
+    // 初始日志
+    addLog('页面加载开始');
+    addLog('Mock 拦截器：' + (window.__MTOP_MOCK_STATUS__ ? '已加载' : '未检测到'));
+    
+    // 监听 mtop 请求
+    if (window.mtop && window.mtop.request) {
+      const originalRequest = window.mtop.request;
+      addLog('✅ mtop.request 可用');
+    } else {
+      addLog('⚠️ mtop.request 不可用');
+    }
+    
+    // 页面加载完成
+    window.addEventListener('load', () => {
+      addLog('🎉 页面加载完成');
+      updateMockStatus();
+    });
+  </script>
+</body>
+</html>

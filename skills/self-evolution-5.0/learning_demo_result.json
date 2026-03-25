@@ -1,0 +1,20 @@
+{
+  "realtime": 3,
+  "deep_patterns": 8,
+  "transfers": {
+    "total_transfers": 3,
+    "domains_connected": 1,
+    "knowledge_transferred": 0
+  },
+  "social": {
+    "peers_count": 0,
+    "learnings_count": 3,
+    "integrated_count": 3
+  },
+  "creative": {
+    "total_discoveries": 3,
+    "avg_novelty": 0.25,
+    "avg_impact": 0.0,
+    "total_connections": 5
+  }
+}

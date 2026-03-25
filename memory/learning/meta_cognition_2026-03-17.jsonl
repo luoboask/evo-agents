@@ -1,0 +1,3 @@
+{"timestamp": "2026-03-17T00:29:36.082376", "step": "理解会话内容", "confidence": 0.95, "context": {"session_id": "session-2026-03-17-001"}}
+{"timestamp": "2026-03-17T00:29:36.083119", "step": "使用工具：web_search, memory_search, exec", "confidence": 0.9, "context": {"tools": ["web_search", "memory_search", "exec"]}}
+{"timestamp": "2026-03-17T00:29:36.083443", "step": "会话成功完成", "confidence": 0.85, "context": {"success": true}}

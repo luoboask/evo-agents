@@ -1,0 +1,23 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v2.7.0)
+
+2026-03-18 02:37:38.212  INFO 59429 --- [           main] com.mock.MockApplication                 : Starting MockApplication v1.0.0 using Java 11.0.28 on U-J4R06XN4-0048.local with PID 59429 (/Users/dhr/.openclaw/workspace/projects/mock-java-service/target/mock-java-service-1.0.0.jar started by dhr in /Users/dhr/.openclaw/workspace-sandbox-agent)
+2026-03-18 02:37:38.214 DEBUG 59429 --- [           main] com.mock.MockApplication                 : Running with Spring Boot v2.7.0, Spring v5.3.20
+2026-03-18 02:37:38.214  INFO 59429 --- [           main] com.mock.MockApplication                 : No active profile set, falling back to 1 default profile: "default"
+2026-03-18 02:37:38.657  INFO 59429 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8090 (http)
+2026-03-18 02:37:38.662  INFO 59429 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-18 02:37:38.663  INFO 59429 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.63]
+2026-03-18 02:37:38.694  INFO 59429 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-18 02:37:38.694  INFO 59429 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 453 ms
+2026-03-18 02:37:38.915  INFO 59429 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
+2026-03-18 02:37:38.933  INFO 59429 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8090 (http) with context path ''
+2026-03-18 02:37:38.940  INFO 59429 --- [           main] com.mock.MockApplication                 : Started MockApplication in 0.923 seconds (JVM running for 1.143)
+2026-03-18 02:37:42.913  INFO 59429 --- [nio-8090-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-18 02:37:42.914  INFO 59429 --- [nio-8090-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-03-18 02:37:42.915  INFO 59429 --- [nio-8090-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms

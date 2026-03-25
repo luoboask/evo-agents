@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>数据测试</title>
+</head>
+<body>
+    <h1>🧪 API 数据测试</h1>
+    <div id="result"></div>
+    
+    <script>
+        async function test() {
+            const result = document.getElementById('result');
+            result.innerHTML = '<h2>🔄 测试中...</h2>';
+            
+            try {
+                // 测试 intelligence-report API
+                const res = await fetch('/api/intelligence-report');
+                const data = await res.json();
+                
+                result.innerHTML = `
+                    <h2>✅ API 调用成功</h2>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                console.log('Data:', data);
+            } catch (error) {
+                result.innerHTML = `
+                    <h2>❌ 错误</h2>
+                    <p>${error.message}</p>
+                    <p>${error.stack}</p>
+                `;
+                console.error('Error:', error);
+            }
+        }
+        
+        test();
+    </script>
+</body>
+</html>

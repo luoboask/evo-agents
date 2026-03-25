@@ -1,0 +1,137 @@
+{
+  "entities": {
+    "technology_python": {
+      "id": "technology_python",
+      "name": "Python",
+      "type": "technology",
+      "confidence": 0.8,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    },
+    "technology_ai": {
+      "id": "technology_ai",
+      "name": "AI",
+      "type": "technology",
+      "confidence": 0.8,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    },
+    "technology_openclaw": {
+      "id": "technology_openclaw",
+      "name": "OpenClaw",
+      "type": "technology",
+      "confidence": 0.8,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    },
+    "technology_agent": {
+      "id": "technology_agent",
+      "name": "Agent",
+      "type": "technology",
+      "confidence": 0.8,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    },
+    "technology_skill": {
+      "id": "technology_skill",
+      "name": "Skill",
+      "type": "technology",
+      "confidence": 0.8,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    },
+    "concept_learning": {
+      "id": "concept_learning",
+      "name": "Learning",
+      "type": "concept",
+      "confidence": 0.8,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    },
+    "concept_intelligence": {
+      "id": "concept_intelligence",
+      "name": "Intelligence",
+      "type": "concept",
+      "confidence": 0.8,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    },
+    "person_openclaw_uses": {
+      "id": "person_openclaw_uses",
+      "name": "OpenClaw uses",
+      "type": "person",
+      "confidence": 0.8,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    },
+    "person_python_for": {
+      "id": "person_python_for",
+      "name": "Python for",
+      "type": "person",
+      "confidence": 0.8,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    },
+    "person_ai_improves": {
+      "id": "person_ai_improves",
+      "name": "AI improves",
+      "type": "person",
+      "confidence": 0.8,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    },
+    "person_learning_efficiency": {
+      "id": "person_learning_efficiency",
+      "name": "learning efficiency",
+      "type": "person",
+      "confidence": 0.8,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    },
+    "person_machine_learning": {
+      "id": "person_machine_learning",
+      "name": "Machine Learning",
+      "type": "person",
+      "confidence": 0.8,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    },
+    "person_is_part": {
+      "id": "person_is_part",
+      "name": "is part",
+      "type": "person",
+      "confidence": 0.8,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    },
+    "person_of_artificial": {
+      "id": "person_of_artificial",
+      "name": "of Artificial",
+      "type": "person",
+      "confidence": 0.8,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    }
+  },
+  "relations": [
+    {
+      "id": "uses_0",
+      "type": "uses",
+      "from": "openclaw",
+      "to": "python",
+      "confidence": 0.7,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    },
+    {
+      "id": "part_of_1",
+      "type": "part_of",
+      "from": "learning",
+      "to": "artificial",
+      "confidence": 0.7,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    },
+    {
+      "id": "improves_2",
+      "type": "improves",
+      "from": "ai",
+      "to": "learning",
+      "confidence": 0.7,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    },
+    {
+      "id": "depends_on_3",
+      "type": "depends_on",
+      "from": "agent",
+      "to": "skill",
+      "confidence": 0.7,
+      "source": "\n    OpenClaw uses Python for implementation. \n    AI improves learning efficiency. \n    Machine Lea"
+    }
+  ],
+  "last_updated": "2026-03-17T01:49:51.764110"
+}

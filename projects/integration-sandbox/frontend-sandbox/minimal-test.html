@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>MTOP Mock 测试 - 最小化版本</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #fff; }
+    .section { background: #2a2a2a; padding: 15px; margin: 10px 0; border-radius: 8px; }
+    .section h2 { margin-top: 0; color: #0af; }
+    .ok { color: #52c41a; }
+    .error { color: #ff4d4f; }
+    .warn { color: #faad14; }
+    pre { background: #000; padding: 10px; border-radius: 4px; overflow: auto; max-height: 300px; }
+    button { background: #1890ff; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+    button:hover { background: #40a9ff; }
+  </style>
+</head>
+<body>
+  <h1>🔍 MTOP Mock 最小化测试</h1>
+  
+  <div class="section">
+    <h2>1. 环境检测</h2>
+    <div id="env-status">检测中...</div>
+  </div>
+  
+  <div class="section">
+    <h2>2. Mock 状态</h2>
+    <div id="mock-status">初始化...</div>
+  </div>
+  
+  <div class="section">
+    <h2>3. 测试操作</h2>
+    <button onclick="testMtopRequest()">🧪 测试 mtop.request</button>
+    <button onclick="testMtopGet()">🧪 测试 mtop.get</button>
+    <button onclick="showFullResponse()">📄 显示完整响应</button>
+    <button onclick="clearLog()">🗑️ 清空日志</button>
+  </div>
+  
+  <div class="section">
+    <h2>4. 请求日志</h2>
+    <pre id="log">等待请求...</pre>
+  </div>
+  
+  <div class="section">
+    <h2>5. 最后响应</h2>
+    <pre id="response">-</pre>
+  </div>
+  
+  <!-- Mock 拦截器 -->
+  <script>
+    console.log('[Mock] 开始加载拦截器...');
+    
+    const MOCK_DATA = {
+      'mtop.relationrecommend.tiantaojprecommend.recommend': {
+        ret: ['SUCCESS::调用成功'],
+        v: '1.0',
+        traceId: 'mock_' + Date.now(),
+        data: {
+          result: [{
+            layoutInfo: { listHeader: ['rcmdTitle'] },
+            mods: {
+              listItems: [
+                {
+                  image: { imgUrl: 'https://pic-cdn-jp.tao-media.co/kf/S23c00cde0a4649579fe0d5a39a401533o.jpg', imgType: '3:4' },
+                  itemType: 'rmdproductV3',
+                  productId: '1001006085354675',
+                  title: { displayTitle: '極上の柔らかさのランニングパンツ', rowNum: 1 },
+                  prices: {
+                    originalPrice: { formattedPrice: '¥ 3,712', minPrice: 3712 },
+                    salePrice: { formattedPrice: '¥ 2,341', minPrice: 2341, discount: 36 }
+                  }
+                },
+                {
+                  image: { imgUrl: 'https://pic-cdn-jp.tao-media.co/kf/S68032c6541fe46a4aa47fd1cdf913443A.jpg', imgType: '3:4' },
+                  itemType: 'rmdproductV3',
+                  productId: '1001006091442084',
+                  title: { displayTitle: 'ベッドサイドテーブル 可動式', rowNum: 1 },
+                  prices: {
+                    originalPrice: { formattedPrice: '¥ 2,614', minPrice: 2614 },
+                    salePrice: { formattedPrice: '¥ 1,353', minPrice: 1353, discount: 48 }
+                  }
+                }
+              ]
+            }
+          }],
+          rcmdTitle: { title: 'RECOMMEND' }
+        }
+      },
+      'mtop.alibaba.jp.guide.page.get': {
+        ret: ['SUCCESS::调用成功'],
+        v: '1.0',
+        traceId: 'mock_' + Date.now(),
+        data: {
+          pageCode: '541699',
+          pageName: '新分类 - 女性穿搭',
+          cards: []
+        }
+      }
+    };
+    
+    window.__MTOP_MOCK_STATUS__ = {
+      enabled: true,
+      interceptedCount: 0,
+      mockedAPIs: Object.keys(MOCK_DATA),
+      lastResponse: null,
+      logs: []
+    };
+    
+    function log(msg, type = 'info') {
+      const status = window.__MTOP_MOCK_STATUS__;
+      status.logs.unshift({ time: new Date().toLocaleTimeString(), msg, type });
+      if (status.logs.length > 50) status.logs.pop();
+      updateLog();
+    }
+    
+    function updateLog() {
+      const el = document.getElementById('log');
+      const status = window.__MTOP_MOCK_STATUS__;
+      el.textContent = status.logs.map(l => `[${l.time}] ${l.msg}`).join('\n');
+    }
+    
+    function clearLog() {
+      window.__MTOP_MOCK_STATUS__.logs = [];
+      updateLog();
+      log('日志已清空', 'warn');
+    }
+    
+    // 拦截 mtop
+    const setupInterceptor = () => {
+      if (!window.mtop) {
+        console.log('[Mock] 等待 mtop 加载...');
+        setTimeout(setupInterceptor, 100);
+        return;
+      }
+      
+      console.log('[Mock] mtop 已加载，开始拦截');
+      log('✅ mtop 库已加载');
+      
+      const originalRequest = window.mtop.request;
+      
+      window.mtop.request = function(api, params, callback) {
+        const apiName = typeof api === 'object' ? api.api : api;
+        const cb = typeof api === 'object' ? params : callback;
+        
+        console.log('[Mock] 拦截请求:', apiName);
+        log(`📡 请求：${apiName}`);
+        
+        const status = window.__MTOP_MOCK_STATUS__;
+        status.interceptedCount++;
+        status.lastAPI = apiName;
+        
+        if (MOCK_DATA[apiName]) {
+          log(`✅ Mock 命中：${apiName}`, 'ok');
+          
+          const mockResponse = MOCK_DATA[apiName];
+          status.lastResponse = mockResponse;
+          
+          setTimeout(() => {
+            if (typeof cb === 'function') {
+              console.log('[Mock] 调用回调');
+              cb(null, mockResponse);
+            }
+            window.dispatchEvent(new CustomEvent('mtop-mock-response', { 
+              detail: { api: apiName, data: mockResponse } 
+            }));
+          }, 50 + Math.random() * 100);
+          
+          return Promise.resolve(mockResponse);
+        } else {
+          log(`⚠️ 未配置 Mock: ${apiName}`, 'warn');
+          
+          const fallback = {
+            ret: ['SUCCESS::Mock Fallback'],
+            v: '1.0',
+            data: {}
+          };
+          
+          setTimeout(() => {
+            if (typeof cb === 'function') cb(null, fallback);
+          }, 50);
+          
+          return Promise.resolve(fallback);
+        }
+      };
+      
+      log('✅ Mock 拦截器已激活', 'ok');
+      updateMockStatus();
+    };
+    
+    setupInterceptor();
+    
+    // 更新状态
+    function updateMockStatus() {
+      const el = document.getElementById('mock-status');
+      const s = window.__MTOP_MOCK_STATUS__;
+      el.innerHTML = `
+        <div><strong>状态:</strong> ${s.enabled ? '<span class="ok">✅ 已激活</span>' : '<span class="error">❌ 未激活</span>'}</div>
+        <div><strong>拦截次数:</strong> ${s.interceptedCount || 0}</div>
+        <div><strong>已配置 API:</strong> ${s.mockedAPIs.length} 个</div>
+        <div><strong>最后拦截:</strong> ${s.lastAPI || '-'}</div>
+        <div style="margin-top:10px;"><strong>API 列表:</strong><br/>${s.mockedAPIs.map(api => `<span style="color:#666;margin:2px 0;display:block;">• ${api}</span>`).join('')}</div>
+      `;
+    }
+    
+    // 测试函数
+    function testMtopRequest() {
+      log('🧪 测试 mtop.request...');
+      
+      if (!window.mtop || !window.mtop.request) {
+        log('❌ mtop.request 不可用', 'error');
+        alert('mtop 不可用！');
+        return;
+      }
+      
+      mtop.request('mtop.relationrecommend.tiantaojprecommend.recommend', {
+        data: { page: 1, pageSize: 10 }
+      }, (err, data) => {
+        if (err) {
+          log('❌ 失败：' + JSON.stringify(err), 'error');
+          document.getElementById('response').textContent = JSON.stringify(err, null, 2);
+        } else {
+          log('✅ 成功！收到 ' + (data?.data?.result?.[0]?.mods?.listItems?.length || 0) + ' 个商品', 'ok');
+          document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+        }
+        updateMockStatus();
+      });
+    }
+    
+    function testMtopGet() {
+      log('🧪 测试 mtop.get...');
+      
+      if (!window.mtop || !window.mtop.get) {
+        log('❌ mtop.get 不可用', 'error');
+        alert('mtop.get 不可用！');
+        return;
+      }
+      
+      mtop.get('mtop.alibaba.jp.guide.page.get', {
+        data: { pageCode: '541699' }
+      }, (err, data) => {
+        if (err) {
+          log('❌ 失败：' + JSON.stringify(err), 'error');
+          document.getElementById('response').textContent = JSON.stringify(err, null, 2);
+        } else {
+          log('✅ 成功！页面：' + (data?.data?.pageName || '未知'), 'ok');
+          document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+        }
+        updateMockStatus();
+      });
+    }
+    
+    function showFullResponse() {
+      const s = window.__MTOP_MOCK_STATUS__;
+      if (s.lastResponse) {
+        document.getElementById('response').textContent = JSON.stringify(s.lastResponse, null, 2);
+        log('📄 显示最后响应');
+      } else {
+        alert('还没有响应数据，请先执行测试');
+      }
+    }
+    
+    // 页面加载
+    window.addEventListener('load', () => {
+      log('🚀 页面加载完成', 'ok');
+      
+      // 环境检测
+      const envEl = document.getElementById('env-status');
+      const checks = [
+        { name: 'window.mtop', ok: !!window.mtop },
+        { name: 'mtop.request', ok: !!(window.mtop && window.mtop.request) },
+        { name: 'mtop.get', ok: !!(window.mtop && window.mtop.get) },
+        { name: 'Mock 拦截器', ok: !!window.__MTOP_MOCK_STATUS__ }
+      ];
+      
+      envEl.innerHTML = checks.map(c => 
+        `<div>${c.ok ? '<span class="ok">✅</span>' : '<span class="error">❌</span>'} ${c.name}</div>`
+      ).join('');
+      
+      updateMockStatus();
+      updateLog();
+    });
+  </script>
+</body>
+</html>

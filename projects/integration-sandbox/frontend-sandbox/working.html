@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charSet="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>淘宝日本 - 分类页面 (可运行版)</title>
+  
+  <!-- 关键：内联 Mock 拦截器 (必须在 mtop.js 之前) -->
+  <script>
+  (function() {
+    console.log('[Mock] 拦截器初始化');
+    
+    const MOCK_DATA = {
+      'mtop.relationrecommend.tiantaojprecommend.recommend': {
+        ret: ['SUCCESS::调用成功'],
+        v: '1.0',
+        data: {
+          result: [{
+            mods: {
+              listItems: [
+                {
+                  image: { imgUrl: 'https://pic-cdn-jp.tao-media.co/kf/S23c00cde0a4649579fe0d5a39a401533o.jpg' },
+                  title: { displayTitle: '商品 1' },
+                  prices: { salePrice: { formattedPrice: '¥ 2,341' } }
+                }
+              ]
+            }
+          }]
+        }
+      },
+      'mtop.alibaba.jp.guide.page.get': {
+        ret: ['SUCCESS::调用成功'],
+        v: '1.0',
+        data: { pageCode: '541699', pageName: '分类页面', cards: [] }
+      }
+    };
+    
+    window.__MTOP_MOCK_STATUS__ = { enabled: true, interceptedCount: 0, mockedAPIs: Object.keys(MOCK_DATA) };
+    
+    // 拦截 mtop
+    const setupMtopInterceptor = () => {
+      if (!window.mtop || !window.mtop.request) {
+        setTimeout(setupMtopInterceptor, 100);
+        return;
+      }
+      
+      const originalRequest = window.mtop.request;
+      window.mtop.request = function(api, params, callback) {
+        const apiName = typeof api === 'object' ? api.api : api;
+        const cb = typeof api === 'object' ? params : callback;
+        
+        console.log('[Mock] 拦截:', apiName);
+        window.__MTOP_MOCK_STATUS__.interceptedCount++;
+        
+        if (MOCK_DATA[apiName]) {
+          setTimeout(() => {
+            if (typeof cb === 'function') cb(null, MOCK_DATA[apiName]);
+          }, 100);
+          return Promise.resolve(MOCK_DATA[apiName]);
+        }
+        
+        return originalRequest.call(this, api, params, cb);
+      };
+      
+      console.log('[Mock] ✅ mtop 拦截器已激活');
+    };
+    
+    setupMtopInterceptor();
+  })();
+  </script>
+  
+  <!-- 必需：ICE 应用配置 -->
+  <script>
+    window.__ICE_APP_CONTEXT__ = {
+      appData: null,
+      loaderData: {
+        category: {
+          pageConfig: {
+            pageCode: '541699',
+            pageName: '分类页面'
+          }
+        }
+      },
+      routePath: '/category',
+      matchedIds: ['category'],
+      documentOnly: false,
+      renderMode: 'CSR',
+      requestContext: {}
+    };
+    
+    // 设置全局配置
+    window.AES_CONFIG = {
+      pid: 'test-pid',
+      site: 'jp',
+      pv_id: 'test-' + Date.now()
+    };
+    
+    window.GEP_CONFIG = window.AES_CONFIG;
+  </script>
+  
+  <!-- CDN 资源 -->
+  <link rel="stylesheet" href="https://assets.alicdn.com/g/ae-fe/cosmos/0.0.254/pc/index.css"/>
+  <link rel="stylesheet" type="text/css" href="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/css/main.css"/>
+  <link rel="stylesheet" type="text/css" href="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/css/962.css"/>
+  <link rel="stylesheet" type="text/css" href="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/css/p_category.css"/>
+  
+  <style>
+    /* 备用样式 - 如果 CDN 失败 */
+    body { font-family: -apple-system, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    #ice-container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; min-height: 500px; }
+    .loading { text-align: center; padding: 40px; color: #999; }
+    .error { color: #ff4d4f; padding: 20px; background: #fff2f0; border: 1px solid #ffccc7; border-radius: 4px; }
+    .mock-status { position: fixed; top: 10px; right: 10px; background: #fff; border: 2px solid #1890ff; padding: 15px; border-radius: 8px; font-size: 12px; z-index: 9999; }
+  </style>
+</head>
+<body>
+  <div id="ice-container">
+    <div class="loading">
+      <p>🔄 页面加载中...</p>
+      <p style="font-size:12px;color:#999;margin-top:10px;">如果长时间未加载，请查看下方错误信息</p>
+    </div>
+  </div>
+  
+  <!-- Mock 状态面板 -->
+  <div class="mock-status">
+    <h3 style="margin:0 0 10px;font-size:14px;">🔌 MTOP Mock 状态</h3>
+    <div id="mock-info">初始化中...</div>
+    <div style="margin-top:10px;">
+      <button onclick="testMock()" style="width:100%;padding:5px;background:#1890ff;color:#fff;border:none;border-radius:4px;cursor:pointer;">🧪 测试 Mock</button>
+    </div>
+  </div>
+  
+  <!-- 错误显示区域 -->
+  <div id="error-container" style="display:none;max-width:1200px;margin:20px auto;"></div>
+  
+  <!-- 核心依赖 -->
+  <script src="https://g.alicdn.com/??code/lib/react/18.3.1/umd/react.production.min.js,code/lib/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+  
+  <!-- MTOP 库 -->
+  <script src="https://g.alicdn.com/mtb/lib-mtop/2.7.2/mtop.js"></script>
+  
+  <!-- 应用代码 -->
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/962.js"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/p_category.js"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/framework.js"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/178.js"></script>
+  <script src="https://g.alicdn.com/jp-fe/jp-new-homepage-category-page/0.0.41/js/main.js"></script>
+  
+  <script>
+    // 错误捕获
+    window.onerror = function(msg, url, line, col, error) {
+      const errorDiv = document.getElementById('error-container');
+      errorDiv.style.display = 'block';
+      errorDiv.innerHTML = `
+        <div class="error">
+          <h3>❌ JavaScript 错误</h3>
+          <p><strong>错误信息:</strong> ${msg}</p>
+          <p><strong>位置:</strong> ${url}:${line}:${col}</p>
+          <p><strong>堆栈:</strong> ${error ? error.stack : 'N/A'}</p>
+        </div>
+      `;
+      console.error('[Error]', msg, url, line, col, error);
+      return false;
+    };
+    
+    // 更新 Mock 状态
+    function updateMockStatus() {
+      const info = document.getElementById('mock-info');
+      const status = window.__MTOP_MOCK_STATUS__;
+      if (status) {
+        info.innerHTML = `
+          <div><strong>状态:</strong> ${status.enabled ? '✅ 已激活' : '❌ 未激活'}</div>
+          <div><strong>拦截次数:</strong> ${status.interceptedCount || 0}</div>
+          <div><strong>API:</strong> ${status.mockedAPIs ? status.mockedAPIs.length : 0} 个</div>
+        `;
+      }
+    }
+    
+    // 测试 Mock
+    function testMock() {
+      if (window.mtop && window.mtop.request) {
+        mtop.request('mtop.relationrecommend.tiantaojprecommend.recommend', {}, (err, data) => {
+          if (err) {
+            alert('❌ Mock 失败：' + JSON.stringify(err));
+          } else {
+            alert('✅ Mock 成功！\n\n收到数据：' + JSON.stringify(data, null, 2).slice(0, 300) + '...');
+          }
+          updateMockStatus();
+        });
+      } else {
+        alert('❌ mtop.request 不可用');
+      }
+    }
+    
+    // 页面加载检查
+    window.addEventListener('load', function() {
+      console.log('[Mock] 页面加载完成');
+      updateMockStatus();
+      
+      // 定期检查
+      let count = 0;
+      const interval = setInterval(() => {
+        count++;
+        updateMockStatus();
+        if (count >= 10) clearInterval(interval);
+      }, 1000);
+      
+      // 检查容器是否有内容
+      setTimeout(() => {
+        const container = document.getElementById('ice-container');
+        if (container && container.innerHTML.includes('loading')) {
+          console.warn('[Mock] 警告：页面加载后容器仍显示 loading 状态');
+        }
+      }, 5000);
+    });
+    
+    console.log('[Mock] 页面初始化完成');
+    console.log('[Mock] ICE_APP_CONTEXT:', window.__ICE_APP_CONTEXT__);
+  </script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+{"timestamp": "2026-03-17T01:37:53.732618", "interaction_id": "interaction-001", "feedback": {"satisfaction": 4, "helpful": true, "too_long": false, "too_short": false, "too_technical": false, "suggestions": "希望能提供更多代码示例"}, "adjustments": [{"type": "user_suggestion", "priority": "high", "action": "实施建议：希望能提供更多代码示例", "reason": "用户明确建议"}]}

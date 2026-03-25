@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能进化工作台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #4ecca3;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .card {
+            background: #16213e;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        h2 {
+            color: #e94560;
+            border-bottom: 2px solid #e94560;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .stat:last-child { border-bottom: none; }
+        .stat-value {
+            color: #4ecca3;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        th {
+            color: #4ecca3;
+            font-weight: 600;
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+        .tag-running { background: rgba(78, 204, 163, 0.3); color: #4ecca3; }
+        .tag-completed { background: rgba(102, 126, 234, 0.3); color: #667eea; }
+        .tag-high { background: rgba(233, 69, 96, 0.3); color: #e94560; }
+        .tag-medium { background: rgba(249, 168, 37, 0.3); color: #f9a825; }
+        .loading { text-align: center; padding: 40px; color: #888; }
+        .error { color: #e94560; padding: 20px; text-align: center; }
+        .refresh {
+            text-align: center;
+            margin-top: 20px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧬 智能进化工作台</h1>
+    
+    <div class="grid">
+        <div class="card">
+            <h2>记忆系统</h2>
+            <div id="memory">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>进化统计</h2>
+            <div id="evolution">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>智能评分</h2>
+            <div id="intelligence">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>实例列表</h2>
+            <div id="instances">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Bug 追踪</h2>
+            <div id="bugs">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>预测分析</h2>
+            <div id="predictions">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="refresh">
+        自动刷新 (10秒) | 最后更新: <span id="time">--:--:--</span>
+    </div>
+    
+    <script>
+        async function loadAll() {
+            try {
+                const res = await fetch('/api/overview');
+                const data = await res.json();
+                
+                // 记忆系统
+                document.getElementById('memory').innerHTML = `
+                    <div class="stat"><span>工作记忆</span><span class="stat-value">${data.memory.working_count}</span></div>
+                    <div class="stat"><span>向量记忆</span><span class="stat-value">${data.memory.vector_count}</span></div>
+                    <div class="stat"><span>知识实体</span><span class="stat-value">${data.memory.kg_entities}</span></div>
+                    <div class="stat"><span>知识关系</span><span class="stat-value">${data.memory.kg_relations}</span></div>
+                    <div class="stat"><span>记忆大小</span><span class="stat-value">${data.memory.total_size_mb} MB</span></div>
+                `;
+                
+                // 进化统计
+                document.getElementById('evolution').innerHTML = `
+                    <div class="stat"><span>总事件</span><span class="stat-value">${data.evolution.total_events}</span></div>
+                    <div class="stat"><span>今日事件</span><span class="stat-value">${data.evolution.today_events}</span></div>
+                    <div class="stat"><span>已修复Bug</span><span class="stat-value">${data.evolution.bugs_fixed}</span></div>
+                    <div class="stat"><span>待修复Bug</span><span class="stat-value">${data.evolution.bugs_pending}</span></div>
+                `;
+                
+                // 智能评分
+                const intel = data.intelligence;
+                document.getElementById('intelligence').innerHTML = `
+                    <div class="stat"><span>综合评分</span><span class="stat-value">${intel.percentage}% [${intel.grade}]</span></div>
+                    <div class="stat"><span>基础能力</span><span class="stat-value">${intel.dimensions['基础能力']}/5</span></div>
+                    <div class="stat"><span>学习能力</span><span class="stat-value">${intel.dimensions['学习能力']}/5</span></div>
+                    <div class="stat"><span>自主能力</span><span class="stat-value">${intel.dimensions['自主能力']}/5</span></div>
+                    <div class="stat"><span>认知能力</span><span class="stat-value">${intel.dimensions['认知能力']}/5</span></div>
+                    <div class="stat"><span>交互能力</span><span class="stat-value">${intel.dimensions['交互能力']}/5</span></div>
+                `;
+                
+            } catch (e) {
+                console.error(e);
+            }
+            
+            // 加载表格数据
+            try {
+                const [instRes, bugsRes, predRes] = await Promise.all([
+                    fetch('/api/instances'),
+                    fetch('/api/bugs'),
+                    fetch('/api/predictions')
+                ]);
+                
+                const instances = await instRes.json();
+                const bugs = await bugsRes.json();
+                const predictions = await predRes.json();
+                
+                // 实例表格
+                document.getElementById('instances').innerHTML = `
+                    <table>
+                        <tr><th>ID</th><th>需求</th><th>状态</th></tr>
+                        ${instances.slice(0,5).map(i => `
+                            <tr>
+                                <td>${i.id.slice(0,20)}...</td>
+                                <td>${i.requirement_id}</td>
+                                <td><span class="tag tag-${i.status.toLowerCase()}">${i.status}</span></td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                `;
+                
+                // Bug 表格
+                document.getElementById('bugs').innerHTML = `                    <table>
+                        <tr><th>类型</th><th>严重度</th><th>描述</th></tr>
+                        ${bugs.slice(0,5).map(b => `
+                            <tr>
+                                <td>${b.bug_type}</td>
+                                <td><span class="tag tag-${b.severity.toLowerCase()}">${b.severity}</span></td>
+                                <td>${b.description.slice(0,30)}...</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                `;
+                
+                // 预测表格
+                document.getElementById('predictions').innerHTML = `
+                    <table>
+                        <tr><th>类型</th><th>置信度</th><th>内容</th></tr>
+                        ${predictions.slice(0,5).map(p => `
+                            <tr>
+                                <td>${p.prediction_type}</td>
+                                <td>${p.confidence}%</td>
+                                <td>${p.prediction_text.slice(0,30)}...</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                `;
+                
+            } catch (e) {
+                console.error(e);
+            }
+            
+            document.getElementById('time').textContent = new Date().toLocaleTimeString();
+        }
+        
+        loadAll();
+        setInterval(loadAll, 10000);
+    </script>
+</body>
+</html>

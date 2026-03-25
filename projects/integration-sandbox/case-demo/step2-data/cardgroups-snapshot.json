@@ -1,0 +1,285 @@
+{
+    "ret": [
+        "SUCCESS::\u8c03\u7528\u6210\u529f"
+    ],
+    "v": "1.0",
+    "traceId": "mock_1773773140898",
+    "data": {
+        "pageCode": "541699",
+        "pageName": "\u65b0\u5206\u7c7b - \u5973\u6027\u7a7f\u642d",
+        "cardGroups": [
+            {
+                "cardCode": "xiaowupinlei1",
+                "identityName": "channelPageStandardCard",
+                "contentInfo": {
+                    "productCardInfo": {
+                        "showDiscountTag": true,
+                        "cardRows": "1",
+                        "cardContainerSize": "3:4"
+                    },
+                    "moduleConfig": {
+                        "customSpmc": "xiaowupinlei1",
+                        "title": "\u5c0f\u7269\u54c1\u7c7b 1"
+                    }
+                },
+                "elements": [
+                    {
+                        "contentInfo": {
+                            "itemList": [
+                                {
+                                    "productId": "1001006104017075",
+                                    "itemId": 1001006104017075,
+                                    "title": "\u30ec\u30c7\u30a3\u30fc\u30b9 \u30dc\u30b9\u30c8\u30f3\u578b \u30b7\u30e7\u30eb\u30c0\u30fc\u30d0\u30c3\u30b0",
+                                    "imgUrl": "https://pic-cdn-jp.tao-media.co/kf/S1e5850ba5b9a49f89a8616f1ef8cb26ad.jpg_400x400q75.jpg_.webp",
+                                    "itemImage": "https://pic-cdn-jp.tao-media.co/kf/S1e5850ba5b9a49f89a8616f1ef8cb26ad.jpg_400x400q75.jpg_.webp",
+                                    "prices": {
+                                        "formattedPrice": "\u00a5 9,267"
+                                    },
+                                    "itemPrice": {
+                                        "cent": 9267,
+                                        "currencySymbol": "\u00a5",
+                                        "discountRate": 9,
+                                        "originalPrice": "\u00a5 10,267",
+                                        "priceInfo": "\u00a5 9,267",
+                                        "priceString": "9267",
+                                        "color": "#333333",
+                                        "discountRateLineBreak": "9%-OFF",
+                                        "displayText": "9%OFF",
+                                        "originalCent": 10267
+                                    },
+                                    "itemStatus": {
+                                        "status": 1,
+                                        "displayText": "\u8cfc\u5165\u3067\u304d\u306a\u3044\u5546\u54c1",
+                                        "statusText": "\u4e0b\u67b6"
+                                    },
+                                    "sales": 0
+                                },
+                                {
+                                    "productId": "1001006096311386",
+                                    "itemId": 1001006096311386,
+                                    "title": "\u5927\u5bb9\u91cf \u672c\u9769\u30c8\u30fc\u30c8\u30d0\u30c3\u30b0",
+                                    "imgUrl": "https://pic-cdn-jp.tao-media.co/kf/S1e24bf6eabbf4e56a2c6ff136fd290fbf.jpg_400x400q75.jpg_.webp",
+                                    "itemImage": "https://pic-cdn-jp.tao-media.co/kf/S1e24bf6eabbf4e56a2c6ff136fd290fbf.jpg_400x400q75.jpg_.webp",
+                                    "prices": {
+                                        "formattedPrice": "\u00a5 8,362"
+                                    },
+                                    "itemPrice": {
+                                        "cent": 8362,
+                                        "currencySymbol": "\u00a5",
+                                        "discountRate": 10,
+                                        "originalPrice": "\u00a5 9,362",
+                                        "priceInfo": "\u00a5 8,362",
+                                        "priceString": "8362",
+                                        "color": "#333333",
+                                        "discountRateLineBreak": "10%-OFF",
+                                        "displayText": "10%OFF",
+                                        "originalCent": 9362
+                                    },
+                                    "itemStatus": {
+                                        "status": 1,
+                                        "displayText": "\u8cfc\u5165\u3067\u304d\u306a\u3044\u5546\u54c1",
+                                        "statusText": "\u4e0b\u67b6"
+                                    },
+                                    "sales": 76
+                                },
+                                {
+                                    "productId": "1001006098713583",
+                                    "itemId": 1001006098713583,
+                                    "title": "\u30ec\u30c8\u30ed\u30c7\u30b6\u30a4\u30f3\u306e\u5927\u5bb9\u91cf\u672c\u9769\u30c8\u30fc\u30c8\u30d0\u30c3\u30b0",
+                                    "imgUrl": "https://pic-cdn-jp.tao-media.co/kf/S98154f84cc8f45c1831f2a07d2c1c968U.jpg_400x400q75.jpg_.webp",
+                                    "itemImage": "https://pic-cdn-jp.tao-media.co/kf/S98154f84cc8f45c1831f2a07d2c1c968U.jpg_400x400q75.jpg_.webp",
+                                    "prices": {
+                                        "formattedPrice": "\u00a5 7,852"
+                                    },
+                                    "itemPrice": {
+                                        "cent": 7852,
+                                        "currencySymbol": "\u00a5",
+                                        "discountRate": 11,
+                                        "originalPrice": "\u00a5 8,852",
+                                        "priceInfo": "\u00a5 7,852",
+                                        "priceString": "7852",
+                                        "color": "#333333",
+                                        "discountRateLineBreak": "11%-OFF",
+                                        "displayText": "11%OFF",
+                                        "originalCent": 8852
+                                    },
+                                    "itemStatus": {
+                                        "status": 1,
+                                        "displayText": "\u8cfc\u5165\u3067\u304d\u306a\u3044\u5546\u54c1",
+                                        "statusText": "\u4e0b\u67b6"
+                                    },
+                                    "sales": 1
+                                },
+                                {
+                                    "productId": "1001006107296768",
+                                    "itemId": 1001006107296768,
+                                    "title": "\u6975\u4e0a\u306e\u67d4\u3089\u304b\u3055\u306e\u814b\u4e0b\u30d0\u30c3\u30b0",
+                                    "imgUrl": "https://pic-cdn-jp.tao-media.co/kf/S1e5850ba5b9a49f89a8616f1ef8cb26ad.jpg_400x400q75.jpg_.webp",
+                                    "itemImage": "https://pic-cdn-jp.tao-media.co/kf/S1e5850ba5b9a49f89a8616f1ef8cb26ad.jpg_400x400q75.jpg_.webp",
+                                    "prices": {
+                                        "formattedPrice": "\u00a5 26,225"
+                                    },
+                                    "itemPrice": {
+                                        "cent": 26225,
+                                        "currencySymbol": "\u00a5",
+                                        "discountRate": 3,
+                                        "originalPrice": "\u00a5 27,225",
+                                        "priceInfo": "\u00a5 26,225",
+                                        "priceString": "26225",
+                                        "color": "#333333",
+                                        "discountRateLineBreak": "3%-OFF",
+                                        "displayText": "3%OFF",
+                                        "originalCent": 27225
+                                    },
+                                    "itemStatus": {
+                                        "status": 1,
+                                        "displayText": "\u8cfc\u5165\u3067\u304d\u306a\u3044\u5546\u54c1",
+                                        "statusText": "\u4e0b\u67b6"
+                                    },
+                                    "sales": 123
+                                }
+                            ],
+                            "isDiscountExist": true
+                        }
+                    }
+                ]
+            },
+            {
+                "cardCode": "xiaowupinlei3",
+                "identityName": "channelPageStandardCard",
+                "contentInfo": {
+                    "productCardInfo": {
+                        "showDiscountTag": true,
+                        "cardRows": "1",
+                        "cardContainerSize": "3:4"
+                    },
+                    "moduleConfig": {
+                        "customSpmc": "xiaowupinlei3",
+                        "title": "\u65c5\u3092\u30e9\u30af\u306b\u3059\u308b\u30b9\u30fc\u30c4\u30b1\u30fc\u30b9\u53b3\u9078"
+                    }
+                },
+                "elements": [
+                    {
+                        "contentInfo": {
+                            "itemList": [
+                                {
+                                    "productId": "1001006107613343",
+                                    "itemId": 1001006107613343,
+                                    "title": "\u7537\u5973\u517c\u7528 \u672c\u9769 \u7f8a\u9769\u88fd \u30c8\u30e9\u30d9\u30eb\u30d0\u30c3\u30b0",
+                                    "imgUrl": "https://pic-cdn-jp.tao-media.co/kf/Sfbc4c5b070274debb049f792bd085aa9Y.jpg_400x400q75.jpg_.webp",
+                                    "itemImage": "https://pic-cdn-jp.tao-media.co/kf/Sfbc4c5b070274debb049f792bd085aa9Y.jpg_400x400q75.jpg_.webp",
+                                    "prices": {
+                                        "formattedPrice": "\u00a5 4,208"
+                                    },
+                                    "itemPrice": {
+                                        "cent": 4208,
+                                        "currencySymbol": "\u00a5",
+                                        "discountRate": 19,
+                                        "originalPrice": "\u00a5 5,208",
+                                        "priceInfo": "\u00a5 4,208",
+                                        "priceString": "4208",
+                                        "color": "#333333",
+                                        "discountRateLineBreak": "19%-OFF",
+                                        "displayText": "19%OFF",
+                                        "originalCent": 5208
+                                    },
+                                    "itemStatus": {
+                                        "status": 1,
+                                        "displayText": "\u8cfc\u5165\u3067\u304d\u306a\u3044\u5546\u54c1",
+                                        "statusText": "\u4e0b\u67b6"
+                                    },
+                                    "sales": 10
+                                },
+                                {
+                                    "productId": "1001006097916009",
+                                    "itemId": 1001006097916009,
+                                    "title": "\u5927\u5bb9\u91cf\u30a2\u30eb\u30df\u30d5\u30ec\u30fc\u30e0\u65c5\u884c\u30ab\u30d0\u30f3",
+                                    "imgUrl": "https://pic-cdn-jp.tao-media.co/kf/Sfb7d7599c9cc456f99e99b0895f6fc7cU.jpg_400x400q75.jpg_.webp",
+                                    "itemImage": "https://pic-cdn-jp.tao-media.co/kf/Sfb7d7599c9cc456f99e99b0895f6fc7cU.jpg_400x400q75.jpg_.webp",
+                                    "prices": {
+                                        "formattedPrice": "\u00a5 7,872"
+                                    },
+                                    "itemPrice": {
+                                        "cent": 7872,
+                                        "currencySymbol": "\u00a5",
+                                        "discountRate": 11,
+                                        "originalPrice": "\u00a5 8,872",
+                                        "priceInfo": "\u00a5 7,872",
+                                        "priceString": "7872",
+                                        "color": "#333333",
+                                        "discountRateLineBreak": "11%-OFF",
+                                        "displayText": "11%OFF",
+                                        "originalCent": 8872
+                                    },
+                                    "itemStatus": {
+                                        "status": 1,
+                                        "displayText": "\u8cfc\u5165\u3067\u304d\u306a\u3044\u5546\u54c1",
+                                        "statusText": "\u4e0b\u67b6"
+                                    },
+                                    "sales": 3
+                                },
+                                {
+                                    "productId": "1001006107198446",
+                                    "itemId": 1001006107198446,
+                                    "title": "\u30f4\u30a3\u30f3\u30c6\u30fc\u30b8\u30af\u30ec\u30a4\u30b8\u30fc\u30db\u30fc\u30b9\u30b9\u30ad\u30f3\u30c8\u30e9\u30d9\u30eb\u30d0\u30c3\u30b0",
+                                    "imgUrl": "https://pic-cdn-jp.tao-media.co/kf/S3810ca1b1e7943dcae43550705e4b7bbD.jpg_400x400q75.jpg_.webp",
+                                    "itemImage": "https://pic-cdn-jp.tao-media.co/kf/S3810ca1b1e7943dcae43550705e4b7bbD.jpg_400x400q75.jpg_.webp",
+                                    "prices": {
+                                        "formattedPrice": "\u00a5 10,971"
+                                    },
+                                    "itemPrice": {
+                                        "cent": 10971,
+                                        "currencySymbol": "\u00a5",
+                                        "discountRate": 8,
+                                        "originalPrice": "\u00a5 11,971",
+                                        "priceInfo": "\u00a5 10,971",
+                                        "priceString": "10971",
+                                        "color": "#333333",
+                                        "discountRateLineBreak": "8%-OFF",
+                                        "displayText": "8%OFF",
+                                        "originalCent": 11971
+                                    },
+                                    "itemStatus": {
+                                        "status": 1,
+                                        "displayText": "\u8cfc\u5165\u3067\u304d\u306a\u3044\u5546\u54c1",
+                                        "statusText": "\u4e0b\u67b6"
+                                    },
+                                    "sales": 14
+                                },
+                                {
+                                    "productId": "1001006098003196",
+                                    "itemId": 1001006098003196,
+                                    "title": "\u8efd\u91cf\u3067\u5805\u7262\u306a\u30ad\u30e3\u30ea\u30fc\u30b1\u30fc\u30b9",
+                                    "imgUrl": "https://pic-cdn-jp.tao-media.co/kf/Sa425b95ac3054077b67473c3dfe929b1Y.jpg_400x400q75.jpg_.webp",
+                                    "itemImage": "https://pic-cdn-jp.tao-media.co/kf/Sa425b95ac3054077b67473c3dfe929b1Y.jpg_400x400q75.jpg_.webp",
+                                    "prices": {
+                                        "formattedPrice": "\u00a5 5,425"
+                                    },
+                                    "itemPrice": {
+                                        "cent": 5425,
+                                        "currencySymbol": "\u00a5",
+                                        "discountRate": 15,
+                                        "originalPrice": "\u00a5 6,425",
+                                        "priceInfo": "\u00a5 5,425",
+                                        "priceString": "5425",
+                                        "color": "#333333",
+                                        "discountRateLineBreak": "15%-OFF",
+                                        "displayText": "15%OFF",
+                                        "originalCent": 6425
+                                    },
+                                    "itemStatus": {
+                                        "status": 1,
+                                        "displayText": "\u8cfc\u5165\u3067\u304d\u306a\u3044\u5546\u54c1",
+                                        "statusText": "\u4e0b\u67b6"
+                                    },
+                                    "sales": 181
+                                }
+                            ],
+                            "isDiscountExist": true
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

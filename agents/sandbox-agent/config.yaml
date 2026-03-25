@@ -1,0 +1,64 @@
+# Sandbox Agent 配置
+name: sandbox-agent
+description: "可管理的联调沙箱 Agent，支持多实例并行"
+type: custom
+
+# 工作目录
+workspace: ~/.sandbox-agent
+
+# 实例配置
+instance:
+  # 默认端口范围
+  port_range:
+    start: 8000
+    end: 9000
+  
+  # 超时配置
+  timeout:
+    startup: 60        # 启动超时（秒）
+    execution: 300     # 执行超时（秒）
+    shutdown: 30       # 关闭超时（秒）
+  
+  # 资源限制
+  resources:
+    max_instances: 10  # 最大实例数
+    max_memory: 512    # 每个实例最大内存（MB）
+
+# Session 配置
+session:
+  # 前端 Session
+  frontend:
+    skills:
+      - puppeteer-test
+      - react-dev
+      - api-interceptor
+    timeout: 0  # 不超时
+  
+  # 后端 Session
+  backend:
+    skills:
+      - docker-runner
+      - api-server
+      - mock-database
+    timeout: 0
+  
+  # 测试 Session
+  test:
+    skills:
+      - test-generator
+      - property-testing
+      - coverage-analyzer
+    timeout: 0
+
+# 日志配置
+logging:
+  level: INFO
+  file: ~/.sandbox-agent/logs/agent.log
+  max_size: 10MB
+  max_files: 5
+
+# 报告配置
+report:
+  format: json  # json/html/markdown
+  output_dir: ~/.sandbox-agent/reports
+  auto_open: false

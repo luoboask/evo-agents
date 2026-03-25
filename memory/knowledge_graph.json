@@ -1,0 +1,200 @@
+{
+  "entities": {
+    "Project:openclaw": {
+      "type": "Project",
+      "name": "OpenClaw",
+      "properties": {},
+      "created_at": "2026-03-16T11:35:39.140986",
+      "mentions": 8
+    },
+    "Technology:openclaw": {
+      "type": "Technology",
+      "name": "openclaw",
+      "properties": {},
+      "created_at": "2026-03-16T11:35:39.141217",
+      "mentions": 48
+    },
+    "Technology:bing": {
+      "type": "Technology",
+      "name": "Bing",
+      "properties": {},
+      "created_at": "2026-03-16T11:35:39.141233",
+      "mentions": 16
+    },
+    "Technology:python": {
+      "type": "Technology",
+      "name": "Python",
+      "properties": {},
+      "created_at": "2026-03-16T11:35:39.141236",
+      "mentions": 24
+    },
+    "Technology:jvs_claw": {
+      "type": "Technology",
+      "name": "JVS Claw",
+      "properties": {},
+      "created_at": "2026-03-16T11:35:39.141242",
+      "mentions": 24
+    },
+    "Technology:ollama": {
+      "type": "Technology",
+      "name": "Ollama",
+      "properties": {},
+      "created_at": "2026-03-16T11:35:39.141248",
+      "mentions": 16
+    },
+    "Technology:关键词搜索": {
+      "type": "Technology",
+      "name": "关键词搜索",
+      "properties": {},
+      "created_at": "2026-03-16T11:35:39.141635",
+      "mentions": 8
+    },
+    "Technology:语义搜索": {
+      "type": "Technology",
+      "name": "语义搜索",
+      "properties": {},
+      "created_at": "2026-03-16T11:35:39.141639",
+      "mentions": 16
+    },
+    "Technology:嵌入模型": {
+      "type": "Technology",
+      "name": "嵌入模型",
+      "properties": {},
+      "created_at": "2026-03-16T11:35:39.141642",
+      "mentions": 8
+    },
+    "Skill:search_v2": {
+      "type": "Skill",
+      "name": "search_v2",
+      "properties": {
+        "description": "改进版搜索技能",
+        "improvements": [
+          "重试机制",
+          "备选搜索引擎",
+          "更好的错误处理"
+        ],
+        "evolved_from": "websearch"
+      },
+      "created_at": "2026-03-16T11:38:56.069792",
+      "mentions": 1
+    },
+    "Skill:search_v3": {
+      "type": "Skill",
+      "name": "search_v3",
+      "properties": {
+        "description": "自主进化版搜索技能",
+        "features": [
+          "智能引擎选择",
+          "自适应超时",
+          "健康监控",
+          "自动切换"
+        ],
+        "evolution_type": "autonomous",
+        "trigger": "predictive_maintenance 检测到健康度 44%"
+      },
+      "created_at": "2026-03-16T14:38:07.797669",
+      "mentions": 1
+    },
+    "Concept:autonomous_evolution": {
+      "type": "Concept",
+      "name": "自主进化",
+      "properties": {
+        "description": "AI 自主发现问题并改进",
+        "key_features": [
+          "自我监控",
+          "根因分析",
+          "自动实施",
+          "效果验证"
+        ]
+      },
+      "created_at": "2026-03-16T14:38:07.797669",
+      "mentions": 1
+    },
+    "Concept:auto_decision": {
+      "type": "Concept",
+      "name": "自主决策",
+      "properties": {
+        "description": "AI 自主决定并实施改进，无需用户确认",
+        "example": "自动将 search_v3 部署为默认搜索引擎"
+      },
+      "created_at": "2026-03-16T14:50:16.006383",
+      "mentions": 1
+    },
+    "Skill:search_v4": {
+      "type": "Skill",
+      "name": "search_v4",
+      "properties": {
+        "description": "进化版搜索技能",
+        "improvements": [
+          "指数退避重试机制",
+          "详细的错误分类",
+          "更智能的健康监控",
+          "成功率统计"
+        ],
+        "evolution_type": "user_triggered",
+        "trigger": "用户输入 evolve"
+      },
+      "created_at": "2026-03-16T15:12:05.459580",
+      "mentions": 1
+    }
+  },
+  "relations": [
+    {
+      "source": "Skill:search_v2",
+      "relation": "evolved_from",
+      "target": "Technology:bing",
+      "confidence": 1.0,
+      "created_at": "2026-03-16T11:38:56.069827",
+      "reason": "基于自我反思的改进"
+    },
+    {
+      "source": "Skill:search_v2",
+      "relation": "improved_by",
+      "target": "Technology:self_reflection",
+      "confidence": 1.0,
+      "created_at": "2026-03-16T11:38:56.069830",
+      "reason": "通过反思系统识别超时问题并改进"
+    },
+    {
+      "source": "Skill:search_v3",
+      "relation": "evolved_from",
+      "target": "Skill:search_v2",
+      "confidence": 1.0,
+      "created_at": "2026-03-16T14:38:07.797669",
+      "reason": "自主进化：基于健康度监控自动改进"
+    },
+    {
+      "source": "Skill:search_v3",
+      "relation": "implements",
+      "target": "Concept:autonomous_evolution",
+      "confidence": 1.0,
+      "created_at": "2026-03-16T14:38:07.797669",
+      "reason": "实现了自主进化的完整流程"
+    },
+    {
+      "source": "Skill:search_v3",
+      "relation": "improved_by",
+      "target": "Technology:predictive_maintenance",
+      "confidence": 1.0,
+      "created_at": "2026-03-16T14:38:07.797669",
+      "reason": "由预测性维护系统触发改进"
+    },
+    {
+      "source": "Skill:websearch",
+      "relation": "auto_deployed",
+      "target": "Skill:search_v3",
+      "confidence": 1.0,
+      "created_at": "2026-03-16T14:50:16.006383",
+      "reason": "自主进化：检测到健康度问题，自动实施改进"
+    },
+    {
+      "source": "Skill:search_v4",
+      "relation": "evolved_from",
+      "target": "Skill:search_v3",
+      "confidence": 1.0,
+      "created_at": "2026-03-16T15:12:05.459580",
+      "reason": "用户触发进化：优化超时处理和错误分类"
+    }
+  ],
+  "updated_at": "2026-03-16T17:43:03.531973"
+}
