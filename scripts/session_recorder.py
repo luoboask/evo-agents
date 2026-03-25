@@ -84,7 +84,7 @@ def append_to_section(content: str, section_title: str, entry: str) -> str:
     return "\n".join(lines)
 
 
-def record(entry_type: str, content: str, date: str = None) -> str:
+def record(entry_type: str, content: str, date: str = None, sync: bool = False) -> str:
     if entry_type not in VALID_TYPES:
         raise ValueError(f"无效类型: {entry_type}，可选: {VALID_TYPES}")
 
@@ -97,7 +97,24 @@ def record(entry_type: str, content: str, date: str = None) -> str:
 
     updated = append_to_section(file_content, section_title, content)
     filepath.write_text(updated, encoding="utf-8")
-    return f"✅ 已记录 [{entry_type}]: {content[:80]}"
+
+    result = f"✅ 已记录 [{entry_type}]: {content[:80]}"
+
+    # 自动触发同步
+    if sync:
+        import subprocess
+        bridge = WORKSPACE / "scripts" / "bridge" / "bridge_sync.py"
+        if bridge.exists():
+            try:
+                subprocess.run(
+                    ["python3", str(bridge), "--agent", "demo-agent", "--days", "1"],
+                    capture_output=True, timeout=30, cwd=str(WORKSPACE)
+                )
+                result += " (+ 已同步)"
+            except Exception:
+                result += " (⚠️ 同步失败)"
+
+    return result
 
 
 def main():
@@ -105,8 +122,10 @@ def main():
     parser.add_argument("--type", "-t", required=True, choices=VALID_TYPES)
     parser.add_argument("--content", "-c", required=True)
     parser.add_argument("--date", "-d", default=None)
+    parser.add_argument("--sync", "-s", action="store_true",
+                        help="记录后自动触发双向同步")
     args = parser.parse_args()
-    print(record(args.type, args.content, args.date))
+    print(record(args.type, args.content, args.date, args.sync))
 
 
 if __name__ == "__main__":

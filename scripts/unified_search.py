@@ -21,6 +21,13 @@ import subprocess
 from pathlib import Path
 from typing import List, Dict, Optional
 
+try:
+    import jieba
+    jieba.setLogLevel(20)
+    HAS_JIEBA = True
+except ImportError:
+    HAS_JIEBA = False
+
 WORKSPACE = Path(__file__).resolve().parent.parent
 MEMORY_DIR = WORKSPACE / "memory"
 INDEX_DB = WORKSPACE / "data" / "index" / "memory_index.db"
@@ -29,7 +36,53 @@ EMBED_MODEL = "nomic-embed-text"
 
 
 def search_markdown(query: str, limit: int = 10) -> List[Dict]:
-    """搜索 markdown 文件（grep 方式）"""
+    """搜索 markdown：先用 FTS5（jieba 分词），无结果退回 grep"""
+    # 尝试 FTS5
+    fts_results = search_fts(query, limit)
+    if fts_results:
+        return fts_results
+    # Fallback: grep
+    return search_grep(query, limit)
+
+
+def search_fts(query: str, limit: int = 10) -> List[Dict]:
+    """FTS5 全文搜索（需要索引 + jieba 分词）"""
+    if not INDEX_DB.exists():
+        return []
+    # 分词
+    if HAS_JIEBA:
+        tokens = " ".join(jieba.cut_for_search(query))
+    else:
+        tokens = query
+
+    conn = sqlite3.connect(str(INDEX_DB))
+    conn.row_factory = sqlite3.Row
+    try:
+        rows = conn.execute("""
+            SELECT d.path, d.line_start, d.content, d.type, d.date, rank
+            FROM documents_fts
+            JOIN documents d ON d.id = documents_fts.rowid
+            WHERE documents_fts MATCH ?
+            ORDER BY rank
+            LIMIT ?
+        """, (tokens, limit)).fetchall()
+        return [{
+            "source": "fts5",
+            "path": r["path"],
+            "line": r["line_start"],
+            "content": r["content"][:300],
+            "type": r["type"],
+            "date": r["date"],
+            "score": round(abs(r["rank"]), 4),
+        } for r in rows]
+    except Exception:
+        return []
+    finally:
+        conn.close()
+
+
+def search_grep(query: str, limit: int = 10) -> List[Dict]:
+    """Grep 文件搜索（fallback）"""
     results = []
     search_paths = []
 
@@ -194,7 +247,8 @@ def format_results(results: List[Dict]) -> str:
         by_source[src].append(r)
 
     source_labels = {
-        "markdown": "📂 Markdown",
+        "markdown": "📂 Markdown (grep)",
+        "fts5": "📂 Markdown (FTS5)",
         "knowledge": "🧠 知识系统",
         "semantic": "🔮 语义搜索",
     }

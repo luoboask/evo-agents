@@ -20,12 +20,26 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
+try:
+    import jieba
+    jieba.setLogLevel(20)  # 抑制 jieba 调试日志
+    HAS_JIEBA = True
+except ImportError:
+    HAS_JIEBA = False
+
 WORKSPACE = Path(__file__).resolve().parent.parent
 MEMORY_DIR = WORKSPACE / "memory"
 INDEX_DIR = WORKSPACE / "data" / "index"
 DB_PATH = INDEX_DIR / "memory_index.db"
 OLLAMA_URL = "http://localhost:11434/api/embeddings"
 EMBED_MODEL = "nomic-embed-text"
+
+
+def tokenize(text: str) -> str:
+    """中文分词：用空格分隔，让 FTS5 能正确索引中文"""
+    if HAS_JIEBA:
+        return " ".join(jieba.cut_for_search(text))
+    return text
 
 
 def init_db(conn: sqlite3.Connection):
@@ -36,6 +50,7 @@ def init_db(conn: sqlite3.Connection):
             line_start INTEGER NOT NULL,
             line_end INTEGER NOT NULL,
             content TEXT NOT NULL,
+            content_tokenized TEXT DEFAULT '',
             type TEXT DEFAULT 'unknown',
             date TEXT,
             mtime REAL NOT NULL
@@ -50,19 +65,26 @@ def init_db(conn: sqlite3.Connection):
             vector BLOB NOT NULL,
             FOREIGN KEY (doc_id) REFERENCES documents(id)
         );
-        CREATE VIRTUAL TABLE IF NOT EXISTS documents_fts USING fts5(
-            content, type, date,
-            content='documents', content_rowid='id'
-        );
-        CREATE TRIGGER IF NOT EXISTS documents_ai AFTER INSERT ON documents BEGIN
-            INSERT INTO documents_fts(rowid, content, type, date)
-            VALUES (new.id, new.content, new.type, new.date);
-        END;
-        CREATE TRIGGER IF NOT EXISTS documents_ad AFTER DELETE ON documents BEGIN
-            INSERT INTO documents_fts(documents_fts, rowid, content, type, date)
-            VALUES ('delete', old.id, old.content, old.type, old.date);
-        END;
     """)
+    # 检查 FTS 表是否存在，不存在则创建
+    existing = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='documents_fts'"
+    ).fetchone()
+    if not existing:
+        conn.executescript("""
+            CREATE VIRTUAL TABLE documents_fts USING fts5(
+                content_tokenized, type, date,
+                content='documents', content_rowid='id'
+            );
+            CREATE TRIGGER IF NOT EXISTS documents_ai AFTER INSERT ON documents BEGIN
+                INSERT INTO documents_fts(rowid, content_tokenized, type, date)
+                VALUES (new.id, new.content_tokenized, new.type, new.date);
+            END;
+            CREATE TRIGGER IF NOT EXISTS documents_ad AFTER DELETE ON documents BEGIN
+                INSERT INTO documents_fts(documents_fts, rowid, content_tokenized, type, date)
+                VALUES ('delete', old.id, old.content_tokenized, old.type, old.date);
+            END;
+        """)
 
 
 def detect_type(line: str) -> str:
@@ -166,11 +188,12 @@ def index_file(conn: sqlite3.Connection, filepath: Path, embed: bool = False) ->
     chunks = parse_md_chunks(filepath)
     count = 0
     for chunk in chunks:
+        tokenized = tokenize(chunk["content"])
         cursor = conn.execute(
-            "INSERT INTO documents (path, line_start, line_end, content, type, date, mtime) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO documents (path, line_start, line_end, content, content_tokenized, type, date, mtime) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             (rel_path, chunk["line_start"], chunk["line_end"],
-             chunk["content"], chunk["type"], chunk["date"], mtime)
+             chunk["content"], tokenized, chunk["type"], chunk["date"], mtime)
         )
         count += 1
         if embed:
