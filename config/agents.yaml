@@ -3,15 +3,12 @@
 # Define your agent(s) here.
 # Each agent gets its own data directory under data/<name>/
 
-# ───────────────────────────────────────────────────────
-# Main Agent
-# ───────────────────────────────────────────────────────
-demo-agent:
-  name: demo-agent
-  role: assistant
-  description: "Demo agent"
-  data_path: data/demo-agent
-
-  settings:
-    max_memories: 1000
-    auto_cleanup: false
+# Example:
+# my-agent:
+#   name: my-agent
+#   role: assistant
+#   description: "My agent"
+#   data_path: data/my-agent
+#   settings:
+#     max_memories: 1000
+#     auto_cleanup: false

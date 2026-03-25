@@ -31,6 +31,45 @@ ENV/
 .DS_Store
 
 # -----------------------------------------------------------------------------
+# ⚠️  运行时数据（每个 agent 实例独有，不提交）
+# -----------------------------------------------------------------------------
+
+# Agent 运行时数据目录
+data/*/
+!data/.gitkeep
+
+# 搜索索引（运行时生成）
+data/index/
+
+# 锁文件
+data/.locks/
+
+# OpenClaw 运行时状态
+.openclaw/
+.agent-runtime/
+
+# 每日记忆文件（运行时生成，agent 特有）
+memory/????-??-??.md
+memory/weekly/
+memory/monthly/
+memory/archive/
+
+# 知识库 JSON（agent 学到的知识）
+public/ai/
+public/architecture/
+public/coding/
+public/data/
+public/devops/
+public/ml/
+public/web_learning/
+
+# 优化日志（agent 特有）
+OPTIMIZATION_*.md
+
+# bridge 同步状态
+.bridge_sync.json
+
+# -----------------------------------------------------------------------------
 # ⚠️  个人配置文件（敏感 - 不包含在 Git 中）
 # -----------------------------------------------------------------------------
 
@@ -90,3 +129,4 @@ site/
 # 1. 提交前请运行：git status 检查是否有敏感文件
 # 2. 公开模板保持在 Git 中（如 config.yaml.example）
 *.lock
+*.local
