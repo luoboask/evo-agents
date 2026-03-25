@@ -17,13 +17,15 @@ import statistics
 
 # 配置
 SKILLS_DIR = Path(__file__).parent
-LOGS_DIR = SKILLS_DIR / "logs"
+# 使用 memory_hub 的相同路径：data/ai-baby/logs/evaluations.jsonl
+DATA_DIR = SKILLS_DIR.parent.parent / "data" / "ai-baby"
+LOGS_DIR = DATA_DIR / "logs"
 CONFIG_FILE = SKILLS_DIR / "config.json"
 EVALUATIONS_FILE = LOGS_DIR / "evaluations.jsonl"
 EXPERIMENTS_FILE = LOGS_DIR / "experiments.jsonl"
 
 # 确保目录存在
-LOGS_DIR.mkdir(exist_ok=True)
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class AutoTuner:
@@ -102,8 +104,8 @@ class AutoTuner:
         avg_latency = statistics.mean(latencies) if latencies else 500
         latency_score = max(0, 1 - (avg_latency / 500))
         
-        # 成本（如果有 token 数据）
-        token_costs = [e.get("token_cost", 100) for e in evaluations]
+        # 成本（如果有 token 数据，过滤 None 值）
+        token_costs = [e.get("token_cost") for e in evaluations if e.get("token_cost") is not None]
         avg_cost = statistics.mean(token_costs) if token_costs else 100
         cost_score = max(0, 1 - (avg_cost / 1000))
         
@@ -126,10 +128,14 @@ class AutoTuner:
                 "current_count": len(evaluations)
             }
         
-        # 按配置分组
+        # 按配置分组（兼容旧数据，缺少 chunk_size 时使用默认值 512）
         config_groups = {}
         for e in evaluations:
-            config_key = f"top{e['config']['top_k']}_thresh{e['config']['similarity_threshold']}_chunk{e['config']['chunk_size']}"
+            cfg = e.get('config', {})
+            top_k = cfg.get('top_k', 5)
+            threshold = cfg.get('similarity_threshold', 0.7)
+            chunk_size = cfg.get('chunk_size', 512)
+            config_key = f"top{top_k}_thresh{threshold}_chunk{chunk_size}"
             if config_key not in config_groups:
                 config_groups[config_key] = []
             config_groups[config_key].append(e)
@@ -194,7 +200,8 @@ class AutoTuner:
         
         tested_configs = set()
         for e in evaluations:
-            config_key = f"{e['config']['top_k']}_{e['config']['similarity_threshold']}_{e['config']['chunk_size']}"
+            cfg = e.get('config', {})
+            config_key = f"{cfg.get('top_k', 5)}_{cfg.get('similarity_threshold', 0.7)}_{cfg.get('chunk_size', 512)}"
             tested_configs.add(config_key)
         
         # 找到未测试的配置
@@ -241,24 +248,25 @@ class AutoTuner:
         report.append("-" * 60)
         
         for i, result in enumerate(analysis["results"][:3], 1):
+            cfg = result['config']
             report.append(f"\n#{i}: {result['config_key']}")
             report.append(f"    综合得分：{result['score']}")
             report.append(f"    样本数：{result['samples']}")
             report.append(f"    平均延迟：{result['avg_latency']}ms")
             report.append(f"    正面反馈：{result['positive_rate']}%")
             report.append(f"    配置:")
-            report.append(f"      - Top-K: {result['config']['top_k']}")
-            report.append(f"      - 相似度阈值：{result['config']['similarity_threshold']}")
-            report.append(f"      - Chunk 大小：{result['config']['chunk_size']}")
+            report.append(f"      - Top-K: {cfg.get('top_k', 5)}")
+            report.append(f"      - 相似度阈值：{cfg.get('similarity_threshold', 0.7)}")
+            report.append(f"      - Chunk 大小：{cfg.get('chunk_size', 512)}")
         
         if analysis["recommendation"]:
             report.append("")
             report.append("=" * 60)
             report.append("💡 推荐配置:")
             best = analysis["recommendation"]["best_config"]
-            report.append(f"   Top-K: {best['top_k']}")
-            report.append(f"   相似度阈值：{best['similarity_threshold']}")
-            report.append(f"   Chunk 大小：{best['chunk_size']}")
+            report.append(f"   Top-K: {best.get('top_k', 5)}")
+            report.append(f"   相似度阈值：{best.get('similarity_threshold', 0.7)}")
+            report.append(f"   Chunk 大小：{best.get('chunk_size', 512)}")
             report.append(f"   综合得分：{analysis['recommendation']['score']}")
         
         report.append("")

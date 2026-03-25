@@ -13,11 +13,13 @@ from typing import Optional, Dict, Any
 
 # 配置
 SKILLS_DIR = Path(__file__).parent
-LOGS_DIR = SKILLS_DIR / "logs"
+# 使用 memory_hub 的相同路径：data/ai-baby/logs/evaluations.jsonl
+DATA_DIR = SKILLS_DIR.parent.parent / "data" / "ai-baby"
+LOGS_DIR = DATA_DIR / "logs"
 EVALUATIONS_FILE = LOGS_DIR / "evaluations.jsonl"
 
 # 确保目录存在
-LOGS_DIR.mkdir(exist_ok=True)
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class RetrievalRecorder:

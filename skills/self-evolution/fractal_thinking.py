@@ -379,8 +379,8 @@ class FractalThinkingEngine:
         
         直接使用 Ollama embedding + 余弦相似度
         """
-        vec1 = ollama_embed(text1)
-        vec2 = ollama_embed(text2)
+        vec1 = get_embedding(text1)
+        vec2 = get_embedding(text2)
         
         # 余弦相似度
         return cosine_similarity(vec1, vec2)
@@ -592,12 +592,17 @@ class FractalThinkingEngine:
             
             # 将分析存入记忆流
             for analysis in analyses:
+                # 将 metadata 内容合并到 content 中
+                content = analysis.description
+                if analysis.metadata:
+                    if 'meta_rules' in analysis.metadata:
+                        content += f" [元规则：{', '.join(analysis.metadata['meta_rules'])}]"
+                
                 self.memory_stream.add_memory(
-                    content=analysis.description,
+                    content=content,
                     memory_type='reflection',
                     tags=[f'Fractal_L{analysis.level}', analysis.level_name],
-                    importance=8.0 if analysis.level >= 2 else 6.0,
-                    metadata=analysis.metadata
+                    importance=8.0 if analysis.level >= 2 else 6.0
                 )
         
         # 生成总结

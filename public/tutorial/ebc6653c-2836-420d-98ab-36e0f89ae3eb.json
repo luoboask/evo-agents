@@ -1,0 +1,15 @@
+{
+  "id": "ebc6653c-2836-420d-98ab-36e0f89ae3eb",
+  "title": "Web 搜索配置指南",
+  "content": "\nWeb 搜索技能配置指南 (2025):\n\n1. 获取 Brave API Key\n   访问：https://brave.com/search/api/\n   注册账号并获取免费 API key (每月 2000 次搜索)\n\n2. 配置 API Key\n   方法 1: OpenClaw 配置\n   ```\n   openclaw configure --section web\n   # 输入 Brave API Key\n   ```\n   \n   方法 2: 环境变量\n   ```\n   export BRAVE_API_KEY=\"your-api-key\"\n   ```\n   \n   方法 3: Gateway 配置\n   在 Gateway 环境中设置 BRAVE_API_KEY\n\n3. 使用 Web 搜索\n   ```python\n   from skills.websearch.search import WebSearch\n   \n   search = WebSearch()\n   results = search.search(\n       query=\"AI Agent 架构\",\n       count=10,\n       freshness=\"week\",\n       country=\"CN\",\n       language=\"zh\"\n   )\n   ```\n\n4. 提取网页内容\n   ```python\n   content = search.fetch(\n       url=\"https://example.com/article\",\n       extract_mode=\"markdown\"\n   )\n   ```\n\n5. 搜索技巧\n   - 精确匹配：\"exact phrase\"\n   - 排除词：query -exclude\n   - 站内搜索：site:example.com query\n   - 时间过滤：freshness=\"week\"\n   - 区域搜索：country=\"CN\"\n\n6. 最佳实践\n   - 精确查询词\n   - 使用 freshness 获取最新信息\n   - 交叉验证多个来源\n   - 避免频繁搜索 (限流)\n\n7. 限制\n   - 免费 API: 2000 次/月\n   - 最多返回 10 个结果\n   - 不支持图片/视频搜索\n",
+  "category": "tutorial",
+  "tags": [
+    "Web 搜索",
+    "配置指南",
+    "Brave API",
+    "技能配置"
+  ],
+  "is_public": true,
+  "created_at": "2026-03-24T02:05:08.050182",
+  "updated_at": "2026-03-24T02:05:08.050233"
+}

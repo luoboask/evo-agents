@@ -17,7 +17,7 @@ from typing import List, Dict, Tuple
 # 运行时配置（由 main 注入）
 WORKSPACE = Path.cwd()
 MEMORY_DIR = WORKSPACE / 'memory'
-DB_PATH = WORKSPACE / 'data' / 'demo-agent' / 'memory' / 'memory_stream.db'
+DB_PATH = WORKSPACE / 'data' / 'ai-baby' / 'memory' / 'ai-baby_memory_stream.db'
 OLLAMA_URL = 'http://localhost:11434/api/embeddings'
 
 
@@ -238,8 +238,8 @@ def main():
     """主函数"""
     import argparse
     parser = argparse.ArgumentParser(description="同步 daily memory 到 agent 数据库")
-    parser.add_argument("--workspace", required=True, help="Workspace 路径")
-    parser.add_argument("--agent", default="demo-agent", help="Agent 名称")
+    parser.add_argument("--workspace", default=Path.cwd(), help="Workspace 路径（默认：当前目录）")
+    parser.add_argument("--agent", default="ai-baby", help="Agent 名称")
     parser.add_argument("--date", help="指定日期 YYYY-MM-DD")
     args = parser.parse_args()
 
