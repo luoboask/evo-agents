@@ -1,14 +1,76 @@
-# Agent Configuration
+# Agent Configuration - test-agents Workspace
 #
-# Define your agent(s) here.
-# Each agent gets its own data directory under data/<name>/
+# 主 Agent + 子 Agent 架构
+# test-agents 是主协调者，analyst/developer/tester 是专业子 Agent
 
-# Example:
-# my-agent:
-#   name: my-agent
-#   role: assistant
-#   description: "My agent"
-#   data_path: data/my-agent
-#   settings:
-#     max_memories: 1000
-#     auto_cleanup: false
+# 主 Agent
+test-agents:
+  name: test-agents
+  role: coordinator
+  description: "主协调 Agent - 负责任务分配和总结沉淀"
+  data_path: data/test-agents
+  memory_path: memory
+  workspace_path: .
+  settings:
+    max_memories: 2000
+    auto_cleanup: true
+    importance_threshold: 6.0
+    enable_semantic: true
+
+# 子 Agent - 需求分析师
+analyst-agent:
+  name: analyst-agent
+  role: analyst
+  description: "需求分析师 - 分析需求、设计方案"
+  data_path: agents/analyst-agent/data
+  memory_path: agents/analyst-agent/memory
+  workspace_path: .
+  settings:
+    max_memories: 1000
+    auto_cleanup: false
+    importance_threshold: 5.0
+    enable_semantic: true
+
+# 子 Agent - 代码开发者
+developer-agent:
+  name: developer-agent
+  role: developer
+  description: "代码开发者 - 实现方案、编写代码"
+  data_path: agents/developer-agent/data
+  memory_path: agents/developer-agent/memory
+  workspace_path: .
+  settings:
+    max_memories: 1500
+    auto_cleanup: true
+    importance_threshold: 5.5
+    enable_semantic: true
+
+# 子 Agent - 质量测试员
+tester-agent:
+  name: tester-agent
+  role: tester
+  description: "质量测试员 - 测试验证、质量保证"
+  data_path: agents/tester-agent/data
+  memory_path: agents/tester-agent/memory
+  workspace_path: .
+  settings:
+    max_memories: 1000
+    auto_cleanup: true
+    importance_threshold: 5.0
+    enable_semantic: true
+
+# 共享资源配置
+shared:
+  scripts: scripts
+  libs: libs
+  skills: skills
+  public: public
+
+# 协作配置
+collaboration:
+  enabled: true
+  workflow:
+    - analyst-agent      # 1. 需求分析
+    - developer-agent    # 2. 方案实现
+    - tester-agent       # 3. 质量测试
+    - test-agents        # 4. 总结沉淀
