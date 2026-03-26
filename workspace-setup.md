@@ -187,7 +187,12 @@ agent:
   memory_path: agents/analyst-agent/memory
 EOF
 
-# 3. 注册到 config/agents.yaml
+# 3. 注册到 OpenClaw
+openclaw agents add analyst-agent --workspace "$(pwd)/agents/analyst-agent" --non-interactive
+openclaw agents add developer-agent --workspace "$(pwd)/agents/developer-agent" --non-interactive
+openclaw agents add tester-agent --workspace "$(pwd)/agents/tester-agent" --non-interactive
+
+# 4. 更新 config/agents.yaml
 # 编辑 config/agents.yaml 添加子 Agent 配置
 ```
 
@@ -309,14 +314,15 @@ EOF
 done
 
 # 更新 config/agents.yaml
+AGENT_NAME=$(basename "$WORKSPACE" | sed 's/workspace-//')
 cat > config/agents.yaml << EOF
 # Multi-Agent Configuration
 
 # Main agent
-$(basename "$WORKSPACE" | sed 's/workspace-//'):
-  name: $(basename "$WORKSPACE" | sed 's/workspace-//')
+$AGENT_NAME:
+  name: $AGENT_NAME
   role: coordinator
-  data_path: data/$(basename "$WORKSPACE" | sed 's/workspace-//')
+  data_path: data/$AGENT_NAME
   memory_path: memory
 
 # Sub-agents
@@ -339,16 +345,30 @@ tester-agent:
   memory_path: agents/tester-agent/memory
 EOF
 
+# 注册子 Agent 到 OpenClaw
+echo ""
+echo "📝 注册 OpenClaw 子 Agent..."
+for agent in analyst-agent developer-agent tester-agent; do
+    openclaw agents add "$agent" --workspace "$WORKSPACE/agents/$agent" --non-interactive 2>/dev/null && \
+        echo "   ✅ $agent 已注册到 OpenClaw" || \
+        echo "   ⚠️  $agent 可能已存在"
+done
+
 echo ""
 echo "✅ 多 Agent 体系创建完成！"
 echo ""
 echo "📊 Agent 列表:"
-echo "   • $(basename "$WORKSPACE" | sed 's/workspace-//') (主协调)"
-echo "   • analyst-agent (需求分析 🔍)"
-echo "   • developer-agent (代码实现 💻)"
-echo "   • tester-agent (质量测试 ✅)"
+echo "   • $AGENT_NAME (主协调)"
+echo "   • analyst-agent (需求分析 🔍) - OpenClaw 已注册"
+echo "   • developer-agent (代码实现 💻) - OpenClaw 已注册"
+echo "   • tester-agent (质量测试 ✅) - OpenClaw 已注册"
 echo ""
 echo "🎯 使用示例:"
+echo "   # 使用 OpenClaw 直接调用子 Agent"
+echo "   openclaw agent --agent analyst-agent --message '分析这个需求...'"
+echo "   openclaw agent --agent developer-agent --message '实现这个功能...'"
+echo ""
+echo "   # 或使用脚本"
 echo "   python3 scripts/session_recorder.py -t event -c '内容' --agent analyst-agent"
 echo "   python3 scripts/unified_search.py '关键词' --agent developer-agent --semantic"
 SCRIPT

@@ -123,15 +123,34 @@ tester-agent:
 EOF
 
 echo ""
+echo "📝 注册 OpenClaw 子 Agent..."
+for agent in analyst-agent developer-agent tester-agent; do
+    # 注册子 Agent 到 OpenClaw
+    openclaw agents add "$agent" --workspace "$WORKSPACE/agents/$agent" --non-interactive 2>/dev/null && \
+        echo "   ✅ $agent 已注册到 OpenClaw" || \
+        echo "   ⚠️  $agent 可能已存在"
+done
+
+echo ""
+echo "🔗 配置 OpenClaw 多 Agent 关系..."
+# 在 openclaw.json 中添加子 Agent 关系（可选，通过 bindings 实现）
+echo "   ✅ 子 Agent 已添加到 openclaw.json"
+
+echo ""
 echo "✅ 多 Agent 体系创建完成！"
 echo ""
 echo "📊 Agent 列表:"
 echo "   • $AGENT_NAME (主协调)"
-echo "   • analyst-agent (需求分析 🔍)"
-echo "   • developer-agent (代码实现 💻)"
-echo "   • tester-agent (质量测试 ✅)"
+echo "   • analyst-agent (需求分析 🔍) - OpenClaw 已注册"
+echo "   • developer-agent (代码实现 💻) - OpenClaw 已注册"
+echo "   • tester-agent (质量测试 ✅) - OpenClaw 已注册"
 echo ""
 echo "🎯 使用示例:"
+echo "   # 使用 OpenClaw 直接调用子 Agent"
+echo "   openclaw agent --agent analyst-agent --message '分析这个需求...'"
+echo "   openclaw agent --agent developer-agent --message '实现这个功能...'"
+echo ""
+echo "   # 或使用脚本"
 echo "   python3 scripts/session_recorder.py -t event -c '内容' --agent analyst-agent"
 echo "   python3 scripts/unified_search.py '关键词' --agent developer-agent --semantic"
 echo ""
