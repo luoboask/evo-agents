@@ -2,125 +2,54 @@
 
 [English](./README.md) | [简体中文](./README.zh-CN.md)
 
-可复用的自进化 Agent 工作区模板，强调显式运行上下文（`--workspace`、`--agent`）、多 Agent 数据隔离、以及能力层共享复用。
+可复用的自进化 Agent workspace，支持显式运行时上下文（`--workspace`, `--agent`），严格的每 Agent 数据隔离，和共享能力层。
 
-## 🦞 OpenClaw 一键引导
+---
 
-如果需要从拉库到安装、健康检查、全量验收的一条龙流程，请直接使用 `workspace-setup.md`。
+## 🦞 OpenClaw 一键安装（推荐）⭐
 
-## 仓库定位
-
-`evo-agents` 的目标是让一份 workspace 代码稳定服务多个 agent 实例，同时保持运行可控、边界清晰：
-
-- 显式参数优先，避免隐式环境耦合
-- 代码与数据天然分离
-- 运行时元数据收敛在 workspace 内
-- 不越界管理平台生命周期目录
-
-详细设计文档：
-
-- `docs/ARCHITECTURE_GENERIC_CN.md`
-- `docs/PROJECT_STRUCTURE_GENERIC_CN.md`
-
-## 架构摘要
-
-分层模型：
-
-- **交互层**：OpenClaw / 外部调用方
-- **运行编排层**：`start.sh`、安装升级脚本、CLI 入参解析
-- **能力实现层**：`skills/*` + `libs/memory_hub`
-- **数据配置层**：`data/<agent>/...` + `public/`
-
-核心规则：
-
-- **代码与数据分离**：代码在 `skills/`、`libs/`、`scripts/`；运行数据在 `data/<agent>/...`
-- **显式运行上下文**：主入口统一传 `--workspace` 与 `--agent`
-- **workspace 内闭环**：运行元数据位于 `.agent-runtime/<agent>/`
-- **平台边界清晰**：不管理 `~/.openclaw/agents`
-
-## 目录结构
-
-```text
-evo-agents/
-├── start.sh
-├── init_system.py
-├── skills/                      # 可调用能力模块
-├── libs/memory_hub/             # 共享基础库
-├── scripts/                     # 安装/升级/卸载/测试脚本
-├── data/<agent>/                # 每个 agent 独立运行数据
-├── .agent-runtime/<agent>/      # run.sh + 安装元数据
-├── public/                      # 可共享知识资产
-├── docs/                        # 架构与结构规范文档
-└── workspace-setup.md           # OpenClaw 一键引导流程
-```
-
-依赖方向：
-
-- `skills/*` -> `libs/*`：允许
-- `skills/*` -> `skills/*`：不推荐（共用逻辑应下沉 `libs/`）
-- `libs/*` -> `skills/*`：禁止
-
-## 快速开始
+**如果你有 OpenClaw，可以用自然语言一键安装：**
 
 ```bash
-# 1) 首次初始化
-python3 init_system.py --workspace <workspace-root> --agent demo-agent
-
-# 2) 启动与健康检查
-./start.sh --workspace <workspace-root> --agent demo-agent
+openclaw agent --message "Read https://raw.githubusercontent.com/luoboask/evo-agents/master/workspace-setup.md and help me install a workspace named demo-agent"
 ```
 
-## Agent 生命周期脚本
+**OpenClaw 会：**
+1. 读取 `workspace-setup.md` 安装指南
+2. 克隆模板到 `~/.openclaw/workspace-demo-agent`
+3. 创建目录结构
+4. 注册 `demo-agent` 到 OpenClaw
+5. 配置多 Agent 系统（可选）
+6. 运行测试
+
+---
+
+## 🚀 快速开始
+
+### 方式 1：手动安装
 
 ```bash
-# 安装指定 agent 的运行入口
-python3 scripts/install_agent_workspace.py \
-  --workspace <workspace-root> \
-  --agent demo-agent
+# 1. 克隆模板
+git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
+cd ~/.openclaw/workspace-my-agent
 
-# 升级/检查
-python3 scripts/upgrade_agent_workspace.py \
-  --workspace <workspace-root> \
-  --agent demo-agent
+# 2. 创建目录结构
+mkdir -p memory/weekly memory/monthly memory/archive
+mkdir -p data/index data/my-agent
 
-# 卸载（可选清理数据）
-python3 scripts/uninstall_agent_workspace.py \
-  --workspace <workspace-root> \
-  --agent demo-agent \
-  --purge-data \
-  --yes
+# 3. 注册 OpenClaw agent
+openclaw agents add my-agent --workspace "$(pwd)" --non-interactive
+
+# 4. 测试
+python3 scripts/session_recorder.py -t event -c 'Hello world'
+python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
 ```
-
-## 常用命令
-
-```bash
-# 记忆检索
-python3 skills/memory-search/search_sqlite.py "query" --agent demo-agent
-python3 skills/memory-search/search_sqlite.py "query" --semantic --agent demo-agent
-
-# RAG 评估
-python3 skills/rag/evaluate.py --report --days 7 --agent demo-agent
-
-# 自进化
-python3 skills/self-evolution/main.py --agent demo-agent status
-python3 skills/self-evolution/main.py --agent demo-agent fractal --limit 10
-python3 skills/self-evolution/main.py --agent demo-agent nightly
-```
-
-## 验收测试
-
-```bash
-python3 scripts/test_features.py --agent demo-agent
-python3 test_all.py --workspace <workspace-root> --agent demo-agent
-python3 scripts/test_agents.py --workspace <workspace-root> --agent demo-agent
-```
-
 
 ---
 
 ## 🔧 功能激活
 
-安装后，交互式激活高级功能：
+安装完成后，交互式激活高级功能：
 
 ```bash
 ./scripts/activate-features.sh
@@ -147,12 +76,67 @@ python3 scripts/test_agents.py --workspace <workspace-root> --agent demo-agent
 
 ---
 
+## 🤖 多 Agent 脚本
+
+### setup-multi-agent.sh - 批量创建
+
+```bash
+./scripts/setup-multi-agent.sh designer writer ops
+# 创建：designer-agent, writer-agent, ops-agent
+```
+
+### add-agent.sh - 新增单个
+
+```bash
+./scripts/add-agent.sh designer UI/UX 设计师 🎨
+# 创建：designer-agent (UI/UX 设计师 🎨)
+```
+
+---
+
+## 📁 目录结构
+
+```
+evo-agents/
+├── 📄 根目录文件
+│   ├── README.md
+│   ├── README.zh-CN.md
+│   ├── workspace-setup.md
+│   └── FEATURE_ACTIVATION_GUIDE.md
+│
+├── 🔧 scripts/
+│   ├── activate-features.sh
+│   ├── setup-multi-agent.sh
+│   ├── add-agent.sh
+│   └── ...
+│
+├── 📚 libs/
+│   └── memory_hub/
+│
+├── 🎯 skills/
+│   ├── memory-search/
+│   ├── rag/
+│   ├── self-evolution/
+│   └── websearch/
+│
+├── 📂 agents/
+│   └── .gitkeep
+│
+└── 📖 docs/
+    ├── ARCHITECTURE_GENERIC_CN.md
+    └── PROJECT_STRUCTURE_GENERIC_CN.md
+```
+
+---
+
 ## 📚 文档
 
 | 文档 | 用途 |
 |------|------|
+| `workspace-setup.md` | ⭐ 完整安装指南 |
 | `FEATURE_ACTIVATION_GUIDE.md` | 功能激活指南 |
-| `workspace-setup.md` | 完整安装指南 |
+| `README.md` | 快速入门（英文） |
+| `README.zh-CN.md` | 快速入门（中文） |
 | `docs/ARCHITECTURE_GENERIC_CN.md` | 架构设计 |
 | `docs/PROJECT_STRUCTURE_GENERIC_CN.md` | 目录结构 |
 

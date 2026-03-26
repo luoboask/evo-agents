@@ -4,135 +4,46 @@
 
 Reusable self-evolving agent workspace with explicit runtime context (`--workspace`, `--agent`), strict per-agent data isolation, and shared capability layers.
 
-## 🦞 OpenClaw One-Click Bootstrap
+---
 
-For clone -> install -> healthcheck -> full verification in one flow, use `workspace-setup.md`.
+## 🦞 OpenClaw One-Click Install (Recommended) ⭐
 
-## Why This Repository
-
-`evo-agents` is designed to make one workspace reusable across multiple agents while keeping runtime behavior deterministic:
-
-- explicit context passing over implicit environment coupling
-- code/data separation by design
-- workspace-local runtime metadata
-- clean boundary with platform-owned lifecycle
-
-Detailed design docs:
-
-- `docs/ARCHITECTURE_GENERIC_EN.md`
-- `docs/PROJECT_STRUCTURE_GENERIC_EN.md`
-
-## Architecture Snapshot
-
-Layered model:
-
-- **Interaction**: OpenClaw / external callers
-- **Orchestration**: `start.sh`, install/upgrade scripts, CLI argument parsing
-- **Capabilities**: `skills/*` + `libs/memory_hub`
-- **Data/Config**: `data/<agent>/...` + `public/`
-
-Core rules:
-
-- **Code/Data Separation**: code in `skills/`, `libs/`, `scripts/`; runtime data in `data/<agent>/...`
-- **Explicit Runtime Context**: pass `--workspace` and `--agent` to entrypoints
-- **Workspace-local Runtime**: metadata in `.agent-runtime/<agent>/`
-- **Boundary Safety**: do not manage `~/.openclaw/agents`
-
-## Repository Layout
-
-```text
-evo-agents/
-├── start.sh
-├── init_system.py
-├── skills/                      # callable capability modules
-├── libs/memory_hub/             # shared infra library
-├── scripts/                     # install/upgrade/uninstall/test helpers
-├── data/<agent>/                # isolated runtime data per agent
-├── .agent-runtime/<agent>/      # run.sh + install metadata
-├── public/                      # shared knowledge assets
-├── docs/                        # architecture and structure docs
-└── workspace-setup.md           # OpenClaw bootstrap playbook
-```
-
-Dependency direction:
-
-- `skills/*` -> `libs/*`: allowed
-- `skills/*` -> `skills/*`: avoid (extract shared logic to `libs/`)
-- `libs/*` -> `skills/*`: forbidden
-
-## Quick Start
+**如果你有 OpenClaw，可以用自然语言一键安装：**
 
 ```bash
-# 1) Initialize (first run)
-python3 init_system.py --workspace <workspace-root> --agent demo-agent
-
-# 2) Health check / status
-./start.sh --workspace <workspace-root> --agent demo-agent
+openclaw agent --message "Read https://raw.githubusercontent.com/luoboask/evo-agents/master/workspace-setup.md and help me install a workspace named demo-agent"
 ```
 
-## Agent Runtime Lifecycle
-
-```bash
-# Install runtime entrypoint for one agent
-python3 scripts/install_agent_workspace.py \
-  --workspace <workspace-root> \
-  --agent demo-agent
-
-# Upgrade/check
-python3 scripts/upgrade_agent_workspace.py \
-  --workspace <workspace-root> \
-  --agent demo-agent
-
-# Uninstall (optional data purge)
-python3 scripts/uninstall_agent_workspace.py \
-  --workspace <workspace-root> \
-  --agent demo-agent \
-  --purge-data \
-  --yes
-```
-
-## Common Commands
-
-```bash
-# Memory search
-python3 skills/memory-search/search_sqlite.py "query" --agent demo-agent
-python3 skills/memory-search/search_sqlite.py "query" --semantic --agent demo-agent
-
-# RAG evaluation
-python3 skills/rag/evaluate.py --report --days 7 --agent demo-agent
-
-# Self-evolution
-python3 skills/self-evolution/main.py --agent demo-agent status
-python3 skills/self-evolution/main.py --agent demo-agent fractal --limit 10
-python3 skills/self-evolution/main.py --agent demo-agent nightly
-```
-
-## Verification
-
-```bash
-python3 scripts/test_features.py --agent demo-agent
-python3 test_all.py --workspace <workspace-root> --agent demo-agent
-python3 scripts/test_agents.py --workspace <workspace-root> --agent demo-agent
-```
-
+**OpenClaw 会：**
+1. 读取 `workspace-setup.md` 安装指南
+2. 克隆模板到 `~/.openclaw/workspace-demo-agent`
+3. 创建目录结构
+4. 注册 `demo-agent` 到 OpenClaw
+5. 配置多 Agent 系统（可选）
+6. 运行测试
 
 ---
 
-## 🤖 多 Agent 管理
+## 🚀 Quick Start
 
-### setup-multi-agent.sh - 批量创建
-
-```bash
-./scripts/setup-multi-agent.sh researcher writer organizer
-```
-
-### add-agent.sh - 新增单个
+### Option 1: Manual Install
 
 ```bash
-./scripts/add-agent.sh coach "成长教练" 🌱
-```
+# 1. Clone template
+git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
+cd ~/.openclaw/workspace-my-agent
 
-详见 `workspace-setup.md` 完整文档。
+# 2. Create directory structure
+mkdir -p memory/weekly memory/monthly memory/archive
+mkdir -p data/index data/my-agent
+
+# 3. Register OpenClaw agent
+openclaw agents add my-agent --workspace "$(pwd)" --non-interactive
+
+# 4. Test
+python3 scripts/session_recorder.py -t event -c 'Hello world'
+python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
+```
 
 ---
 
@@ -165,12 +76,67 @@ After installation, activate advanced features interactively:
 
 ---
 
+## 🤖 Multi-Agent Scripts
+
+### setup-multi-agent.sh - Create Multiple Agents
+
+```bash
+./scripts/setup-multi-agent.sh designer writer ops
+# Creates: designer-agent, writer-agent, ops-agent
+```
+
+### add-agent.sh - Add Single Agent
+
+```bash
+./scripts/add-agent.sh designer UI/UX 设计师 🎨
+# Creates: designer-agent (UI/UX 设计师 🎨)
+```
+
+---
+
+## 📁 Directory Structure
+
+```
+evo-agents/
+├── 📄 Root Files
+│   ├── README.md
+│   ├── README.zh-CN.md
+│   ├── workspace-setup.md
+│   └── FEATURE_ACTIVATION_GUIDE.md
+│
+├── 🔧 scripts/
+│   ├── activate-features.sh
+│   ├── setup-multi-agent.sh
+│   ├── add-agent.sh
+│   └── ...
+│
+├── 📚 libs/
+│   └── memory_hub/
+│
+├── 🎯 skills/
+│   ├── memory-search/
+│   ├── rag/
+│   ├── self-evolution/
+│   └── websearch/
+│
+├── 📂 agents/
+│   └── .gitkeep
+│
+└── 📖 docs/
+    ├── ARCHITECTURE_GENERIC_EN.md
+    └── PROJECT_STRUCTURE_GENERIC_EN.md
+```
+
+---
+
 ## 📚 Documentation
 
 | Document | Purpose |
 |----------|---------|
+| `workspace-setup.md` | ⭐ Complete installation guide |
 | `FEATURE_ACTIVATION_GUIDE.md` | Feature activation guide |
-| `workspace-setup.md` | Complete installation guide |
+| `README.md` | Quick start (English) |
+| `README.zh-CN.md` | Quick start (Chinese) |
 | `docs/ARCHITECTURE_GENERIC_EN.md` | Architecture design |
 | `docs/PROJECT_STRUCTURE_GENERIC_EN.md` | Directory structure |
 
