@@ -115,3 +115,47 @@ python3 test_all.py --workspace <workspace-root> --agent demo-agent
 python3 scripts/test_agents.py --workspace <workspace-root> --agent demo-agent
 ```
 
+
+---
+
+## 🔧 功能激活
+
+安装后，交互式激活高级功能：
+
+```bash
+./scripts/activate-features.sh
+```
+
+**可激活功能：**
+1. 🔮 语义搜索（Ollama + 嵌入模型）
+2. 📚 知识库系统
+3. 🧬 自进化系统
+4. 📊 RAG 评估
+5. ⏰ 定时任务（Cron）
+6. ✅ 全部激活
+7. ❌ 跳过
+
+**嵌入模型选择：**
+- bge-m3 (1.2GB, 🇨🇳 中文)
+- nomic-embed-text (274MB, 🇺🇸 英文)
+- mxbai-embed-large (670MB, 🌍 多语言)
+- all-minilm (46MB, 🇺🇸 英文，快速)
+
+**文档：**
+- `FEATURE_ACTIVATION_GUIDE.md` - 完整激活指南
+- `workspace-setup.md` - 完整安装指南
+
+---
+
+## 📚 文档
+
+| 文档 | 用途 |
+|------|------|
+| `FEATURE_ACTIVATION_GUIDE.md` | 功能激活指南 |
+| `workspace-setup.md` | 完整安装指南 |
+| `docs/ARCHITECTURE_GENERIC_CN.md` | 架构设计 |
+| `docs/PROJECT_STRUCTURE_GENERIC_CN.md` | 目录结构 |
+
+---
+
+**最后更新：** 2026-03-26

@@ -133,3 +133,47 @@ python3 scripts/test_agents.py --workspace <workspace-root> --agent demo-agent
 ```
 
 详见 `workspace-setup.md` 完整文档。
+
+---
+
+## 🔧 Feature Activation
+
+After installation, activate advanced features interactively:
+
+```bash
+./scripts/activate-features.sh
+```
+
+**Available Features:**
+1. 🔮 Semantic Search (Ollama + Embedding Models)
+2. 📚 Knowledge Base System
+3. 🧬 Self-Evolution System
+4. 📊 RAG Evaluation
+5. ⏰ Scheduled Tasks (Cron)
+6. ✅ Activate All
+7. ❌ Skip
+
+**Embedding Models:**
+- bge-m3 (1.2GB, 🇨🇳 Chinese)
+- nomic-embed-text (274MB, 🇺🇸 English)
+- mxbai-embed-large (670MB, 🌍 Multi-language)
+- all-minilm (46MB, 🇺🇸 English, Fast)
+
+**Documentation:**
+- `FEATURE_ACTIVATION_GUIDE.md` - Full activation guide
+- `workspace-setup.md` - Complete installation playbook
+
+---
+
+## 📚 Documentation
+
+| Document | Purpose |
+|----------|---------|
+| `FEATURE_ACTIVATION_GUIDE.md` | Feature activation guide |
+| `workspace-setup.md` | Complete installation guide |
+| `docs/ARCHITECTURE_GENERIC_EN.md` | Architecture design |
+| `docs/PROJECT_STRUCTURE_GENERIC_EN.md` | Directory structure |
+
+---
+
+**Last Updated:** 2026-03-26
