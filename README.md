@@ -35,17 +35,22 @@ openclaw agent --message "Read https://raw.githubusercontent.com/luoboask/evo-ag
 git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
 cd ~/.openclaw/workspace-my-agent
 
-# 2. Create directory structure
+# 2. Register OpenClaw agent (IMPORTANT! This creates AGENTS.md, SOUL.md, etc.)
+openclaw agents add my-agent --workspace "$(pwd)" --non-interactive
+
+# 3. Create directory structure
 mkdir -p memory/weekly memory/monthly memory/archive
 mkdir -p data/index data/my-agent
-
-# 3. Register OpenClaw agent
-openclaw agents add my-agent --workspace "$(pwd)" --non-interactive
 
 # 4. Test
 python3 scripts/session_recorder.py -t event -c 'Hello world'
 python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
 ```
+
+**⚠️ Important:** Step 2 (`openclaw agents add`) is required! It creates:
+- AGENTS.md, SOUL.md, MEMORY.md
+- USER.md, IDENTITY.md, TOOLS.md
+- HEARTBEAT.md
 
 ---
 

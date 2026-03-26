@@ -35,17 +35,22 @@ openclaw agent --message "Read https://raw.githubusercontent.com/luoboask/evo-ag
 git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
 cd ~/.openclaw/workspace-my-agent
 
-# 2. 创建目录结构
+# 2. 注册 OpenClaw agent（重要！这会创建 AGENTS.md, SOUL.md 等文件）
+openclaw agents add my-agent --workspace "$(pwd)" --non-interactive
+
+# 3. 创建目录结构
 mkdir -p memory/weekly memory/monthly memory/archive
 mkdir -p data/index data/my-agent
-
-# 3. 注册 OpenClaw agent
-openclaw agents add my-agent --workspace "$(pwd)" --non-interactive
 
 # 4. 测试
 python3 scripts/session_recorder.py -t event -c 'Hello world'
 python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
 ```
+
+**⚠️ 重要：** 第 2 步（`openclaw agents add`）是必须的！它会创建：
+- AGENTS.md, SOUL.md, MEMORY.md
+- USER.md, IDENTITY.md, TOOLS.md
+- HEARTBEAT.md
 
 ---
 
