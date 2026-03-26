@@ -1,11 +1,26 @@
-# =============================================================================
-# Unified Memory System - .gitignore
-# Purpose: Protect personal data and runtime files
-# =============================================================================
+# Runtime data (exclude all agent-specific data)
+memory/*.md
+memory/weekly/*.md
+memory/monthly/*.md
+memory/archive/*.md
+memory/knowledge/
+memory/learning/
+memory/evolution_*.jsonl
+memory/*.db
+memory/*.pkl
+memory/*.json
 
-# -----------------------------------------------------------------------------
+# Agent-specific data
+agents/*/memory/
+agents/*/data/
+data/*/
+data/*.db
+data/index/
+
+# OpenClaw runtime
+.openclaw/
+
 # Python
-# -----------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
@@ -13,126 +28,46 @@ __pycache__/
 .Python
 *.egg-info/
 .eggs/
-dist/
-build/
 
 # Virtual environments
-env/
 venv/
-ENV/
-.venv
+env/
+.venv/
+.env/
 
 # IDE
-.vscode/
 .idea/
+.vscode/
 *.swp
 *.swo
 *~
+
+# OS
 .DS_Store
+Thumbs.db
 
-# -----------------------------------------------------------------------------
-# ⚠️  Runtime Data (per-agent, do not commit)
-# -----------------------------------------------------------------------------
-
-# Agent data directories
-data/*/
-!data/.gitkeep
-
-# Search indexes
-data/index/
-
-# Lock files
-data/.locks/
-
-# OpenClaw runtime
-.openclaw/
-.agent-runtime/
-
-# Daily memory files (agent-specific)
-memory/????-??-??.md
-memory/weekly/
-memory/monthly/
-memory/archive/
-memory/knowledge/
-
-# Knowledge JSON (agent learned)
-public/ai/
-public/architecture/
-public/coding/
-public/data/
-public/devops/
-public/ml/
-public/web_learning/
-public/operations/
-public/prompt/
-public/rag/
-public/security/
-public/tutorial/
-public/openclaw/
-
-# Optimization logs
-OPTIMIZATION_*.md
-
-# Bridge sync state
-.bridge_sync.json
-
-# Local backups
-*.local
-*.bak
-
-# -----------------------------------------------------------------------------
-# ⚠️  Personal Config (sensitive - not in Git)
-# -----------------------------------------------------------------------------
-
-config.yaml
-config.local.yaml
-credentials.json
-user_profile.json
-*.secret
-*.secrets
-
-# Databases (personal memory & knowledge)
-*.db
-*.sqlite
-*.sqlite3
-
-# Logs (personal usage)
+# Logs
 *.log
-*.jsonl
 logs/
-log/
 
-# Learning records
-memory/learning/
-memory/realtime_learning_*.jsonl
-
-# -----------------------------------------------------------------------------
-# External Config Directories
-# -----------------------------------------------------------------------------
-
-# -----------------------------------------------------------------------------
-# Temp Files
-# -----------------------------------------------------------------------------
+# Temp
 tmp/
 temp/
 *.tmp
-*.cache
 
-# -----------------------------------------------------------------------------
-# Testing
-# -----------------------------------------------------------------------------
+# Test artifacts
+test_*.log
 .coverage
 htmlcov/
 .pytest_cache/
-.tox/
 
-# -----------------------------------------------------------------------------
-# Documentation Build
-# -----------------------------------------------------------------------------
-docs/_build/
-site/
+# Projects (git repos cloned by user)
+projects/
 
-# -----------------------------------------------------------------------------
-# Lock files from scripts
-# -----------------------------------------------------------------------------
-*.lock
+# Public knowledge (user-generated)
+public/
+
+# Config (may contain secrets)
+config/*.local.yaml
+*.env
+.env.*

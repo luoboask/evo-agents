@@ -1,0 +1,14 @@
+# Agent Configuration - developer-agent
+
+agent:
+  name: developer-agent
+  role: developer
+  description: "代码开发者 - 实现方案、编写代码"
+  data_path: agents/developer-agent/data
+  memory_path: agents/developer-agent/memory
+  workspace_path: ../..
+  settings:
+    max_memories: 1500
+    auto_cleanup: true
+    importance_threshold: 5.5
+    enable_semantic: true
