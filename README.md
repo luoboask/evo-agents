@@ -25,17 +25,23 @@
 
 ## 🚀 Quick Start
 
-### Option 1: One-Click Install
+### Option 1: OpenClaw One-Click Install (Recommended) ⭐
+
+If you have OpenClaw installed, let it read the setup guide and install for you:
 
 ```bash
-# Install with default name 'my-agent'
-curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash
-
-# Or specify your own agent name
-curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash -s your-agent-name
+# Ask OpenClaw to read workspace-setup.md and install
+openclaw agent --message "Read workspace-setup.md and help me install this workspace template"
 ```
 
-### Option 2: Manual Install
+OpenClaw will:
+1. Read `workspace-setup.md` installation guide
+2. Create directory structure
+3. Register the agent
+4. Set up multi-agent system (optional)
+5. Run tests
+
+### Option 2: One-Click Install
 
 ```bash
 # 1. Clone template

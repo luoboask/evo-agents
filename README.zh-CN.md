@@ -25,7 +25,23 @@
 
 ## 🚀 快速开始
 
-### 方式 1：一键安装
+### 方式 1：OpenClaw 一键安装（推荐）⭐
+
+如果你已经安装了 OpenClaw，可以让它读取安装指南并帮你安装：
+
+```bash
+# 让 OpenClaw 读取 workspace-setup.md 并安装
+openclaw agent --message "Read workspace-setup.md and help me install this workspace template"
+```
+
+OpenClaw 会：
+1. 读取 `workspace-setup.md` 安装指南
+2. 创建目录结构
+3. 注册 Agent
+4. 配置多 Agent 体系（可选）
+5. 运行测试
+
+### 方式 2：一键安装
 
 ```bash
 # 安装默认名称 'my-agent'
