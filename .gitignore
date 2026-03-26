@@ -134,3 +134,11 @@ site/
 # Agent-specific data (整个 agents/ 目录都不提交)
 agents/
 !agents/.gitkeep
+
+# Agent-specific skills (特定 Agent 的技能不提交)
+skills/aura-*/
+skills/danger-xhs-browser/
+skills/japan-media-agent/
+skills/pinterest-browser-publisher/
+skills/star-mansion-master/
+skills/tarot-master/
