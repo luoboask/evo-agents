@@ -62,6 +62,33 @@ python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
 
 ---
 
+## 🤖 Multi-Agent Scripts
+
+### setup-multi-agent.sh - Create Multiple Agents
+
+```bash
+cd ~/.openclaw/workspace-my-agent
+./scripts/setup-multi-agent.sh designer writer ops
+# Creates: designer-agent, writer-agent, ops-agent
+```
+
+### add-agent.sh - Add Single Agent
+
+```bash
+cd ~/.openclaw/workspace-my-agent
+./scripts/add-agent.sh designer UI/UX 设计师 🎨
+# Creates: designer-agent (UI/UX 设计师 🎨)
+```
+
+**Rules:**
+1. Must pass role name as argument
+2. Auto-generates `role-agent`
+3. If already has `-agent`, won't add again
+
+See `workspace-setup.md` for full documentation.
+
+---
+
 ## 📁 Directory Structure
 
 ```
@@ -82,6 +109,8 @@ workspace/
 │   ├── memory_compressor.py    # Compression
 │   ├── memory_stats.py         # Stats
 │   ├── health_check.py         # Health check
+│   ├── setup-multi-agent.sh    # Create multiple agents ⭐
+│   ├── add-agent.sh            # Add single agent ⭐
 │   └── bridge/                 # Bidirectional sync
 │
 ├── 📚 libs/                  # Shared libraries

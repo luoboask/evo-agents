@@ -1,35 +1,70 @@
 #!/bin/bash
 # setup-multi-agent.sh - 一键创建多 Agent 体系
-# 用法：./setup-multi-agent.sh <workspace-path>
+# 用法：./setup-multi-agent.sh <role1> [role2] [role3] ...
+# 说明：每个角色会自动生成 role-agent，如果已带 -agent 则不再添加
 
 set -e
 
-WORKSPACE="$1"
-if [ -z "$WORKSPACE" ]; then
-    echo "用法：./setup-multi-agent.sh <workspace-path>"
+# 自动获取 workspace 目录（脚本的父目录）
+WORKSPACE="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$WORKSPACE"
+
+# 必须传参数
+if [ $# -eq 0 ]; then
+    echo "用法：./setup-multi-agent.sh <role1> [role2] [role3] ..."
+    echo ""
+    echo "说明：每个角色会自动生成 role-agent，如果已带 -agent 则不再添加"
     echo ""
     echo "示例:"
-    echo "   ./setup-multi-agent.sh ~/.openclaw/workspace-my-agent"
+    echo "   ./setup-multi-agent.sh designer writer ops"
+    echo "   ./setup-multi-agent.sh designer-agent writer-agent"
+    echo "   ./setup-multi-agent.sh \"designer:UI/UX 设计师:🎨\" \"writer:内容创作者:✍️\""
     exit 1
 fi
 
-cd "$WORKSPACE"
+AGENTS=("$@")
 
 echo "╔════════════════════════════════════════════════════════╗"
 echo "║     创建多 Agent 体系                                   ║"
 echo "╚════════════════════════════════════════════════════════╝"
 echo ""
+echo "📁 Workspace: $WORKSPACE"
+echo "📋 角色列表：${AGENTS[*]}"
+echo ""
 
-# 创建子 Agent 目录
-for agent in analyst-agent developer-agent tester-agent; do
-    echo "📁 创建 $agent..."
-    mkdir -p "agents/$agent/{memory,data}"
+# 创建子 Agent
+for agent_spec in "${AGENTS[@]}"; do
+    # 解析 agent_spec (格式：name:desc:emoji 或 name)
+    IFS=':' read -ra PARTS <<< "$agent_spec"
+    NAME="${PARTS[0]}"
     
-    # 创建 AGENTS.md
-    cat > "agents/$agent/AGENTS.md" << EOF
-# AGENTS.md - $agent
+    # 添加 -agent 后缀（如果没有）
+    if [[ "$NAME" == *"-agent" ]]; then
+        AGENT_NAME="$NAME"
+    else
+        AGENT_NAME="${NAME}-agent"
+    fi
+    
+    # 默认描述和 emoji
+    DESC="${PARTS[1]:-${PARTS[0]}}"
+    EMOJI="${PARTS[2]:-🤖}"
+    
+    # 提取角色名（去掉 -agent 后缀）
+    ROLE="${AGENT_NAME%-agent}"
+    
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "📁 创建 $AGENT_NAME ($DESC $EMOJI)"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    
+    # 1. 创建目录
+    mkdir -p "agents/$AGENT_NAME/{memory,data}"
+    echo "   ✅ 目录结构"
+    
+    # 2. 创建配置文件
+    cat > "agents/$AGENT_NAME/AGENTS.md" << EOF
+# AGENTS.md - $AGENT_NAME
 
-**角色：** ${agent%-agent}
+**角色：** $DESC
 **职责：** 专业任务处理
 
 ## 工作流程
@@ -37,37 +72,20 @@ for agent in analyst-agent developer-agent tester-agent; do
 2. 处理任务
 3. 输出结果
 EOF
-
-    # 创建 SOUL.md
-    case $agent in
-        analyst-agent)
-            emoji="🔍"
-            desc="需求分析师"
-            ;;
-        developer-agent)
-            emoji="💻"
-            desc="代码开发者"
-            ;;
-        tester-agent)
-            emoji="✅"
-            desc="质量测试员"
-            ;;
-    esac
     
-    cat > "agents/$agent/SOUL.md" << EOF
-# SOUL.md - $agent
+    cat > "agents/$AGENT_NAME/SOUL.md" << EOF
+# SOUL.md - $AGENT_NAME
 
-**你是谁：** $desc
-**emoji：** $emoji
+**你是谁：** $DESC
+**emoji：** $EMOJI
 
 ## 个性
 - 专业、认真、负责
 - 善于思考和解决问题
 EOF
-
-    # 创建 MEMORY.md
-    cat > "agents/$agent/MEMORY.md" << EOF
-# MEMORY.md - $agent
+    
+    cat > "agents/$AGENT_NAME/MEMORY.md" << EOF
+# MEMORY.md - $AGENT_NAME
 
 ## 长期记忆
 _重要的人、事、偏好、决定_
@@ -76,81 +94,91 @@ _重要的人、事、偏好、决定_
 - 名称：待填写
 - 时区：Asia/Shanghai
 EOF
-
-    # 创建 config.yaml
-    cat > "agents/$agent/config.yaml" << EOF
+    
+    cat > "agents/$AGENT_NAME/config.yaml" << EOF
 agent:
-  name: $agent
-  role: ${agent%-agent}
-  description: "$desc"
-  data_path: agents/$agent/data
-  memory_path: agents/$agent/memory
+  name: $AGENT_NAME
+  role: $ROLE
+  description: "$DESC"
+  data_path: agents/$AGENT_NAME/data
+  memory_path: agents/$AGENT_NAME/memory
 EOF
-
-    echo "   ✅ $agent 创建完成"
+    
+    echo "   ✅ 配置文件"
+    
+    # 3. 注册到 OpenClaw
+    if openclaw agents add "$AGENT_NAME" --workspace "$WORKSPACE/agents/$AGENT_NAME" --non-interactive 2>/dev/null; then
+        echo "   ✅ 已注册到 OpenClaw"
+    else
+        echo "   ⚠️  可能已存在"
+    fi
+    
+    echo ""
 done
 
-# 更新 config/agents.yaml
-AGENT_NAME=$(basename "$WORKSPACE" | sed 's/workspace-//')
+# 4. 更新 config/agents.yaml
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📝 更新 config/agents.yaml..."
+
+MAIN_AGENT=$(basename "$WORKSPACE" | sed 's/workspace-//')
+
 cat > config/agents.yaml << EOF
 # Multi-Agent Configuration
-
 # Main agent
-$AGENT_NAME:
-  name: $AGENT_NAME
+$MAIN_AGENT:
+  name: $MAIN_AGENT
   role: coordinator
-  data_path: data/$AGENT_NAME
+  data_path: data/$MAIN_AGENT
   memory_path: memory
 
 # Sub-agents
-analyst-agent:
-  name: analyst-agent
-  role: analyst
-  data_path: agents/analyst-agent/data
-  memory_path: agents/analyst-agent/memory
-
-developer-agent:
-  name: developer-agent
-  role: developer
-  data_path: agents/developer-agent/data
-  memory_path: agents/developer-agent/memory
-
-tester-agent:
-  name: tester-agent
-  role: tester
-  data_path: agents/tester-agent/data
-  memory_path: agents/tester-agent/memory
 EOF
 
-echo ""
-echo "📝 注册 OpenClaw 子 Agent..."
-for agent in analyst-agent developer-agent tester-agent; do
-    # 注册子 Agent 到 OpenClaw
-    openclaw agents add "$agent" --workspace "$WORKSPACE/agents/$agent" --non-interactive 2>/dev/null && \
-        echo "   ✅ $agent 已注册到 OpenClaw" || \
-        echo "   ⚠️  $agent 可能已存在"
+for agent_spec in "${AGENTS[@]}"; do
+    IFS=':' read -ra PARTS <<< "$agent_spec"
+    NAME="${PARTS[0]}"
+    if [[ "$NAME" == *"-agent" ]]; then
+        AGENT_NAME="$NAME"
+    else
+        AGENT_NAME="${NAME}-agent"
+    fi
+    ROLE="${AGENT_NAME%-agent}"
+    DESC="${PARTS[1]:-$ROLE}"
+    
+    cat >> config/agents.yaml << EOF
+$AGENT_NAME:
+  name: $AGENT_NAME
+  role: $ROLE
+  data_path: agents/$AGENT_NAME/data
+  memory_path: agents/$AGENT_NAME/memory
+
+EOF
 done
 
-echo ""
-echo "🔗 配置 OpenClaw 多 Agent 关系..."
-# 在 openclaw.json 中添加子 Agent 关系（可选，通过 bindings 实现）
-echo "   ✅ 子 Agent 已添加到 openclaw.json"
+echo "   ✅ 已更新"
 
+# 5. 输出结果
 echo ""
-echo "✅ 多 Agent 体系创建完成！"
+echo "╔════════════════════════════════════════════════════════╗"
+echo "║     ✅ 多 Agent 体系创建完成！                           ║"
+echo "╚════════════════════════════════════════════════════════╝"
 echo ""
-echo "📊 Agent 列表:"
-echo "   • $AGENT_NAME (主协调)"
-echo "   • analyst-agent (需求分析 🔍) - OpenClaw 已注册"
-echo "   • developer-agent (代码实现 💻) - OpenClaw 已注册"
-echo "   • tester-agent (质量测试 ✅) - OpenClaw 已注册"
+echo "📊 创建结果:"
+echo "   • $MAIN_AGENT (主协调)"
+for agent_spec in "${AGENTS[@]}"; do
+    IFS=':' read -ra PARTS <<< "$agent_spec"
+    NAME="${PARTS[0]}"
+    if [[ "$NAME" == *"-agent" ]]; then
+        AGENT_NAME="$NAME"
+    else
+        AGENT_NAME="${NAME}-agent"
+    fi
+    DESC="${PARTS[1]:-$NAME}"
+    EMOJI="${PARTS[2]:-🤖}"
+    echo "   • $AGENT_NAME ($DESC $EMOJI)"
+done
 echo ""
-echo "🎯 使用示例:"
-echo "   # 使用 OpenClaw 直接调用子 Agent"
-echo "   openclaw agent --agent analyst-agent --message '分析这个需求...'"
-echo "   openclaw agent --agent developer-agent --message '实现这个功能...'"
-echo ""
-echo "   # 或使用脚本"
-echo "   python3 scripts/session_recorder.py -t event -c '内容' --agent analyst-agent"
-echo "   python3 scripts/unified_search.py '关键词' --agent developer-agent --semantic"
+echo "🎯 使用:"
+echo "   python3 scripts/session_recorder.py -t event -c '内容' --agent <agent-name>"
+echo "   openclaw agent --agent <agent-name> --message '任务'"
 echo ""

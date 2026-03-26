@@ -72,6 +72,33 @@ python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
 
 ---
 
+## 🤖 多 Agent 脚本
+
+### setup-multi-agent.sh - 批量创建多 Agent
+
+```bash
+cd ~/.openclaw/workspace-my-agent
+./scripts/setup-multi-agent.sh designer writer ops
+# 创建：designer-agent, writer-agent, ops-agent
+```
+
+### add-agent.sh - 新增单个 Agent
+
+```bash
+cd ~/.openclaw/workspace-my-agent
+./scripts/add-agent.sh designer UI/UX 设计师 🎨
+# 创建：designer-agent (UI/UX 设计师 🎨)
+```
+
+**规则：**
+1. 必须传参数（角色名）
+2. 自动生成 `role-agent`
+3. 如果已带 `-agent`，不再添加
+
+详见 `workspace-setup.md` 完整文档。
+
+---
+
 ## 📁 目录结构
 
 ```
@@ -92,6 +119,8 @@ workspace/
 │   ├── memory_compressor.py    # 压缩沉淀
 │   ├── memory_stats.py         # 系统统计
 │   ├── health_check.py         # 健康检查
+│   ├── setup-multi-agent.sh    # 批量创建 Agent ⭐
+│   ├── add-agent.sh            # 新增单个 Agent ⭐
 │   └── bridge/                 # 双向同步
 │
 ├── 📚 libs/                  # 共享库
