@@ -27,15 +27,15 @@
 
 ### 方式 1：OpenClaw 一键安装（推荐）⭐
 
-如果你已经安装了 OpenClaw，可以让它读取安装指南并帮你安装：
+如果你已经安装了 OpenClaw，可以让它直接读取 GitHub 上的安装指南并帮你安装：
 
 ```bash
-# 让 OpenClaw 读取 workspace-setup.md 并安装
-openclaw agent --message "Read workspace-setup.md and help me install this workspace template"
+# 让 OpenClaw 读取 GitHub 上的 workspace-setup.md 并安装
+openclaw agent --message "Read https://raw.githubusercontent.com/luoboask/evo-agents/refs/heads/master/workspace-setup.md and help me install this workspace template"
 ```
 
 OpenClaw 会：
-1. 读取 `workspace-setup.md` 安装指南
+1. 从 GitHub 读取 `workspace-setup.md` 安装指南
 2. 创建目录结构
 3. 注册 Agent
 4. 配置多 Agent 体系（可选）
