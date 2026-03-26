@@ -1,4 +1,4 @@
-# growth-agents Workspace 安装指南
+# evo-agents Workspace 安装指南
 
 **版本：** v1.0  
 **更新日期：** 2026-03-26
@@ -7,16 +7,48 @@
 
 ## 🎯 概述
 
-growth-agents 是一个基于 evo-agents 架构的 OpenClaw Workspace，专注于个人成长和自进化。
+evo-agents 是一个 OpenClaw Workspace 模板，提供多 Agent 协作、脚本工具链和完整文档。
+
+---
+
+## 🚀 安装方式
+
+### 方式 1：OpenClaw 自然语言安装（推荐）⭐
+
+```bash
+openclaw agent --message "Read https://raw.githubusercontent.com/luoboask/evo-agents/master/workspace-setup.md and help me install"
+```
+
+### 方式 2：手动安装
+
+```bash
+# 1. 克隆 evo-agents 模板（获得 scripts/, skills/, libs/）
+git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
+cd ~/.openclaw/workspace-my-agent
+
+# 2. 注册到 OpenClaw（创建 AGENTS.md, SOUL.md 等）
+openclaw agents add my-agent --workspace "$(pwd)" --non-interactive
+
+# 3. 创建目录结构
+mkdir -p memory/weekly memory/monthly memory/archive
+mkdir -p data/index data/my-agent
+
+# 4. 测试
+python3 scripts/session_recorder.py -t event -c 'Hello world'
+```
+
+**为什么需要两步？**
+- `git clone` → 获得 evo-agents 的 scripts/, skills/, libs/
+- `openclaw agents add` → 创建 AGENTS.md, SOUL.md 等，并注册 agent
 
 ---
 
 ## 🚀 快速开始
 
-### 使用已有安装
+安装完成后：
 
 ```bash
-cd ~/.openclaw/workspace-growth-agents
+cd ~/.openclaw/workspace-my-agent
 ```
 
 ### 新增子 Agent
