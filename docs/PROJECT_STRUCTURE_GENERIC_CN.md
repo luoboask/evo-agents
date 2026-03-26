@@ -1,8 +1,8 @@
-# 📁 项目结构规范（通用版 / 中文）
+# 📁 test-agents Workspace - 目录结构规范
 
-**版本：** v6.0  
-**适用范围：** 任意 Agent + 任意 workspace  
-**定位：** 规范目录分层、命名规则、依赖边界与临时脚本管理
+**版本：** v1.0  
+**更新日期：** 2026-03-26  
+**适用范围：** test-agents Workspace
 
 ---
 
@@ -10,212 +10,254 @@
 
 ### 1.1 分离关注点
 
-```text
+```
 ┌─────────────────────────────────────────┐
-│          技能层 (skills/)               │
-│ 独立能力，可单独调用，包含 SKILL.md      │
+│          共享层 (scripts/libs/skills)    │
+│  所有 Agent 共用，支持 --agent 参数        │
 └─────────────────────────────────────────┘
-                    ▲ 依赖
+                    ↓
 ┌─────────────────────────────────────────┐
-│            库层 (libs/)                  │
-│ 共享基础设施，被技能依赖，不是技能入口    │
+│          隔离层 (agents/*/memory/data)  │
+│  每个 Agent 独立记忆和数据                 │
 └─────────────────────────────────────────┘
 ```
 
-### 1.2 运行上下文原则
+### 1.2 核心原则
 
-- 统一通过参数传入上下文：
-  - `--workspace <path>`
-  - `--agent <name>`
-- 不依赖隐式环境上下文。
-
-### 1.3 边界原则
-
-- 只管理传入的 workspace。
-- 不管理 `~/.openclaw/agents` 等平台内部目录。
+- **共享代码** - scripts/libs/skills 所有 Agent 共用
+- **隔离数据** - 每个 Agent 独立 memory/ 和 data/
+- **参数化** - 所有脚本支持 `--agent` 参数
 
 ---
 
-## 2. 命名规范
+## 2. 完整目录结构
 
-| 目录类型 | 命名规范 | 示例 | 说明 |
-|---|---|---|---|
-| `libs/` 子目录 | 下划线 `_` | `memory_hub` | 适配包导入约定 |
-| `skills/` 子目录 | 连字符 `-` | `memory-search` | 可读性高，文档/URL 友好 |
-| `scripts/` 文件 | 动词+对象 | `install_agent_workspace.py` | 明确行为 |
-| `docs/` 文件 | 主题命名 | `PROJECT_STRUCTURE_GENERIC_CN.md` | 便于索引 |
-
----
-
-## 3. 推荐目录结构（通用）
-
-```text
-<workspace>/
-├── libs/                          # 共享库层
+```
+workspace/
+│
+├── 📄 根目录文件
+│   ├── AGENTS.md           # 会话规范 ⭐
+│   ├── SOUL.md             # Agent 身份
+│   ├── MEMORY.md           # 长期记忆
+│   ├── USER.md             # 用户信息
+│   ├── IDENTITY.md         # 身份标识
+│   ├── TOOLS.md            # 工具配置
+│   └── HEARTBEAT.md        # 心跳检查
+│
+├── 🤖 agents/              # ⭐ 子 Agent 数据隔离
+│   ├── analyst-agent/
+│   │   ├── AGENTS.md
+│   │   ├── SOUL.md
+│   │   ├── MEMORY.md
+│   │   ├── config.yaml
+│   │   ├── memory/         # 🔒 独立记忆
+│   │   └── data/           # 🔒 独立数据库
+│   ├── developer-agent/
+│   └── tester-agent/
+│
+├── 🔧 scripts/             # ⭐ 共享脚本
+│   ├── session_recorder.py
+│   ├── unified_search.py
+│   ├── memory_indexer.py
+│   ├── memory_compressor.py
+│   ├── memory_stats.py
+│   ├── health_check.py
+│   └── bridge/
+│
+├── 📚 libs/                # ⭐ 共享库
 │   └── memory_hub/
-│       ├── __init__.py
-│       ├── hub.py
-│       ├── storage.py
-│       ├── knowledge.py
-│       ├── evaluation.py
-│       └── models.py
 │
-├── skills/                        # 技能层
+├── 🎯 skills/              # ⭐ 共享技能
 │   ├── memory-search/
-│   │   ├── SKILL.md
-│   │   ├── skill.json
-│   │   └── search_sqlite.py
 │   ├── rag/
-│   │   ├── SKILL.md (可选)
-│   │   ├── skill.json
-│   │   └── evaluate.py
 │   ├── self-evolution/
-│   │   ├── SKILL.md (可选)
-│   │   ├── skill.json
-│   │   └── main.py
 │   └── websearch/
-│       ├── SKILL.md
-│       ├── skill.json
-│       └── search.py
 │
-├── scripts/                       # 工具脚本（安装/升级/测试）
-├── docs/                          # 架构/运行/安装文档
-├── public/                        # 公共知识
-├── data/                          # 按 agent 隔离数据
-│   └── <agent>/
-│       ├── memory/
-│       ├── logs/
-│       └── config/
-├── .agent-runtime/                # workspace 内运行时元数据
-│   └── <agent>/
-│       ├── run.sh
-│       └── install.json
-└── temp/                          # 临时脚本目录（不入库）
+├── 📝 memory/              # 主 Agent 记忆
+├── 💾 data/                # 主 Agent 数据
+├── 🌐 public/              # 公共知识库
+├── ⚙️ config/              # 配置
+├── 📂 projects/            # Git 库管理
+└── docs/                   # 文档
 ```
 
 ---
 
-## 4. 目录职责说明
+## 3. 目录职责
 
-### 4.1 `libs/`（共享库）
+### 3.1 根目录文件
 
-- 面向“被复用”的基础能力（存储、模型、评估等）。
-- 不作为技能入口，不要求 `SKILL.md`。
-- 可被多个技能依赖。
+| 文件 | 用途 |
+|------|------|
+| `AGENTS.md` | 会话行为规范（搜索、记录、同步） |
+| `SOUL.md` | Agent 身份和个性 |
+| `MEMORY.md` | 长期记忆（重要事件、决定） |
+| `USER.md` | 用户信息 |
+| `IDENTITY.md` | 身份标识（名称、emoji、头像） |
+| `TOOLS.md` | 工具配置（相机、SSH、TTS 等） |
+| `HEARTBEAT.md` | 心跳检查清单 |
 
-### 4.2 `skills/`（技能）
+### 3.2 agents/ - 子 Agent 数据隔离
 
-- 面向“可调用能力”的功能模块。
-- 推荐包含：
-  - `SKILL.md`（能力说明）
-  - `skill.json`（元数据）
-  - 一个或多个实现文件
+| Agent | 路径 | 用途 |
+|-------|------|------|
+| analyst-agent | `agents/analyst-agent/` | 需求分析 🔍 |
+| developer-agent | `agents/developer-agent/` | 代码实现 💻 |
+| tester-agent | `agents/tester-agent/` | 质量测试 ✅ |
 
-### 4.3 `scripts/`（工具脚本）
+每个子 Agent 包含：
+- `AGENTS.md` - 行为规范
+- `SOUL.md` - 身份
+- `MEMORY.md` - 记忆
+- `config.yaml` - 配置
+- `memory/` - 独立记忆目录
+- `data/` - 独立数据库
 
-- 一次性/运维型入口，例如安装、升级、验收测试。
-- 需可重复执行，尽量幂等。
+### 3.3 scripts/ - 共享脚本
 
-### 4.4 `data/`（数据隔离）
+| 脚本 | 功能 | 支持 --agent |
+|------|------|-------------|
+| `session_recorder.py` | 记录事件 | ✅ |
+| `unified_search.py` | 统一搜索 | ✅ |
+| `memory_indexer.py` | 构建索引 | ✅ |
+| `memory_compressor.py` | 压缩沉淀 | ✅ |
+| `memory_stats.py` | 系统统计 | ✅ |
+| `health_check.py` | 健康检查 | ✅ |
+| `bridge/*.py` | 双向同步 | ✅ |
 
-- `data/<agent>/...` 为唯一运行数据边界。
-- 不同 agent 之间禁止交叉写入。
+### 3.4 skills/ - 共享技能
 
-### 4.5 `.agent-runtime/`（运行时元数据）
+| Skill | 功能 |
+|-------|------|
+| `memory-search/` | 记忆搜索（关键词 + 语义） |
+| `rag/` | RAG 评估 |
+| `self-evolution/` | 自进化系统 |
+| `websearch/` | 网页搜索 |
 
-- 存放 run 脚本与安装元信息。
-- 仅在当前 workspace 生效。
+### 3.5 memory/ - 主 Agent 记忆
+
+```
+memory/
+├── YYYY-MM-DD.md        # 每日记录
+├── weekly/              # 周摘要
+├── monthly/             # 月摘要
+├── archive/             # 归档
+└── knowledge/           # 知识
+```
+
+### 3.6 data/ - 主 Agent 数据
+
+```
+data/
+├── .locks/              # 文件锁
+├── index/               # 搜索索引
+└── test-agents/         # test-agents 的 SQLite 数据
+```
+
+### 3.7 public/ - 公共知识库
+
+| 分类 | 用途 |
+|------|------|
+| `common/` | 通用知识 |
+| `domain/` | 领域知识 |
+| `faq/` | FAQ |
+| `openclaw/` | OpenClaw 相关 |
+| `operations/` | 运维知识 |
+| `prompt/` | Prompt 模板 |
+| `rag/` | RAG 相关 |
+| `security/` | 安全知识 |
+| `skills/` | 技能文档 |
+| `tutorial/` | 教程 |
+
+### 3.8 projects/ - Git 库管理
+
+```
+projects/
+├── lib-a/          # 直接放，不分类
+├── app-b/
+└── test-repo/
+```
+
+**原则：**
+- ✅ 扁平结构 - 所有库直接放 `projects/`
+- ✅ 不分类 - 避免决策成本
+- ✅ 手动清理 - 不需要时手动删除
 
 ---
 
-## 5. 依赖关系规则
+## 4. 命名规范
 
-```text
+| 目录类型 | 命名规范 | 示例 |
+|---------|---------|------|
+| `libs/` 子目录 | 下划线 `_` | `memory_hub` |
+| `skills/` 子目录 | 连字符 `-` | `memory-search` |
+| `scripts/` 文件 | 动词 + 对象 | `session_recorder.py` |
+| `agents/` 子目录 | 连字符 `-` | `analyst-agent` |
+| `docs/` 文件 | 主题命名 | `ARCHITECTURE_GENERIC_CN.md` |
+
+---
+
+## 5. 依赖关系
+
+```
 skills/*  ─────► libs/*
 skills/*  ✖────► skills/*   (避免横向强耦合)
 libs/*    ✖────► skills/*   (禁止反向依赖)
 ```
 
-规则：
-
-- 技能可以依赖库。
-- 技能之间如需复用，先抽到 `libs/`。
-- 库层不能依赖技能层。
-
 ---
 
-## 6. 导入与调用规范
+## 6. 使用示例
 
-### 6.1 库导入（推荐）
-
-```python
-from libs.memory_hub import MemoryHub
-```
-
-### 6.2 技能调用（推荐参数化）
+### 记录事件
 
 ```bash
-python3 skills/memory-search/search_sqlite.py "query" --agent demo-agent
-python3 skills/rag/evaluate.py --report --days 7 --agent demo-agent
-python3 skills/self-evolution/main.py --agent demo-agent status
+# 记录到子 Agent
+python3 scripts/session_recorder.py -t event -c '内容' --agent analyst-agent
+
+# 记录到主 Agent
+python3 scripts/session_recorder.py -t decision -c '内容' --agent test-agents --sync
 ```
 
----
-
-## 7. 临时脚本管理（`temp/`）
-
-### 7.1 使用场景
-
-- 调试脚本
-- 一次性迁移
-- 快速实验
-
-### 7.2 规则
-
-- 临时脚本放 `temp/`，不要放 `scripts/`。
-- 命名建议：`YYYY-MM-DD_xxx.py`。
-- 使用后及时迁移或删除。
-
-### 7.3 清理建议
+### 搜索记忆
 
 ```bash
-# 查看临时脚本
-ls -lt temp/
+# 搜索子 Agent
+python3 scripts/unified_search.py '关键词' --agent developer-agent --semantic
 
-# 清理 7 天前脚本（示例）
-find temp/ -name "*.py" -mtime +7 -delete
+# 搜索主 Agent
+python3 scripts/unified_search.py '关键词' --agent test-agents --semantic
+```
+
+### Git 库管理
+
+```bash
+# 克隆
+git clone https://github.com/xxx/lib.git projects/
+
+# 查看
+ls -1 projects/
+
+# 删除
+rm -rf projects/old-lib/
 ```
 
 ---
 
-## 8. 新增模块检查清单
+## 7. 总结
 
-### 新增 Lib
-
-- [ ] 使用下划线命名
-- [ ] 提供清晰导出接口（`__init__.py`）
-- [ ] 不引入对 `skills/` 的依赖
-
-### 新增 Skill
-
-- [ ] 使用连字符命名
-- [ ] 添加 `SKILL.md` 与 `skill.json`
-- [ ] 提供参数化入口（至少支持 `--agent`）
-- [ ] 不直接依赖其他 skill 实现文件
-
-### 代码审查
-
-- [ ] 分层职责清晰
-- [ ] 依赖方向正确
-- [ ] 路径与上下文由参数显式传入
+| 目录 | 共享/隔离 | 说明 |
+|------|----------|------|
+| `scripts/` | ✅ 共享 | 所有 Agent 共用 |
+| `libs/` | ✅ 共享 | 所有 Agent 共用 |
+| `skills/` | ✅ 共享 | 所有 Agent 共用 |
+| `agents/*/` | 🔒 隔离 | 每个子 Agent 独立 |
+| `memory/` | 🔒 隔离 | 主 Agent 独立 |
+| `data/` | 🔒 隔离 | 主 Agent 独立 |
+| `public/` | ✅ 共享 | 公共知识库 |
+| `projects/` | ✅ 共享 | Git 库管理 |
 
 ---
 
-## 9. 总结
-
-这个通用结构的目标是：
-
-1. **能力可复用**（共享 `skills/` + `libs/`）
-2. **数据可隔离**（`data/<agent>/`）
-3. **运行可控**（显式 `workspace + agent` 参数）
-4. **边界清晰**（仅管理当前 workspace）
+**最后更新：** 2026-03-26  
+**维护者：** test-agents 🦞

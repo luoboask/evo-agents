@@ -1,221 +1,263 @@
-# 📁 Project Structure Standard (Generic / English)
+# 📁 test-agents Workspace - Directory Structure
 
-**Version:** v6.0  
-**Scope:** Any agent + any workspace  
-**Purpose:** Define folder layering, naming rules, dependency boundaries, and temp-script policy
+**Version:** v1.0  
+**Updated:** 2026-03-26  
+**Scope:** test-agents Workspace
 
 ---
 
 ## 1. Architecture Principles
 
-### 1.1 Separation of concerns
+### 1.1 Separation of Concerns
 
-```text
+```
 ┌─────────────────────────────────────────┐
-│          Capability Layer (skills/)      │
-│ Independent features, callable, with docs │
+│       Shared Layer (scripts/libs/skills) │
+│   All Agents share, supports --agent     │
 └─────────────────────────────────────────┘
-                    ▲ depends on
+                    ↓
 ┌─────────────────────────────────────────┐
-│            Library Layer (libs/)         │
-│ Shared infrastructure, not skill entry   │
+│     Isolated Layer (agents/*/memory)    │
+│   Each Agent has independent memory      │
 └─────────────────────────────────────────┘
 ```
 
-### 1.2 Runtime context principle
+### 1.2 Core Principles
 
-- Runtime context must be explicit:
-  - `--workspace <path>`
-  - `--agent <name>`
-- Avoid hidden implicit context.
-
-### 1.3 Boundary principle
-
-- Manage only the provided workspace.
-- Do not manage platform-owned paths like `~/.openclaw/agents`.
+- **Shared Code** - scripts/libs/skills shared by all Agents
+- **Isolated Data** - Each Agent has independent memory/ and data/
+- **Parameterized** - All scripts support `--agent` parameter
 
 ---
 
-## 2. Naming Conventions
+## 2. Complete Directory Structure
 
-| Directory Type | Convention | Example | Why |
-|---|---|---|---|
-| `libs/` modules | snake_case | `memory_hub` | import-friendly |
-| `skills/` modules | kebab-case | `memory-search` | human/URL friendly |
-| `scripts/` files | verb-object | `install_agent_workspace.py` | explicit behavior |
-| `docs/` files | topic-based | `PROJECT_STRUCTURE_GENERIC_EN.md` | easy indexing |
-
----
-
-## 3. Recommended Generic Layout
-
-```text
-<workspace>/
-├── libs/
+```
+workspace/
+│
+├── 📄 Root Files
+│   ├── AGENTS.md           # Session spec ⭐
+│   ├── SOUL.md             # Agent identity
+│   ├── MEMORY.md           # Long-term memory
+│   ├── USER.md             # User info
+│   ├── IDENTITY.md         # Identity
+│   ├── TOOLS.md            # Tools config
+│   └── HEARTBEAT.md        # Heartbeat check
+│
+├── 🤖 agents/              # ⭐ Sub-Agent isolation
+│   ├── analyst-agent/
+│   │   ├── AGENTS.md
+│   │   ├── SOUL.md
+│   │   ├── MEMORY.md
+│   │   ├── config.yaml
+│   │   ├── memory/         # 🔒 Independent memory
+│   │   └── data/           # 🔒 Independent database
+│   ├── developer-agent/
+│   └── tester-agent/
+│
+├── 🔧 scripts/             # ⭐ Shared scripts
+│   ├── session_recorder.py
+│   ├── unified_search.py
+│   ├── memory_indexer.py
+│   ├── memory_compressor.py
+│   ├── memory_stats.py
+│   ├── health_check.py
+│   └── bridge/
+│
+├── 📚 libs/                # ⭐ Shared libraries
 │   └── memory_hub/
-│       ├── __init__.py
-│       ├── hub.py
-│       ├── storage.py
-│       ├── knowledge.py
-│       ├── evaluation.py
-│       └── models.py
 │
-├── skills/
+├── 🎯 skills/              # ⭐ Shared skills
 │   ├── memory-search/
-│   │   ├── SKILL.md
-│   │   ├── skill.json
-│   │   └── search_sqlite.py
 │   ├── rag/
-│   │   ├── SKILL.md (optional)
-│   │   ├── skill.json
-│   │   └── evaluate.py
 │   ├── self-evolution/
-│   │   ├── SKILL.md (optional)
-│   │   ├── skill.json
-│   │   └── main.py
 │   └── websearch/
-│       ├── SKILL.md
-│       ├── skill.json
-│       └── search.py
 │
-├── scripts/
-├── docs/
-├── public/
-├── data/
-│   └── <agent>/
-│       ├── memory/
-│       ├── logs/
-│       └── config/
-├── .agent-runtime/
-│   └── <agent>/
-│       ├── run.sh
-│       └── install.json
-└── temp/
+├── 📝 memory/              # Main Agent memory
+├── 💾 data/                # Main Agent data
+├── 🌐 public/              # Public knowledge base
+├── ⚙️ config/              # Config
+├── 📂 projects/            # Git repos
+└── docs/                   # Documentation
 ```
 
 ---
 
-## 4. Directory Responsibilities
+## 3. Directory Responsibilities
 
-### 4.1 `libs/` (shared libraries)
+### 3.1 Root Files
 
-- Reusable low-level capabilities (storage/model/evaluation).
-- Not a skill entrypoint.
-- Shared by multiple skills.
+| File | Purpose |
+|------|---------|
+| `AGENTS.md` | Session行为规范 (search, record, sync) |
+| `SOUL.md` | Agent identity and personality |
+| `MEMORY.md` | Long-term memory (events, decisions) |
+| `USER.md` | User information |
+| `IDENTITY.md` | Identity (name, emoji, avatar) |
+| `TOOLS.md` | Tools config (cameras, SSH, TTS) |
+| `HEARTBEAT.md` | Heartbeat checklist |
 
-### 4.2 `skills/` (capabilities)
+### 3.2 agents/ - Sub-Agent Isolation
 
-- User-facing callable features.
-- Recommended content:
-  - `SKILL.md`
-  - `skill.json`
-  - implementation files
+| Agent | Path | Purpose |
+|-------|------|---------|
+| analyst-agent | `agents/analyst-agent/` | Requirement Analysis 🔍 |
+| developer-agent | `agents/developer-agent/` | Code Implementation 💻 |
+| tester-agent | `agents/tester-agent/` | Quality Testing ✅ |
 
-### 4.3 `scripts/` (tooling entrypoints)
+Each sub-Agent contains:
+- `AGENTS.md` -行为规范
+- `SOUL.md` - Identity
+- `MEMORY.md` - Memory
+- `config.yaml` - Config
+- `memory/` - Independent memory directory
+- `data/` - Independent database
 
-- Operational workflows: install/upgrade/test.
-- Should be repeatable and idempotent.
+### 3.3 scripts/ - Shared Scripts
 
-### 4.4 `data/` (per-agent isolation)
+| Script | Function | Supports --agent |
+|--------|----------|------------------|
+| `session_recorder.py` | Record events | ✅ |
+| `unified_search.py` | Unified search | ✅ |
+| `memory_indexer.py` | Build index | ✅ |
+| `memory_compressor.py` | Compression | ✅ |
+| `memory_stats.py` | System stats | ✅ |
+| `health_check.py` | Health check | ✅ |
+| `bridge/*.py` | Bidirectional sync | ✅ |
 
-- `data/<agent>/...` is the primary runtime data boundary.
-- No cross-agent write access.
+### 3.4 skills/ - Shared Skills
 
-### 4.5 `.agent-runtime/` (workspace runtime metadata)
+| Skill | Function |
+|-------|----------|
+| `memory-search/` | Memory search (keyword + semantic) |
+| `rag/` | RAG evaluation |
+| `self-evolution/` | Self-evolution system |
+| `websearch/` | Web search |
 
-- Contains run entrypoint and install metadata.
-- Scope is only the current workspace.
+### 3.5 memory/ - Main Agent Memory
+
+```
+memory/
+├── YYYY-MM-DD.md        # Daily records
+├── weekly/              # Weekly summaries
+├── monthly/             # Monthly summaries
+├── archive/             # Archive
+└── knowledge/           # Knowledge
+```
+
+### 3.6 data/ - Main Agent Data
+
+```
+data/
+├── .locks/              # File locks
+├── index/               # Search index
+└── test-agents/         # test-agents SQLite data
+```
+
+### 3.7 public/ - Public Knowledge Base
+
+| Category | Purpose |
+|----------|---------|
+| `common/` | General knowledge |
+| `domain/` | Domain knowledge |
+| `faq/` | FAQ |
+| `openclaw/` | OpenClaw related |
+| `operations/` | Operations knowledge |
+| `prompt/` | Prompt templates |
+| `rag/` | RAG related |
+| `security/` | Security knowledge |
+| `skills/` | Skill documentation |
+| `tutorial/` | Tutorials |
+
+### 3.8 projects/ - Git Repos Management
+
+```
+projects/
+├── lib-a/          # Flat, no categories
+├── app-b/
+└── test-repo/
+```
+
+**Principles:**
+- ✅ Flat structure - All repos in `projects/`
+- ✅ No categories - Avoid decision cost
+- ✅ Manual cleanup - Delete when not needed
 
 ---
 
-## 5. Dependency Direction Rules
+## 4. Naming Conventions
 
-```text
+| Directory Type | Convention | Example |
+|---------------|------------|---------|
+| `libs/` subdirs | Underscore `_` | `memory_hub` |
+| `skills/` subdirs | Hyphen `-` | `memory-search` |
+| `scripts/` files | Verb+Object | `session_recorder.py` |
+| `agents/` subdirs | Hyphen `-` | `analyst-agent` |
+| `docs/` files | Topic naming | `ARCHITECTURE_GENERIC_CN.md` |
+
+---
+
+## 5. Dependencies
+
+```
 skills/*  ─────► libs/*
-skills/*  ✖────► skills/*   (avoid tight lateral coupling)
-libs/*    ✖────► skills/*   (no reverse dependency)
+skills/*  ✖────► skills/*   (avoid horizontal coupling)
+libs/*    ✖────► skills/*   (no reverse dependencies)
 ```
-
-Rules:
-
-- Skills may depend on libs.
-- If skills share logic, extract it into `libs/`.
-- Libs must not depend on skills.
 
 ---
 
-## 6. Import and Invocation Standards
+## 6. Usage Examples
 
-### 6.1 Library import (recommended)
-
-```python
-from libs.memory_hub import MemoryHub
-```
-
-### 6.2 Skill invocation (parameterized)
+### Record Events
 
 ```bash
-python3 skills/memory-search/search_sqlite.py "query" --agent demo-agent
-python3 skills/rag/evaluate.py --report --days 7 --agent demo-agent
-python3 skills/self-evolution/main.py --agent demo-agent status
+# Record to sub-Agent
+python3 scripts/session_recorder.py -t event -c 'content' --agent analyst-agent
+
+# Record to main Agent
+python3 scripts/session_recorder.py -t decision -c 'content' --agent test-agents --sync
 ```
 
----
-
-## 7. Temporary Script Policy (`temp/`)
-
-### 7.1 Typical use cases
-
-- Debug helpers
-- One-off migration scripts
-- Quick experiments
-
-### 7.2 Rules
-
-- Keep temporary scripts in `temp/`, not `scripts/`.
-- Suggested naming: `YYYY-MM-DD_xxx.py`.
-- Promote useful scripts to stable locations, remove the rest.
-
-### 7.3 Cleanup suggestion
+### Search Memory
 
 ```bash
-# Inspect temp scripts
-ls -lt temp/
+# Search sub-Agent
+python3 scripts/unified_search.py 'keyword' --agent developer-agent --semantic
 
-# Remove scripts older than 7 days (example)
-find temp/ -name "*.py" -mtime +7 -delete
+# Search main Agent
+python3 scripts/unified_search.py 'keyword' --agent test-agents --semantic
+```
+
+### Git Repos
+
+```bash
+# Clone
+git clone https://github.com/xxx/lib.git projects/
+
+# List
+ls -1 projects/
+
+# Delete
+rm -rf projects/old-lib/
 ```
 
 ---
 
-## 8. New Module Checklist
+## 7. Summary
 
-### New Lib
-
-- [ ] snake_case name
-- [ ] clear exported API in `__init__.py`
-- [ ] no dependency on `skills/`
-
-### New Skill
-
-- [ ] kebab-case name
-- [ ] includes `SKILL.md` and `skill.json`
-- [ ] has parameterized entrypoint (at least `--agent`)
-- [ ] no direct dependency on other skill implementation files
-
-### Review Checks
-
-- [ ] layering is clear
-- [ ] dependency direction is correct
-- [ ] runtime context is explicit via CLI params
+| Directory | Shared/Isolated | Description |
+|-----------|-----------------|-------------|
+| `scripts/` | ✅ Shared | All Agents share |
+| `libs/` | ✅ Shared | All Agents share |
+| `skills/` | ✅ Shared | All Agents share |
+| `agents/*/` | 🔒 Isolated | Each sub-Agent independent |
+| `memory/` | 🔒 Isolated | Main Agent independent |
+| `data/` | 🔒 Isolated | Main Agent independent |
+| `public/` | ✅ Shared | Public knowledge |
+| `projects/` | ✅ Shared | Git repos |
 
 ---
 
-## 9. Summary
-
-This generic structure ensures:
-
-1. **Reusable capabilities** (`skills/` + `libs/`)
-2. **Isolated data per agent** (`data/<agent>/`)
-3. **Predictable runtime context** (explicit `workspace + agent`)
-4. **Clear ownership boundary** (workspace-managed only)
+**Last Updated:** 2026-03-26  
+**Maintainer:** test-agents 🦞

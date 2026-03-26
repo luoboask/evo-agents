@@ -1,21 +1,21 @@
-# HEARTBEAT.md - Daily Tasks
+# HEARTBEAT.md - 定期任务
 
-_Edit this file to add your own periodic reminders and checks. Keep it short._
-
-## Daily
-
-- [ ] Check recent memory notes
-- [ ] Any pending tasks from yesterday?
-
-## Weekly
-
-- [ ] Review and update MEMORY.md
-- [ ] Run self-evolution check
+## 每次 Heartbeat
 
 ```bash
-cd skills/self-evolution && python3 main.py status
+# 双向同步记忆（markdown ↔ 知识系统）
+python3 scripts/bridge/bridge_sync.py --agent demo-agent
 ```
 
----
+## 每周一
 
-_If nothing needs attention, reply HEARTBEAT_OK._
+```bash
+# 可选：运行记忆压缩（如果文件太多）
+# python3 scripts/memory_compressor.py --weekly
+```
+
+## 规则
+
+- 没事不做多余的事
+- 深夜 (23:00-08:00) 保持安静
+- 有重要发现才打扰用户

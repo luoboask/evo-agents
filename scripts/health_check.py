@@ -178,7 +178,7 @@ def check(agent_name: str, fix: bool = False):
 
 def main():
     parser = argparse.ArgumentParser(description="记忆系统健康检查")
-    parser.add_argument("--agent", default="ai-baby")
+    parser.add_argument("--agent", default="demo-agent")
     parser.add_argument("--fix", action="store_true", help="自动修复发现的问题")
     args = parser.parse_args()
     check(args.agent, args.fix)

@@ -1,242 +1,215 @@
-# 🏗️ Agent Workspace 通用架构（中文通用版）
+# 🏗️ test-agents Workspace 架构
 
-**版本：** v6.0（通用版）  
-**适用范围：** 任意 Agent + 任意 workspace 路径  
-**状态：** 可落地实施
-
----
-
-## 1. 设计目标
-
-- **单一 Workspace 复用**：同一份代码支持多个 Agent 实例。
-- **参数驱动运行**：通过显式参数传入 `workspace` 和 `agent`。
-- **数据严格隔离**：每个 Agent 的数据独立存放在 `data/<agent>/`。
-- **技能统一共享**：`skills/` 为共享能力层，不按 Agent 拷贝代码。
-- **边界清晰**：只管理传入的 workspace，不管理 `~/.openclaw/agents`。
+**版本：** v1.0  
+**更新日期：** 2026-03-26  
+**适用范围：** test-agents Workspace
 
 ---
 
-## 2. 核心原则
+## 1. 核心架构
 
-1. **代码与数据分离**
-   - 代码：`skills/`、`libs/`、`scripts/`
-   - 数据：`data/<agent>/...`
+**两层结构：**
 
-2. **显式优于隐式**
-   - 运行时通过参数传入：
-     - `--workspace <path>`
-     - `--agent <name>`
-   - 不依赖环境变量中的隐式上下文。
-
-3. **Workspace 内闭环**
-   - 安装、升级、卸载、运行信息均写在 workspace 内。
-   - 运行时元数据放在 `.agent-runtime/<agent>/`。
-
-4. **OpenClaw 边界不越界**
-   - OpenClaw 的 Agent 注册与平台生命周期由 OpenClaw 自己管理。
-   - 本项目只负责 workspace 内能力实现与数据组织。
+| 层面 | 路径 | 管理方 | 用途 |
+|------|------|--------|------|
+| **OpenClaw** | `~/.openclaw/agents/` | OpenClaw 自动 | sessions、auth |
+| **Workspace** | `workspace/agents/` | 手动管理 | 子 Agent 数据隔离 |
 
 ---
 
-## 3. 分层架构
+## 2. 目录结构
 
-```text
-┌───────────────────────────────────────────┐
-│               用户交互层                  │
-│   (TUI / WebChat / 外部调用方 / OpenClaw) │
-└───────────────────────────────────────────┘
-                    ↓
-┌───────────────────────────────────────────┐
-│               运行编排层                  │
-│  start.sh / install scripts / CLI 入参   │
-│  (显式接收 workspace + agent)            │
-└───────────────────────────────────────────┘
-                    ↓
-┌───────────────────────────────────────────┐
-│               能力实现层                  │
-│  skills/* + libs/memory_hub              │
-└───────────────────────────────────────────┘
-                    ↓
-┌───────────────────────────────────────────┐
-│               数据与配置层                │
-│  data/<agent>/memory|logs|config         │
-│  public/ 共享知识                         │
-└───────────────────────────────────────────┘
 ```
-
----
-
-## 4. 推荐目录结构
-
-```text
-<workspace>/
-├── start.sh
-├── init_system.py
-├── config/
-│   └── agents.yaml
-├── skills/
+~/.openclaw/workspace-test-agents/
+│
+├── 📄 根目录文件
+│   ├── AGENTS.md           # 会话规范 ⭐
+│   ├── SOUL.md             # Agent 身份 ⭐
+│   ├── MEMORY.md           # 长期记忆 ⭐
+│   ├── USER.md             # 用户信息 ⭐
+│   ├── IDENTITY.md         # 身份标识
+│   ├── TOOLS.md            # 工具配置
+│   └── HEARTBEAT.md        # 心跳检查
+│
+├── 🤖 agents/              # ⭐ 子 Agent 数据隔离
+│   ├── analyst-agent/      # 🔍 需求分析师
+│   │   ├── AGENTS.md
+│   │   ├── SOUL.md
+│   │   ├── MEMORY.md
+│   │   ├── config.yaml
+│   │   ├── memory/         # 🔒 独立记忆
+│   │   └── data/           # 🔒 独立数据库
+│   ├── developer-agent/    # 💻 代码开发者
+│   └── tester-agent/       # ✅ 质量测试员
+│
+├── 🔧 scripts/             # ⭐ 共享脚本
+│   ├── session_recorder.py     # 支持 --agent
+│   ├── unified_search.py       # 支持 --agent
+│   ├── memory_indexer.py
+│   ├── memory_compressor.py
+│   ├── memory_stats.py
+│   ├── health_check.py
+│   └── bridge/                 # 双向同步
+│
+├── 📚 libs/                  # ⭐ 共享库
+│   └── memory_hub/
+│
+├── 🎯 skills/                # ⭐ 共享技能
 │   ├── memory-search/
 │   ├── rag/
 │   ├── self-evolution/
 │   └── websearch/
-├── libs/
-│   └── memory_hub/
-├── public/                     # 共享知识（可跨 agent 复用）
-├── data/
-│   ├── demo-agent/
-│   │   ├── memory/
-│   │   ├── logs/
-│   │   └── config/
-│   └── <other-agent>/
-├── .agent-runtime/
-│   └── demo-agent/
-│       ├── run.sh
-│       └── install.json
-└── docs/
-    ├── RUNBOOK.md
-    ├── INSTALL_AGENT.md
-    └── ARCHITECTURE_GENERIC_CN.md
+│
+├── 📝 memory/                # 主 Agent 记忆
+├── 💾 data/                  # 主 Agent 数据
+├── 🌐 public/                # 公共知识库
+├── ⚙️ config/                # 配置
+│   └── agents.yaml
+├── 📂 projects/              # Git 库管理
+└── docs/                     # 文档
 ```
 
 ---
 
-## 5. 多 Agent 设计（通用）
+## 3. 多 Agent 设计
 
-### 5.1 Agent 之间共享什么
+### 3.1 Agent 列表
 
-- `skills/`：共享能力代码
-- `libs/`：共享底层库
-- `public/`：共享公开知识
+| Agent | 角色 | 路径 | Emoji |
+|-------|------|------|-------|
+| **test-agents** | coordinator | `memory/` + `data/` | 🦞 |
+| **analyst-agent** | analyst | `agents/analyst-agent/` | 🔍 |
+| **developer-agent** | developer | `agents/developer-agent/` | 💻 |
+| **tester-agent** | tester | `agents/tester-agent/` | ✅ |
 
-### 5.2 Agent 之间隔离什么
+### 3.2 共享与隔离
 
-- `data/<agent>/memory`：记忆数据库
-- `data/<agent>/logs`：日志
-- `data/<agent>/config`：运行配置
-- `.agent-runtime/<agent>`：该 agent 的运行脚本与安装元数据
+| 资源 | 共享/隔离 | 说明 |
+|------|----------|------|
+| `scripts/` | ✅ 共享 | 所有 Agent 共用 |
+| `libs/` | ✅ 共享 | 所有 Agent 共用 |
+| `skills/` | ✅ 共享 | 所有 Agent 共用 |
+| `memory/` | 🔒 隔离 | 每个 Agent 独立 |
+| `data/` | 🔒 隔离 | 每个 Agent 独立 |
 
-### 5.3 配置入口
+### 3.3 协作流程
 
-`config/agents.yaml` 只描述 Agent 的角色与默认数据路径，不绑定平台级生命周期。
-
----
-
-## 6. 技能系统规范
-
-每个技能目录推荐包含：
-
-- `SKILL.md`：技能说明（面向调用）
-- `skill.json`：元数据
-- 实现文件（语言不限）
-
-推荐约定：
-
-- 技能逻辑通过参数接收 `agent`（不要隐式读环境）
-- 数据访问统一下沉到 `libs/memory_hub`
-- CLI 统一支持 `--agent`
+```
+1️⃣  analyst-agent    需求分析
+    ↓
+2️⃣  developer-agent  方案实现
+    ↓
+3️⃣  tester-agent     质量测试
+    ↓
+4️⃣  test-agents      总结沉淀
+```
 
 ---
 
-## 7. 数据管理策略
+## 4. 使用方式
 
-### 7.1 记忆与评估
-
-- 记忆：`data/<agent>/memory/memory_stream.db`
-- 知识库：`data/<agent>/memory/knowledge_base.db`
-- RAG 评估：`data/<agent>/logs/*` 或技能内日志路径
-
-### 7.2 知识分层
-
-- `public/`：公共知识（可共享）
-- `data/<agent>/...`：私有知识（仅该 agent）
-
-### 7.3 数据生命周期
-
-- 安装：创建 `data/<agent>/...` 目录
-- 运行：增量写入
-- 卸载：可选保留或清理 `data/<agent>/`
-
----
-
-## 8. 运行与安装流程（参数化）
-
-### 8.1 启动
+### 记录事件
 
 ```bash
-./start.sh --workspace <workspace-path> --agent demo-agent
+cd ~/.openclaw/workspace-test-agents
+
+# 记录到子 Agent
+python3 scripts/session_recorder.py -t event -c '内容' --agent analyst-agent
+
+# 记录到主 Agent
+python3 scripts/session_recorder.py -t decision -c '内容' --agent test-agents --sync
 ```
 
-### 8.2 初始化
+### 搜索记忆
 
 ```bash
-python3 init_system.py --workspace <workspace-path> --agent demo-agent
-```
+# 搜索子 Agent
+python3 scripts/unified_search.py '关键词' --agent developer-agent --semantic
 
-### 8.3 安装 Agent 运行入口
-
-```bash
-python3 scripts/install_agent_workspace.py \
-  --agent demo-agent \
-  --workspace <workspace-path>
-```
-
-安装后运行：
-
-```bash
-<workspace-path>/.agent-runtime/demo-agent/run.sh
-```
-
-### 8.4 升级检查
-
-```bash
-python3 scripts/upgrade_agent_workspace.py \
-  --agent demo-agent \
-  --workspace <workspace-path>
-```
-
-### 8.5 卸载
-
-```bash
-python3 scripts/uninstall_agent_workspace.py \
-  --agent demo-agent \
-  --workspace <workspace-path> \
-  --yes
+# 搜索主 Agent
+python3 scripts/unified_search.py '关键词' --agent test-agents --semantic
 ```
 
 ---
 
-## 9. 与平台集成边界（关键）
+## 5. Git 库管理
 
-本项目约束：
+### projects/ 目录
 
-- ✅ 管理 `<workspace>` 内目录与能力
-- ✅ 管理 `<workspace>/data/*` 与 `.agent-runtime/*`
-- ❌ 不管理 `~/.openclaw/agents`（平台侧生命周期）
-- ❌ 不假设平台目录结构（避免耦合）
+```
+projects/
+├── lib-a/          # 直接放，不分类
+├── app-b/
+└── test-repo/
+```
 
-这保证了 workspace 可在不同平台/宿主中复用。
+**原则：**
+- ✅ 扁平结构 - 所有库直接放 `projects/`
+- ✅ 不分类 - 避免决策成本
+- ✅ 手动清理 - 不需要时手动删除
+
+### 使用
+
+```bash
+# 克隆
+git clone https://github.com/xxx/lib.git projects/
+
+# 查看
+ls -1 projects/
+
+# 删除
+rm -rf projects/old-lib/
+```
 
 ---
 
-## 10. 风险与治理建议
+## 6. 核心原则
 
-- **风险：参数遗漏导致跑错目录**
-  - 建议：入口脚本强制参数校验（已采用）
-
-- **风险：文档与实现漂移**
-  - 建议：每次接口变更同步更新 `RUNBOOK.md` 与 `INSTALL_AGENT.md`
-
-- **风险：多 Agent 数据串用**
-  - 建议：所有能力调用显式传 `--agent`
+1. **共享代码 + 隔离数据** - scripts/libs/skills 共享，memory/data 隔离
+2. **参数化设计** - 所有脚本支持 `--agent` 参数
+3. **扁平结构** - projects/ 不分类
+4. **OpenClaw 边界** - `~/.openclaw/agents/` 由 OpenClaw 管理
 
 ---
 
-## 11. 总结
+## 7. 配置
 
-该通用架构的核心是三点：
+### config/agents.yaml
 
-1. **单 workspace 复用能力**
-2. **多 agent 数据隔离**
-3. **参数显式传递上下文**
+```yaml
+test-agents:
+  name: test-agents
+  role: coordinator
+  data_path: data/test-agents
+  memory_path: memory
 
-按这个模型实施后，workspace 可以在不同 Agent、不同部署环境中稳定复用，同时保持清晰边界与可维护性。
+analyst-agent:
+  name: analyst-agent
+  role: analyst
+  data_path: agents/analyst-agent/data
+  memory_path: agents/analyst-agent/memory
+
+developer-agent:
+  name: developer-agent
+  role: developer
+  
+tester-agent:
+  name: tester-agent
+  role: tester
+```
+
+---
+
+## 8. 文档
+
+| 文档 | 用途 |
+|------|------|
+| `ARCHITECTURE_GENERIC_CN.md` | 本文档 - 架构说明 |
+| `ARCHITECTURE_GENERIC_EN.md` | Architecture (English) |
+| `PROJECT_STRUCTURE_GENERIC_CN.md` | 目录结构规范 |
+| `PROJECT_STRUCTURE_GENERIC_EN.md` | Project Structure (English) |
+
+---
+
+**最后更新：** 2026-03-26  
+**维护者：** test-agents 🦞

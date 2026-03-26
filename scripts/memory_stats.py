@@ -39,7 +39,7 @@ def count_md_entries(filepath: Path) -> int:
 
 def main():
     parser = argparse.ArgumentParser(description="记忆系统统计")
-    parser.add_argument("--agent", default="ai-baby")
+    parser.add_argument("--agent", default="demo-agent")
     args = parser.parse_args()
 
     print("=" * 55)

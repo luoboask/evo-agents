@@ -1,243 +1,215 @@
-# 🏗️ Generic Agent Workspace Architecture (English)
+# 🏗️ test-agents Workspace Architecture
 
-**Version:** v6.0 (Generic)  
-**Scope:** Any agent + any workspace path  
-**Status:** Ready for implementation
-
----
-
-## 1. Design Goals
-
-- **Single workspace reuse**: one codebase supports multiple agent instances.
-- **Parameter-driven runtime**: pass `workspace` and `agent` explicitly.
-- **Strict data isolation**: each agent stores data under `data/<agent>/`.
-- **Shared capabilities**: `skills/` is shared, no per-agent code duplication.
-- **Clear boundary**: only manage the provided workspace; do not manage `~/.openclaw/agents`.
+**Version:** v1.0  
+**Updated:** 2026-03-26  
+**Scope:** test-agents Workspace
 
 ---
 
-## 2. Core Principles
+## 1. Core Architecture
 
-1. **Separate code from data**
-   - Code: `skills/`, `libs/`, `scripts/`
-   - Data: `data/<agent>/...`
+**Two-Layer Structure:**
 
-2. **Explicit over implicit**
-   - Runtime context must be passed via CLI arguments:
-     - `--workspace <path>`
-     - `--agent <name>`
-   - Do not rely on hidden environment context.
-
-3. **Workspace-local lifecycle**
-   - Install/upgrade/uninstall/runtime metadata stays inside the workspace.
-   - Runtime metadata is stored under `.agent-runtime/<agent>/`.
-
-4. **Respect OpenClaw boundaries**
-   - OpenClaw owns platform-side agent registration and lifecycle.
-   - This project only owns capabilities and data organization inside the workspace.
+| Layer | Path | Managed By | Purpose |
+|-------|------|------------|---------|
+| **OpenClaw** | `~/.openclaw/agents/` | OpenClaw Auto | sessions, auth |
+| **Workspace** | `workspace/agents/` | Manual | Sub-Agent data isolation |
 
 ---
 
-## 3. Layered Architecture
+## 2. Directory Structure
 
-```text
-┌───────────────────────────────────────────┐
-│            User Interaction Layer         │
-│ (TUI / WebChat / External Caller / OpenClaw) │
-└───────────────────────────────────────────┘
-                    ↓
-┌───────────────────────────────────────────┐
-│             Runtime Orchestration         │
-│ start.sh / install scripts / CLI args    │
-│ (explicit workspace + agent)             │
-└───────────────────────────────────────────┘
-                    ↓
-┌───────────────────────────────────────────┐
-│             Capability Layer              │
-│ skills/* + libs/memory_hub               │
-└───────────────────────────────────────────┘
-                    ↓
-┌───────────────────────────────────────────┐
-│             Data & Config Layer           │
-│ data/<agent>/memory|logs|config          │
-│ public/ shared knowledge                  │
-└───────────────────────────────────────────┘
 ```
-
----
-
-## 4. Recommended Directory Structure
-
-```text
-<workspace>/
-├── start.sh
-├── init_system.py
-├── config/
-│   └── agents.yaml
-├── skills/
+~/.openclaw/workspace-test-agents/
+│
+├── 📄 Root Files
+│   ├── AGENTS.md           # Session spec ⭐
+│   ├── SOUL.md             # Agent identity ⭐
+│   ├── MEMORY.md           # Long-term memory ⭐
+│   ├── USER.md             # User info ⭐
+│   ├── IDENTITY.md         # Identity
+│   ├── TOOLS.md            # Tools config
+│   └── HEARTBEAT.md        # Heartbeat check
+│
+├── 🤖 agents/              # ⭐ Sub-Agent isolation
+│   ├── analyst-agent/      # 🔍 Requirement Analyst
+│   │   ├── AGENTS.md
+│   │   ├── SOUL.md
+│   │   ├── MEMORY.md
+│   │   ├── config.yaml
+│   │   ├── memory/         # 🔒 Independent memory
+│   │   └── data/           # 🔒 Independent database
+│   ├── developer-agent/    # 💻 Code Developer
+│   └── tester-agent/       # ✅ Quality Tester
+│
+├── 🔧 scripts/             # ⭐ Shared scripts
+│   ├── session_recorder.py     # Supports --agent
+│   ├── unified_search.py       # Supports --agent
+│   ├── memory_indexer.py
+│   ├── memory_compressor.py
+│   ├── memory_stats.py
+│   ├── health_check.py
+│   └── bridge/                 # Bidirectional sync
+│
+├── 📚 libs/                  # ⭐ Shared libraries
+│   └── memory_hub/
+│
+├── 🎯 skills/                # ⭐ Shared skills
 │   ├── memory-search/
 │   ├── rag/
 │   ├── self-evolution/
 │   └── websearch/
-├── libs/
-│   └── memory_hub/
-├── public/                     # shared knowledge
-├── data/
-│   ├── demo-agent/
-│   │   ├── memory/
-│   │   ├── logs/
-│   │   └── config/
-│   └── <other-agent>/
-├── .agent-runtime/
-│   └── demo-agent/
-│       ├── run.sh
-│       └── install.json
-└── docs/
-    ├── RUNBOOK.md
-    ├── INSTALL_AGENT.md
-    ├── ARCHITECTURE_GENERIC_CN.md
-    └── ARCHITECTURE_GENERIC_EN.md
+│
+├── 📝 memory/                # Main Agent memory
+├── 💾 data/                  # Main Agent data
+├── 🌐 public/                # Public knowledge base
+├── ⚙️ config/                # Config
+│   └── agents.yaml
+├── 📂 projects/              # Git repos management
+└── docs/                     # Documentation
 ```
 
 ---
 
-## 5. Multi-Agent Model (Generic)
+## 3. Multi-Agent Design
 
-### 5.1 What is shared
+### 3.1 Agent List
 
-- `skills/`: shared capability code
-- `libs/`: shared foundational modules
-- `public/`: shared/public knowledge
+| Agent | Role | Path | Emoji |
+|-------|------|------|-------|
+| **test-agents** | coordinator | `memory/` + `data/` | 🦞 |
+| **analyst-agent** | analyst | `agents/analyst-agent/` | 🔍 |
+| **developer-agent** | developer | `agents/developer-agent/` | 💻 |
+| **tester-agent** | tester | `agents/tester-agent/` | ✅ |
 
-### 5.2 What is isolated
+### 3.2 Shared vs Isolated
 
-- `data/<agent>/memory`: memory databases
-- `data/<agent>/logs`: logs
-- `data/<agent>/config`: runtime config
-- `.agent-runtime/<agent>`: runtime launcher and install metadata
+| Resource | Shared/Isolated | Description |
+|----------|-----------------|-------------|
+| `scripts/` | ✅ Shared | All Agents use same scripts |
+| `libs/` | ✅ Shared | All Agents use same libraries |
+| `skills/` | ✅ Shared | All Agents use same skills |
+| `memory/` | 🔒 Isolated | Each Agent has independent memory |
+| `data/` | 🔒 Isolated | Each Agent has independent database |
 
-### 5.3 Config entry
+### 3.3 Collaboration Flow
 
-`config/agents.yaml` describes role and default data path per agent, not platform lifecycle ownership.
-
----
-
-## 6. Skill System Convention
-
-Each skill directory should include:
-
-- `SKILL.md`: skill-level behavior and usage
-- `skill.json`: metadata
-- implementation files (language-agnostic)
-
-Recommended conventions:
-
-- Skills accept `agent` explicitly via parameters.
-- Data access is centralized via `libs/memory_hub`.
-- CLI tools consistently expose `--agent`.
+```
+1️⃣  analyst-agent    Requirement Analysis
+    ↓
+2️⃣  developer-agent  Implementation
+    ↓
+3️⃣  tester-agent     Quality Testing
+    ↓
+4️⃣  test-agents      Summary & Documentation
+```
 
 ---
 
-## 7. Data Management Strategy
+## 4. Usage
 
-### 7.1 Memory and evaluation
-
-- Memory DB: `data/<agent>/memory/memory_stream.db`
-- Knowledge DB: `data/<agent>/memory/knowledge_base.db`
-- RAG evaluation: `data/<agent>/logs/*` or skill-specific log path
-
-### 7.2 Knowledge layers
-
-- `public/`: shared knowledge
-- `data/<agent>/...`: private knowledge
-
-### 7.3 Data lifecycle
-
-- Install: create `data/<agent>/...`
-- Runtime: append/update incrementally
-- Uninstall: optionally keep or purge `data/<agent>/`
-
----
-
-## 8. Runtime & Installation Flow (Parameter-driven)
-
-### 8.1 Start
+### Record Events
 
 ```bash
-./start.sh --workspace <workspace-path> --agent demo-agent
+cd ~/.openclaw/workspace-test-agents
+
+# Record to sub-Agent
+python3 scripts/session_recorder.py -t event -c 'content' --agent analyst-agent
+
+# Record to main Agent
+python3 scripts/session_recorder.py -t decision -c 'content' --agent test-agents --sync
 ```
 
-### 8.2 Initialize
+### Search Memory
 
 ```bash
-python3 init_system.py --workspace <workspace-path> --agent demo-agent
-```
+# Search sub-Agent
+python3 scripts/unified_search.py 'keyword' --agent developer-agent --semantic
 
-### 8.3 Install runtime entrypoint
-
-```bash
-python3 scripts/install_agent_workspace.py \
-  --agent demo-agent \
-  --workspace <workspace-path>
-```
-
-After install:
-
-```bash
-<workspace-path>/.agent-runtime/demo-agent/run.sh
-```
-
-### 8.4 Upgrade/check
-
-```bash
-python3 scripts/upgrade_agent_workspace.py \
-  --agent demo-agent \
-  --workspace <workspace-path>
-```
-
-### 8.5 Uninstall
-
-```bash
-python3 scripts/uninstall_agent_workspace.py \
-  --agent demo-agent \
-  --workspace <workspace-path> \
-  --yes
+# Search main Agent
+python3 scripts/unified_search.py 'keyword' --agent test-agents --semantic
 ```
 
 ---
 
-## 9. Platform Integration Boundary (Critical)
+## 5. Git Repos Management
 
-This project:
+### projects/ Directory
 
-- ✅ Manages directories and capabilities inside `<workspace>`
-- ✅ Manages `<workspace>/data/*` and `.agent-runtime/*`
-- ❌ Does not manage `~/.openclaw/agents` (platform-owned lifecycle)
-- ❌ Does not assume platform-specific directory internals
+```
+projects/
+├── lib-a/          # Flat structure, no categories
+├── app-b/
+└── test-repo/
+```
 
-This keeps the workspace portable across different host platforms.
+**Principles:**
+- ✅ Flat structure - All repos in `projects/`
+- ✅ No categories - Avoid decision cost
+- ✅ Manual cleanup - Delete when not needed
+
+### Usage
+
+```bash
+# Clone
+git clone https://github.com/xxx/lib.git projects/
+
+# List
+ls -1 projects/
+
+# Delete
+rm -rf projects/old-lib/
+```
 
 ---
 
-## 10. Risks and Mitigations
+## 6. Core Principles
 
-- **Risk: missing runtime arguments**
-  - Mitigation: strict argument validation in entry scripts
-
-- **Risk: docs/runtime drift**
-  - Mitigation: update `RUNBOOK.md` and `INSTALL_AGENT.md` with every interface change
-
-- **Risk: cross-agent data contamination**
-  - Mitigation: require explicit `--agent` across workflows
+1. **Shared Code + Isolated Data** - scripts/libs/skills shared, memory/data isolated
+2. **Parameterized Design** - All scripts support `--agent` parameter
+3. **Flat Structure** - projects/ without categories
+4. **OpenClaw Boundary** - `~/.openclaw/agents/` managed by OpenClaw
 
 ---
 
-## 11. Summary
+## 7. Configuration
 
-This generic architecture is built on three guarantees:
+### config/agents.yaml
 
-1. **Single workspace capability reuse**
-2. **Per-agent data isolation**
-3. **Explicit parameterized runtime context**
+```yaml
+test-agents:
+  name: test-agents
+  role: coordinator
+  data_path: data/test-agents
+  memory_path: memory
 
-With these guarantees, one workspace can be reused safely across agents and environments while keeping boundaries clear and maintenance predictable.
+analyst-agent:
+  name: analyst-agent
+  role: analyst
+  data_path: agents/analyst-agent/data
+  memory_path: agents/analyst-agent/memory
+
+developer-agent:
+  name: developer-agent
+  role: developer
+  
+tester-agent:
+  name: tester-agent
+  role: tester
+```
+
+---
+
+## 8. Documentation
+
+| Document | Purpose |
+|----------|---------|
+| `ARCHITECTURE_GENERIC_CN.md` | Architecture (Chinese) |
+| `ARCHITECTURE_GENERIC_EN.md` | This document - Architecture (English) |
+| `PROJECT_STRUCTURE_GENERIC_CN.md` | Directory Structure (Chinese) |
+| `PROJECT_STRUCTURE_GENERIC_EN.md` | Directory Structure (English) |
+
+---
+
+**Last Updated:** 2026-03-26  
+**Maintainer:** test-agents 🦞
