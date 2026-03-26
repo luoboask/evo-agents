@@ -10,7 +10,7 @@
 安装 evo-agents 后，默认已启用基础功能。本指南教你如何手动激活高级功能：
 
 1. **语义搜索模型** - Ollama + 嵌入模型（可选模型）
-2. **知识库** - 知识管理系统
+2. **知识库** - Knowledge Base（知识管理系统）
 3. **自进化系统** - 自动学习和进化
 4. **RAG 评估** - 检索增强生成评估
 5. **定时任务** - 自动执行任务
@@ -147,7 +147,7 @@ python3 scripts/memory_stats.py --agent my-agent
 
 ---
 
-## 2️⃣ 激活知识库
+## 2️⃣ 激活知识库系统
 
 ### 步骤 1：检查 memory_hub
 
@@ -387,7 +387,7 @@ chmod +x scripts/activate-features.sh
 | **基础记忆** | ✅ | ✅ |
 | **关键词搜索** | ✅ | ✅ |
 | **语义搜索** | ❌ | ✅ (Ollama + bge-m3) |
-| **知识库** | ❌ | ✅ (memory_hub) |
+| **知识库** | ❌ | ✅ (Knowledge Base) |
 | **RAG 评估** | ❌ | ✅ (skills/rag/) |
 | **自进化** | ❌ | ✅ (skills/self-evolution/) |
 | **分形思考** | ❌ | ✅ (每周自动执行) |
