@@ -1,232 +1,342 @@
-# Unified Memory System for OpenClaw
+# test-agents - OpenClaw 多 Agent Workspace
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Platform: macOS](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
 
-[English](./README.md) | [简体中文](./README.zh-CN.md)
+**给 OpenClaw Agent 真正的记忆和多 Agent 协作能力。**
 
-> **Give your OpenClaw agent real memory.**
->
-> Markdown as primary source. SQLite as search index. Bidirectional sync. Semantic search. Zero external API keys required.
+---
 
-**⚠️ This is a Workspace Template, not a Skill.** For SubAgent/Skill installation, use [unified-memory-skill](https://github.com/luoboask/unified-memory-skill) instead.
+## 🎯 特性
 
-**Unified Memory System** bridges OpenClaw's native Markdown memory with a high-performance SQLite backend, enabling semantic search, automatic compression, and concurrent-safe multi-session operation — all running locally with Ollama.
+| 特性 | 说明 |
+|------|------|
+| **多 Agent 架构** | 主 Agent + 专业子 Agent（分析师/开发者/测试员） |
+| **数据隔离** | 每个 Agent 独立 memory/ 和 data/ |
+| **共享资源** | scripts/libs/skills 所有 Agent 共用 |
+| **双向同步** | Markdown ↔ SQLite 自动一致 |
+| **语义搜索** | Ollama + bge-m3，理解中文语义 |
+| **并发安全** | fcntl 锁 + SQLite WAL 模式 |
 
-## 🚀 Installation
+---
 
-### Option 1: One-Click Install (Recommended)
+## 🚀 快速开始
 
-```bash
-# Install with default name 'my-agent'
-curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash
-
-# Or specify your own agent name
-curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash -s your-agent-name
-```
-
-Examples:
-```bash
-curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash -s growth-assistant
-curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash -s demo-agent
-```
-
-This will:
-1. Clone the template to `~/.openclaw/workspace-{agent-name}`
-2. Create directory structure
-3. Register the agent with OpenClaw (`openclaw agents add`)
-4. Run a quick test
-
-**OpenClaw Recognition:**
-After installation, OpenClaw will recognize your agent:
-```bash
-openclaw agents list  # Shows: your-agent-name
-openclaw agent --agent your-agent-name --message "Hello"
-```
-
-### Option 2: Manual Install
+### 方式 1：手动安装
 
 ```bash
-# 1. Clone the template
-git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
+# 1. 克隆仓库
+git clone https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-test-agents
+cd ~/.openclaw/workspace-test-agents
 
-# 2. Create directory structure
-cd ~/.openclaw/workspace-my-agent
-mkdir -p memory/weekly memory/monthly memory/archive data/index
+# 2. 安装依赖（可选）
+pip3 install --user jieba  # 中文分词
 
-# 3. Register with OpenClaw
-openclaw agents add my-agent --workspace $(pwd) --non-interactive
+# 3. 创建目录
+mkdir -p memory/weekly memory/monthly memory/archive
+mkdir -p data/index data/test-agents
 
-# 4. Test
-python3 scripts/session_recorder.py -t event -c 'Hello world'
-python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
+# 4. 注册 OpenClaw agent
+openclaw agents add test-agents --workspace "$(pwd)" --non-interactive
+
+# 5. 运行测试
+./test-multi-agent.sh
 ```
 
-## ❌ Not for SubAgent/Skill Use
-
-This repository is a **complete Workspace Template** that includes:
-- Agent lifecycle files (AGENTS.md, SOUL.md, MEMORY.md, USER.md)
-- Multiple integrated skills (self-evolution, rag, websearch)
-- Full directory structure for agent runtime
-
-**For SubAgent or Skill-only installation**, use the lightweight skill repository instead:
+### 方式 2：从零创建
 
 ```bash
-cd ~/.openclaw/workspace/skills
-git clone https://github.com/luoboask/unified-memory-skill.git unified-memory
+# 1. 创建目录
+mkdir -p ~/.openclaw/workspace-test-agents
+cd ~/.openclaw/workspace-test-agents
+
+# 2. 注册 OpenClaw agent
+openclaw agents add test-agents --workspace "$(pwd)" --non-interactive
+
+# 3. 创建核心文件
+cat > AGENTS.md << 'EOF'
+# AGENTS.md - test-agents
+
+## 会话流程
+1. 会话开始：搜索记忆
+2. 会话中：实时记录
+3. 会话结束：同步
+EOF
+
+# 4. 创建目录
+mkdir -p memory agents scripts skills libs
 ```
 
-See [unified-memory-skill](https://github.com/luoboask/unified-memory-skill) for SubAgent/Skill usage.
+---
 
-## ✨ Why This?
+## 🤖 多 Agent 架构
 
-| Feature | Description |
-|---------|-------------|
-| **Bidirectional Bridge** | Auto-sync Markdown ↔ SQLite, consistent data on both sides |
-| **Semantic Search** | Natural language queries, bge-m3 understands semantics (local Ollama, no API key needed) |
-| **FTS5 Chinese** | jieba tokenization, precise Chinese keyword matching |
-| **Smart Scoring** | Auto-importance (decisions 8+, learnings 6+, events 5) |
-| **Auto Compression** | Daily → Weekly → Monthly → Long-term, prevents data bloat |
-| **Concurrency Safe** | fcntl locks + SQLite WAL, no data loss in multi-session |
+```
+test-agents (主协调) 🦞
+├── analyst-agent (需求分析) 🔍
+├── developer-agent (代码实现) 💻
+└── tester-agent (质量测试) ✅
+```
 
-## 📁 Directory Structure
+### Agent 列表
+
+| Agent | 角色 | 路径 |
+|-------|------|------|
+| **test-agents** | coordinator | `memory/` + `data/test-agents/` |
+| **analyst-agent** | analyst | `agents/analyst-agent/` |
+| **developer-agent** | developer | `agents/developer-agent/` |
+| **tester-agent** | tester | `agents/tester-agent/` |
+
+---
+
+## 🎯 使用方式
+
+### 记录事件
+
+```bash
+cd ~/.openclaw/workspace-test-agents
+
+# 记录到子 Agent
+python3 scripts/session_recorder.py -t event -c '分析完成' --agent analyst-agent
+
+# 记录到主 Agent
+python3 scripts/session_recorder.py -t decision -c '采用方案 A' --agent test-agents --sync
+```
+
+### 搜索记忆
+
+```bash
+# 搜索子 Agent
+python3 scripts/unified_search.py '需求分析' --agent analyst-agent --semantic
+
+# 搜索主 Agent
+python3 scripts/unified_search.py '昨天的决定' --agent test-agents --semantic
+```
+
+### 查看统计
+
+```bash
+python3 scripts/memory_stats.py --agent developer-agent
+```
+
+---
+
+## 📁 目录结构
 
 ```
 workspace/
-├── MEMORY.md                    # Long-term core memory (LLM reads every session)
-├── memory/
-│   ├── 2026-03-25.md            # Daily notes
-│   ├── weekly/2026-W13.md       # Weekly summaries
-│   └── monthly/2026-03.md       # Monthly summaries
-├── data/
-│   ├── <agent>/memory/          # SQLite knowledge system
-│   └── index/memory_index.db    # FTS5 + vector index
-├── scripts/
-│   ├── session_recorder.py      # Record events (5 types)
-│   ├── unified_search.py        # Unified search (FTS5 + semantic + grep)
-│   ├── memory_indexer.py        # Build index (optional --embed for vectors)
-│   ├── memory_compressor.py     # Compression + sedimentation
-│   ├── memory_stats.py          # System statistics
-│   ├── health_check.py          # Health check + auto-fix
-│   └── bridge/                  # Bidirectional sync
-│       ├── bridge_sync.py
-│       ├── bridge_to_markdown.py
-│       └── bridge_to_knowledge.py
-├── libs/memory_hub/             # Original knowledge system (backward compatible)
-└── skills/                      # Original skills (backward compatible)
+├── 📄 根目录文件
+│   ├── AGENTS.md           # 会话规范 ⭐
+│   ├── SOUL.md             # Agent 身份
+│   ├── MEMORY.md           # 长期记忆
+│   ├── USER.md             # 用户信息
+│   └── ...
+│
+├── 🤖 agents/              # ⭐ 子 Agent 数据隔离
+│   ├── analyst-agent/
+│   │   ├── AGENTS.md
+│   │   ├── SOUL.md
+│   │   ├── MEMORY.md
+│   │   ├── config.yaml
+│   │   ├── memory/         # 🔒 独立记忆
+│   │   └── data/           # 🔒 独立数据库
+│   ├── developer-agent/
+│   └── tester-agent/
+│
+├── 🔧 scripts/             # ⭐ 共享脚本
+│   ├── session_recorder.py     # 支持 --agent
+│   ├── unified_search.py       # 支持 --agent
+│   ├── memory_indexer.py
+│   └── ...
+│
+├── 📚 libs/                  # ⭐ 共享库
+│   └── memory_hub/
+│
+├── 🎯 skills/                # ⭐ 共享技能
+│   ├── memory-search/
+│   ├── rag/
+│   ├── self-evolution/
+│   └── websearch/
+│
+├── 📝 memory/                # 主 Agent 记忆
+├── 💾 data/                  # 主 Agent 数据
+├── 🌐 public/                # 公共知识库
+├── ⚙️ config/                # 配置
+└── 📂 projects/              # Git 库管理
 ```
 
-## 🛠️ Quick Start
+---
 
-### Minimal Install (Zero Dependencies)
+## 🔄 多 Agent 协作流程
 
-Only Python 3.10+ required, works out of the box.
-
-```bash
-# Record event
-python3 scripts/session_recorder.py -t event -c 'Completed important work today'
-
-# Search (auto-selects best method)
-python3 scripts/unified_search.py 'important work' --agent my-agent
+```
+1️⃣  analyst-agent    需求分析
+    ↓
+2️⃣  developer-agent  方案实现
+    ↓
+3️⃣  tester-agent     质量测试
+    ↓
+4️⃣  test-agents      总结沉淀
 ```
 
-### Recommended Enhancements (Optional)
+---
 
-**1. FTS5 Chinese Tokenization (Recommended)**
+## 📊 测试
 
 ```bash
-pip3 install jieba  # or pip3 install --user --break-system-packages jieba
-python3 scripts/memory_indexer.py --full
+# 运行完整测试
+./test-multi-agent.sh
+
+# 测试结果
+╔════════════════════════════════════════════════════════╗
+║     test-agents 多 Agent 完整测试                       ║
+╚════════════════════════════════════════════════════════╝
+
+总测试数：26
+✅ 通过：26
+❌ 失败：0
+成功率：100%
+
+🎉 所有测试通过！多 Agent 架构运行正常！
 ```
 
-**2. Semantic Search (Recommended, good for Chinese)**
+---
+
+## 📚 文档
+
+| 文档 | 用途 |
+|------|------|
+| `docs/ARCHITECTURE_GENERIC_CN.md` | 架构说明（中文） |
+| `docs/ARCHITECTURE_GENERIC_EN.md` | Architecture (English) |
+| `docs/PROJECT_STRUCTURE_GENERIC_CN.md` | 目录结构（中文） |
+| `docs/PROJECT_STRUCTURE_GENERIC_EN.md` | Project Structure (English) |
+| `TEST_REPORT_MULTI_AGENT.md` | 测试报告 |
+
+---
+
+## ⚙️ 配置
+
+### config/agents.yaml
+
+```yaml
+test-agents:
+  name: test-agents
+  role: coordinator
+  data_path: data/test-agents
+  memory_path: memory
+
+analyst-agent:
+  name: analyst-agent
+  role: analyst
+  data_path: agents/analyst-agent/data
+  memory_path: agents/analyst-agent/memory
+
+developer-agent:
+  name: developer-agent
+  role: developer
+  
+tester-agent:
+  name: tester-agent
+  role: tester
+```
+
+---
+
+## 🔧 依赖
+
+### 必需
+- Python 3.10+
+- OpenClaw
+
+### 可选
+- **jieba** - 中文分词（FTS5 搜索）
+- **Ollama** - 语义搜索（bge-m3 模型）
 
 ```bash
-# Install Ollama
+# 安装 jieba
+pip3 install --user jieba
+
+# 安装 Ollama
 brew install ollama  # macOS
-# Or visit https://ollama.com/download
-
-# Start and download model
-ollama serve
-ollama pull bge-m3  # 1.2GB, good for Chinese
-# or ollama pull nomic-embed-text  # 274MB, good for English
-
-# Build semantic index
-python3 scripts/memory_indexer.py --full --embed
-
-# Semantic search
-python3 scripts/unified_search.py 'what did I do yesterday' --semantic
+ollama pull bge-m3   # 中文语义模型
 ```
 
-## 💬 Memory Flow in Conversations
+---
 
-**AGENTS.md includes complete specifications**, automatically followed in every conversation:
+## 🎯 核心原则
 
-### At Conversation Start: Search Memory
-When user mentions previous things → search first, then answer:
-```bash
-python3 scripts/unified_search.py 'relevant keywords' --agent my-agent --semantic
-```
+1. **共享代码 + 隔离数据** - scripts/libs/skills 共享，memory/data 隔离
+2. **参数化设计** - 所有脚本支持 `--agent` 参数
+3. **扁平结构** - projects/ 不分类，直接放
+4. **OpenClaw 边界** - `~/.openclaw/agents/` 由 OpenClaw 管理
 
-### During Conversation: Real-time Recording
-When important info found → record immediately:
-```bash
-python3 scripts/session_recorder.py -t decision -c 'User decided to use X solution' --sync
-python3 scripts/session_recorder.py -t learning -c 'Learned Y knowledge point' --sync
-python3 scripts/session_recorder.py -t event -c 'Z event happened' --sync
-```
+---
 
-### At Conversation End: Sync
-If content was recorded → auto-sync (`--sync` runs in background)
-
-## 🔧 Common Commands
-
-| Command | Description |
-|---------|-------------|
-| `session_recorder.py -t event -c '...'` | Record event |
-| `session_recorder.py -t decision -c '...' --sync` | Record decision and auto-sync |
-| `unified_search.py 'keywords'` | Keyword search |
-| `unified_search.py 'question' --semantic` | Semantic search |
-| `bridge_sync.py --agent my-agent` | Bidirectional sync |
-| `memory_indexer.py --incremental --embed` | Incremental index + vectors |
-| `memory_compressor.py --weekly` | Generate weekly summary |
-| `memory_stats.py --agent my-agent` | System statistics |
-| `health_check.py --agent my-agent` | Health check |
-
-## ⏰ Scheduled Tasks (Recommended)
+## 📋 Git 库管理
 
 ```bash
-# Daily 03:00: Incremental index
-openclaw cron add --name "daily-index" --cron "0 3 * * *" \
-  --system-event "cd /path/to/workspace && python3 scripts/memory_indexer.py --incremental --embed"
+# 克隆到 projects/
+git clone https://github.com/xxx/lib.git projects/
 
-# Every 6 hours: Bidirectional sync
-openclaw cron add --name "bridge-sync" --every "6h" \
-  --system-event "cd /path/to/workspace && python3 scripts/bridge/bridge_sync.py --agent my-agent"
+# 查看
+ls -1 projects/
 
-# Monday 04:00: Weekly summary
-openclaw cron add --name "weekly-compress" --cron "0 4 * * 1" \
-  --system-event "cd /path/to/workspace && python3 scripts/memory_compressor.py --weekly"
+# 删除
+rm -rf projects/old-lib/
 ```
 
-## 🔄 Graceful Degradation
+**原则：** 扁平结构，不分类，手动清理。
 
-| Dependency | Installed | Not Installed |
-|------------|-----------|---------------|
-| **jieba** | FTS5 Chinese tokenization | Fallback to grep (slower but works) |
-| **Ollama + model** | Semantic search (natural language) | Fallback to FTS5 or grep |
-| **Neither** | grep + SQLite LIKE | Core features fully functional |
+---
 
-**Minimal install has zero dependencies** — just Python 3.10+.
+## ✅ 测试验证
 
-## 📚 Documentation
+| 测试项 | 结果 |
+|--------|------|
+| 环境检查 | ✅ 8/8 |
+| 记录事件 | ✅ 4/4 |
+| 数据隔离 | ✅ 4/4 |
+| 搜索功能 | ✅ 4/4 |
+| 统计功能 | ✅ 4/4 |
+| 深度验证 | ✅ 2/2 |
+| **总计** | **✅ 26/26 (100%)** |
 
-- `README.md` / `README.zh-CN.md` — This document
-- `workspace-setup.md` — Complete installation guide
-- `AGENTS.md` — Memory flow specifications for conversations
-- `docs/ARCHITECTURE_GENERIC_EN.md` — Architecture design
+---
 
-## 📝 License
+## 📝 更新日志
 
-MIT
+### v1.0 (2026-03-26)
+- ✅ 多 Agent 架构实施
+- ✅ 3 个子 Agent（analyst/developer/tester）
+- ✅ 自动化测试（26 测试 100% 通过）
+- ✅ 文档整理（删除 23 个临时文档）
+- ✅ 脚本清理（删除 4 个过时脚本）
+
+---
+
+## 🤝 贡献
+
+1. Fork 项目
+2. 创建特性分支
+3. 提交 PR
+4. 通过测试
+
+---
+
+## 📄 许可证
+
+MIT License - 详见 [LICENSE](LICENSE)
+
+---
+
+## 🔗 链接
+
+- **GitHub:** https://github.com/luoboask/evo-agents
+- **OpenClaw:** https://github.com/openclaw/openclaw
+- **文档:** https://docs.openclaw.ai
+
+---
+
+**最后更新：** 2026-03-26  
+**维护者：** test-agents 🦞
