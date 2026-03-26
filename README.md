@@ -27,19 +27,20 @@
 
 ### Option 1: OpenClaw One-Click Install (Recommended) ⭐
 
-If you have OpenClaw installed, let it read the setup guide from GitHub and install for you:
+If you have OpenClaw installed, use natural language to install:
 
 ```bash
-# Ask OpenClaw to read workspace-setup.md from GitHub and install
-openclaw agent --message "Read https://raw.githubusercontent.com/luoboask/evo-agents/refs/heads/master/workspace-setup.md and help me install this workspace template"
+# Install demo-agent workspace
+openclaw agent --message "Read https://raw.githubusercontent.com/luoboask/evo-agents/refs/heads/master/workspace-setup.md and help me install a workspace named demo-agent"
 ```
 
 OpenClaw will:
 1. Read `workspace-setup.md` installation guide from GitHub
-2. Create directory structure
-3. Register the agent
-4. Set up multi-agent system (optional)
-5. Run tests
+2. Clone template to `~/.openclaw/workspace-demo-agent`
+3. Create directory structure
+4. Register `demo-agent` to OpenClaw
+5. Set up multi-agent system (optional)
+6. Run tests
 
 ### Option 2: One-Click Install
 
