@@ -11,35 +11,21 @@ evo-agents 是一个 OpenClaw Workspace 模板，提供多 Agent 协作、脚本
 
 ---
 
-## 🚀 安装方式
+## 🚀 一键安装（推荐）⭐
 
-### 方式 1：OpenClaw 自然语言安装（推荐）⭐
-
-```bash
-openclaw agent --message "Read https://raw.githubusercontent.com/luoboask/evo-agents/master/workspace-setup.md and help me install"
-```
-
-### 方式 2：手动安装
+**只需一个命令：**
 
 ```bash
-# 1. 克隆 evo-agents 模板（获得 scripts/, skills/, libs/）
-git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
-cd ~/.openclaw/workspace-my-agent
-
-# 2. 注册到 OpenClaw（创建 AGENTS.md, SOUL.md 等）
-openclaw agents add my-agent --workspace "$(pwd)" --non-interactive
-
-# 3. 创建目录结构
-mkdir -p memory/weekly memory/monthly memory/archive
-mkdir -p data/index data/my-agent
-
-# 4. 测试
-python3 scripts/session_recorder.py -t event -c 'Hello world'
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s my-agent
 ```
 
-**为什么需要两步？**
-- `git clone` → 获得 evo-agents 的 scripts/, skills/, libs/
-- `openclaw agents add` → 创建 AGENTS.md, SOUL.md 等，并注册 agent
+**就这么简单！** 脚本会自动：
+1. 克隆 evo-agents 模板
+2. 注册 agent 到 OpenClaw（**自动创建 AGENTS.md, SOUL.md 等文件**）
+3. 创建目录结构
+4. 运行测试
+
+**无需关心步骤！** 🎉
 
 ---
 
