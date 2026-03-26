@@ -12,17 +12,3 @@
 #   settings:
 #     max_memories: 1000
 #     auto_cleanup: false
-
-# Sub-agent: pinterest-agent
-pinterest-agent:
-  name: pinterest-agent
-  role: pinterest
-  data_path: agents/pinterest-agent/data
-  memory_path: agents/pinterest-agent/memory
-
-# Sub-agent: xhs-agent
-xhs-agent:
-  name: xhs-agent
-  role: xhs
-  data_path: agents/xhs-agent/data
-  memory_path: agents/xhs-agent/memory

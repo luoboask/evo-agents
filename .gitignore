@@ -92,3 +92,13 @@ skills/danger-xhs-browser/
 skills/japan-media-agent/
 skills/star-mansion-master/
 skills/tarot-master/
+
+# 特定项目和数据
+MediaCrawler/
+baoyu-skills/
+prompts/
+souls/
+xhs-research/
+
+# 公共知识（用户自己添加的）
+public/data/
