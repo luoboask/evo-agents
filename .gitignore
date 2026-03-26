@@ -72,7 +72,6 @@ config/*.local.yaml
 *.env
 .env.*
 
-# Agent templates (keep templates, exclude runtime data)
-agents/<agent-name>/
-agents/README.md
+# Agent directories (exclude all agent-specific data)
+agents/
 !agents/.gitkeep

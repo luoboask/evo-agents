@@ -10,9 +10,8 @@
 evo-agents 是一个完整的 OpenClaw Workspace 模板，包含：
 - Agent 生命周期文件（AGENTS.md, SOUL.md, MEMORY.md, USER.md）
 - 多个集成技能（self-evolution, rag, websearch, memory-search）
-- 完整的多 Agent 目录结构
-- 双向同步系统（Markdown ↔ SQLite）
-- 语义搜索支持（Ollama）
+- 记忆管理系统（双向同步 + 语义搜索）
+- 多 Agent 协作支持
 
 ---
 
@@ -40,13 +39,6 @@ curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.
 3. 注册 OpenClaw agent（`openclaw agents add`）
 4. 运行快速测试
 
-**OpenClaw 识别：**
-安装后，OpenClaw 会识别你的 agent：
-```bash
-openclaw agents list  # 显示：your-agent-name
-openclaw agent --agent your-agent-name --message "Hello"
-```
-
 ---
 
 ### 方式 2：手动安装
@@ -57,7 +49,8 @@ git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/works
 
 # 2. 创建目录结构
 cd ~/.openclaw/workspace-my-agent
-mkdir -p memory/weekly memory/monthly memory/archive data/index
+mkdir -p memory/weekly memory/monthly memory/archive
+mkdir -p data/index data/{agent-name}
 
 # 3. 注册 OpenClaw agent
 openclaw agents add my-agent --workspace "$(pwd)" --non-interactive
@@ -65,6 +58,159 @@ openclaw agents add my-agent --workspace "$(pwd)" --non-interactive
 # 4. 测试
 python3 scripts/session_recorder.py -t event -c 'Hello world'
 python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
+```
+
+---
+
+## 📁 完整目录结构
+
+```
+workspace/
+├── 📄 根目录文件
+│   ├── AGENTS.md              # 会话行为规范 ⭐
+│   ├── SOUL.md                # Agent 身份
+│   ├── MEMORY.md              # 长期记忆
+│   ├── USER.md                # 用户信息
+│   ├── IDENTITY.md            # 身份标识
+│   ├── TOOLS.md               # 工具配置
+│   └── HEARTBEAT.md           # 心跳检查
+│
+├── 🔧 scripts/                # 共享脚本
+│   ├── session_recorder.py        # 记录事件
+│   ├── unified_search.py          # 统一搜索
+│   ├── memory_indexer.py          # 构建索引
+│   ├── memory_compressor.py       # 压缩沉淀
+│   ├── memory_stats.py            # 系统统计
+│   ├── health_check.py            # 健康检查
+│   └── bridge/                    # 双向同步
+│       ├── bridge_sync.py
+│       ├── bridge_to_markdown.py
+│       └── bridge_to_knowledge.py
+│
+├── 📚 libs/                   # 共享库
+│   └── memory_hub/              # 记忆核心库
+│
+├── 🎯 skills/                 # 共享技能
+│   ├── memory-search/           # 记忆搜索
+│   ├── rag/                     # RAG 评估
+│   ├── self-evolution/          # 自进化系统
+│   └── websearch/               # 网页搜索
+│
+├── 📝 memory/                 # 记忆目录
+│   ├── YYYY-MM-DD.md            # 每日记录
+│   ├── weekly/                  # 周摘要
+│   ├── monthly/                 # 月摘要
+│   └── archive/                 # 归档
+│
+├── 💾 data/                   # 数据目录
+│   ├── <agent-name>/            # Agent 数据
+│   │   └── memory/              # SQLite 数据库
+│   └── index/                   # 搜索索引
+│
+├── 🤖 agents/                 # 多 Agent 目录（可选）
+│   └── <sub-agent-name>/        # 子 Agent
+│       ├── AGENTS.md
+│       ├── SOUL.md
+│       ├── MEMORY.md
+│       ├── config.yaml
+│       ├── memory/
+│       └── data/
+│
+├── 🌐 public/                 # 公共知识库
+├── 📂 projects/               # Git 库管理
+├── ⚙️ config/                 # 配置
+│   └── agents.yaml              # 多 Agent 配置
+└── 📖 docs/                   # 文档
+    ├── ARCHITECTURE_GENERIC_CN.md
+    ├── ARCHITECTURE_GENERIC_EN.md
+    ├── PROJECT_STRUCTURE_GENERIC_CN.md
+    └── PROJECT_STRUCTURE_GENERIC_EN.md
+```
+
+---
+
+## 🤖 多 Agent 配置（可选）
+
+evo-agents 支持多 Agent 协作，可以创建多个专业子 Agent。
+
+### 创建子 Agent
+
+```bash
+cd ~/.openclaw/workspace-my-agent
+
+# 1. 创建子 Agent 目录
+mkdir -p agents/analyst-agent/{memory,data}
+mkdir -p agents/developer-agent/{memory,data}
+mkdir -p agents/tester-agent/{memory,data}
+
+# 2. 创建配置文件
+cat > agents/analyst-agent/AGENTS.md << 'EOF'
+# AGENTS.md - analyst-agent
+
+**角色：** 需求分析师  
+**职责：** 分析需求、设计方案
+
+## 工作流程
+1. 接收任务
+2. 分析需求
+3. 输出方案
+EOF
+
+cat > agents/analyst-agent/SOUL.md << 'EOF'
+# SOUL.md - analyst-agent
+
+**你是谁：** 需求分析师  
+**emoji：** 🔍
+
+## 个性
+- 善于分析和拆解问题
+- 注重细节和背景理解
+EOF
+
+cat > agents/analyst-agent/MEMORY.md << 'EOF'
+# MEMORY.md - analyst-agent
+
+## 长期记忆
+_重要的人、事、偏好、决定_
+
+## 用户
+- 名称：待填写
+- 时区：Asia/Shanghai
+EOF
+
+cat > agents/analyst-agent/config.yaml << 'EOF'
+agent:
+  name: analyst-agent
+  role: analyst
+  description: "需求分析师"
+  data_path: agents/analyst-agent/data
+  memory_path: agents/analyst-agent/memory
+EOF
+
+# 3. 注册到 config/agents.yaml
+# 编辑 config/agents.yaml 添加子 Agent 配置
+```
+
+### 多 Agent 示例
+
+```
+my-agent (主协调) 🦞
+├── analyst-agent (需求分析) 🔍
+├── developer-agent (代码实现) 💻
+└── tester-agent (质量测试) ✅
+```
+
+### 使用子 Agent
+
+```bash
+# 记录事件到子 Agent
+python3 scripts/session_recorder.py -t event -c '内容' --agent analyst-agent
+
+# 搜索子 Agent 记忆
+python3 scripts/unified_search.py '关键词' --agent developer-agent --semantic
+
+# 查看子 Agent 统计
+python3 scripts/memory_stats.py --agent tester-agent
 ```
 
 ---
@@ -97,35 +243,6 @@ git clone https://github.com/luoboask/unified-memory-skill.git unified-memory
 | **智能评分** | 自动重要性（决策 8+，学习 6+，事件 5+） |
 | **自动压缩** | 日→周→月→长期，防止数据膨胀 |
 | **并发安全** | fcntl 锁 + SQLite WAL，多会话无数据丢失 |
-
----
-
-## 📁 目录结构
-
-```
-workspace/
-├── MEMORY.md                    # 长期核心记忆（LLM 每次会话读取）
-├── memory/
-│   ├── 2026-03-25.md            # 每日记录
-│   ├── weekly/2026-W13.md       # 周摘要
-│   └── monthly/2026-03.md       # 月摘要
-├── data/
-│   ├── <agent>/memory/          # SQLite 知识系统
-│   └── index/memory_index.db    # FTS5 + 向量索引
-├── scripts/
-│   ├── session_recorder.py      # 记录事件（5 种类型）
-│   ├── unified_search.py        # 统一搜索（FTS5 + 语义 + grep）
-│   ├── memory_indexer.py        # 构建索引（可选 --embed 向量）
-│   ├── memory_compressor.py     # 压缩 + 沉淀
-│   ├── memory_stats.py          # 系统统计
-│   ├── health_check.py          # 健康检查 + 自动修复
-│   └── bridge/                  # 双向同步
-│       ├── bridge_sync.py
-│       ├── bridge_to_markdown.py
-│       └── bridge_to_knowledge.py
-├── libs/memory_hub/             # 原始知识系统（向后兼容）
-└── skills/                      # 原始技能（向后兼容）
-```
 
 ---
 
@@ -245,12 +362,30 @@ openclaw cron add --name "weekly-compress" --cron "0 4 * * 1" \
 
 ---
 
+## 📋 Git 库管理
+
+```bash
+# 克隆到 projects/
+git clone https://github.com/xxx/lib.git projects/
+
+# 查看
+ls -1 projects/
+
+# 删除
+rm -rf projects/old-lib/
+```
+
+**原则：** 扁平结构，不分类，手动清理。
+
+---
+
 ## 📚 文档
 
-- `README.md` / `README.zh-CN.md` — 本文档
-- `workspace-setup.md` — 完整安装指南
+- `README.md` / `README.zh-CN.md` — 项目说明
+- `workspace-setup.md` — 本文档（完整安装指南）
 - `AGENTS.md` — 会话记忆流规范
 - `docs/ARCHITECTURE_GENERIC_CN.md` — 架构设计
+- `docs/PROJECT_STRUCTURE_GENERIC_CN.md` — 目录结构
 
 ---
 
