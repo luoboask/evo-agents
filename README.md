@@ -8,48 +8,27 @@ Reusable self-evolving agent workspace with explicit runtime context (`--workspa
 
 ---
 
-## 🦞 OpenClaw One-Click Install (Recommended) ⭐
+## 🦞 One-Click Install (Recommended) ⭐
 
-**Install with OpenClaw natural language:**
+**Just run this command:**
 
 ```bash
-openclaw agent --message "Read https://raw.githubusercontent.com/luoboask/evo-agents/master/workspace-setup.md and help me install a workspace named demo-agent"
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s my-agent
 ```
 
-**OpenClaw will:**
-1. Read `workspace-setup.md` installation guide
-2. Clone template to `~/.openclaw/workspace-demo-agent`
+**That's it!** The script will:
+1. Clone evo-agents template
+2. Register agent with OpenClaw (creates AGENTS.md, SOUL.md, etc.)
 3. Create directory structure
-4. Register `demo-agent` to OpenClaw
-5. Configure multi-agent system (optional)
-6. Run tests
+4. Run tests
+
+**No need to worry about steps!** 🎉
 
 ---
 
 ## 🚀 Quick Start
 
 ### Option 1: Manual Install
-
-**Why git clone + openclaw agents add?**
-- `git clone` → Gets evo-agents scripts/, skills/, libs/
-- `openclaw agents add` → Creates AGENTS.md, SOUL.md, registers agent
-
-```bash
-# 1. Clone evo-agents template (gets scripts/, skills/, libs/)
-git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
-cd ~/.openclaw/workspace-my-agent
-
-# 2. Register with OpenClaw (creates AGENTS.md, SOUL.md, etc.)
-openclaw agents add my-agent --workspace "$(pwd)" --non-interactive
-
-# 3. Create directory structure
-mkdir -p memory/weekly memory/monthly memory/archive
-mkdir -p data/index data/my-agent
-
-# 4. Test
-python3 scripts/session_recorder.py -t event -c 'Hello world'
-python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
-```
 
 ---
 

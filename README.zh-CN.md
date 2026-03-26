@@ -8,48 +8,27 @@
 
 ---
 
-## 🦞 OpenClaw 一键安装（推荐）⭐
+## 🦞 一键安装（推荐）⭐
 
-**用 OpenClaw 自然语言安装：**
+**只需运行一个命令：**
 
 ```bash
-openclaw agent --message "Read https://raw.githubusercontent.com/luoboask/evo-agents/master/workspace-setup.md and help me install a workspace named demo-agent"
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s my-agent
 ```
 
-**OpenClaw 会：**
-1. 读取 `workspace-setup.md` 安装指南
-2. 克隆模板到 `~/.openclaw/workspace-demo-agent`
+**就这么简单！** 脚本会自动：
+1. 克隆 evo-agents 模板
+2. 注册 agent 到 OpenClaw（创建 AGENTS.md, SOUL.md 等）
 3. 创建目录结构
-4. 注册 `demo-agent` 到 OpenClaw
-5. 配置多 Agent 系统（可选）
-6. 运行测试
+4. 运行测试
+
+**无需关心步骤！** 🎉
 
 ---
 
 ## 🚀 快速开始
 
 ### 方式 1：手动安装
-
-**为什么需要 git clone + openclaw agents add 两步？**
-- `git clone` → 获得 evo-agents 的 scripts/, skills/, libs/
-- `openclaw agents add` → 创建 AGENTS.md, SOUL.md 等，并注册 agent
-
-```bash
-# 1. 克隆 evo-agents 模板（获得 scripts/, skills/, libs/）
-git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
-cd ~/.openclaw/workspace-my-agent
-
-# 2. 注册到 OpenClaw（创建 AGENTS.md, SOUL.md 等）
-openclaw agents add my-agent --workspace "$(pwd)" --non-interactive
-
-# 3. 创建目录结构
-mkdir -p memory/weekly memory/monthly memory/archive
-mkdir -p data/index data/my-agent
-
-# 4. 测试
-python3 scripts/session_recorder.py -t event -c 'Hello world'
-python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
-```
 
 ---
 
