@@ -2,334 +2,245 @@
 
 [English](./README.md) | [简体中文](./README.zh-CN.md)
 
-**OpenClaw 多 Agent Workspace 模板**
+**OpenClaw Multi-Agent Workspace Template**
 
-可复用的自进化 Agent workspace，支持显式运行时上下文（`--workspace`, `--agent`），严格的每 Agent 数据隔离，和共享能力层。
+Reusable self-evolving agent workspace with explicit runtime context (`--workspace`, `--agent`), strict per-agent data isolation, and shared capability layers.
 
 ---
 
-## 🦞 OpenClaw 一键安装（推荐）⭐
+## 🦞 OpenClaw One-Click Install (Recommended) ⭐
 
-**用 OpenClaw 自然语言安装：**
+**Install with OpenClaw natural language:**
 
 ```bash
 openclaw agent --message "Read https://raw.githubusercontent.com/luoboask/evo-agents/master/workspace-setup.md and help me install a workspace named demo-agent"
 ```
 
-**OpenClaw 会：**
-1. 读取 `workspace-setup.md` 安装指南
-2. 克隆模板到 `~/.openclaw/workspace-demo-agent`
-3. 创建目录结构
-4. 注册 `demo-agent` 到 OpenClaw
-5. 配置多 Agent 系统（可选）
-6. 运行测试
+**OpenClaw will:**
+1. Read `workspace-setup.md` installation guide
+2. Clone template to `~/.openclaw/workspace-demo-agent`
+3. Create directory structure
+4. Register `demo-agent` to OpenClaw
+5. Configure multi-agent system (optional)
+6. Run tests
 
 ---
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 方式 1：手动安装
+### Option 1: Manual Install
 
 ```bash
-# 1. 克隆模板
+# 1. Clone template
 git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
 cd ~/.openclaw/workspace-my-agent
 
-# 2. 创建目录结构
+# 2. Create directory structure
 mkdir -p memory/weekly memory/monthly memory/archive
 mkdir -p data/index data/my-agent
 
-# 3. 注册 OpenClaw agent
+# 3. Register OpenClaw agent
 openclaw agents add my-agent --workspace "$(pwd)" --non-interactive
 
-# 4. 测试
+# 4. Test
 python3 scripts/session_recorder.py -t event -c 'Hello world'
 python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
 ```
 
 ---
 
-## 🔧 功能激活
+## 🔧 Feature Activation
 
-安装完成后，交互式激活高级功能：
+After installation, activate advanced features interactively:
 
 ```bash
 ./scripts/activate-features.sh
 ```
 
-**可激活功能：**
-1. 🔮 语义搜索（Ollama + 嵌入模型）
-2. 📚 知识库系统
-3. 🧬 自进化系统
-4. 📊 RAG 评估
-5. ⏰ 定时任务（Cron）
-6. ✅ 全部激活
-7. ❌ 跳过
+**Available Features:**
+1. 🔮 Semantic Search (Ollama + Embedding Models)
+2. 📚 Knowledge Base System
+3. 🧬 Self-Evolution System
+4. 📊 RAG Evaluation
+5. ⏰ Scheduled Tasks (Cron)
+6. ✅ Activate All
+7. ❌ Skip
 
-**嵌入模型选择：**
-- bge-m3 (1.2GB, 🇨🇳 中文)
-- nomic-embed-text (274MB, 🇺🇸 英文)
-- mxbai-embed-large (670MB, 🌍 多语言)
-- all-minilm (46MB, 🇺🇸 英文，快速)
+**Embedding Models:**
+- bge-m3 (1.2GB, 🇨🇳 Chinese)
+- nomic-embed-text (274MB, 🇺🇸 English)
+- mxbai-embed-large (670MB, 🌍 Multi-language)
+- all-minilm (46MB, 🇺🇸 English, Fast)
 
-**文档：**
-- `FEATURE_ACTIVATION_GUIDE.md` - 完整激活指南
-- `workspace-setup.md` - 完整安装指南
+**Documentation:**
+- `FEATURE_ACTIVATION_GUIDE.md` - Full activation guide
+- `workspace-setup.md` - Complete installation playbook
 
 ---
 
-## 🤖 多 Agent 脚本
+## 🤖 Multi-Agent Scripts
 
-### setup-multi-agent.sh - 批量创建
+### setup-multi-agent.sh - Create Multiple Agents
 
 ```bash
 ./scripts/setup-multi-agent.sh designer writer ops
-# 创建：designer-agent, writer-agent, ops-agent
+# Creates: designer-agent, writer-agent, ops-agent
 ```
 
-### add-agent.sh - 新增单个
+### add-agent.sh - Add Single Agent
 
 ```bash
-./scripts/add-agent.sh designer UI/UX 设计师 🎨
-# 创建：designer-agent (UI/UX 设计师 🎨)
+./scripts/add-agent.sh designer UI/UX Designer 🎨
+# Creates: designer-agent (UI/UX Designer 🎨)
 ```
 
-**规则：**
-1. 必须传参数（角色名）
-2. 自动生成 `role-agent`
-3. 如果已带 `-agent`，不再添加
+**Rules:**
+1. Must pass role name as argument
+2. Auto-generates `role-agent`
+3. If already has `-agent`, won't add again
 
 ---
 
-## 📁 目录结构
+## 🏗️ Architecture Advantages
 
-```
-evo-agents/
-├── 📄 根目录文件
-│   ├── README.md
-│   ├── README.zh-CN.md
-│   ├── workspace-setup.md
-│   └── FEATURE_ACTIVATION_GUIDE.md
-│
-├── 🔧 scripts/
-│   ├── activate-features.sh
-│   ├── setup-multi-agent.sh
-│   ├── add-agent.sh
-│   └── ...
-│
-├── 📚 libs/
-│   └── memory_hub/
-│
-├── 🎯 skills/
-│   ├── memory-search/
-│   ├── rag/
-│   ├── self-evolution/
-│   └── websearch/
-│
-├── 📂 agents/
-│   └── .gitkeep
-│
-└── 📖 docs/
-    ├── ARCHITECTURE_GENERIC_CN.md
-    └── PROJECT_STRUCTURE_GENERIC_CN.md
-```
+### Why Choose evo-agents Template?
+
+#### 1️⃣ Code/Data Separation
+
+**Traditional (Native):** All files mixed together
+
+**evo-agents Optimized:**
+- 📄 Root (Agent config)
+- 🔧 scripts/ (Shared scripts)
+- 📚 libs/ (Shared libraries)
+- 🎯 skills/ (Shared skills)
+- 📂 agents/ (Sub-agent data isolation)
+- 📝 memory/ (Memory files)
+
+**Benefits:** Clear responsibilities, Easy maintenance, Scalable
 
 ---
 
-## 🏗️ 结构优化优势
+#### 2️⃣ Shared Resource Layer
 
-### 为什么选择 evo-agents 模板？
+**Traditional:** Each agent copies scripts/ independently
 
-#### 1️⃣ 代码/数据分离架构
+**evo-agents:** All agents share scripts/libs/skills
 
-**传统方式（原生）：**
-```
-workspace/
-├── AGENTS.md
-├── SOUL.md
-└── ... (所有文件混在一起)
-```
-
-**evo-agents 优化：**
-```
-workspace/
-├── 📄 根目录（Agent 配置）
-├── 🔧 scripts/（共享脚本）
-├── 📚 libs/（共享库）
-├── 🎯 skills/（共享技能）
-├── 📂 agents/（子 Agent 数据隔离）
-└── 📝 memory/（记忆文件）
-```
-
-**优势：**
-- ✅ 职责清晰：每个目录有明确用途
-- ✅ 易于维护：修改脚本不影响配置
-- ✅ 可扩展：添加新功能不破坏结构
+**Savings:**
+- Disk space: **-80%**
+- Maintenance time: **-90%**
+- Learning cost: **-70%**
 
 ---
 
-#### 2️⃣ 共享资源层
+#### 3️⃣ Data Isolation Design
 
-**传统方式：**
-- 每个 Agent 独立复制 scripts/
-- 代码重复，维护困难
-- 更新需要同步多个 workspace
+**Traditional:** All data mixed in memory/
 
-**evo-agents 优化：**
-- 所有 Agent 共享 scripts/libs/skills
-- 代码只有一份
-- 更新一次，所有 Agent 受益
+**evo-agents:** Each agent has independent memory/ and data/
 
-**节省：**
-- 磁盘空间：-80%（无需重复复制）
-- 维护时间：-90%（只需更新一处）
-- 学习成本：-70%（统一接口）
+**Benefits:** Complete isolation, Easy management, Privacy protection
 
 ---
 
-#### 3️⃣ 数据隔离设计
+#### 4️⃣ Script-based Toolchain
 
-**传统方式：**
-- 所有数据混在 memory/
-- 无法区分不同 Agent 的记忆
-- 删除 Agent 时难以清理
+**Traditional:** Manual creation, error-prone
 
-**evo-agents 优化：**
-```
-agents/
-├── analyst-agent/
-│   ├── memory/（独立记忆）
-│   └── data/（独立数据库）
-├── developer-agent/
-│   ├── memory/
-│   └── data/
-└── tester-agent/
-    ├── memory/
-    └── data/
-```
-
-**优势：**
-- ✅ 完全隔离：每个 Agent 独立数据
-- ✅ 易于管理：删除 Agent 只需删除对应目录
-- ✅ 隐私保护：不同 Agent 数据不混合
-
----
-
-#### 4️⃣ 脚本化工具链
-
-**传统方式：**
-- 手动创建目录和文件
-- 容易出错
-- 需要记忆步骤
-
-**evo-agents 优化：**
+**evo-agents:**
 ```bash
-# 创建多 Agent
 ./scripts/setup-multi-agent.sh analyst developer tester
-
-# 新增单个 Agent
-./scripts/add-agent.sh designer "UI 设计师" 🎨
-
-# 激活功能
+./scripts/add-agent.sh designer "UI Designer" 🎨
 ./scripts/activate-features.sh
 ```
 
-**优势：**
-- ✅ 一键完成：无需手动操作
-- ✅ 不易出错：脚本自动处理
-- ✅ 可重复：随时创建新 Agent
+**Benefits:** One-click completion, Error-free, Repeatable
 
 ---
 
-#### 5️⃣ 文档驱动
+#### 5️⃣ Documentation-Driven
 
-**传统方式：**
-- 无文档或文档简单
-- 需要多次询问 AI
-- 学习曲线陡峭
+**Traditional:** No documentation, multiple AI queries needed
 
-**evo-agents 优化：**
-- ✅ README.md - 快速入门
-- ✅ workspace-setup.md - 完整安装指南
-- ✅ FEATURE_ACTIVATION_GUIDE.md - 功能激活
-- ✅ docs/ - 架构设计文档
+**evo-agents:** Complete documentation, self-service
 
-**节省：**
-- 询问次数：-80%
-- 学习时间：-70%
-- 困惑度：-90%
+**Savings:**
+- Query count: **-80%**
+- Learning time: **-70%**
+- Confusion: **-90%**
 
 ---
 
-## 📊 性能测试
+## 📊 Performance Testing
 
-**测试日期：** 2026-03-26  
-**对比对象：** evo-agents 模板 vs OpenClaw 原生
+**Test Date:** 2026-03-26  
+**Comparison:** evo-agents template vs OpenClaw Native
 
-### 真实对话测试（3 轮）
+### Real Dialog Testing (3 Rounds)
 
-| 测试场景 | 原生 | evo-agents | 节省 |
-|---------|------|------------|------|
-| 项目管理咨询 | ~600 tokens | ~550 tokens | **-8%** |
-| Python 编程咨询 | ~700 tokens | ~650 tokens | **-7%** |
-| Git 工作流咨询 | ~500 tokens | ~500 tokens | 0% |
-| **总计** | **~1,800** | **~1,700** | **-6%** |
+| Test Scenario | Native | evo-agents | Savings |
+|--------------|--------|------------|---------|
+| Project Management | ~600 tokens | ~550 tokens | **-8%** |
+| Python Programming | ~700 tokens | ~650 tokens | **-7%** |
+| Git Workflow | ~500 tokens | ~500 tokens | 0% |
+| **Total** | **~1,800** | **~1,700** | **-6%** |
 
-### Token 投资回报
+### Token ROI
 
-| 项目 | 原生 | evo-agents | 差异 |
-|------|------|------------|------|
-| 创建成本 | 250 tokens | 150 tokens | **-40%** |
-| 文档阅读 | 0 | ~4,100 tokens | +4,100 |
-| 每次使用 | ~600 tokens | ~570 tokens | **-5%** |
+| Item | Native | evo-agents | Difference |
+|------|--------|------------|------------|
+| Creation cost | 250 tokens | 150 tokens | **-40%** |
+| Documentation | 0 | ~4,100 tokens | +4,100 |
+| Per use | ~600 tokens | ~570 tokens | **-5%** |
 
-**回本次数：** 约 41 次使用（纯 Token）/ **1-2 次**（考虑时间成本）
+**Break-even:** ~41 uses (tokens only) / **1-2 uses** (with time value)
 
-### 用户体验对比
+### User Experience Comparison
 
-| 指标 | 原生 | evo-agents | 提升 |
-|------|------|------------|------|
-| 对话轮数 | 2-3 轮 | 1 轮 | **-60%** |
-| 时间成本 | 15 分钟 | 3 分钟 | **-80%** |
-| 自助完成 | ~30% | ~90% | **+200%** |
-| 满意度 | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | **+25%** |
+| Metric | Native | evo-agents | Improvement |
+|--------|--------|------------|-------------|
+| Dialog rounds | 2-3 | 1 | **-60%** |
+| Time cost | 15 min | 3 min | **-80%** |
+| Self-service | ~30% | ~90% | **+200%** |
+| Satisfaction | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | **+25%** |
 
-### 功能完整性
+### Feature Completeness
 
-| 功能 | 原生 | evo-agents |
-|------|------|------------|
-| 基础 Agent | ✅ | ✅ |
-| 多 Agent 脚本 | ❌ | ✅ |
-| 功能激活向导 | ❌ | ✅ |
-| 知识库系统 | ❌ | ✅ |
-| 完整文档 | ❌ | ✅ |
+| Feature | Native | evo-agents |
+|---------|--------|------------|
+| Basic Agent | ✅ | ✅ |
+| Multi-Agent Scripts | ❌ | ✅ |
+| Feature Activation Wizard | ❌ | ✅ |
+| Knowledge Base System | ❌ | ✅ |
+| Complete Documentation | ❌ | ✅ |
 
-### 推荐指数
+### Recommendation Rating
 
-| 维度 | 原生 | evo-agents |
-|------|------|------------|
-| Token 效率 | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| 功能完整 | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| 用户体验 | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| 时间效率 | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **总体** | **⭐⭐⭐⭐** | **⭐⭐⭐⭐⭐** |
+| Dimension | Native | evo-agents |
+|-----------|--------|------------|
+| Token Efficiency | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Feature Completeness | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| User Experience | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Time Efficiency | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| **Overall** | **⭐⭐⭐⭐** | **⭐⭐⭐⭐⭐** |
 
-**🎯 结论：evo-agents 模板在各方面都更优！**
-
----
-
-## 📚 文档
-
-| 文档 | 用途 |
-|------|------|
-| `workspace-setup.md` | ⭐ 完整安装指南 |
-| `FEATURE_ACTIVATION_GUIDE.md` | 功能激活指南 |
-| `README.md` | 快速入门（英文） |
-| `README.zh-CN.md` | 快速入门（中文） |
-| `docs/ARCHITECTURE_GENERIC_CN.md` | 架构设计 |
-| `docs/PROJECT_STRUCTURE_GENERIC_CN.md` | 目录结构 |
+**🎯 Conclusion: evo-agents template is better in every aspect!**
 
 ---
 
-**最后更新：** 2026-03-26  
+## 📚 Documentation
+
+| Document | Purpose |
+|----------|---------|
+| `workspace-setup.md` | ⭐ Complete installation guide |
+| `FEATURE_ACTIVATION_GUIDE.md` | Feature activation guide |
+| `README.md` | Quick start (English) |
+| `README.zh-CN.md` | Quick start (Chinese) |
+| `docs/ARCHITECTURE_GENERIC_EN.md` | Architecture design |
+| `docs/PROJECT_STRUCTURE_GENERIC_EN.md` | Directory structure |
+
+---
+
+**Last Updated:** 2026-03-26  
 **GitHub:** https://github.com/luoboask/evo-agents
