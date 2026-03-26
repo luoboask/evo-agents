@@ -30,12 +30,16 @@ openclaw agent --message "Read https://raw.githubusercontent.com/luoboask/evo-ag
 
 ### Option 1: Manual Install
 
+**Why git clone + openclaw agents add?**
+- `git clone` → Gets evo-agents scripts/, skills/, libs/
+- `openclaw agents add` → Creates AGENTS.md, SOUL.md, registers agent
+
 ```bash
-# 1. Clone template
+# 1. Clone evo-agents template (gets scripts/, skills/, libs/)
 git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
 cd ~/.openclaw/workspace-my-agent
 
-# 2. Register OpenClaw agent (IMPORTANT! This creates AGENTS.md, SOUL.md, etc.)
+# 2. Register with OpenClaw (creates AGENTS.md, SOUL.md, etc.)
 openclaw agents add my-agent --workspace "$(pwd)" --non-interactive
 
 # 3. Create directory structure
@@ -46,11 +50,6 @@ mkdir -p data/index data/my-agent
 python3 scripts/session_recorder.py -t event -c 'Hello world'
 python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
 ```
-
-**⚠️ Important:** Step 2 (`openclaw agents add`) is required! It creates:
-- AGENTS.md, SOUL.md, MEMORY.md
-- USER.md, IDENTITY.md, TOOLS.md
-- HEARTBEAT.md
 
 ---
 

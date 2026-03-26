@@ -30,12 +30,16 @@ openclaw agent --message "Read https://raw.githubusercontent.com/luoboask/evo-ag
 
 ### 方式 1：手动安装
 
+**为什么需要 git clone + openclaw agents add 两步？**
+- `git clone` → 获得 evo-agents 的 scripts/, skills/, libs/
+- `openclaw agents add` → 创建 AGENTS.md, SOUL.md 等，并注册 agent
+
 ```bash
-# 1. 克隆模板
+# 1. 克隆 evo-agents 模板（获得 scripts/, skills/, libs/）
 git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
 cd ~/.openclaw/workspace-my-agent
 
-# 2. 注册 OpenClaw agent（重要！这会创建 AGENTS.md, SOUL.md 等文件）
+# 2. 注册到 OpenClaw（创建 AGENTS.md, SOUL.md 等）
 openclaw agents add my-agent --workspace "$(pwd)" --non-interactive
 
 # 3. 创建目录结构
@@ -46,11 +50,6 @@ mkdir -p data/index data/my-agent
 python3 scripts/session_recorder.py -t event -c 'Hello world'
 python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
 ```
-
-**⚠️ 重要：** 第 2 步（`openclaw agents add`）是必须的！它会创建：
-- AGENTS.md, SOUL.md, MEMORY.md
-- USER.md, IDENTITY.md, TOOLS.md
-- HEARTBEAT.md
 
 ---
 
