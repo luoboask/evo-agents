@@ -47,7 +47,7 @@ echo ""
 
 # 1. 创建目录
 echo "📁 创建目录..."
-mkdir -p "agents/$AGENT_NAME/{memory,data}"
+mkdir -p "agents/$AGENT_NAME/memory" "agents/$AGENT_NAME/data"
 echo "   ✅ agents/$AGENT_NAME/{memory,data}"
 
 # 2. 创建配置文件
@@ -141,3 +141,16 @@ echo "🎯 使用:"
 echo "   python3 scripts/session_recorder.py -t event -c '内容' --agent $AGENT_NAME"
 echo "   openclaw agent --agent $AGENT_NAME --message '任务'"
 echo ""
+
+# 创建符号链接到父 workspace 的 scripts/ 和 skills/
+echo ""
+echo "🔗 创建符号链接到共享资源..."
+WORKSPACE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "agents/$AGENT_NAME"
+ln -sf ../../scripts scripts 2>/dev/null || true
+ln -sf ../../skills skills 2>/dev/null || true
+ln -sf ../../libs libs 2>/dev/null || true
+echo "   ✅ 已创建 scripts -> ../../scripts"
+echo "   ✅ 已创建 skills -> ../../skills"
+echo "   ✅ 已创建 libs -> ../../libs"
+cd "$WORKSPACE_ROOT"

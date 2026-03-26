@@ -57,7 +57,7 @@ for agent_spec in "${AGENTS[@]}"; do
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     
     # 1. 创建目录
-    mkdir -p "agents/$AGENT_NAME/{memory,data}"
+    mkdir -p "agents/$AGENT_NAME/memory" "agents/$AGENT_NAME/data"
     echo "   ✅ 目录结构"
     
     # 2. 创建配置文件
@@ -182,3 +182,12 @@ echo "🎯 使用:"
 echo "   python3 scripts/session_recorder.py -t event -c '内容' --agent <agent-name>"
 echo "   openclaw agent --agent <agent-name> --message '任务'"
 echo ""
+
+    # 创建符号链接到父 workspace 的 scripts/ 和 skills/
+    echo "   🔗 创建符号链接到共享资源..."
+    cd "agents/$AGENT_NAME"
+    ln -sf ../../scripts scripts 2>/dev/null || true
+    ln -sf ../../skills skills 2>/dev/null || true
+    ln -sf ../../libs libs 2>/dev/null || true
+    echo "   ✅ 已创建 scripts, skills, libs 符号链接"
+    cd "$WORKSPACE"
