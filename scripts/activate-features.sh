@@ -26,18 +26,61 @@ echo ""
 if command -v ollama &> /dev/null; then
     echo "   ✅ Ollama 已安装"
     
-    if ollama list 2>/dev/null | grep -qE "bge-m3|nomic-embed"; then
-        echo "   ✅ 嵌入模型已下载"
-        ollama list | grep -E "bge-m3|nomic-embed"
+    # 检查已有模型
+    EXISTING_MODELS=$(ollama list 2>/dev/null | grep -E "bge-m3|nomic-embed|mxbai-embed|all-minilm" || true)
+    
+    if [ -n "$EXISTING_MODELS" ]; then
+        echo "   ✅ 嵌入模型已下载:"
+        echo "$EXISTING_MODELS" | while read line; do
+            echo "      $line"
+        done
     else
         echo "   ⚠️  嵌入模型未下载"
         echo ""
-        read -p "是否下载 bge-m3 模型？(1.2GB, 中文最佳) [y/N] " -n 1 -r
+        echo "   请选择模型（根据主要使用语言）:"
         echo ""
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            ollama pull bge-m3
-            echo "   ✅ bge-m3 下载完成"
-        fi
+        echo "   1) bge-m3           (1.2GB, 中文最佳，推荐中文用户)"
+        echo "   2) nomic-embed-text (274MB, 英文最佳，推荐英文用户)"
+        echo "   3) mxbai-embed-large (670MB, 多语言支持)"
+        echo "   4) all-minilm       (46MB,  英文，快速测试)"
+        echo "   5) 全部下载         (所有模型，自动选择)"
+        echo "   6) 跳过             (稍后手动下载)"
+        echo ""
+        read -p "请选择 [1-6]: " MODEL_CHOICE
+        
+        case $MODEL_CHOICE in
+            1)
+                echo "   下载 bge-m3 (中文最佳)..."
+                ollama pull bge-m3
+                echo "   ✅ bge-m3 下载完成"
+                ;;
+            2)
+                echo "   下载 nomic-embed-text (英文最佳)..."
+                ollama pull nomic-embed-text
+                echo "   ✅ nomic-embed-text 下载完成"
+                ;;
+            3)
+                echo "   下载 mxbai-embed-large (多语言)..."
+                ollama pull mxbai-embed-large
+                echo "   ✅ mxbai-embed-large 下载完成"
+                ;;
+            4)
+                echo "   下载 all-minilm (最小最快)..."
+                ollama pull all-minilm
+                echo "   ✅ all-minilm 下载完成"
+                ;;
+            5)
+                echo "   下载所有模型..."
+                ollama pull bge-m3
+                ollama pull nomic-embed-text
+                ollama pull mxbai-embed-large
+                echo "   ✅ 所有模型下载完成"
+                ;;
+            *)
+                echo "   ⏭️  跳过模型下载"
+                echo "   手动下载：ollama pull bge-m3"
+                ;;
+        esac
     fi
 else
     echo "   ❌ Ollama 未安装"

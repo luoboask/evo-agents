@@ -64,13 +64,42 @@ ollama serve
 
 ### 步骤 3：下载嵌入模型
 
-**推荐模型（中文效果好）：**
-```bash
-# bge-m3 - 1.2GB，中文最佳
-ollama pull bge-m3
+**根据语言选择模型：**
 
-# 或 nomic-embed-text - 274MB，英文好
+| 模型 | 大小 | 语言 | 推荐场景 |
+|------|------|------|---------|
+| **bge-m3** | 1.2GB | 中文最佳 | 中文内容、多语言混合 |
+| **nomic-embed-text** | 274MB | 英文最佳 | 英文内容、快速搜索 |
+| **mxbai-embed-large** | 670MB | 多语言 | 多语言混合场景 |
+| **all-minilm** | 46MB | 英文 | 快速测试、低配置 |
+
+**中文用户推荐：**
+```bash
+# bge-m3 - 中文最佳，支持多语言
+ollama pull bge-m3
+```
+
+**英文用户推荐：**
+```bash
+# nomic-embed-text - 英文最佳，轻量快速
 ollama pull nomic-embed-text
+
+# 或 all-minilm - 最小最快（适合测试）
+ollama pull all-minilm
+```
+
+**多语言用户推荐：**
+```bash
+# mxbai-embed-large - 多语言支持好
+ollama pull mxbai-embed-large
+```
+
+**全部下载（自动选择）：**
+```bash
+# 下载所有常用模型
+ollama pull bge-m3
+ollama pull nomic-embed-text
+ollama pull mxbai-embed-large
 ```
 
 ---
