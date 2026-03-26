@@ -220,7 +220,112 @@ python3 scripts/memory_stats.py --agent tester-agent
 
 ---
 
-### 方式 3：一键创建多 Agent 体系（推荐）⭐
+## 🤖 多 Agent 管理脚本
+
+### 脚本 1：setup-multi-agent.sh - 批量创建多 Agent
+
+**用途：** 一次性创建多个专业子 Agent
+
+**用法：**
+```bash
+cd ~/.openclaw/workspace-my-agent
+./scripts/setup-multi-agent.sh <role1> [role2] [role3] ...
+```
+
+**规则：**
+1. 必须传参数（角色名）
+2. 自动生成 `role-agent`
+3. 如果已带 `-agent`，不再添加
+
+**示例：**
+```bash
+# 创建 3 个角色
+./scripts/setup-multi-agent.sh designer writer ops
+# 创建：designer-agent, writer-agent, ops-agent
+
+# 已带 -agent
+./scripts/setup-multi-agent.sh designer-agent writer-agent
+# 创建：designer-agent, writer-agent（不再添加 -agent）
+
+# 带描述和 emoji
+./scripts/setup-multi-agent.sh "designer:UI/UX 设计师:🎨" "writer:内容创作者:✍️"
+# 创建：designer-agent (UI/UX 设计师 🎨), writer-agent (内容创作者 ✍️)
+```
+
+**自动完成：**
+- ✅ 创建目录结构（`agents/<agent>/memory/`, `agents/<agent>/data/`）
+- ✅ 创建配置文件（AGENTS.md, SOUL.md, MEMORY.md, config.yaml）
+- ✅ 注册到 OpenClaw（`openclaw agents add`）
+- ✅ 更新 config/agents.yaml
+
+---
+
+### 脚本 2：add-agent.sh - 新增单个 Agent
+
+**用途：** 新增单个专业子 Agent
+
+**用法：**
+```bash
+cd ~/.openclaw/workspace-my-agent
+./scripts/add-agent.sh <role> [description] [emoji]
+```
+
+**规则：**
+1. 必须传参数（角色名）
+2. 自动生成 `role-agent`
+3. 如果已带 `-agent`，不再添加
+
+**示例：**
+```bash
+# 最简单
+./scripts/add-agent.sh designer
+# 创建：designer-agent
+
+# 带描述
+./scripts/add-agent.sh designer UI/UX 设计师
+# 创建：designer-agent (UI/UX 设计师)
+
+# 带描述和 emoji
+./scripts/add-agent.sh designer UI/UX 设计师 🎨
+# 创建：designer-agent (UI/UX 设计师 🎨)
+
+# 已带 -agent
+./scripts/add-agent.sh designer-agent
+# 创建：designer-agent（不再添加 -agent）
+```
+
+**自动完成：**
+- ✅ 创建目录结构
+- ✅ 创建配置文件
+- ✅ 注册到 OpenClaw
+- ✅ 更新 config/agents.yaml
+
+---
+
+### 多 Agent 示例
+
+**场景 1：创建内容创作团队**
+```bash
+cd ~/.openclaw/workspace-content
+./scripts/setup-multi-agent.sh writer editor designer seo
+# 创建：writer-agent, editor-agent, designer-agent, seo-agent
+```
+
+**场景 2：创建开发团队**
+```bash
+cd ~/.openclaw/workspace-dev
+./scripts/setup-multi-agent.sh "frontend:前端开发:💻" "backend:后端开发:🖥️" "devops:运维:🔧" "qa:质量测试:✅"
+```
+
+**场景 3：新增单个角色**
+```bash
+cd ~/.openclaw/workspace-my-agent
+./scripts/add-agent.sh analyst 数据分析师 📊
+```
+
+---
+
+## 🤖 多 Agent 配置（可选）
 
 创建包含 3 个专业子 Agent 的完整多 Agent 体系：
 
