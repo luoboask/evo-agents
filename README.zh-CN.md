@@ -1,10 +1,10 @@
-# test-agents - OpenClaw 多 Agent Workspace
+# evo-agents - OpenClaw Workspace 模板
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Platform: macOS](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
 
-**给 OpenClaw Agent 真正的记忆和多 Agent 协作能力。**
+**一个完整的 OpenClaw Workspace 模板，包含记忆管理和多 Agent 协作能力。**
 
 [English](./README.md) | [简体中文](./README.zh-CN.md)
 
@@ -14,10 +14,10 @@
 
 | 特性 | 说明 |
 |------|------|
-| **多 Agent 架构** | 主 Agent + 专业子 Agent（分析师/开发者/测试员） |
+| **多 Agent 架构** | 主 Agent + 专业子 Agent |
 | **数据隔离** | 每个 Agent 独立 memory/ 和 data/ |
 | **共享资源** | scripts/libs/skills 所有 Agent 共用 |
-| **双向同步** | Markdown ↔ SQLite 自动一致 |
+| **双向同步** | Markdown ↔ SQLite 自动同步 |
 | **语义搜索** | Ollama + bge-m3，理解中文语义 |
 | **并发安全** | fcntl 锁 + SQLite WAL 模式 |
 
@@ -25,101 +25,33 @@
 
 ## 🚀 快速开始
 
-### 方式 1：手动安装
+### 方式 1：一键安装
 
 ```bash
-# 1. 克隆仓库
-git clone https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-test-agents
-cd ~/.openclaw/workspace-test-agents
+# 安装默认名称 'my-agent'
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash
 
-# 2. 安装依赖（可选）
-pip3 install --user jieba  # 中文分词
+# 或指定自己的 agent 名称
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/init-agent.sh | bash -s your-agent-name
+```
 
-# 3. 创建目录
+### 方式 2：手动安装
+
+```bash
+# 1. 克隆模板
+git clone --depth 1 https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
+cd ~/.openclaw/workspace-my-agent
+
+# 2. 创建目录结构
 mkdir -p memory/weekly memory/monthly memory/archive
-mkdir -p data/index data/test-agents
+mkdir -p data/index data/my-agent
 
-# 4. 注册 OpenClaw agent
-openclaw agents add test-agents --workspace "$(pwd)" --non-interactive
+# 3. 注册 OpenClaw agent
+openclaw agents add my-agent --workspace "$(pwd)" --non-interactive
 
-# 5. 运行测试
-./test-multi-agent.sh
-```
-
-### 方式 2：从零创建
-
-```bash
-# 1. 创建目录
-mkdir -p ~/.openclaw/workspace-test-agents
-cd ~/.openclaw/workspace-test-agents
-
-# 2. 注册 OpenClaw agent
-openclaw agents add test-agents --workspace "$(pwd)" --non-interactive
-
-# 3. 创建核心文件
-cat > AGENTS.md << 'EOF'
-# AGENTS.md - test-agents
-
-## 会话流程
-1. 会话开始：搜索记忆
-2. 会话中：实时记录
-3. 会话结束：同步
-EOF
-
-# 4. 创建目录
-mkdir -p memory agents scripts skills libs
-```
-
----
-
-## 🤖 多 Agent 架构
-
-```
-test-agents (主协调) 🦞
-├── analyst-agent (需求分析) 🔍
-├── developer-agent (代码实现) 💻
-└── tester-agent (质量测试) ✅
-```
-
-### Agent 列表
-
-| Agent | 角色 | 路径 |
-|-------|------|------|
-| **test-agents** | coordinator | `memory/` + `data/test-agents/` |
-| **analyst-agent** | analyst | `agents/analyst-agent/` |
-| **developer-agent** | developer | `agents/developer-agent/` |
-| **tester-agent** | tester | `agents/tester-agent/` |
-
----
-
-## 🎯 使用方式
-
-### 记录事件
-
-```bash
-cd ~/.openclaw/workspace-test-agents
-
-# 记录到子 Agent
-python3 scripts/session_recorder.py -t event -c '分析完成' --agent analyst-agent
-
-# 记录到主 Agent
-python3 scripts/session_recorder.py -t decision -c '采用方案 A' --agent test-agents --sync
-```
-
-### 搜索记忆
-
-```bash
-# 搜索子 Agent
-python3 scripts/unified_search.py '需求分析' --agent analyst-agent --semantic
-
-# 搜索主 Agent
-python3 scripts/unified_search.py '昨天的决定' --agent test-agents --semantic
-```
-
-### 查看统计
-
-```bash
-python3 scripts/memory_stats.py --agent developer-agent
+# 4. 测试
+python3 scripts/session_recorder.py -t event -c 'Hello world'
+python3 scripts/unified_search.py 'hello' --agent my-agent --semantic
 ```
 
 ---
@@ -133,44 +65,82 @@ workspace/
 │   ├── SOUL.md             # Agent 身份
 │   ├── MEMORY.md           # 长期记忆
 │   ├── USER.md             # 用户信息
-│   └── ...
+│   ├── IDENTITY.md         # 身份标识
+│   ├── TOOLS.md            # 工具配置
+│   └── HEARTBEAT.md        # 心跳检查
 │
-├── 🤖 agents/              # ⭐ 子 Agent 数据隔离
-│   ├── analyst-agent/
-│   │   ├── AGENTS.md
-│   │   ├── SOUL.md
-│   │   ├── MEMORY.md
-│   │   ├── config.yaml
-│   │   ├── memory/         # 🔒 独立记忆
-│   │   └── data/           # 🔒 独立数据库
-│   ├── developer-agent/
-│   └── tester-agent/
+├── 🔧 scripts/             # 共享脚本
+│   ├── session_recorder.py     # 记录事件
+│   ├── unified_search.py       # 统一搜索
+│   ├── memory_indexer.py       # 构建索引
+│   ├── memory_compressor.py    # 压缩沉淀
+│   ├── memory_stats.py         # 系统统计
+│   ├── health_check.py         # 健康检查
+│   └── bridge/                 # 双向同步
 │
-├── 🔧 scripts/             # ⭐ 共享脚本
-│   ├── session_recorder.py     # 支持 --agent
-│   ├── unified_search.py       # 支持 --agent
-│   ├── memory_indexer.py
-│   └── ...
-│
-├── 📚 libs/                  # ⭐ 共享库
+├── 📚 libs/                  # 共享库
 │   └── memory_hub/
 │
-├── 🎯 skills/                # ⭐ 共享技能
+├── 🎯 skills/                # 共享技能
 │   ├── memory-search/
 │   ├── rag/
 │   ├── self-evolution/
 │   └── websearch/
 │
-├── 📝 memory/                # 主 Agent 记忆
-├── 💾 data/                  # 主 Agent 数据
+├── 📝 memory/                # 记忆目录
+│   ├── YYYY-MM-DD.md         # 每日记录
+│   ├── weekly/               # 周摘要
+│   ├── monthly/              # 月摘要
+│   └── archive/              # 归档
+│
+├── 💾 data/                  # 数据目录
+│   ├── <agent-name>/         # Agent 数据
+│   └── index/                # 搜索索引
+│
+├── 🤖 agents/                # 多 Agent（可选）
+│   └── <sub-agent>/          # 子 Agent
+│
 ├── 🌐 public/                # 公共知识库
+├── 📂 projects/              # Git 库管理
 ├── ⚙️ config/                # 配置
-└── 📂 projects/              # Git 库管理
+└── 📖 docs/                  # 文档
 ```
 
 ---
 
-## 🔄 多 Agent 协作流程
+## 🤖 多 Agent 配置（可选）
+
+创建专业子 Agent，实现协作：
+
+```bash
+cd ~/.openclaw/workspace-my-agent
+
+# 1. 创建子 Agent 目录
+mkdir -p agents/analyst-agent/{memory,data}
+mkdir -p agents/developer-agent/{memory,data}
+mkdir -p agents/tester-agent/{memory,data}
+
+# 2. 创建配置文件
+cat > agents/analyst-agent/AGENTS.md << 'EOF'
+# AGENTS.md - analyst-agent
+
+**角色：** 需求分析师  
+**职责：** 分析需求、设计方案
+EOF
+
+cat > agents/analyst-agent/config.yaml << 'EOF'
+agent:
+  name: analyst-agent
+  role: analyst
+  data_path: agents/analyst-agent/data
+  memory_path: agents/analyst-agent/memory
+EOF
+
+# 3. 使用子 Agent
+python3 scripts/session_recorder.py -t event -c '内容' --agent analyst-agent
+```
+
+### 协作流程示例
 
 ```
 1️⃣  analyst-agent    需求分析
@@ -179,68 +149,37 @@ workspace/
     ↓
 3️⃣  tester-agent     质量测试
     ↓
-4️⃣  test-agents      总结沉淀
+4️⃣  my-agent         总结沉淀
 ```
 
 ---
 
-## 📊 测试
+## 🛠️ 使用方式
+
+### 记录事件
 
 ```bash
-# 运行完整测试
-./test-multi-agent.sh
+# 记录到 Agent
+python3 scripts/session_recorder.py -t event -c '内容' --agent my-agent
 
-# 测试结果
-╔════════════════════════════════════════════════════════╗
-║     test-agents 多 Agent 完整测试                       ║
-╚════════════════════════════════════════════════════════╝
-
-总测试数：26
-✅ 通过：26
-❌ 失败：0
-成功率：100%
-
-🎉 所有测试通过！多 Agent 架构运行正常！
+# 记录并自动同步
+python3 scripts/session_recorder.py -t decision -c '决策' --agent my-agent --sync
 ```
 
----
+### 搜索记忆
 
-## 📚 文档
+```bash
+# 关键词搜索
+python3 scripts/unified_search.py '关键词' --agent my-agent
 
-| 文档 | 用途 |
-|------|------|
-| `docs/ARCHITECTURE_GENERIC_CN.md` | 架构说明（中文） |
-| `docs/ARCHITECTURE_GENERIC_EN.md` | Architecture (English) |
-| `docs/PROJECT_STRUCTURE_GENERIC_CN.md` | 目录结构（中文） |
-| `docs/PROJECT_STRUCTURE_GENERIC_EN.md` | Project Structure (English) |
-| `TEST_REPORT_MULTI_AGENT.md` | 测试报告 |
+# 语义搜索
+python3 scripts/unified_search.py '昨天做了什么' --agent my-agent --semantic
+```
 
----
+### 查看统计
 
-## ⚙️ 配置
-
-### config/agents.yaml
-
-```yaml
-test-agents:
-  name: test-agents
-  role: coordinator
-  data_path: data/test-agents
-  memory_path: memory
-
-analyst-agent:
-  name: analyst-agent
-  role: analyst
-  data_path: agents/analyst-agent/data
-  memory_path: agents/analyst-agent/memory
-
-developer-agent:
-  name: developer-agent
-  role: developer
-  
-tester-agent:
-  name: tester-agent
-  role: tester
+```bash
+python3 scripts/memory_stats.py --agent my-agent
 ```
 
 ---
@@ -266,16 +205,65 @@ ollama pull bge-m3   # 中文语义模型
 
 ---
 
-## 🎯 核心原则
+## 📚 文档
 
-1. **共享代码 + 隔离数据** - scripts/libs/skills 共享，memory/data 隔离
-2. **参数化设计** - 所有脚本支持 `--agent` 参数
-3. **扁平结构** - projects/ 不分类，直接放
-4. **OpenClaw 边界** - `~/.openclaw/agents/` 由 OpenClaw 管理
+| 文档 | 用途 |
+|------|------|
+| `workspace-setup.md` | ⭐ 完整安装指南 |
+| `docs/ARCHITECTURE_GENERIC_CN.md` | 架构说明（中文） |
+| `docs/ARCHITECTURE_GENERIC_EN.md` | Architecture (English) |
+| `docs/PROJECT_STRUCTURE_GENERIC_CN.md` | 目录结构（中文） |
+| `docs/PROJECT_STRUCTURE_GENERIC_EN.md` | Directory Structure (English) |
 
 ---
 
-## 📋 Git 库管理
+## 📋 常用命令
+
+| 命令 | 说明 |
+|------|------|
+| `session_recorder.py -t event -c '...'` | 记录事件 |
+| `session_recorder.py -t decision -c '...' --sync` | 记录决策 + 同步 |
+| `unified_search.py '关键词'` | 关键词搜索 |
+| `unified_search.py '问题' --semantic` | 语义搜索 |
+| `bridge_sync.py --agent my-agent` | 双向同步 |
+| `memory_indexer.py --incremental --embed` | 增量索引 + 向量 |
+| `memory_compressor.py --weekly` | 周摘要 |
+| `memory_stats.py --agent my-agent` | 系统统计 |
+| `health_check.py --agent my-agent` | 健康检查 |
+
+---
+
+## ⏰ 定时任务
+
+```bash
+# 每天凌晨 3 点：增量索引
+openclaw cron add --name "daily-index" --cron "0 3 * * *" \
+  --system-event "cd /path && python3 scripts/memory_indexer.py --incremental --embed"
+
+# 每 6 小时：双向同步
+openclaw cron add --name "bridge-sync" --every "6h" \
+  --system-event "cd /path && python3 scripts/bridge/bridge_sync.py --agent my-agent"
+
+# 周一凌晨 4 点：周摘要
+openclaw cron add --name "weekly-compress" --cron "0 4 * * 1" \
+  --system-event "cd /path && python3 scripts/memory_compressor.py --weekly"
+```
+
+---
+
+## 🔄 优雅降级
+
+| 依赖 | 已安装 | 未安装 |
+|------|--------|--------|
+| **jieba** | FTS5 中文分词 | 降级到 grep |
+| **Ollama** | 语义搜索 | 降级到 FTS5 |
+| **都没有** | grep + SQLite LIKE | 核心功能可用 |
+
+**最小安装：零依赖** — 只需 Python 3.10+。
+
+---
+
+## 📂 Git 库管理
 
 ```bash
 # 克隆到 projects/
@@ -292,43 +280,9 @@ rm -rf projects/old-lib/
 
 ---
 
-## ✅ 测试验证
-
-| 测试项 | 结果 |
-|--------|------|
-| 环境检查 | ✅ 8/8 |
-| 记录事件 | ✅ 4/4 |
-| 数据隔离 | ✅ 4/4 |
-| 搜索功能 | ✅ 4/4 |
-| 统计功能 | ✅ 4/4 |
-| 深度验证 | ✅ 2/2 |
-| **总计** | **✅ 26/26 (100%)** |
-
----
-
-## 📝 更新日志
-
-### v1.0 (2026-03-26)
-- ✅ 多 Agent 架构实施
-- ✅ 3 个子 Agent（analyst/developer/tester）
-- ✅ 自动化测试（26 测试 100% 通过）
-- ✅ 文档整理（删除 23 个临时文档）
-- ✅ 脚本清理（删除 4 个过时脚本）
-
----
-
-## 🤝 贡献
-
-1. Fork 项目
-2. 创建特性分支
-3. 提交 PR
-4. 通过测试
-
----
-
 ## 📄 许可证
 
-MIT License - 详见 [LICENSE](LICENSE)
+MIT License
 
 ---
 
@@ -340,5 +294,4 @@ MIT License - 详见 [LICENSE](LICENSE)
 
 ---
 
-**最后更新：** 2026-03-26  
-**维护者：** test-agents 🦞
+**最后更新：** 2026-03-26
