@@ -131,6 +131,6 @@ site/
 *.lock
 *.local
 
-# Agent-specific data
-agents/*/memory/
-agents/*/data/
+# Agent-specific data (整个 agents/ 目录都不提交)
+agents/
+!agents/.gitkeep
