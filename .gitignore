@@ -81,3 +81,14 @@ public/data/
 tmp/
 temp/
 *.tmp
+
+# -----------------------------------------------------------------------------
+# 特定 Agent 的 skills (不提交到通用库)
+# -----------------------------------------------------------------------------
+skills/aura-content-strategist/
+skills/aura-image-gen/
+skills/aura-xhs-images/
+skills/danger-xhs-browser/
+skills/japan-media-agent/
+skills/star-mansion-master/
+skills/tarot-master/
