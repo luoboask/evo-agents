@@ -130,3 +130,7 @@ site/
 # 2. 公开模板保持在 Git 中（如 config.yaml.example）
 *.lock
 *.local
+
+# Agent-specific data
+agents/*/memory/
+agents/*/data/

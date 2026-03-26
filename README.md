@@ -115,3 +115,21 @@ python3 test_all.py --workspace <workspace-root> --agent demo-agent
 python3 scripts/test_agents.py --workspace <workspace-root> --agent demo-agent
 ```
 
+
+---
+
+## 🤖 多 Agent 管理
+
+### setup-multi-agent.sh - 批量创建
+
+```bash
+./scripts/setup-multi-agent.sh researcher writer organizer
+```
+
+### add-agent.sh - 新增单个
+
+```bash
+./scripts/add-agent.sh coach "成长教练" 🌱
+```
+
+详见 `workspace-setup.md` 完整文档。

@@ -161,7 +161,7 @@ def _do_sync(result: str) -> str:
             os.setsid()  # 脱离终端
             if bridge.exists():
                 subprocess.run(
-                    ["python3", str(bridge), "--agent", "ai-baby", "--days", "1"],
+                    ["python3", str(bridge), "--agent", "growth-agents", "--days", "1"],
                     capture_output=True, timeout=30, cwd=str(WORKSPACE)
                 )
             if indexer.exists():
