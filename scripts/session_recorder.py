@@ -21,6 +21,25 @@ from pathlib import Path
 WORKSPACE = Path(__file__).resolve().parent.parent
 MEMORY_DIR = WORKSPACE / "memory"
 
+# 支持多 Agent - 通过 --agent 参数指定
+DEFAULT_AGENT = None  # 默认使用 workspace 根目录的 memory/
+
+
+def get_agent_memory_dir(agent: str = None) -> Path:
+    """获取指定 Agent 的记忆目录"""
+    if not agent:
+        return WORKSPACE / "memory"
+    
+    # 支持两种路径格式：
+    # 1. agents/<agent>/memory/ (多 Agent 模式)
+    # 2. memory/ (默认模式)
+    agent_memory = WORKSPACE / "agents" / agent / "memory"
+    if agent_memory.exists():
+        return agent_memory
+    
+    # 如果 agents/<agent>/memory 不存在，回退到默认
+    return WORKSPACE / "memory"
+
 TYPE_MAP = {
     "event":      ("📌 事件",),
     "decision":   ("🔨 决定",),
@@ -32,9 +51,11 @@ TYPE_MAP = {
 VALID_TYPES = list(TYPE_MAP.keys())
 
 
-def get_today_file() -> Path:
+def get_today_file(agent: str = None) -> Path:
+    """获取今日记忆文件路径"""
+    memory_dir = get_agent_memory_dir(agent)
     today = datetime.now().strftime("%Y-%m-%d")
-    return MEMORY_DIR / f"{today}.md"
+    return memory_dir / f"{today}.md"
 
 
 def ensure_daily_file(filepath: Path) -> str:
@@ -97,11 +118,11 @@ def append_to_section(content: str, section_title: str, entry: str) -> str:
     return "\n".join(lines)
 
 
-def record(entry_type: str, content: str, date: str = None, sync: bool = False) -> str:
+def record(entry_type: str, content: str, date: str = None, sync: bool = False, agent: str = None) -> str:
     if entry_type not in VALID_TYPES:
         raise ValueError(f"无效类型: {entry_type}，可选: {VALID_TYPES}")
 
-    filepath = MEMORY_DIR / f"{date}.md" if date else get_today_file()
+    filepath = (get_agent_memory_dir(agent) / f"{date}.md") if date else get_today_file(agent)
     section_title = TYPE_MAP[entry_type][0]
 
     # 用文件锁防止并发写入冲突
@@ -140,12 +161,12 @@ def record(entry_type: str, content: str, date: str = None, sync: bool = False) 
     result = f"✅ 已记录 [{entry_type}]: {content[:80]}"
 
     if sync:
-        result = _do_sync(result)
+        result = _do_sync(result, agent)
 
     return result
 
 
-def _do_sync(result: str) -> str:
+def _do_sync(result: str, agent: str = None) -> str:
     """后台异步执行同步 + 索引更新，不阻塞主流程"""
     import subprocess
     import os
@@ -160,15 +181,15 @@ def _do_sync(result: str) -> str:
         try:
             os.setsid()  # 脱离终端
             if bridge.exists():
-                subprocess.run(
-                    ["python3", str(bridge), "--agent", "growth-agents", "--days", "1"],
-                    capture_output=True, timeout=30, cwd=str(WORKSPACE)
-                )
+                cmd = ["python3", str(bridge), "--days", "1"]
+                if agent:
+                    cmd.extend(["--agent", agent])
+                subprocess.run(cmd, capture_output=True, timeout=30, cwd=str(WORKSPACE))
             if indexer.exists():
-                subprocess.run(
-                    ["python3", str(indexer), "--incremental", "--embed"],
-                    capture_output=True, timeout=60, cwd=str(WORKSPACE)
-                )
+                cmd = ["python3", str(indexer), "--incremental", "--embed"]
+                if agent:
+                    cmd.extend(["--agent", agent])
+                subprocess.run(cmd, capture_output=True, timeout=60, cwd=str(WORKSPACE))
         except Exception:
             pass
         finally:
@@ -180,15 +201,15 @@ def _do_sync(result: str) -> str:
     return result
 
 
-def batch_record(entries: list, sync: bool = False) -> str:
+def batch_record(entries: list, sync: bool = False, agent: str = None) -> str:
     """批量记录"""
     results = []
     for entry in entries:
-        r = record(entry["type"], entry["content"], entry.get("date"), sync=False)
+        r = record(entry["type"], entry["content"], entry.get("date"), sync=False, agent=agent)
         results.append(r)
 
     if sync:
-        results.append(_do_sync("🔄"))
+        results.append(_do_sync("🔄", agent))
 
     return "\n".join(results)
 
@@ -201,13 +222,15 @@ def main():
                         help='批量 JSON: \'[{"type":"event","content":"xxx"}]\'')
     parser.add_argument("--date", "-d", default=None)
     parser.add_argument("--sync", "-s", action="store_true")
+    parser.add_argument("--agent", "-a", default=None,
+                        help='Agent 名称（多 Agent 模式）')
     args = parser.parse_args()
 
     if args.batch:
         entries = json.loads(args.batch)
-        print(batch_record(entries, args.sync))
+        print(batch_record(entries, args.sync, agent=args.agent))
     elif args.type and args.content:
-        print(record(args.type, args.content, args.date, args.sync))
+        print(record(args.type, args.content, args.date, args.sync, agent=args.agent))
     else:
         parser.print_help()
 

@@ -292,7 +292,7 @@ def main():
     parser.add_argument("--limit", "-n", type=int, default=10)
     parser.add_argument("--source", choices=["all", "markdown", "knowledge", "semantic"],
                         default="all", help="搜索范围")
-    parser.add_argument("--agent", default="ai-baby")
+    parser.add_argument("--agent", default="demo-agent")
     args = parser.parse_args()
 
     mode = "语义" if (args.semantic or args.source == "semantic") else "关键词"
