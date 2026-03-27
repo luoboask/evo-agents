@@ -124,3 +124,12 @@ HEARTBEAT.md
 
 # OpenClaw runtime
 .openclaw/
+
+# Personal configs (should not be in template)
+HEARTBEAT.md
+IDENTITY.md
+MEMORY.md
+USER.md
+SOUL.md
+TOOLS.md
+AGENTS.md
