@@ -183,7 +183,7 @@ echo "   python3 scripts/session_recorder.py -t event -c '内容' --agent <agent
 echo "   openclaw agent --agent <agent-name> --message '任务'"
 echo ""
 
-# 创建子 Agent 的 scripts/, skills/, libs/ 目录（可选）
+# 创建子 Agent 的 scripts/, skills/, libs/ 目录
 for agent_spec in "${AGENTS[@]}"; do
     IFS=':' read -ra PARTS <<< "$agent_spec"
     NAME="${PARTS[0]}"
@@ -194,8 +194,14 @@ for agent_spec in "${AGENTS[@]}"; do
     fi
     
     cd "agents/$AGENT_NAME"
-    mkdir -p scripts skills libs 2>/dev/null || true
+    
+    # 创建 scripts/ 和 libs/ 空目录（可选，Agent 特定）
+    mkdir -p scripts libs 2>/dev/null || true
+    
+    # 创建 skills/ 符号链接到父 workspace（共享技能）
+    ln -sf ../../skills skills 2>/dev/null || true
+    
     cd "$WORKSPACE"
 done
-echo "💡 提示：子 Agent 可以有自己的 scripts/, skills/, libs/，也可以使用父 workspace 的资源"
+echo "💡 提示：skills/ 已链接到父 workspace（共享技能），scripts/ 和 libs/ 可放置 Agent 特定资源"
 echo ""

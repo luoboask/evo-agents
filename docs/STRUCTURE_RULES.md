@@ -134,9 +134,9 @@ evo-agents/
 │       ├── agent/           # Agent 配置
 │       ├── memory/          # Agent 记忆
 │       ├── sessions/        # 聊天会话
-│       ├── scripts/         # Agent 特定脚本（可选）
-│       ├── skills/          # Agent 特定技能（可选）
-│       ├── libs/            # Agent 特定库（可选）
+│       ├── scripts/         # Agent 特定脚本（可选，空目录）
+│       ├── skills/          # → ../../skills（符号链接，共享）
+│       ├── libs/            # Agent 特定库（可选，空目录）
 │       └── data/            # Agent 数据
 ├── 📁 config/               # 配置
 ├── 📁 data/                 # 运行时数据（不提交）
@@ -195,17 +195,17 @@ agents/<agent-name>/
 ├── agent/                   # Agent 配置
 ├── memory/                  # Agent 记忆
 ├── sessions/                # 聊天会话
-├── scripts/                 # Agent 特定脚本（可选）
-├── skills/                  # Agent 特定技能（可选）
-├── libs/                    # Agent 特定库（可选）
+├── scripts/                 # Agent 特定脚本（可选，空目录）
+├── skills/                  # → ../../skills（符号链接，共享父 workspace）
+├── libs/                    # Agent 特定库（可选，空目录）
 ├── AGENTS.md, SOUL.md
 └── data/
 ```
 
 **说明：**
-- ✅ 子 Agent 可以有自己的 `scripts/`, `skills/`, `libs/`
-- ✅ 也可以使用父 workspace 的资源
-- ✅ 灵活选择，无强制要求
+- ✅ `skills/` 符号链接到父 workspace（共享所有技能）
+- ✅ `scripts/` 和 `libs/` 是空目录（可放置 Agent 特定资源）
+- ✅ 这样设计既共享技能，又允许 Agent 特定脚本和库
 
 ---
 
