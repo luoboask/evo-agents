@@ -26,7 +26,7 @@ from typing import List, Dict
 WORKSPACE = Path(__file__).resolve().parent.parent.parent
 MEMORY_DIR = WORKSPACE / "memory"
 
-sys.path.insert(0, str(WORKSPACE / "scripts"))
+sys.path.insert(0, str(WORKSPACE / "scripts" / "core"))
 from lock_utils import file_lock, md_file_lock, open_db
 
 # 记忆类型映射

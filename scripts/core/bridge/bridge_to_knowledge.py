@@ -28,7 +28,7 @@ WORKSPACE = Path(__file__).resolve().parent.parent.parent
 MEMORY_DIR = WORKSPACE / "memory"
 
 # 加载锁工具
-sys.path.insert(0, str(WORKSPACE / "scripts"))
+sys.path.insert(0, str(WORKSPACE / "scripts" / "core"))
 from lock_utils import file_lock, open_db
 
 # Markdown section → 知识系统类型映射
