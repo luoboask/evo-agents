@@ -80,6 +80,33 @@ fi
 
 echo ""
 
+# 先从 OpenClaw 注销主 Agent（在删除 workspace 之前）
+echo "📝 从 OpenClaw 注销主 Agent / Unregister main agent from OpenClaw..."
+if openclaw agents list 2>/dev/null | grep -q "^$AGENT_NAME"; then
+    echo "   运行 / Running: openclaw agents remove $AGENT_NAME"
+    openclaw agents remove "$AGENT_NAME" 2>/dev/null && \
+        echo "   ✅ 已注销 / Unregistered" || \
+        echo "   ⚠️  注销失败 / Unregister failed (可能需要手动清理)"
+else
+    echo "   ⚠️  Agent 未注册 / Agent not registered"
+fi
+echo ""
+
+# 注销所有子 Agent
+if [ "$SUB_AGENTS" -gt 0 ]; then
+    echo "📝 注销子 Agent / Unregister sub-agents..."
+    for agent_dir in "$WORKSPACE/agents/"*/; do
+        if [ -d "$agent_dir" ]; then
+            sub_agent=$(basename "$agent_dir")
+            echo "   - $sub_agent"
+            openclaw agents remove "$sub_agent" 2>/dev/null || true
+        fi
+    done
+    echo "   ✅ 子 Agent 已注销 / Sub-agents unregistered"
+    echo ""
+fi
+
+
 # 最终确认
 echo "⚠️  最后确认 / Final confirmation:"
 read -p "   确定要删除整个 workspace 吗？/ Sure to delete entire workspace? (YES/NO): " FINAL_CONFIRM
@@ -102,29 +129,6 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     cp -r "$WORKSPACE" "$BACKUP_DIR"
     echo "   ✅ 备份完成 / Backup complete"
     echo "   大小 / Size: $(du -sh "$BACKUP_DIR" | cut -f1)"
-    echo ""
-fi
-
-# 从 OpenClaw 注销主 Agent
-echo "📝 从 OpenClaw 注销主 Agent / Unregister main agent from OpenClaw..."
-if openclaw agents list 2>/dev/null | grep -q "^$AGENT_NAME"; then
-    echo "   运行 / Running: openclaw agents remove $AGENT_NAME"
-    openclaw agents remove "$AGENT_NAME" 2>/dev/null && \
-        echo "   ✅ 已注销 / Unregistered" || \
-        echo "   ⚠️  注销失败 / Unregister failed (可能需要手动清理)"
-else
-    echo "   ⚠️  Agent 未注册 / Agent not registered"
-fi
-echo ""
-
-# 注销子 Agent
-if [ "$SUB_AGENTS" -gt 0 ]; then
-    echo "📝 注销子 Agent / Unregister sub-agents..."
-    for agent in $(ls -1 "$WORKSPACE/agents/" 2>/dev/null); do
-        echo "   - $agent"
-        openclaw agents remove "$agent" 2>/dev/null || true
-    done
-    echo "   ✅ 子 Agent 已注销 / Sub-agents unregistered"
     echo ""
 fi
 
