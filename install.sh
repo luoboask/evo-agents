@@ -6,8 +6,21 @@
 set -e
 
 AGENT_NAME="${1:-my-agent}"
-FORCE="${2:-}"
-ACTIVATE="${3:-}"
+FORCE=""
+ACTIVATE=""
+
+# 解析参数
+for arg in "$@"; do
+    case $arg in
+        --force|-f)
+            FORCE="yes"
+            ;;
+        --activate|-a)
+            ACTIVATE="yes"
+            ;;
+    esac
+done
+
 WORKSPACE_ROOT="$HOME/.openclaw/workspace-$AGENT_NAME"
 
 echo "╔════════════════════════════════════════════════════════╗"
@@ -21,7 +34,7 @@ echo ""
 # Check if workspace exists | 检查 workspace 是否存在
 if [ -d "$WORKSPACE_ROOT" ]; then
     # 如果使用了 --force，跳过确认
-    if [[ "$FORCE" == "--force" ]] || [[ "$FORCE" == "-f" ]]; then
+    if [[ -n "$FORCE" ]]; then
         echo "⚠️  Workspace 已存在 / Workspace already exists"
         echo "   使用 --force 参数，跳过确认 / Using --force, skipping confirmation"
         echo ""
@@ -138,7 +151,7 @@ python3 scripts/session_recorder.py -t event -c "$AGENT_NAME 初始化完成" --
 
 # 6. 激活功能 / Activate Features (可选)
 echo ""
-if [[ "$ACTIVATE" == "--activate" ]] || [[ "$ACTIVATE" == "-a" ]]; then
+if [[ -n "$ACTIVATE" ]]; then
     echo "5️⃣  激活功能 / Activating features..."
     echo ""
     
