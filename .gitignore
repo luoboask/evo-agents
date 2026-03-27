@@ -40,12 +40,15 @@ ENV/
 Thumbs.db
 
 # -----------------------------------------------------------------------------
-# Runtime data (运行时数据)
+# Runtime data (运行时数据) - 本地保留，不提交
 # -----------------------------------------------------------------------------
-data/
-!data/.gitkeep
-memory/
-!memory/.gitkeep
+data/*.json
+data/**/*.json
+memory/*.md
+memory/**/*.md
+memory/*.db
+memory/*.pkl
+memory/*.json
 logs/
 *.log
 
@@ -83,6 +86,14 @@ prompts/
 souls/
 
 # -----------------------------------------------------------------------------
-# Public data (user-generated)
+# Public data (user-generated) - 本地保留，不提交
 # -----------------------------------------------------------------------------
-public/data/
+public/*/
+!public/common/
+!public/domain/
+!public/faq/
+!public/prompt/
+!public/rag/
+!public/security/
+!public/skills/
+!public/tutorial/
