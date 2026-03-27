@@ -44,7 +44,15 @@ if [ -d "$WORKSPACE_ROOT" ]; then
     echo "   y - 继续（迁移改造 / Migrate and update）"
     echo "   n - 取消 / Cancel"
     echo ""
-    read -p "请输入 / Enter (y/N): " -n 1 -r
+    
+    # 使用 /dev/tty 读取输入（支持 curl | bash 方式运行）
+    if [ -t 0 ]; then
+        read -p "请输入 / Enter (y/N): " -n 1 -r
+        REPLY="$REPLY"
+    else
+        # 从终端设备读取
+        read -p "请输入 / Enter (y/N): " -n 1 REPLY < /dev/tty 2>/dev/null || REPLY=""
+    fi
     echo ""
     
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
