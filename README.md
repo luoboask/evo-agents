@@ -4,6 +4,8 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-2026.3.13-green.svg)](https://github.com/openclaw/openclaw)
 
+**🌐 Language:** [English](README.md) | [简体中文](README.zh-CN.md)
+
 **🤖 Multi-Agent Workspace Template for OpenClaw**
 
 A reusable, self-evolving agent workspace with strict data isolation, shared capabilities, and production-ready tooling.
