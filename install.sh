@@ -63,29 +63,20 @@ if [ -d "$WORKSPACE_ROOT" ]; then
                 exit 1
             fi
         else
-            # 管道输入，尝试从 /dev/tty 读取
-            if [ -e /dev/tty ]; then
-                echo "   (在单独终端中输入 y/n)"
-                read -p "请输入 / Enter (y/N): " -n 1 REPLY < /dev/tty 2>/dev/null || REPLY=""
-                echo ""
-                if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-                    echo "❌ 已取消 / Cancelled"
-                    exit 1
-                fi
-            else
-                # 没有终端，默认取消
-                echo ""
-                echo "⚠️  检测到管道输入，无法读取确认"
-                echo "⚠️  Detected pipe input, cannot read confirmation"
-                echo ""
-                echo "请使用以下方式运行 / Please run:"
-                echo "  bash install.sh $AGENT_NAME"
-                echo ""
-                echo "或者添加 --force 参数强制继续 / Or use --force to continue:"
-                echo "  curl -s ... | bash -s $AGENT_NAME --force"
-                echo ""
-                exit 1
-            fi
+            # 管道输入，无法交互式确认
+            echo ""
+            echo "⚠️  检测到管道输入，无法读取确认"
+            echo "⚠️  Detected pipe input, cannot read confirmation"
+            echo ""
+            echo "请使用以下方式之一 / Please use one of:"
+            echo ""
+            echo "1. 直接运行（推荐）/ Run directly (recommended):"
+            echo "   bash install.sh $AGENT_NAME"
+            echo ""
+            echo "2. 强制继续（跳过确认）/ Force (skip confirmation):"
+            echo "   curl -s ... | bash -s $AGENT_NAME --force"
+            echo ""
+            exit 1
         fi
         
         cd "$WORKSPACE_ROOT"
