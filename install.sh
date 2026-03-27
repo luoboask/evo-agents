@@ -1,7 +1,7 @@
 #!/bin/bash
 # install.sh - 一键安装 evo-agents Workspace
 # 用法：curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s <agent-name>
-# Usage: curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s <agent-name>
+# Usage: curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s <agent-name> [--force]
 
 set -e
 
@@ -27,57 +27,58 @@ if [ -d "$WORKSPACE_ROOT" ]; then
         cd "$WORKSPACE_ROOT"
     else
         echo "⚠️  Workspace 已存在 / Workspace already exists"
-    echo ""
-    echo "这可能是因为:"
-    echo "This could be because:"
-    echo "  1. 您之前安装过 / You installed before"
-    echo "  2. 这是改造现有 Agent / This is migrating an existing agent"
-    echo ""
-    
-    # Check if it looks like an evo-agents workspace | 检查是否像 evo-agents workspace
-    if [ -f "$WORKSPACE_ROOT/skills/memory-search/search.py" ] || \
-       [ -f "$WORKSPACE_ROOT/README.md" ]; then
-        echo "📊 检测到现有 evo-agents workspace"
-        echo "   Detected existing evo-agents workspace"
         echo ""
-        echo "🔄 迁移改造 / Migration:"
-        echo "   - ✅ 保留个人配置 (USER.md, SOUL.md 等)"
-        echo "   - ✅ 保留记忆数据 (memory/, public/)"
-        echo "   - 🗑️ 清理特定技能"
-        echo "   - 📦 更新为通用模板"
+        echo "这可能是因为:"
+        echo "This could be because:"
+        echo "  1. 您之前安装过 / You installed before"
+        echo "  2. 这是改造现有 Agent / This is migrating an existing agent"
         echo ""
-    fi
-    
-    echo "❓ 是否继续？/ Continue?"
-    echo "   y - 继续（迁移改造 / Migrate and update）"
-    echo "   n - 取消 / Cancel"
-    echo ""
-    
-    # 检查是否是交互式终端
-    if [ -t 0 ]; then
-        # 标准终端输入
-        read -p "请输入 / Enter (y/N): " -n 1 -r
+        
+        # Check if it looks like an evo-agents workspace | 检查是否像 evo-agents workspace
+        if [ -f "$WORKSPACE_ROOT/skills/memory-search/search.py" ] || \
+           [ -f "$WORKSPACE_ROOT/README.md" ]; then
+            echo "📊 检测到现有 evo-agents workspace"
+            echo "   Detected existing evo-agents workspace"
+            echo ""
+            echo "🔄 迁移改造 / Migration:"
+            echo "   - ✅ 保留个人配置 (USER.md, SOUL.md 等)"
+            echo "   - ✅ 保留记忆数据 (memory/, public/)"
+            echo "   - 🗑️ 清理特定技能"
+            echo "   - 📦 更新为通用模板"
+            echo ""
+        fi
+        
+        echo "❓ 是否继续？/ Continue?"
+        echo "   y - 继续（迁移改造 / Migrate and update）"
+        echo "   n - 取消 / Cancel"
         echo ""
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            echo "❌ 已取消 / Cancelled"
+        
+        # 检查是否是交互式终端
+        if [ -t 0 ]; then
+            # 标准终端输入
+            read -p "请输入 / Enter (y/N): " -n 1 -r
+            echo ""
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                echo "❌ 已取消 / Cancelled"
+                exit 1
+            fi
+        else
+            # 管道输入，无法交互式确认
+            echo ""
+            echo "⚠️  检测到管道输入，无法读取确认"
+            echo "⚠️  Detected pipe input, cannot read confirmation"
+            echo ""
+            echo "请使用以下方式运行 / Please run:"
+            echo "  bash install.sh $AGENT_NAME"
+            echo ""
+            echo "或者添加 --force 参数强制继续 / Or use --force to continue:"
+            echo "  curl -s ... | bash -s $AGENT_NAME --force"
+            echo ""
             exit 1
         fi
-    else
-        # 管道输入，无法交互式确认
-        echo ""
-        echo "⚠️  检测到管道输入，无法读取确认"
-        echo "⚠️  Detected pipe input, cannot read confirmation"
-        echo ""
-        echo "请使用以下方式运行 / Please run:"
-        echo "  bash install.sh $AGENT_NAME"
-        echo ""
-        echo "或者添加 --force 参数强制继续 / Or use --force to continue:"
-        echo "  curl -s ... | bash -s $AGENT_NAME --force"
-        echo ""
-        exit 1
+        
+        cd "$WORKSPACE_ROOT"
     fi
-    
-    cd "$WORKSPACE_ROOT"
 else
     # 1. 克隆模板 / Clone template
     echo "1️⃣  克隆 evo-agents 模板 / Cloning template..."
