@@ -10,14 +10,35 @@ Reusable self-evolving agent workspace with explicit runtime context (`--workspa
 
 ## 🦞 One-Click Install (Recommended) ⭐
 
+### Fresh Install | 新安装
+
 **Just run this command:**
 
 ```bash
 curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s my-agent
 ```
 
+### Migration | 迁移改造
+
+**Already have an existing workspace?**
+
+```bash
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s existing-agent
+```
+
+The script will:
+1. ⚠️ Detect existing workspace
+2. ❓ Ask for migration confirmation
+3. ✅ **Preserve your data** (USER.md, SOUL.md, memory/, public/)
+4. 🗑️ Clean up agent-specific skills
+5. 📦 Update to universal template
+
+**📖 See [docs/MIGRATION.md](docs/MIGRATION.md) for details.**
+
+---
+
 **That's it!** The script will:
-1. Clone evo-agents template
+1. Clone evo-agents template (or update existing)
 2. Register agent with OpenClaw (creates AGENTS.md, SOUL.md, etc.)
 3. Create directory structure
 4. Run tests
