@@ -61,6 +61,31 @@ done
 
 WORKSPACE_ROOT="$HOME/.openclaw/workspace-$AGENT_NAME"
 
+# 检测是否是管道运行，如果是，重新加载为交互模式
+if [ ! -t 0 ] && [[ -z "$FORCE" ]]; then
+    # 管道运行，重新加载为交互模式
+    SCRIPT_URL="https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh"
+    TEMP_SCRIPT="/tmp/evo-install-$$.sh"
+    
+    echo "╔════════════════════════════════════════════════════════╗"
+    echo "║  evo-agents 一键安装 / One-Click Install                 ║"
+    echo "╚════════════════════════════════════════════════════════╝"
+    echo ""
+    echo "📦 Agent: $AGENT_NAME"
+    echo "📁 Workspace: $WORKSPACE_ROOT"
+    echo ""
+    echo "🔄 检测到管道运行，切换到交互模式..."
+    echo "   Pipe mode detected, switching to interactive mode..."
+    echo ""
+    
+    # 下载脚本到临时文件
+    curl -sS "$SCRIPT_URL" -o "$TEMP_SCRIPT"
+    chmod +x "$TEMP_SCRIPT"
+    
+    # 重新执行（交互模式）
+    exec bash "$TEMP_SCRIPT" "$AGENT_NAME" "$@"
+fi
+
 echo "╔════════════════════════════════════════════════════════╗"
 echo "║  evo-agents 一键安装 / One-Click Install                 ║"
 echo "╚════════════════════════════════════════════════════════╝"
@@ -82,44 +107,30 @@ if [ -d "$WORKSPACE_ROOT" ]; then
         echo "   Workspace for $AGENT_NAME already exists"
         echo ""
         
-        # 检测是否是管道运行
-        if [ -t 0 ]; then
-            # 交互式终端，询问用户
-            echo "❓ 是否继续安装？/ Continue installation?"
-            echo "   y - 继续（保留数据）/ Continue (preserve data)"
-            echo "   n - 取消 / Cancel"
-            echo ""
-            
-            read -p "请输入 / Enter (Y/n): " -n 1 -r
-            echo ""
-            
-            if [[ ! "$REPLY" =~ ^[Yy]$ ]] && [[ -n "$REPLY" ]]; then
-                echo_error "已取消 / Cancelled"
-                exit 0
-            fi
-            
-            # 询问备份
-            echo ""
-            echo "❓ 安装前是否备份当前 workspace？/ Backup before install?"
-            echo "   y - 备份（推荐）/ Backup (recommended)"
-            echo "   n - 跳过备份 / Skip backup"
-            echo ""
-            
-            read -p "请输入 / Enter (Y/n): " -n 1 -r
-            BACKUP_REPLY="$REPLY"
-            echo ""
-        else
-            # 管道运行，自动继续但提示
-            echo_warning "管道运行模式 / Pipe mode detected"
-            echo "   自动继续安装（保留现有数据）"
-            echo "   Auto-continuing installation (preserving existing data)"
-            echo ""
-            echo "💡 如需交互式安装，请使用:"
-            echo "   curl -sO https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh"
-            echo "   bash install.sh $AGENT_NAME"
-            echo ""
-            BACKUP_REPLY="y"  # 管道模式默认备份
+        # 交互式询问
+        echo "❓ 是否继续安装？/ Continue installation?"
+        echo "   y - 继续（保留数据）/ Continue (preserve data)"
+        echo "   n - 取消 / Cancel"
+        echo ""
+        
+        read -p "请输入 / Enter (Y/n): " -n 1 -r
+        echo ""
+        
+        if [[ ! "$REPLY" =~ ^[Yy]$ ]] && [[ -n "$REPLY" ]]; then
+            echo_error "已取消 / Cancelled"
+            exit 0
         fi
+        
+        # 询问备份
+        echo ""
+        echo "❓ 安装前是否备份当前 workspace？/ Backup before install?"
+        echo "   y - 备份（推荐）/ Backup (recommended)"
+        echo "   n - 跳过备份 / Skip backup"
+        echo ""
+        
+        read -p "请输入 / Enter (Y/n): " -n 1 -r
+        BACKUP_REPLY="$REPLY"
+        echo ""
         
         if [[ "$BACKUP_REPLY" =~ ^[Yy]$ ]] || [[ -z "$BACKUP_REPLY" ]]; then
             # 创建备份
@@ -144,21 +155,6 @@ if [ -d "$WORKSPACE_ROOT" ]; then
                 echo ""
             fi
         fi
-        
-        echo "🔄 继续安装将更新通用模板文件："
-        echo "   Continuing install will update template files:"
-        echo ""
-        echo "   ✅ 保留以下内容（不会删除）:"
-        echo "      - 您的个人配置 (USER.md, SOUL.md 等)"
-        echo "      - 记忆数据 (memory/, public/)"
-        echo "      - 您添加的技能（skills/ 目录）"
-        echo "      - 您的脚本和数据"
-        echo ""
-        echo "   📦 将更新以下内容:"
-        echo "      - 通用技能（memory-search, rag, self-evolution, web-knowledge）"
-        echo "      - 脚本工具（scripts/core/ 目录）"
-        echo "      - 文档（README.md 等）"
-        echo ""
         
         cd "$WORKSPACE_ROOT"
     fi
@@ -262,3 +258,8 @@ echo ""
 echo "💡 提示：请告诉你的 Agent 阅读 docs/AGENT_INSTRUCTIONS.md"
 echo "   Tip: Tell your agents to read docs/AGENT_INSTRUCTIONS.md"
 echo ""
+
+# 清理临时脚本
+if [[ "$0" == /tmp/evo-install-* ]]; then
+    rm -f "$0"
+fi
