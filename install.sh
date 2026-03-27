@@ -35,35 +35,27 @@ echo ""
 if [ -d "$WORKSPACE_ROOT" ]; then
     # 如果使用了 --force，跳过确认
     if [[ -n "$FORCE" ]]; then
-        echo "⚠️  Workspace 已存在 / Workspace already exists"
-        echo "   使用 --force 参数，跳过确认 / Using --force, skipping confirmation"
+        echo "⚠️  Workspace 已存在，使用 --force 跳过确认"
+        echo "   Workspace exists, using --force to skip confirmation"
         echo ""
         cd "$WORKSPACE_ROOT"
     else
-        echo "⚠️  Workspace 已存在 / Workspace already exists"
-        echo ""
-        echo "📊 检测到现有 workspace:"
-        echo "   Detected existing workspace:"
-        echo ""
-        echo "   Agent: $AGENT_NAME"
-        echo "   路径 / Path: $WORKSPACE_ROOT"
-        echo ""
-        
         # 检查是否已安装过 evo-agents | Check if evo-agents is already installed
         if [ -f "$WORKSPACE_ROOT/skills/memory-search/search.py" ] || \
            [ -f "$WORKSPACE_ROOT/README.md" ]; then
-            echo "✅ 已安装 evo-agents 模板"
-            echo "   evo-agents template already installed"
+            echo "🔄 检测到现有 evo-agents workspace，将进行迁移改造"
+            echo "   Detected existing evo-agents workspace, will migrate"
             echo ""
-            echo "🔄 将继续安装（保留个人数据）/ Continuing (preserving personal data):"
-            echo "   - ✅ 保留个人配置 (USER.md, SOUL.md 等) / Personal configs"
-            echo "   - ✅ 保留记忆数据 (memory/, public/) / Memory & knowledge base"
-            echo "   - 🗑️ 清理特定技能 / Clean up agent-specific skills"
-            echo "   - 📦 更新通用模板 / Update universal template"
+            echo "   保留 / Preserve:"
+            echo "   - ✅ 个人配置 (USER.md, SOUL.md 等) / Personal configs"
+            echo "   - ✅ 记忆数据 (memory/, public/) / Memory & knowledge"
+            echo ""
+            echo "   清理 / Clean up:"
+            echo "   - 🗑️ 特定 Agent 技能 / Agent-specific skills"
             echo ""
         else
-            echo "⚠️  非 evo-agents workspace，将覆盖安装"
-            echo "   Not an evo-agents workspace, will overwrite"
+            echo "⚠️  检测到非 evo-agents workspace，将覆盖安装"
+            echo "   Detected non-evo-agents workspace, will overwrite"
             echo ""
         fi
         
