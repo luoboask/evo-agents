@@ -9,3 +9,10 @@ agents:
   #   enabled: true
   
   # Add your agents here
+
+# Sub-agent: demo-agent
+demo-agent:
+  name: demo-agent
+  role: demo
+  data_path: agents/demo-agent/data
+  memory_path: agents/demo-agent/memory

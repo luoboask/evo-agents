@@ -307,3 +307,24 @@ skills/
 ---
 
 **记住：模板是为了提供通用框架，不是覆盖用户的个性化配置！**
+
+---
+
+## 📋 Workspace Rules | 使用规范
+
+**🔗 See:** [WORKSPACE_RULES.md](WORKSPACE_RULES.md)
+
+**关键规则：**
+
+1. **脚本** - 只在 `scripts/` 创建
+2. **技能** - 只在 `skills/` 创建
+3. **Git 项目** - 使用 `/tmp/` 或 `~/projects/` 或 `data/<agent>/work/`
+4. **不要在根目录** - 不克隆、不创建项目
+5. **定期清理** - 清理临时文件
+
+**推荐结构：**
+```
+~/projects/              # 你的项目（推荐）
+/tmp/                    # 临时工作
+workspace/data/*/work/   # Agent 特定工作
+```
