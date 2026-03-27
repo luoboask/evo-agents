@@ -1,14 +1,11 @@
-# Agent Configuration
-#
-# Define your agent(s) here.
-# Each agent gets its own data directory under data/<name>/
+# evo-agents - Agent Configuration Template
+# Copy this file and customize for your agents
 
-# Example:
-# my-agent:
-#   name: my-agent
-#   role: assistant
-#   description: "My agent"
-#   data_path: data/my-agent
-#   settings:
-#     max_memories: 1000
-#     auto_cleanup: false
+agents:
+  # Example agent configuration
+  # - name: my-agent
+  #   workspace: ~/.openclaw/workspace-my-agent
+  #   model: bailian/qwen3.5-plus
+  #   enabled: true
+  
+  # Add your agents here

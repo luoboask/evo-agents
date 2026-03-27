@@ -39,66 +39,50 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# 日志
+# -----------------------------------------------------------------------------
+# Runtime data (运行时数据)
+# -----------------------------------------------------------------------------
+data/
+!data/.gitkeep
+memory/
+!memory/.gitkeep
+logs/
 *.log
 
-# 敏感信息
-.env
-.env.local
-*.key
-*.pem
-secrets/
+# -----------------------------------------------------------------------------
+# Config with secrets
+# -----------------------------------------------------------------------------
+config/agents.yaml
+config/*.env
+config/*.secret
+config/*.key
 
-# 运行时数据
-data/*/
-!data/.gitkeep
-data/index/
-data/.locks/
-
-# 记忆
-memory/????-??-??.md
-memory/weekly/
-memory/monthly/
-memory/archive/
-memory/learning/
-memory/realtime_learning_*.jsonl
-
-# OpenClaw 运行时
-.openclaw/
-
-# 特定 Agent 的 skills (用户自己添加的)
+# -----------------------------------------------------------------------------
+# Skills - exclude agent-specific
+# -----------------------------------------------------------------------------
 skills/aura-*/
-skills/danger-xhs-browser/
-skills/japan-media-agent/
-skills/pinterest-browser-publisher/
-skills/star-mansion-master/
-skills/tarot-master/
-
-# 公共知识（用户自己添加的）
-public/data/
-
-# 临时文件
-tmp/
-temp/
-*.tmp
+skills/*-browser/
+skills/*-publisher/
+skills/*-master/
+skills/japan-*/
+skills/star-*/
+skills/tarot-*/
+skills/danger-*/
 
 # -----------------------------------------------------------------------------
-# 特定 Agent 的 skills (不提交到通用库)
+# Projects (specific to certain agents)
 # -----------------------------------------------------------------------------
-skills/aura-content-strategist/
-skills/aura-image-gen/
-skills/aura-xhs-images/
-skills/danger-xhs-browser/
-skills/japan-media-agent/
-skills/star-mansion-master/
-skills/tarot-master/
-
-# 特定项目和数据
 MediaCrawler/
 baoyu-skills/
-prompts/
-souls/
 xhs-research/
 
-# 公共知识（用户自己添加的）
+# -----------------------------------------------------------------------------
+# Prompts and Souls (agent-specific)
+# -----------------------------------------------------------------------------
+prompts/
+souls/
+
+# -----------------------------------------------------------------------------
+# Public data (user-generated)
+# -----------------------------------------------------------------------------
 public/data/
