@@ -25,12 +25,12 @@ evo-agents/
 │   ├── core/                # System scripts (updated by template)
 │   └── *.sh, *.py           # User scripts (safe)
 │
-├── 📁 skills/               # Skills (all in root)
-│   ├── memory-search/       # Universal skill (updated)
-│   ├── rag/                 # Universal skill (updated)
-│   ├── self-evolution/      # Universal skill (updated)
-│   ├── web-knowledge/       # Universal skill (updated)
-│   └── my-custom-skill/     # Custom skill (safe)
+├── 📁 skills/               # Skills (OpenClaw native structure)
+│   ├── memory-search/       # Template skill (updated)
+│   ├── rag/                 # Template skill (updated)
+│   ├── self-evolution/      # Template skill (updated)
+│   ├── web-knowledge/       # Template skill (updated)
+│   └── <your-skill>/        # Your skills (preserved)
 │
 ├── 📄 .gitignore            # Git ignore rules
 ├── 📄 install.sh            # One-click install script
@@ -131,37 +131,31 @@ scripts/
 └── deploy.sh          # User script (safe) ✅
 ```
 
-#### 5. User Skills (Safe)
+#### 5. Skills Directory (OpenClaw Native)
 
 **Location:** `skills/` root directory
 
 **Behavior:**
-- ✅ Never deleted
-- 🧩 Custom skills
-- 📦 Not updated by template
+- ✅ All skills in one directory (OpenClaw native)
+- 📦 Template skills updated: `memory-search/`, `rag/`, `self-evolution/`, `web-knowledge/`
+- ✅ Your skills preserved: any other skill directories
 
 **Example:**
 ```
 skills/
-├── memory-search/         # Universal skill (updated) 📦
-├── rag/                   # Universal skill (updated) 📦
-├── self-evolution/        # Universal skill (updated) 📦
-├── web-knowledge/         # Universal skill (updated) 📦
-│
-├── my-custom-skill/       # User skill (safe) ✅
-├── xhs-agent/             # Agent-specific skill (safe) ✅
-└── pinterest-bot/         # Agent-specific skill (safe) ✅
+├── memory-search/         # Template skill (updated) 📦
+├── rag/                   # Template skill (updated) 📦
+├── self-evolution/        # Template skill (updated) 📦
+├── web-knowledge/         # Template skill (updated) 📦
+├── my-tool/               # Your skill (preserved) ✅
+└── xhs-agent/             # Your skill (preserved) ✅
 ```
 
-**Universal skills (updated by template):**
-- `memory-search/`
-- `rag/`
-- `self-evolution/`
-- `web-knowledge/`
-
-**User skills (safe):**
-- All other skill directories
-- Naming: `my-skill/`, `agent-name/`, `xxx-bot/`
+**How it works:**
+- Template updates only the 4 universal skills
+- All other skills are preserved
+- No special naming required
+- This is the standard OpenClaw skills structure
 
 ---
 
@@ -192,16 +186,10 @@ scripts/*.py
 scripts/*.sh
 !scripts/core/
 
-# User skills (optional - can commit)
-# Universal skills are updated by template, user skills are safe
-skills/my-*/
-skills/*-agent/
-skills/*-bot/
-# Universal skills (template managed, not recommended to modify)
-# skills/memory-search/
-# skills/rag/
-# skills/self-evolution/
-# skills/web-knowledge/
+# Skills directory (OpenClaw native)
+# Template updates only: memory-search, rag, self-evolution, web-knowledge
+# All other skills are preserved
+skills/
 ```
 
 ---
@@ -247,7 +235,7 @@ skills/*-bot/
       │
       └─ Yes → Update template files only
          ├─ Update: scripts/core/, skills/memory-search/, skills/rag/, skills/self-evolution/, skills/web-knowledge/, docs/
-         └─ Preserve: USER.md, memory/, public/, scripts/*, skills/* (other skills)
+         └─ Preserve: USER.md, memory/, public/, scripts/*, skills/ (your skills)
 ```
 
 ---
@@ -262,9 +250,10 @@ skills/*-bot/
    - `scripts/` root directory safe
    - Only `scripts/core/` updated
 
-3. **Never delete user skills**
-   - `skills/` root directory safe
-   - Only universal skills updated (memory-search, rag, self-evolution, web-knowledge)
+3. **Skills directory is safe**
+   - `skills/` is OpenClaw native structure
+   - Only 4 template skills updated
+   - Your skills preserved
 
 4. **Always backup before changes**
    - Auto backup before re-installation
@@ -298,12 +287,12 @@ evo-agents/
 │   ├── core/                # 系统脚本（模板更新）
 │   └── *.sh, *.py           # 用户脚本（安全）
 │
-├── 📁 skills/               # 技能（都在根目录）
-│   ├── memory-search/       # 通用技能（模板更新）
-│   ├── rag/                 # 通用技能（模板更新）
-│   ├── self-evolution/      # 通用技能（模板更新）
-│   ├── web-knowledge/       # 通用技能（模板更新）
-│   └── my-custom-skill/     # 自定义技能（安全）
+├── 📁 skills/               # 技能（OpenClaw 原生结构）
+│   ├── memory-search/       # 模板技能（更新）
+│   ├── rag/                 # 模板技能（更新）
+│   ├── self-evolution/      # 模板技能（更新）
+│   ├── web-knowledge/       # 模板技能（更新）
+│   └── <your-skill>/        # 你的技能（保留）
 │
 ├── 📄 .gitignore            # Git 忽略规则
 ├── 📄 install.sh            # 一键安装脚本
@@ -334,7 +323,7 @@ evo-agents/
 
 #### 1. 模板文件（安装时更新）
 
-**位置：** 根目录，`scripts/core/`, `skills/`（通用技能）, `docs/`
+**位置：** 根目录，`scripts/core/`, `skills/`（4 个通用技能）, `docs/`
 
 **行为：**
 - 📦 重新安装时更新
@@ -404,37 +393,31 @@ scripts/
 └── deploy.sh          # 用户脚本（安全）✅
 ```
 
-#### 5. 用户技能（安全）
+#### 5. Skills 目录（OpenClaw 原生）
 
 **位置：** `skills/` 根目录
 
 **行为：**
-- ✅ 永不删除
-- 🧩 自定义技能
-- 📦 模板不更新
+- ✅ 所有技能放在一个目录（OpenClaw 原生）
+- 📦 模板更新 4 个技能：`memory-search/`, `rag/`, `self-evolution/`, `web-knowledge/`
+- ✅ 你的技能保留：其他所有技能目录
 
 **示例：**
 ```
 skills/
-├── memory-search/         # 通用技能（模板更新）📦
-├── rag/                   # 通用技能（模板更新）📦
-├── self-evolution/        # 通用技能（模板更新）📦
-├── web-knowledge/         # 通用技能（模板更新）📦
-│
-├── my-custom-skill/       # 用户技能（安全）✅
-├── xhs-agent/             # Agent 特定技能（安全）✅
-└── pinterest-bot/         # Agent 特定技能（安全）✅
+├── memory-search/         # 模板技能（更新）📦
+├── rag/                   # 模板技能（更新）📦
+├── self-evolution/        # 模板技能（更新）📦
+├── web-knowledge/         # 模板技能（更新）📦
+├── my-tool/               # 你的技能（保留）✅
+└── xhs-agent/             # 你的技能（保留）✅
 ```
 
-**通用技能（会被模板更新）：**
-- `memory-search/`
-- `rag/`
-- `self-evolution/`
-- `web-knowledge/`
-
-**用户技能（安全）：**
-- 所有其他技能目录
-- 命名建议：`my-skill/`, `agent-name/`, `xxx-bot/`
+**工作原理：**
+- 模板只更新 4 个通用技能
+- 其他所有技能都保留
+- 不需要特殊命名
+- 这就是 OpenClaw 原生的 skills 结构
 
 ---
 
@@ -465,16 +448,9 @@ scripts/*.py
 scripts/*.sh
 !scripts/core/
 
-# 用户技能（可选 - 可提交）
-# 通用技能会被模板更新，用户技能安全
-skills/my-*/
-skills/*-agent/
-skills/*-bot/
-# 通用技能（模板管理，不建议修改）
-# skills/memory-search/
-# skills/rag/
-# skills/self-evolution/
-# skills/web-knowledge/
+# Skills 目录（OpenClaw 原生）
+# 模板只更新 4 个通用技能，其他技能保留
+skills/
 ```
 
 ---
@@ -487,8 +463,9 @@ skills/*-bot/
 - **风格：** 小写，Shell 用连字符，Python 用下划线
 
 #### 技能
-- **通用：** `skills/memory-search/`, `skills/rag/` 等
-- **自定义：** `skills/my-skill/` 或 `skills/agent-name/`
+- **位置：** `skills/` 目录（OpenClaw 原生结构）
+- **模板技能：** `memory-search/`, `rag/`, `self-evolution/`, `web-knowledge/`
+- **你的技能：** 直接放在 `skills/` 下，任何命名都可以
 - **必需文件：** `SKILL.md`, `skill.json`
 
 #### Agent
@@ -535,9 +512,10 @@ skills/*-bot/
    - `scripts/` 根目录安全
    - 只更新 `scripts/core/`
 
-3. **永不删除用户技能**
-   - `skills/` 根目录安全
-   - 只更新通用技能（memory-search, rag, self-evolution, web-knowledge）
+3. **Skills 目录安全**
+   - `skills/` 是 OpenClaw 原生结构
+   - 只更新 4 个模板技能
+   - 你的技能保留
 
 4. **更改前始终备份**
    - 重新安装前自动备份
