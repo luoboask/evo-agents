@@ -55,8 +55,12 @@ if [ -d "$WORKSPACE_ROOT" ]; then
         echo ""
         echo "   📦 将更新以下内容:"
         echo "      - 通用技能（memory-search, rag, self-evolution, web-knowledge）"
-        echo "      - 脚本工具（scripts/ 目录）"
+        echo "      - 系统脚本（scripts/core/ 目录）"
         echo "      - 文档（README.md 等）"
+        echo ""
+        echo "   📝 您的自定义脚本:"
+        echo "      - scripts/ 目录的其他文件不会被覆盖"
+        echo "      - 请将自定义脚本放在 scripts/ 根目录"
         echo ""
         
         echo "❓ 是否继续？/ Continue?"

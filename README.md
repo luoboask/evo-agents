@@ -108,19 +108,31 @@ After installation, activate advanced features interactively:
 
 ## 🤖 Multi-Agent Scripts
 
-### setup-multi-agent.sh - Create Multiple Agents
+### System Scripts (scripts/core/)
+
+Core scripts provided by evo-agents template:
 
 ```bash
-./scripts/setup-multi-agent.sh designer writer ops
-# Creates: designer-agent, writer-agent, ops-agent
+./scripts/core/activate-features.sh   # Activate features
+./scripts/core/add-agent.sh           # Add agent
+./scripts/core/setup-multi-agent.sh   # Setup multiple agents
 ```
 
-### add-agent.sh - Add Single Agent
+**⚠️ Don't modify these files** - they will be updated by template.
+
+### User Scripts (scripts/)
+
+Your custom scripts go here:
 
 ```bash
-./scripts/add-agent.sh designer UI/UX Designer 🎨
-# Creates: designer-agent (UI/UX Designer 🎨)
+scripts/
+├── core/              # System scripts (don't modify)
+├── my-script.sh       # Your custom script ✅
+├── backup.sh          # Your backup script ✅
+└── custom-tool.py     # Your custom tool ✅
 ```
+
+**✅ Safe to modify** - your scripts won't be overwritten.
 
 **Rules:**
 1. Must pass role name as argument
