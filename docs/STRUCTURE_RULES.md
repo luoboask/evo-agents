@@ -395,23 +395,41 @@ data/           # Agent 特定数据
 agents/         # 已注册的 Agent 配置
 ```
 
-#### 4. 用户脚本（安全）
+#### 4. 脚本目录（OpenClaw 原生 + Agent 共享）
 
 **位置：** `scripts/` 根目录
 
 **行为：**
-- ✅ 永不被覆盖
-- 🛠️ 用户自定义脚本
-- 📝 不在 `.gitignore` 中（可选择提交）
+- ✅ 所有脚本放在一个目录（OpenClaw 原生）
+- ✅ 所有 Agent 共享（主 Agent + 子 Agent）
+- ✅ 子 Agent 通过符号链接访问
+- 📦 系统脚本在 `scripts/core/`（模板更新）
+- ✅ 用户脚本在 `scripts/` 根目录（保留）
 
 **示例：**
 ```
 scripts/
-├── core/              # 系统脚本（更新）
-├── my-backup.sh       # 用户脚本（安全）✅
-├── custom-tool.py     # 用户脚本（安全）✅
-└── deploy.sh          # 用户脚本（安全）✅
+├── core/                    # 系统脚本（模板更新）📦
+│   ├── activate-features.sh
+│   ├── add-agent.sh
+│   └── ...
+│
+├── my-backup.sh             # 用户脚本（保留）✅
+├── custom-tool.py           # 用户脚本（保留）✅
+└── agent-created.sh         # Agent 执行时创建的脚本（保留）✅
 ```
+
+**Agent 创建脚本的约束：**
+
+| Agent 类型 | 创建位置 | 实际存储 |
+|-----------|---------|---------|
+| **主 Agent** | `scripts/<script>` | `<workspace>/scripts/<script>` |
+| **子 Agent** | `agents/<agent>/scripts/<script>` | `<workspace>/scripts/<script>` (通过符号链接) |
+
+**规则：**
+- ✅ 所有脚本放在 `scripts/` 根目录
+- ✅ 所有 Agent 共享脚本
+- ❌ 不要在 `agents/<agent>/` 下创建独立脚本目录
 
 #### 5. Skills 目录（OpenClaw 原生）
 
@@ -620,3 +638,38 @@ skills/
 ├── web-knowledge/         # 模板技能（更新）
 └── my-custom-skill/       # 你的技能（保留）
 ```
+
+### Q: Agent 执行命令时创建的脚本放在哪里？
+
+**A:** 所有 Agent（主 Agent 和子 Agent）创建的脚本都放在 `scripts/` 根目录：
+
+**主 Agent：**
+```bash
+# 直接创建
+cat > scripts/backup.sh << 'EOF'
+#!/bin/bash
+echo "Backup script"
+EOF
+```
+
+**子 Agent：**
+```bash
+# 通过符号链接创建（实际存储在父 workspace 的 scripts/）
+cd agents/<agent-name>/
+cat > scripts/agent-backup.sh << 'EOF'
+#!/bin/bash
+echo "Agent backup script"
+EOF
+# 实际文件位置：<workspace>/scripts/agent-backup.sh
+```
+
+**约束规则：**
+- ✅ 所有脚本放在 `scripts/` 根目录
+- ✅ 所有 Agent 共享脚本
+- ✅ 子 Agent 通过符号链接访问
+- ❌ 不要在 `agents/<agent>/` 下创建脚本目录
+
+**好处：**
+- 脚本集中管理
+- 所有 Agent 共享
+- 便于维护和复用
