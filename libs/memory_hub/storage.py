@@ -10,6 +10,12 @@ import json
 import urllib.request
 from typing import List, Dict, Optional
 
+# 导入 Embedding 缓存
+try:
+    from .embedding_cache import EmbeddingCache
+except ImportError:
+    from embedding_cache import EmbeddingCache
+
 
 class StorageManager:
     """存储管理器 - 负责数据库操作"""
@@ -18,6 +24,11 @@ class StorageManager:
         self.memory_path = memory_path
         self.db_path = memory_path / 'memory_stream.db'
         self._init_database()
+        
+        # 初始化 Embedding 缓存
+        self.embedding_cache = EmbeddingCache(
+            cache_file=memory_path / 'embedding_cache.pkl'
+        )
     
     def _init_database(self):
         """初始化数据库表结构"""
@@ -41,10 +52,18 @@ class StorageManager:
             )
         ''')
         
-        # 创建索引
+        # 创建索引 - 性能优化
         cur.execute('CREATE INDEX IF NOT EXISTS idx_type ON memories(memory_type)')
         cur.execute('CREATE INDEX IF NOT EXISTS idx_created ON memories(created_at)')
         cur.execute('CREATE INDEX IF NOT EXISTS idx_importance ON memories(importance)')
+        cur.execute('CREATE INDEX IF NOT EXISTS idx_tags ON memories(tags)')
+        cur.execute('CREATE INDEX IF NOT EXISTS idx_content_search ON memories(content)')
+        
+        # 启用 WAL 模式 - 提高并发性能
+        cur.execute('PRAGMA journal_mode=WAL')
+        
+        # 增加缓存大小 - 提高查询性能（64MB）
+        cur.execute('PRAGMA cache_size=-64000')
         
         conn.commit()
         conn.close()
@@ -203,7 +222,13 @@ class StorageManager:
         }
     
     def _get_embedding(self, text: str) -> List[float]:
-        """获取 Ollama embedding"""
+        """获取 Ollama embedding（带缓存）"""
+        # 先尝试从缓存获取
+        cached = self.embedding_cache.get(text)
+        if cached:
+            return cached
+        
+        # 缓存未命中，调用 Ollama
         try:
             payload = {
                 "model": "nomic-embed-text",
@@ -216,7 +241,13 @@ class StorageManager:
             )
             response = urllib.request.urlopen(req, timeout=10)
             data = json.loads(response.read().decode())
-            return data.get('embedding', [])
+            embedding = data.get('embedding', [])
+            
+            # 缓存 embedding
+            if embedding:
+                self.embedding_cache.set(text, embedding)
+            
+            return embedding
         except Exception as e:
             print(f"⚠️  Ollama Embedding 失败：{e}")
             return []
