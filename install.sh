@@ -43,6 +43,46 @@ if [ -d "$WORKSPACE_ROOT" ]; then
         echo "⚠️  检测到 $AGENT_NAME 的 workspace 已存在"
         echo "   Workspace for $AGENT_NAME already exists"
         echo ""
+        
+        # 提供备份选项
+        echo "❓ 安装前是否备份当前 workspace？/ Backup before install?"
+        echo "   y - 备份（推荐）/ Backup (recommended)"
+        echo "   n - 跳过备份 / Skip backup"
+        echo ""
+        
+        if [ -t 0 ]; then
+            read -p "请输入 / Enter (Y/n): " -n 1 -r
+            BACKUP_REPLY="$REPLY"
+            echo ""
+        else
+            # 管道输入，默认备份
+            BACKUP_REPLY="y"
+        fi
+        
+        if [[ "$BACKUP_REPLY" =~ ^[Yy]$ ]] || [[ -z "$BACKUP_REPLY" ]]; then
+            # 创建备份
+            BACKUP_DIR="/tmp/workspace-backup-$AGENT_NAME-$(date +%Y%m%d-%H%M%S)"
+            echo ""
+            echo "📦 正在备份到 / Backing up to:"
+            echo "   $BACKUP_DIR"
+            echo ""
+            
+            cp -r "$WORKSPACE_ROOT" "$BACKUP_DIR"
+            
+            if [ $? -eq 0 ]; then
+                echo "✅ 备份完成 / Backup complete"
+                echo "   备份大小 / Backup size: $(du -sh "$BACKUP_DIR" | cut -f1)"
+                echo ""
+                echo "💡 如需恢复备份，运行："
+                echo "   To restore backup, run:"
+                echo "   cp -r $BACKUP_DIR/* $WORKSPACE_ROOT/"
+                echo ""
+            else
+                echo "⚠️  备份失败，继续安装 / Backup failed, continuing install"
+                echo ""
+            fi
+        fi
+        
         echo "🔄 继续安装将更新通用模板文件："
         echo "   Continuing will update template files:"
         echo ""

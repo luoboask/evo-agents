@@ -284,3 +284,43 @@ scripts/
 
 **Last Updated:** 2026-03-26  
 **GitHub:** https://github.com/luoboask/evo-agents
+
+---
+
+## 💾 Backup & Restore | 备份与恢复
+
+### Auto Backup | 自动备份
+
+During re-installation, the script will ask:
+- "Backup before install? (y/n)"
+- Backups are saved to: `/tmp/workspace-backup-<agent>-<timestamp>/`
+
+### Manual Backup | 手动备份
+
+```bash
+# Backup current workspace
+cp -r ~/.openclaw/workspace-my-agent /tmp/workspace-backup-my-agent-$(date +%Y%m%d)
+```
+
+### Restore Backup | 恢复备份
+
+```bash
+# Restore latest backup
+./scripts/core/restore-backup.sh
+
+# Restore specific backup
+./scripts/core/restore-backup.sh /tmp/workspace-backup-my-agent-20260327
+```
+
+**What's preserved during restore:**
+- ✅ Personal configs (USER.md, SOUL.md, etc.)
+- ✅ Memory data (memory/)
+- ✅ Knowledge base (public/)
+- ✅ Agent data (data/)
+
+**What's restored from backup:**
+- 📦 Template files (README.md, etc.)
+- 📦 System scripts (scripts/core/)
+- 📦 Universal skills (skills/core/)
+
+---
