@@ -5,8 +5,8 @@
 
 set -e
 
-# 自动获取 workspace 目录（脚本的父目录）
-WORKSPACE="$(cd "$(dirname "$0")/.." && pwd)"
+# 自动获取 workspace 目录（scripts/core/的父目录的父目录）
+WORKSPACE="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$WORKSPACE"
 
 # 必须传参数
