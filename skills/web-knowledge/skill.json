@@ -1,0 +1,28 @@
+{
+  "name": "web-knowledge",
+  "version": "6.0.0",
+  "description": "Web knowledge acquisition - 多引擎搜索 + 网页内容爬取",
+  "homepage": "https://github.com/luoboask/evo-agents",
+  "author": "ai-baby",
+  "license": "MIT",
+  "updated_at": "2026-03-27",
+  "changelog": "6.0.0: 重大升级 - 新增网页爬取功能 (crawl.py)，新增百度/Google 搜索引擎，支持批量爬取，智能页面类型识别; 改名 websearch → web-knowledge",
+  "files": {
+    "search": "search.py",
+    "crawl": "crawl.py",
+    "readme": "README.md"
+  },
+  "engines": ["bing", "baidu", "google", "duckduckgo"],
+  "features": [
+    "multi-engine-search",
+    "smart-engine-selection",
+    "health-monitoring",
+    "adaptive-timeout",
+    "exponential-backoff",
+    "page-crawling",
+    "batch-crawling",
+    "page-type-detection",
+    "content-cleaning",
+    "multi-format-output"
+  ]
+}

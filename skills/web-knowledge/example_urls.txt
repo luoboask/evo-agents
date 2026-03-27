@@ -1,0 +1,8 @@
+# 示例 URL 列表
+# 每行一个 URL，# 开头为注释
+
+# 技术文档
+https://docs.python.org/3/library/asyncio.html
+
+# 教程文章
+https://realpython.com/async-io-python/

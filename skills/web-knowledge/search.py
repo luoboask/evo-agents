@@ -22,14 +22,15 @@ class SmartSearchEngine:
     """智能搜索引擎 - v4 进化版"""
     
     def __init__(self):
-        self.workspace = Path(__file__).resolve().parents[2]
+        self.workspace = Path("/Users/dhr/.openclaw/workspace")
         self.learning_dir = self.workspace / "memory" / "learning"
         
         # 搜索引擎健康状态
         self.engine_health = {
             "bing": {"healthy": True, "last_fail": None, "fail_count": 0, "success_count": 0},
+            "baidu": {"healthy": True, "last_fail": None, "fail_count": 0, "success_count": 0},
+            "google": {"healthy": True, "last_fail": None, "fail_count": 0, "success_count": 0},
             "duckduckgo": {"healthy": True, "last_fail": None, "fail_count": 0, "success_count": 0},
-            "google_lite": {"healthy": True, "last_fail": None, "fail_count": 0, "success_count": 0}
         }
         
         # 自适应超时
@@ -97,7 +98,7 @@ class SmartSearchEngine:
     
     def get_best_engine(self):
         """获取最佳搜索引擎"""
-        engines = ["bing", "duckduckgo", "google_lite"]
+        engines = ["bing", "baidu", "google", "duckduckgo"]
         
         # 按成功率排序
         scored_engines = []
@@ -134,10 +135,14 @@ class SmartSearchEngine:
             try:
                 if engine == "bing":
                     results = self._search_bing(query, limit, timeout)
+                elif engine == "baidu":
+                    results = self._search_baidu(query, limit, timeout)
+                elif engine == "google":
+                    results = self._search_google(query, limit, timeout)
                 elif engine == "duckduckgo":
                     results = self._search_duckduckgo(query, limit, timeout)
                 else:
-                    results = self._search_google_lite(query, limit, timeout)
+                    results = self._search_bing(query, limit, timeout)
                 
                 if results:
                     self.mark_result(engine, True)
@@ -204,15 +209,212 @@ class SmartSearchEngine:
         
         return self._parse_results(result.stdout, limit)
     
-    def _search_duckduckgo(self, query, limit, timeout):
-        """DuckDuckGo 搜索（简化版）"""
-        print("   使用 DuckDuckGo 备选...", file=sys.stderr)
-        return []
+    def _search_baidu(self, query, limit, timeout):
+        """百度搜索 - 使用移动端接口（反爬较低）"""
+        encoded_query = urllib.parse.quote(query)
+        # 使用百度移动端接口，反爬较低
+        url = f"https://m.baidu.com/s?wd={encoded_query}&rn={limit}"
+        
+        headers = [
+            '-H', 'User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
+            '-H', 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            '-H', 'Accept-Language: zh-CN,zh;q=0.9',
+            '-H', 'Referer: https://m.baidu.com/',
+            '--compressed',
+        ]
+        
+        result = subprocess.run(
+            ['curl', '-s', '-L', '--max-time', str(int(timeout))] + headers + [url],
+            capture_output=True, text=True, timeout=int(timeout) + 5
+        )
+        
+        if result.returncode != 0:
+            raise Exception(f"curl failed: {result.stderr}")
+        
+        if len(result.stdout) < 500:
+            raise Exception("百度返回内容过短，可能触发反爬")
+        
+        return self._parse_baidu_results(result.stdout, limit)
     
-    def _search_google_lite(self, query, limit, timeout):
-        """Google Lite 搜索（简化版）"""
-        print("   使用 Google Lite 备选...", file=sys.stderr)
-        return []
+    def _search_google(self, query, limit, timeout):
+        """Google 搜索"""
+        encoded_query = urllib.parse.quote(query)
+        url = f"https://www.google.com/search?q={encoded_query}&num={limit * 2}"
+        
+        headers = [
+            '-H', 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            '-H', 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            '-H', 'Accept-Language: en-US,en;q=0.9',
+        ]
+        
+        result = subprocess.run(
+            ['curl', '-s', '-L', '--max-time', str(int(timeout))] + headers + [url],
+            capture_output=True, text=True, timeout=int(timeout) + 5
+        )
+        
+        if result.returncode != 0:
+            raise Exception(f"curl failed: {result.stderr}")
+        
+        return self._parse_google_results(result.stdout, limit)
+    
+    def _search_duckduckgo(self, query, limit, timeout):
+        """DuckDuckGo 搜索 - 轻量级 HTML 接口"""
+        encoded_query = urllib.parse.quote(query)
+        # 使用 lite 版本，更快更轻量
+        url = f"https://lite.duckduckgo.com/lite/?q={encoded_query}"
+        
+        headers = [
+            '-H', 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+            '-H', 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            '-H', 'Accept-Language: en-US,en;q=0.9',
+        ]
+        
+        result = subprocess.run(
+            ['curl', '-s', '-L', '--max-time', str(int(timeout))] + headers + [url],
+            capture_output=True, text=True, timeout=int(timeout) + 5
+        )
+        
+        if result.returncode != 0:
+            raise Exception(f"curl failed: {result.stderr}")
+        
+        if len(result.stdout) < 200:
+            raise Exception("DuckDuckGo 返回内容过短")
+        
+        return self._parse_duckduckgo_results(result.stdout, limit)
+    
+    def _parse_baidu_results(self, html, limit):
+        """解析百度搜索结果（移动端）"""
+        results = []
+        
+        # 移动端结果容器 - 多种类名
+        container_patterns = [
+            r'<div[^>]*class="[^"]*result[^"]*"[^>]*>.*?</div>',
+            r'<section[^>]*class="[^"]*result[^"]*"[^>]*>.*?</section>',
+            r'<div[^>]*data-click="[^"]*"[^>]*>.*?</div>',
+        ]
+        
+        containers = []
+        for pattern in container_patterns:
+            containers.extend(re.findall(pattern, html, re.DOTALL | re.IGNORECASE))
+        
+        # 提取所有链接和标题
+        link_pattern = r'<a[^>]*href="([^"]+)"[^>]*>([^<]+)</a>'
+        links = re.findall(link_pattern, html, re.DOTALL | re.IGNORECASE)
+        
+        for href, title in links:
+            if len(results) >= limit:
+                break
+            
+            # 过滤百度内部链接
+            if 'baidu.com' in href and '/s?' not in href:
+                continue
+            if href.startswith('#') or href.startswith('javascript:'):
+                continue
+            if 'tdk=' in href or 'click?' in href:
+                continue
+            
+            # 清理标题
+            title = re.sub(r'<[^>]+>', '', title).strip()
+            if len(title) < 2 or len(title) > 100:
+                continue
+            
+            results.append({
+                'title': title,
+                'url': href,
+            })
+        
+        return results[:limit]
+    
+    def _parse_google_results(self, html, limit):
+        """解析 Google 搜索结果"""
+        results = []
+        # Google 结果容器（多种类名）
+        container_patterns = [
+            r'<div[^>]*class="[^"]*g[^"]*"[^>]*>(.*?)</div>',
+            r'<div[^>]*class="[^"]*yuRUbf[^"]*"[^>]*>(.*?)</div>',
+        ]
+        
+        containers = []
+        for pattern in container_patterns:
+            containers.extend(re.findall(pattern, html, re.DOTALL | re.IGNORECASE))
+        
+        for container in containers[:limit * 3]:
+            if len(results) >= limit:
+                break
+            
+            result = {}
+            
+            # 提取标题和链接
+            title_pattern = r'<a[^>]*href="([^"]*)"[^>]*>(.*?)</a>'
+            title_match = re.search(title_pattern, container, re.DOTALL | re.IGNORECASE)
+            if title_match:
+                url = title_match.group(1)
+                # 过滤非结果链接
+                if url.startswith('/search') or url.startswith('#') or 'google' in url.lower():
+                    continue
+                result['url'] = url
+                title = re.sub(r'<[^>]+>', '', title_match.group(2))
+                result['title'] = title.strip()
+            
+            # 提取摘要
+            snippet_pattern = r'<div[^>]*class="[^"]*VwiC3b[^"]*"[^>]*>(.*?)</div>'
+            snippet_match = re.search(snippet_pattern, container, re.DOTALL | re.IGNORECASE)
+            if snippet_match:
+                snippet = re.sub(r'<[^>]+>', '', snippet_match.group(1))
+                result['snippet'] = snippet.strip()
+            
+            if result.get('title') and result.get('url'):
+                results.append(result)
+        
+        return results
+    
+    def _parse_duckduckgo_results(self, html, limit):
+        """解析 DuckDuckGo Lite 搜索结果"""
+        results = []
+        
+        # Lite 版本使用表格布局，提取所有结果链接
+        # 查找结果行（包含 result-link 类的链接）
+        link_pattern = r'<a[^>]*class="result-link"[^>]*href="([^"]*)"[^>]*>([^<]+)</a>'
+        links = re.findall(link_pattern, html, re.IGNORECASE)
+        
+        for href, title in links:
+            if len(results) >= limit:
+                break
+            
+            # 清理标题
+            title = re.sub(r'<[^>]+>', '', title).strip()
+            if len(title) < 2 or len(title) > 100:
+                continue
+            
+            results.append({
+                'title': title,
+                'url': href,
+            })
+        
+        # 如果没有找到，尝试通用解析
+        if not results:
+            # 提取所有外部链接
+            all_links = re.findall(r'<a[^>]*href="(https?://[^"]+)"[^>]*>([^<]+)</a>', html, re.IGNORECASE)
+            for href, title in all_links:
+                if len(results) >= limit:
+                    break
+                
+                # 过滤 DuckDuckGo 内部链接
+                if 'duckduckgo.com' in href:
+                    continue
+                if href.startswith('#') or 'javascript:' in href:
+                    continue
+                
+                title = re.sub(r'<[^>]+>', '', title).strip()
+                if len(title) < 2 or len(title) > 100:
+                    continue
+                
+                results.append({
+                    'title': title,
+                    'url': href,
+                })
+        
+        return results[:limit]
     
     def _parse_results(self, html, limit):
         """解析搜索结果"""
