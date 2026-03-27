@@ -42,23 +42,28 @@ if [ -d "$WORKSPACE_ROOT" ]; then
     else
         echo "⚠️  Workspace 已存在 / Workspace already exists"
         echo ""
-        echo "这可能是因为:"
-        echo "This could be because:"
-        echo "  1. 您之前安装过 / You installed before"
-        echo "  2. 这是改造现有 Agent / This is migrating an existing agent"
+        echo "📊 检测到现有 workspace:"
+        echo "   Detected existing workspace:"
+        echo ""
+        echo "   Agent: $AGENT_NAME"
+        echo "   路径 / Path: $WORKSPACE_ROOT"
         echo ""
         
-        # Check if it looks like an evo-agents workspace | 检查是否像 evo-agents workspace
+        # 检查是否已安装过 evo-agents | Check if evo-agents is already installed
         if [ -f "$WORKSPACE_ROOT/skills/memory-search/search.py" ] || \
            [ -f "$WORKSPACE_ROOT/README.md" ]; then
-            echo "📊 检测到现有 evo-agents workspace"
-            echo "   Detected existing evo-agents workspace"
+            echo "✅ 已安装 evo-agents 模板"
+            echo "   evo-agents template already installed"
             echo ""
-            echo "🔄 迁移改造 / Migration:"
-            echo "   - ✅ 保留个人配置 (USER.md, SOUL.md 等)"
-            echo "   - ✅ 保留记忆数据 (memory/, public/)"
-            echo "   - 🗑️ 清理特定技能"
-            echo "   - 📦 更新为通用模板"
+            echo "🔄 将继续安装（保留个人数据）/ Continuing (preserving personal data):"
+            echo "   - ✅ 保留个人配置 (USER.md, SOUL.md 等) / Personal configs"
+            echo "   - ✅ 保留记忆数据 (memory/, public/) / Memory & knowledge base"
+            echo "   - 🗑️ 清理特定技能 / Clean up agent-specific skills"
+            echo "   - 📦 更新通用模板 / Update universal template"
+            echo ""
+        else
+            echo "⚠️  非 evo-agents workspace，将覆盖安装"
+            echo "   Not an evo-agents workspace, will overwrite"
             echo ""
         fi
         
