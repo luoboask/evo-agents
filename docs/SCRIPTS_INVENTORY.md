@@ -168,3 +168,11 @@ rm -f restore-backup.sh
 ---
 
 **建议：删除 6 个已废弃脚本，保留核心和常用脚本**
+
+### 🗑️ Uninstall Scripts (New)
+
+| Script | Purpose | Keep? |
+|--------|---------|-------|
+| **uninstall-agent.sh** | Uninstall sub-agent | ✅ Yes |
+| **uninstall-workspace.sh** | Uninstall entire workspace | ✅ Yes |
+

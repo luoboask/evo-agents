@@ -43,6 +43,14 @@
 |----------|-------------|------|
 | **[FEATURE_ACTIVATION_GUIDE.md](../FEATURE_ACTIVATION_GUIDE.md)** | Activate features | After install |
 
+### 🗑️ Uninstall
+
+| Document | Description |
+|----------|-------------|
+| **[UNINSTALL.md](UNINSTALL.md)** | Uninstall guide |
+| **[scripts/core/uninstall-agent.sh](../scripts/core/uninstall-agent.sh)** | Uninstall sub-agent |
+| **[scripts/core/uninstall-workspace.sh](../scripts/core/uninstall-workspace.sh)** | Uninstall workspace |
+
 ### 📞 Support
 
 | Document | Description |
