@@ -356,25 +356,52 @@ build/
 
 #### 手动清理
 
-**每周清理脚本：**
+**使用清理脚本：**
 ```bash
-#!/bin/bash
-# cleanup.sh - 清理 workspace
+# 运行清理脚本
+./scripts/core/cleanup.sh
 
-WORKSPACE="$1"
+# 或指定 workspace
+./scripts/core/cleanup.sh ~/.openclaw/workspace-my-agent
+```
 
-echo "🧹 清理 workspace: $WORKSPACE"
+**清理内容：**
+- ✅ `data/*/work/` - Agent 临时工作目录
+- ✅ `agents/*/data/*/work/` - 子 Agent 临时工作目录
+- ✅ `node_modules/`, `__pycache__/` - 构建产物
+- ✅ `*.log`, `*.tmp`, `*.pyc` - 临时文件
 
-# 清理临时工作目录
-find "$WORKSPACE/data" -type d -name "work" -exec rm -rf {} + 2>/dev/null || true
-find "$WORKSPACE/agents" -type d -name "work" -exec rm -rf {} + 2>/dev/null || true
+**不会清理：**
+- ❌ `data/<agent>/memory/` - Agent 记忆
+- ❌ `agents/<agent>/agent/` - Agent 配置
+- ❌ `agents/<agent>/sessions/` - 聊天会话
+- ❌ `memory/` - 日常记忆
+- ❌ `public/` - 知识库
 
-# 清理构建产物
-find "$WORKSPACE" -name "node_modules" -type d -exec rm -rf {} + 2>/dev/null || true
-find "$WORKSPACE" -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
-find "$WORKSPACE" -name "*.log" -delete 2>/dev/null || true
+**work/ 目录说明：**
 
-echo "✅ 清理完成"
+`work/` 是**临时工作目录**，用于：
+- ✅ 临时克隆的 Git 项目
+- ✅ 临时处理的文件
+- ✅ 构建产物
+- ✅ 测试数据
+
+**不是**用于：
+- ❌ 永久配置
+- ❌ 重要数据
+- ❌ 长期项目
+
+**正确使用：**
+```bash
+# ✅ 临时工作
+cd data/my-agent/work/
+git clone https://github.com/xxx/project.git
+# 分析完成后清理
+rm -rf work/project/
+
+# ✅ 永久数据放在其他地方
+cd data/my-agent/
+mkdir config/  # 永久配置
 ```
 
 ---
