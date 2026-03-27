@@ -183,4 +183,19 @@ echo "   python3 scripts/session_recorder.py -t event -c '内容' --agent <agent
 echo "   openclaw agent --agent <agent-name> --message '任务'"
 echo ""
 
-    echo ""
+# 创建子 Agent 的 scripts/, skills/, libs/ 目录（可选）
+for agent_spec in "${AGENTS[@]}"; do
+    IFS=':' read -ra PARTS <<< "$agent_spec"
+    NAME="${PARTS[0]}"
+    if [[ "$NAME" == *"-agent" ]]; then
+        AGENT_NAME="$NAME"
+    else
+        AGENT_NAME="${NAME}-agent"
+    fi
+    
+    cd "agents/$AGENT_NAME"
+    mkdir -p scripts skills libs 2>/dev/null || true
+    cd "$WORKSPACE"
+done
+echo "💡 提示：子 Agent 可以有自己的 scripts/, skills/, libs/，也可以使用父 workspace 的资源"
+echo ""

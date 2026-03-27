@@ -130,6 +130,14 @@ agents/<agent-name>/
 evo-agents/
 ├── 📁 .github/              # GitHub 配置
 ├── 📁 agents/               # 子 Agent（脚本创建）
+│   └── <agent-name>/        # 子 Agent 目录
+│       ├── agent/           # Agent 配置
+│       ├── memory/          # Agent 记忆
+│       ├── sessions/        # 聊天会话
+│       ├── scripts/         # Agent 特定脚本（可选）
+│       ├── skills/          # Agent 特定技能（可选）
+│       ├── libs/            # Agent 特定库（可选）
+│       └── data/            # Agent 数据
 ├── 📁 config/               # 配置
 ├── 📁 data/                 # 运行时数据（不提交）
 ├── 📁 docs/                 # 文档
@@ -187,11 +195,17 @@ agents/<agent-name>/
 ├── agent/                   # Agent 配置
 ├── memory/                  # Agent 记忆
 ├── sessions/                # 聊天会话
+├── scripts/                 # Agent 特定脚本（可选）
+├── skills/                  # Agent 特定技能（可选）
+├── libs/                    # Agent 特定库（可选）
 ├── AGENTS.md, SOUL.md
 └── data/
 ```
 
-**注意：** 子 Agent 共享父 workspace 的 scripts/ 和 skills/（不需要符号链接）
+**说明：**
+- ✅ 子 Agent 可以有自己的 `scripts/`, `skills/`, `libs/`
+- ✅ 也可以使用父 workspace 的资源
+- ✅ 灵活选择，无强制要求
 
 ---
 
@@ -244,23 +258,27 @@ agents/<agent-name>/
 
 ### Q: Agent 执行时创建的脚本放在哪里？
 
-**A:** 所有脚本都放在 `scripts/` 根目录：
+**A:** 有两种选择：
 
-**主 Agent：**
+**选项 1: 共享脚本（推荐）**
 ```bash
+# 放在父 workspace 的 scripts/ 根目录
 cat > scripts/backup.sh
+# 所有 Agent 都可以使用
 ```
 
-**子 Agent：**
+**选项 2: Agent 特定脚本**
 ```bash
+# 放在子 Agent 自己的 scripts/ 目录
 cd agents/<agent-name>/
-cat > scripts/agent-backup.sh  # 实际存储在父 workspace 的 scripts/
+cat > scripts/agent-backup.sh
+# 只有这个 Agent 使用
 ```
 
 **规则：**
-- ✅ 所有脚本放在 `scripts/` 根目录
-- ✅ 所有 Agent 共享
-- ❌ 不要在 `agents/<agent>/` 下创建独立脚本目录
+- ✅ 可以放在父 workspace 的 `scripts/`（所有 Agent 共享）
+- ✅ 可以放在子 Agent 的 `agents/<agent>/scripts/`（Agent 特定）
+- ✅ 灵活选择，无强制要求
 
 ---
 
