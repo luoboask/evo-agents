@@ -146,6 +146,17 @@ else
     git clone --depth 1 https://github.com/luoboask/evo-agents.git "$WORKSPACE_ROOT"
     echo "   ✅ 克隆完成 / Clone complete"
     cd "$WORKSPACE_ROOT"
+    
+    # 确保 skills/ 目录存在（从模板复制）
+    if [ ! -d "skills/memory-search" ]; then
+        echo ""
+        echo "📦 复制通用技能..."
+        # skills/ 目录已通过 git clone 复制
+        if [ -d "skills" ]; then
+            echo "   ✅ skills/ 目录已就绪"
+            ls -1 skills/ | sed 's/^/      - /'
+        fi
+    fi
 fi
 
 # 2. 注册到 OpenClaw / Register to OpenClaw
