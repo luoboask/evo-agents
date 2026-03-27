@@ -17,59 +17,66 @@ evo-agents is an OpenClaw Workspace template providing multi-agent collaboration
 
 ### 🚀 One-Click Install (Recommended) ⭐
 
+#### Fresh Install (New Agent)
+
 **Just one command:**
 
 ```bash
 curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s my-agent
 ```
 
-**That's it!** The script will automatically:
+**That's it!** The script will:
 1. Clone evo-agents template
-2. Register agent to OpenClaw (**automatically creates AGENTS.md, SOUL.md, etc.**)
+2. Register agent to OpenClaw
 3. Create directory structure
 4. Run tests
 
-**No manual steps needed!** 🎉
-
 ---
 
-### 🔄 Migration (Existing Agent)
+### 🔄 Re-installation (Existing Agent)
 
-**Already have an evo-agents or test-agents workspace?**
+**Already have a workspace for this agent?**
 
-If you're migrating an existing Agent (not a fresh install), the install script will detect this and ask for confirmation:
+#### Option 1: Interactive (Recommended) ⭐
 
 ```bash
-curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s existing-agent
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh)" -s existing-agent
 ```
 
-**The script will:**
-1. ⚠️ Detect existing workspace
-2. ❓ Ask for migration confirmation
-3. ✅ Preserve your personal data (USER.md, SOUL.md, memory/, public/)
-4. 🗑️ Clean up agent-specific skills
-5. 📦 Update to universal template structure
+**What happens:**
+- ⚠️ Detects existing workspace
+- ❓ Asks for confirmation (y/n)
+- ✅ Preserves your data (USER.md, SOUL.md, memory/, public/, skills/, scripts/)
+- 📦 Updates template files (skills/core/, scripts/core/, docs/)
 
-**⚠️ Important:** Before migrating:
-- Backup your workspace: `cp -r ~/.openclaw/workspace-xxx /tmp/backup`
-- Review [Migration Guide](docs/MIGRATION.md) for details
+**What's preserved:**
+- ✅ Personal configs (USER.md, SOUL.md, etc.)
+- ✅ Memory data (memory/ directory)
+- ✅ Knowledge base (public/ directory)
+- ✅ Your skills (skills/ directory)
+- ✅ Your scripts (scripts/ root directory)
 
-**What gets preserved:**
-- ✅ USER.md, SOUL.md, IDENTITY.md (personal configs)
-- ✅ memory/*.md (conversation history)
-- ✅ public/*.json (knowledge base)
-- ✅ data/ (agent data)
-- ✅ agents/ (registered agents)
+**What's updated:**
+- 📦 Universal skills (skills/core/)
+- 📦 System scripts (scripts/core/)
+- 📦 Documentation (README.md, etc.)
 
-**What gets cleaned:**
-- ❌ Agent-specific skills (e.g., `aura-*`, `danger-*`)
-- ❌ Agent-specific projects (e.g., `MediaCrawler`, `baoyu-skills`)
+#### Option 2: Download First
+
+```bash
+curl -sO https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh
+bash install.sh existing-agent
+```
+
+#### Option 3: Force (Skip Confirmation)
+
+```bash
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s existing-agent --force
+```
 
 ---
 
 ### 📋 Manual Installation
-
-If you prefer manual control:
 
 #### Step 1: Clone Template
 
@@ -84,81 +91,76 @@ cd ~/.openclaw/workspace-my-agent
 openclaw agents add my-agent --workspace ~/.openclaw/workspace-my-agent
 ```
 
-This creates:
-- `~/.openclaw/agents/my-agent/agent/` - Agent directory
-- `AGENTS.md`, `SOUL.md`, `IDENTITY.md` - Configuration files
-
-#### Step 3: Create Directory Structure
+#### Step 3: Create Directories
 
 ```bash
 mkdir -p memory/weekly memory/monthly memory/archive
 mkdir -p data/index data/my-agent
 ```
 
-#### Step 4: Initialize Personal Configs
-
-Edit these files to define your agent:
+#### Step 4: Test
 
 ```bash
-# Agent identity
-nano IDENTITY.md
-
-# User information
-nano USER.md
-
-# Agent personality
-nano SOUL.md
-```
-
-#### Step 5: Test
-
-```bash
-# Test memory system
-python3 scripts/session_recorder.py -t event -c "Test event" --agent my-agent
-
-# Check status
-openclaw agents list | grep my-agent
+python3 scripts/core/session_recorder.py -t event -c "Test" --agent my-agent
 ```
 
 ---
 
-### 🆚 Fresh Install vs Migration
+### 📁 Directory Structure
 
-| Aspect | Fresh Install | Migration |
-|--------|--------------|-----------|
-| **Backup needed** | ❌ No | ✅ **Required** |
-| **Preserve USER.md** | ❌ No (template) | ✅ **Yes** |
-| **Preserve memory/** | ❌ No | ✅ **Yes** |
-| **Preserve public/** | ❌ No | ✅ **Yes** |
-| **Clean skills** | ✅ Already clean | ✅ Required |
-| **Confirmation** | ❌ Not needed | ✅ **Required** |
-
----
-
-### 📚 Documentation
-
-- **[README.md](README.md)** - Quick start guide
-- **[docs/MIGRATION.md](docs/MIGRATION.md)** - Detailed migration guide
-- **[GITHUB_PUSH_RULES.md](GITHUB_PUSH_RULES.md)** - GitHub push guidelines
-- **[FEATURE_ACTIVATION_GUIDE.md](FEATURE_ACTIVATION_GUIDE.md)** - Feature activation
+```
+workspace/
+├── skills/
+│   ├── core/              # System skills (updated)
+│   │   ├── memory-search/
+│   │   ├── rag/
+│   │   ├── self-evolution/
+│   │   └── web-knowledge/
+│   │
+│   └── your-skill/        # Your skills (safe) ✅
+│
+├── scripts/
+│   ├── core/              # System scripts (updated)
+│   │   ├── activate-features.sh
+│   │   ├── add-agent.sh
+│   │   └── ...
+│   │
+│   └── your-script.sh     # Your scripts (safe) ✅
+│
+├── memory/                # Your memory data (preserved) ✅
+├── public/                # Your knowledge base (preserved) ✅
+├── data/                  # Your agent data (preserved) ✅
+├── USER.md                # Your config (preserved) ✅
+├── SOUL.md                # Your config (preserved) ✅
+└── README.md              # Template (updated) 📦
+```
 
 ---
 
 ### 🛠️ Post-Installation
 
-After installation:
+#### Activate Features
 
 ```bash
 cd ~/.openclaw/workspace-my-agent
-
-# Activate advanced features
 ./scripts/core/activate-features.sh
+```
 
-# Check installed skills
-ls skills/
+**Available features:**
+1. 🔮 Semantic Search (Ollama + embedding models)
+2. 📚 Knowledge Base System
+3. 🧬 Self-Evolution System
+4. 📊 RAG Evaluation
+5. ⏰ Scheduled Tasks (Cron)
 
-# View documentation
-cat README.md
+#### Add More Agents
+
+```bash
+# Single agent
+./scripts/core/add-agent.sh coach "Life Coach" 🌱
+
+# Multiple agents
+./scripts/core/setup-multi-agent.sh researcher writer organizer
 ```
 
 ---
@@ -166,17 +168,16 @@ cat README.md
 ### 📞 Troubleshooting
 
 **Workspace already exists?**
-- The install script will ask for confirmation
-- Choose 'y' to migrate (preserves data)
-- Choose 'n' to cancel
+- Use interactive mode: `bash -c "$(curl ...)" -s agent`
+- Or force: `curl ... | bash -s agent --force`
 
 **Agent already registered?**
-- Script skips registration
-- Your existing config is preserved
+- Script skips registration automatically
+- Your config is preserved
 
-**Missing files after install?**
-- Check `git status` for untracked files
-- Personal configs may be in `.gitignore`
+**Scripts not found?**
+- Check `scripts/core/` directory
+- Update your paths to `scripts/core/script.sh`
 
 ---
 
@@ -190,6 +191,8 @@ evo-agents 是一个 OpenClaw Workspace 模板，提供多 Agent 协作、脚本
 
 ### 🚀 一键安装（推荐）⭐
 
+#### 新安装（新 Agent）
+
 **只需一个命令：**
 
 ```bash
@@ -198,51 +201,56 @@ curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh 
 
 **就这么简单！** 脚本会自动：
 1. 克隆 evo-agents 模板
-2. 注册 agent 到 OpenClaw（**自动创建 AGENTS.md, SOUL.md 等文件**）
+2. 注册 agent 到 OpenClaw
 3. 创建目录结构
 4. 运行测试
 
-**无需关心步骤！** 🎉
-
 ---
 
-### 🔄 迁移改造（现有 Agent）
+### 🔄 重新安装（现有 Agent）
 
-**已经有 evo-agents 或 test-agents workspace？**
+**已经为这个 Agent 安装过 workspace？**
 
-如果您是在改造现有 Agent（不是全新安装），安装脚本会检测到并询问确认：
+#### 选项 1: 交互式（推荐）⭐
 
 ```bash
-curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s existing-agent
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh)" -s existing-agent
 ```
 
-**脚本会：**
-1. ⚠️ 检测已存在的 workspace
-2. ❓ 询问迁移确认
-3. ✅ 保留个人数据（USER.md, SOUL.md, memory/, public/）
-4. 🗑️ 清理特定 Agent 技能
-5. 📦 更新为通用模板结构
-
-**⚠️ 重要：** 迁移前先备份：
-- 备份 workspace: `cp -r ~/.openclaw/workspace-xxx /tmp/backup`
-- 查看 [迁移指南](docs/MIGRATION.md) 了解详情
+**会发生什么：**
+- ⚠️ 检测到现有 workspace
+- ❓ 询问确认（y/n）
+- ✅ 保留你的数据（USER.md, SOUL.md, memory/, public/, skills/, scripts/）
+- 📦 更新模板文件（skills/core/, scripts/core/, docs/）
 
 **保留的内容：**
-- ✅ USER.md, SOUL.md, IDENTITY.md（个人配置）
-- ✅ memory/*.md（对话历史）
-- ✅ public/*.json（知识库）
-- ✅ data/（Agent 数据）
-- ✅ agents/（已注册 Agent）
+- ✅ 个人配置（USER.md, SOUL.md 等）
+- ✅ 记忆数据（memory/ 目录）
+- ✅ 知识库（public/ 目录）
+- ✅ 你的技能（skills/ 目录）
+- ✅ 你的脚本（scripts/ 根目录）
 
-**清理的内容：**
-- ❌ 特定 Agent 技能（如 `aura-*`, `danger-*`）
-- ❌ 特定项目（如 `MediaCrawler`, `baoyu-skills`）
+**更新的内容：**
+- 📦 通用技能（skills/core/）
+- 📦 系统脚本（scripts/core/）
+- 📦 文档（README.md 等）
+
+#### 选项 2: 先下载
+
+```bash
+curl -sO https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh
+bash install.sh existing-agent
+```
+
+#### 选项 3: 强制（跳过确认）
+
+```bash
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s existing-agent --force
+```
 
 ---
 
 ### 📋 手动安装
-
-如果需要手动控制：
 
 #### 第一步：克隆模板
 
@@ -257,81 +265,76 @@ cd ~/.openclaw/workspace-my-agent
 openclaw agents add my-agent --workspace ~/.openclaw/workspace-my-agent
 ```
 
-这会创建：
-- `~/.openclaw/agents/my-agent/agent/` - Agent 目录
-- `AGENTS.md`, `SOUL.md`, `IDENTITY.md` - 配置文件
-
-#### 第三步：创建目录结构
+#### 第三步：创建目录
 
 ```bash
 mkdir -p memory/weekly memory/monthly memory/archive
 mkdir -p data/index data/my-agent
 ```
 
-#### 第四步：初始化个人配置
-
-编辑这些文件来定义你的 Agent：
+#### 第四步：测试
 
 ```bash
-# Agent 身份
-nano IDENTITY.md
-
-# 用户信息
-nano USER.md
-
-# Agent 人格
-nano SOUL.md
-```
-
-#### 第五步：测试
-
-```bash
-# 测试记忆系统
-python3 scripts/session_recorder.py -t event -c "Test event" --agent my-agent
-
-# 检查状态
-openclaw agents list | grep my-agent
+python3 scripts/core/session_recorder.py -t event -c "Test" --agent my-agent
 ```
 
 ---
 
-### 🆚 新安装 vs 迁移改造
+### 📁 目录结构
 
-| 方面 | 新安装 | 迁移改造 |
-|------|--------|---------|
-| **需要备份** | ❌ 不需要 | ✅ **必须** |
-| **保留 USER.md** | ❌ 不需要（模板） | ✅ **必须** |
-| **保留 memory/** | ❌ 不需要 | ✅ **必须** |
-| **保留 public/** | ❌ 不需要 | ✅ **必须** |
-| **清理技能** | ✅ 已干净 | ✅ 必须 |
-| **需要确认** | ❌ 不需要 | ✅ **必须** |
-
----
-
-### 📚 文档
-
-- **[README.md](README.md)** - 快速入门指南
-- **[docs/MIGRATION.md](docs/MIGRATION.md)** - 详细迁移指南
-- **[GITHUB_PUSH_RULES.md](GITHUB_PUSH_RULES.md)** - GitHub 推送规范
-- **[FEATURE_ACTIVATION_GUIDE.md](FEATURE_ACTIVATION_GUIDE.md)** - 功能激活指南
+```
+workspace/
+├── skills/
+│   ├── core/              # 系统技能（会更新）
+│   │   ├── memory-search/
+│   │   ├── rag/
+│   │   ├── self-evolution/
+│   │   └── web-knowledge/
+│   │
+│   └── your-skill/        # 你的技能（安全）✅
+│
+├── scripts/
+│   ├── core/              # 系统脚本（会更新）
+│   │   ├── activate-features.sh
+│   │   ├── add-agent.sh
+│   │   └── ...
+│   │
+│   └── your-script.sh     # 你的脚本（安全）✅
+│
+├── memory/                # 你的记忆数据（保留）✅
+├── public/                # 你的知识库（保留）✅
+├── data/                  # 你的 Agent 数据（保留）✅
+├── USER.md                # 你的配置（保留）✅
+├── SOUL.md                # 你的配置（保留）✅
+└── README.md              # 模板（更新）📦
+```
 
 ---
 
 ### 🛠️ 安装后
 
-安装完成后：
+#### 激活功能
 
 ```bash
 cd ~/.openclaw/workspace-my-agent
-
-# 激活高级功能
 ./scripts/core/activate-features.sh
+```
 
-# 查看已安装的技能
-ls skills/
+**可用功能：**
+1. 🔮 语义搜索（Ollama + 嵌入模型）
+2. 📚 知识库系统
+3. 🧬 自进化系统
+4. 📊 RAG 评估
+5. ⏰ 定时任务（Cron）
 
-# 查看文档
-cat README.md
+#### 添加更多 Agent
+
+```bash
+# 单个 Agent
+./scripts/core/add-agent.sh coach "成长教练" 🌱
+
+# 多个 Agent
+./scripts/core/setup-multi-agent.sh researcher writer organizer
 ```
 
 ---
@@ -339,39 +342,17 @@ cat README.md
 ### 📞 故障排除
 
 **Workspace 已存在？**
-- 安装脚本会询问确认
-- 选择 'y' 进行迁移（保留数据）
-- 选择 'n' 取消
+- 使用交互模式：`bash -c "$(curl ...)" -s agent`
+- 或强制：`curl ... | bash -s agent --force`
 
 **Agent 已注册？**
-- 脚本跳过注册步骤
-- 保留现有配置
+- 脚本自动跳过注册
+- 保留你的配置
 
-**安装后缺少文件？**
-- 检查 `git status` 查看未追踪文件
-- 个人配置可能在 `.gitignore` 中
-
----
-
-## Quick Reference | 快速参考
-
-```bash
-# Fresh install | 新安装
-curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s my-agent
-
-# Migration | 迁移改造
-curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s existing-agent
-
-# Manual install | 手动安装
-git clone https://github.com/luoboask/evo-agents.git ~/.openclaw/workspace-my-agent
-cd ~/.openclaw/workspace-my-agent
-openclaw agents add my-agent --workspace ~/.openclaw/workspace-my-agent
-
-# Check status | 检查状态
-openclaw agents list
-git status
-```
+**找不到脚本？**
+- 检查 `scripts/core/` 目录
+- 更新路径为 `scripts/core/script.sh`
 
 ---
 
-**🎉 Ready to start! | 准备开始！**
+**🎉 准备开始！/ Ready to start!**
