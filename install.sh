@@ -1,12 +1,13 @@
 #!/bin/bash
 # install.sh - 一键安装 evo-agents Workspace
 # 用法：curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s <agent-name>
-# Usage: curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s <agent-name> [--force]
+# Usage: curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s <agent-name> [--force] [--activate]
 
 set -e
 
 AGENT_NAME="${1:-my-agent}"
 FORCE="${2:-}"
+ACTIVATE="${3:-}"
 WORKSPACE_ROOT="$HOME/.openclaw/workspace-$AGENT_NAME"
 
 echo "╔════════════════════════════════════════════════════════╗"
@@ -135,7 +136,48 @@ echo "4️⃣  测试 / Testing..."
 python3 scripts/session_recorder.py -t event -c "$AGENT_NAME 初始化完成" --agent $AGENT_NAME 2>/dev/null && \
     echo "   ✅ 测试通过 / Test passed" || echo "   ⚠️  测试跳过（可选）/ Test skipped (optional)"
 
-# 6. 完成 / Complete
+# 6. 激活功能 / Activate Features (可选)
+echo ""
+if [[ "$ACTIVATE" == "--activate" ]] || [[ "$ACTIVATE" == "-a" ]]; then
+    echo "5️⃣  激活功能 / Activating features..."
+    echo ""
+    
+    # 检查 Ollama
+    if command -v ollama &> /dev/null; then
+        echo "   ✅ Ollama 已安装 / Ollama is installed"
+        
+        # 下载 bge-m3 模型（中文支持好）
+        echo "   📥 下载嵌入模型 / Downloading embedding model..."
+        ollama pull bge-m3 2>/dev/null && \
+            echo "   ✅ bge-m3 模型就绪 / bge-m3 model ready" || \
+            echo "   ⚠️  模型下载失败 / Model download failed"
+    else
+        echo "   ⚠️  Ollama 未安装 / Ollama not installed"
+        echo "   安装方法 / Install:"
+        echo "   macOS: brew install ollama"
+        echo "   Linux: curl -fsSL https://ollama.com/install.sh | sh"
+    fi
+    
+    echo ""
+    echo "   ✅ 基础功能已激活 / Basic features activated"
+    echo ""
+    echo "   更多功能可以稍后运行 / For more features, run later:"
+    echo "   ./scripts/activate-features.sh"
+else
+    echo "5️⃣  功能激活 / Feature Activation"
+    echo ""
+    echo "   要激活高级功能（语义搜索、RAG 等），请运行："
+    echo "   To activate advanced features (semantic search, RAG, etc.):"
+    echo ""
+    echo "   ./scripts/activate-features.sh"
+    echo ""
+    echo "   或者使用 --activate 参数自动激活："
+    echo "   Or use --activate flag for auto activation:"
+    echo "   curl -s ... | bash -s $AGENT_NAME --activate"
+    echo ""
+fi
+
+# 7. 完成 / Complete
 echo ""
 echo "╔════════════════════════════════════════════════════════╗"
 echo "║  ✅ 安装完成！/ Installation Complete!                   ║"
