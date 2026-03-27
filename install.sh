@@ -6,6 +6,7 @@
 set -e
 
 AGENT_NAME="${1:-my-agent}"
+FORCE="${2:-}"
 WORKSPACE_ROOT="$HOME/.openclaw/workspace-$AGENT_NAME"
 
 echo "╔════════════════════════════════════════════════════════╗"
@@ -18,7 +19,14 @@ echo ""
 
 # Check if workspace exists | 检查 workspace 是否存在
 if [ -d "$WORKSPACE_ROOT" ]; then
-    echo "⚠️  Workspace 已存在 / Workspace already exists"
+    # 如果使用了 --force，跳过确认
+    if [[ "$FORCE" == "--force" ]] || [[ "$FORCE" == "-f" ]]; then
+        echo "⚠️  Workspace 已存在 / Workspace already exists"
+        echo "   使用 --force 参数，跳过确认 / Using --force, skipping confirmation"
+        echo ""
+        cd "$WORKSPACE_ROOT"
+    else
+        echo "⚠️  Workspace 已存在 / Workspace already exists"
     echo ""
     echo "这可能是因为:"
     echo "This could be because:"
@@ -45,7 +53,7 @@ if [ -d "$WORKSPACE_ROOT" ]; then
     echo "   n - 取消 / Cancel"
     echo ""
     
-    # 使用 /dev/tty 读取输入（支持 curl | bash 方式运行）
+    # 检查是否是交互式终端
     if [ -t 0 ]; then
         # 标准终端输入
         read -p "请输入 / Enter (y/N): " -n 1 -r
@@ -55,25 +63,20 @@ if [ -d "$WORKSPACE_ROOT" ]; then
             exit 1
         fi
     else
-        # 管道输入，尝试从 /dev/tty 读取
-        if [ -e /dev/tty ]; then
-            exec </dev/tty
-            read -p "请输入 / Enter (y/N): " -n 1 -r
-            echo ""
-            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-                echo "❌ 已取消 / Cancelled"
-                exit 1
-            fi
-        else
-            # 没有终端，默认取消
-            echo "⚠️  无法读取输入，默认取消 / Cannot read input, cancelling"
-            exit 1
-        fi
+        # 管道输入，无法交互式确认
+        echo ""
+        echo "⚠️  检测到管道输入，无法读取确认"
+        echo "⚠️  Detected pipe input, cannot read confirmation"
+        echo ""
+        echo "请使用以下方式运行 / Please run:"
+        echo "  bash install.sh $AGENT_NAME"
+        echo ""
+        echo "或者添加 --force 参数强制继续 / Or use --force to continue:"
+        echo "  curl -s ... | bash -s $AGENT_NAME --force"
+        echo ""
+        exit 1
     fi
     
-    echo "✅ 继续安装 / Continuing installation..."
-    
-    echo "✅ 继续安装 / Continuing installation..."
     cd "$WORKSPACE_ROOT"
 else
     # 1. 克隆模板 / Clone template
