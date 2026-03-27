@@ -4,7 +4,7 @@
 # Usage: curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s <agent-name> [--force] [--activate]
 
 set -e
-#!/bin/bash
+
 # Color codes
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -73,28 +73,52 @@ echo ""
 if [ -d "$WORKSPACE_ROOT" ]; then
     # 如果使用了 --force，跳过确认
     if [[ -n "$FORCE" ]]; then
-        echo "⚠️  Workspace 已存在，使用 --force 跳过确认"
+        echo_warning "Workspace 已存在，使用 --force 跳过确认"
         echo "   Workspace exists, using --force to skip confirmation"
         echo ""
         cd "$WORKSPACE_ROOT"
     else
-        echo "⚠️  检测到 $AGENT_NAME 的 workspace 已存在"
+        echo_warning "检测到 $AGENT_NAME 的 workspace 已存在"
         echo "   Workspace for $AGENT_NAME already exists"
         echo ""
         
-        # 提供备份选项
-        echo "❓ 安装前是否备份当前 workspace？/ Backup before install?"
-        echo "   y - 备份（推荐）/ Backup (recommended)"
-        echo "   n - 跳过备份 / Skip backup"
-        echo ""
-        
+        # 检测是否是管道运行
         if [ -t 0 ]; then
+            # 交互式终端，询问用户
+            echo "❓ 是否继续安装？/ Continue installation?"
+            echo "   y - 继续（保留数据）/ Continue (preserve data)"
+            echo "   n - 取消 / Cancel"
+            echo ""
+            
+            read -p "请输入 / Enter (Y/n): " -n 1 -r
+            echo ""
+            
+            if [[ ! "$REPLY" =~ ^[Yy]$ ]] && [[ -n "$REPLY" ]]; then
+                echo_error "已取消 / Cancelled"
+                exit 0
+            fi
+            
+            # 询问备份
+            echo ""
+            echo "❓ 安装前是否备份当前 workspace？/ Backup before install?"
+            echo "   y - 备份（推荐）/ Backup (recommended)"
+            echo "   n - 跳过备份 / Skip backup"
+            echo ""
+            
             read -p "请输入 / Enter (Y/n): " -n 1 -r
             BACKUP_REPLY="$REPLY"
             echo ""
         else
-            # 管道输入，默认备份
-            BACKUP_REPLY="y"
+            # 管道运行，自动继续但提示
+            echo_warning "管道运行模式 / Pipe mode detected"
+            echo "   自动继续安装（保留现有数据）"
+            echo "   Auto-continuing installation (preserving existing data)"
+            echo ""
+            echo "💡 如需交互式安装，请使用:"
+            echo "   curl -sO https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh"
+            echo "   bash install.sh $AGENT_NAME"
+            echo ""
+            BACKUP_REPLY="y"  # 管道模式默认备份
         fi
         
         if [[ "$BACKUP_REPLY" =~ ^[Yy]$ ]] || [[ -z "$BACKUP_REPLY" ]]; then
@@ -108,7 +132,7 @@ if [ -d "$WORKSPACE_ROOT" ]; then
             cp -r "$WORKSPACE_ROOT" "$BACKUP_DIR"
             
             if [ $? -eq 0 ]; then
-                echo "✅ 备份完成 / Backup complete"
+                echo_step "备份完成 / Backup complete"
                 echo "   备份大小 / Backup size: $(du -sh "$BACKUP_DIR" | cut -f1)"
                 echo ""
                 echo "💡 如需恢复备份，运行："
@@ -116,65 +140,25 @@ if [ -d "$WORKSPACE_ROOT" ]; then
                 echo "   cp -r $BACKUP_DIR/* $WORKSPACE_ROOT/"
                 echo ""
             else
-                echo "⚠️  备份失败，继续安装 / Backup failed, continuing install"
+                echo_warning "备份失败，继续安装 / Backup failed, continuing install"
                 echo ""
             fi
         fi
         
         echo "🔄 继续安装将更新通用模板文件："
-        echo "   Continuing will update template files:"
+        echo "   Continuing install will update template files:"
         echo ""
         echo "   ✅ 保留以下内容（不会删除）:"
         echo "      - 您的个人配置 (USER.md, SOUL.md 等)"
-        echo "      - 记忆数据 (memory/ 目录)"
-        echo "      - 知识库 (public/ 目录)"
+        echo "      - 记忆数据 (memory/, public/)"
         echo "      - 您添加的技能（skills/ 目录）"
         echo "      - 您的脚本和数据"
         echo ""
         echo "   📦 将更新以下内容:"
         echo "      - 通用技能（memory-search, rag, self-evolution, web-knowledge）"
-        echo "      - 系统脚本（scripts/core/ 目录）"
+        echo "      - 脚本工具（scripts/core/ 目录）"
         echo "      - 文档（README.md 等）"
         echo ""
-        echo "   📝 您的自定义脚本:"
-        echo "      - scripts/ 目录的其他文件不会被覆盖"
-        echo "      - 请将自定义脚本放在 scripts/ 根目录"
-        echo ""
-        
-        echo "❓ 是否继续？/ Continue?"
-        echo "   y - 继续（迁移改造 / Migrate and update）"
-        echo "   n - 取消 / Cancel"
-        echo ""
-        
-        # 检查是否是交互式终端
-        if [ -t 0 ]; then
-            # 标准终端输入
-            read -p "请输入 / Enter (y/N): " -n 1 -r
-            echo ""
-            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-                echo "❌ 已取消 / Cancelled"
-                exit 1
-            fi
-        else
-            # 管道输入，无法交互式确认
-            echo ""
-            echo "⚠️  检测到管道输入，无法读取确认"
-            echo "⚠️  Detected pipe input, cannot read confirmation"
-            echo ""
-            echo "请使用以下方式之一 / Please use one of:"
-            echo ""
-            echo "1. 推荐方式（支持交互）/ Recommended (interactive):"
-            echo "   bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh)\" -s $AGENT_NAME"
-            echo ""
-            echo "2. 下载后运行 / Download first:"
-            echo "   curl -sO https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh"
-            echo "   bash install.sh $AGENT_NAME"
-            echo ""
-            echo "3. 强制继续（跳过确认）/ Force (skip confirmation):"
-            echo "   curl -s ... | bash -s $AGENT_NAME --force"
-            echo ""
-            exit 1
-        fi
         
         cd "$WORKSPACE_ROOT"
     fi
@@ -182,21 +166,8 @@ else
     # 1. 克隆模板 / Clone template
     echo_step "1️⃣  克隆 evo-agents 模板 / Cloning template..."
     git clone --depth 1 https://github.com/luoboask/evo-agents.git "$WORKSPACE_ROOT"
-# Note: tests/ directory is not copied to workspace (development only)
-# 注意：tests/ 目录不会复制到 workspace（仅用于开发）
     echo "   ✅ 克隆完成 / Clone complete"
     cd "$WORKSPACE_ROOT"
-    
-    # 确保 skills/ 目录存在（从模板复制）
-    if [ ! -d "skills/memory-search" ]; then
-        echo ""
-        echo "📦 复制通用技能..."
-        # skills/ 目录已通过 git clone 复制
-        if [ -d "skills" ]; then
-            echo "   ✅ skills/ 目录已就绪"
-            ls -1 skills/ | sed 's/^/      - /'
-        fi
-    fi
 fi
 
 # 2. 注册到 OpenClaw / Register to OpenClaw
@@ -209,24 +180,23 @@ else
     echo "   ✅ 注册完成 / Registration complete"
 fi
 
-# 4. 创建目录结构 / Create directory structure
+# 3. 创建目录结构 / Create directory structure
 echo ""
-echo "4️⃣  创建目录结构 / Creating directory structure..."
+echo_step "3️⃣  创建目录结构 / Creating directory structure..."
 mkdir -p memory/weekly memory/monthly memory/archive
 mkdir -p data/index data/$AGENT_NAME
 echo "   ✅ 目录创建完成 / Directories created"
 
-# 5. 测试 / Test
+# 4. 测试 / Test
 echo ""
-echo "5️⃣  测试 / Testing..."
+echo_step "4️⃣  测试 / Testing..."
 python3 scripts/core/session_recorder.py -t event -c "$AGENT_NAME 初始化完成" --agent $AGENT_NAME 2>/dev/null && \
     echo "   ✅ 测试通过 / Test passed" || echo "   ⚠️  测试跳过（可选）/ Test skipped (optional)"
 
-# 6. 激活功能 / Activate Features (可选)
-echo ""
+# 5. 激活功能 / Activate Features (可选)
 if [[ -n "$ACTIVATE" ]]; then
-    echo "6️⃣  激活功能 / Activating features..."
     echo ""
+    echo_step "5️⃣  激活功能 / Activating features..."
     
     # 检查 Ollama
     if command -v ollama &> /dev/null; then
@@ -250,7 +220,8 @@ if [[ -n "$ACTIVATE" ]]; then
     echo "   更多功能可以稍后运行 / For more features, run later:"
     echo "   ./scripts/core/activate-features.sh"
 else
-    echo_step "5️⃣  功能激活 / Feature Activation"
+    echo ""
+    echo "5️⃣  功能激活 / Feature Activation"
     echo ""
     echo "   要激活高级功能（语义搜索、RAG 等），请运行："
     echo "   To activate advanced features (semantic search, RAG, etc.):"
@@ -263,9 +234,9 @@ else
     echo ""
 fi
 
-# 7. 完成 / Complete
+# 6. 完成 / Complete
 echo ""
-echo_step "8️⃣  完成 / Complete"
+echo_step "6️⃣  完成 / Complete"
 echo ""
 echo "╔════════════════════════════════════════════════════════╗"
 echo "║  ✅ 安装完成！/ Installation Complete!                   ║"
