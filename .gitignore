@@ -97,3 +97,12 @@ public/*/
 !public/security/
 !public/skills/
 !public/tutorial/
+
+# -----------------------------------------------------------------------------
+# Agent Instance Files (每个 Agent 自己创建，不提交)
+# -----------------------------------------------------------------------------
+USER.md
+SOUL.md
+IDENTITY.md
+MEMORY.md
+HEARTBEAT.md
