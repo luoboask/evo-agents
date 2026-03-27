@@ -77,20 +77,26 @@ if [ -d "$WORKSPACE_ROOT" ]; then
                 exit 1
             fi
         else
-            # 管道输入，无法交互式确认
+            # 管道输入，自动下载到临时脚本并执行
             echo ""
-            echo "⚠️  检测到管道输入，无法读取确认"
-            echo "⚠️  Detected pipe input, cannot read confirmation"
+            echo "⚠️  检测到管道输入，切换到交互模式"
+            echo "⚠️  Detected pipe input, switching to interactive mode"
             echo ""
-            echo "请使用以下方式之一 / Please use one of:"
+            
+            # 下载脚本到临时文件
+            TEMP_SCRIPT=$(mktemp /tmp/install-XXXXXX.sh)
+            curl -s -o "$TEMP_SCRIPT" "https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh"
+            chmod +x "$TEMP_SCRIPT"
+            
+            echo "✅ 已下载脚本到临时文件"
+            echo "   Downloaded script to temporary file"
             echo ""
-            echo "1. 直接运行（推荐）/ Run directly (recommended):"
-            echo "   bash install.sh $AGENT_NAME"
+            echo "🔄 重新启动（交互模式）..."
+            echo "   Restarting in interactive mode..."
             echo ""
-            echo "2. 强制继续（跳过确认）/ Force (skip confirmation):"
-            echo "   curl -s ... | bash -s $AGENT_NAME --force"
-            echo ""
-            exit 1
+            
+            # 执行临时脚本（有交互）
+            exec bash "$TEMP_SCRIPT" "$AGENT_NAME"
         fi
         
         cd "$WORKSPACE_ROOT"
