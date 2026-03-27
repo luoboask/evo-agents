@@ -133,3 +133,6 @@ USER.md
 SOUL.md
 TOOLS.md
 AGENTS.md
+
+# Tests (development only)
+tests/

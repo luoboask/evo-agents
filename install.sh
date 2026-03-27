@@ -182,6 +182,8 @@ else
     # 1. 克隆模板 / Clone template
     echo_step "1️⃣  克隆 evo-agents 模板 / Cloning template..."
     git clone --depth 1 https://github.com/luoboask/evo-agents.git "$WORKSPACE_ROOT"
+# Note: tests/ directory is not copied to workspace (development only)
+# 注意：tests/ 目录不会复制到 workspace（仅用于开发）
     echo "   ✅ 克隆完成 / Clone complete"
     cd "$WORKSPACE_ROOT"
     

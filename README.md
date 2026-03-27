@@ -364,3 +364,27 @@ cp -r ~/.openclaw/workspace-my-agent /tmp/workspace-backup-my-agent-$(date +%Y%m
 - 📦 Universal skills (skills/core/)
 
 ---
+
+---
+
+## 🧪 Development | 开发
+
+### Tests | 测试
+
+**Test scripts** are in `tests/` directory (development only, not installed to workspace):
+
+```bash
+# Run tests | 运行测试
+cd tests/
+./run_tests.sh
+
+# Or with Python
+python3 -m unittest discover -v
+```
+
+**Test files:**
+- `tests/test_install.py` - Install script tests
+- `tests/test_memory.py` - Memory system tests
+- `tests/run_tests.sh` - Test runner
+
+**Note:** Tests are for development only and won't be installed to workspace.

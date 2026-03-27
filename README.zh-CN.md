@@ -341,3 +341,27 @@ python3 scripts/core/memory_stats.py --agent main
 openclaw cron add --name "记录" --every "3600" \
   --command "python3 scripts/core/session_recorder.py -t event -c '自动' --agent main"
 ```
+
+---
+
+## 🧪 开发
+
+### 测试
+
+**测试脚本**在 `tests/` 目录中（仅用于开发，不安装到 workspace）：
+
+```bash
+# 运行测试
+cd tests/
+./run_tests.sh
+
+# 或使用 Python
+python3 -m unittest discover -v
+```
+
+**测试文件:**
+- `tests/test_install.py` - 安装脚本测试
+- `tests/test_memory.py` - 记忆系统测试
+- `tests/run_tests.sh` - 测试运行器
+
+**注意:** 测试仅用于开发，不会安装到 workspace。
