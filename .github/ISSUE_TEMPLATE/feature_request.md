@@ -21,7 +21,7 @@ How would this feature be used? Who would benefit from it?
 **Example Usage**
 ```bash
 # Example of how this feature would be used
-./scripts/setup-multi-agent.sh designer writer editor
+./scripts/core/setup-multi-agent.sh designer writer editor
 ```
 
 **Additional context**

@@ -66,8 +66,8 @@ pip3 install -r requirements.txt  # When we have requirements
 python3 -m pytest tests/
 
 # Test the scripts manually
-./scripts/setup-multi-agent.sh test-agent
-./scripts/add-agent.sh demo "Demo Agent" 🤖
+./scripts/core/setup-multi-agent.sh test-agent
+./scripts/core/add-agent.sh demo "Demo Agent" 🤖
 ```
 
 ## Styleguides

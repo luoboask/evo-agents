@@ -82,7 +82,7 @@ The script will:
 After installation, activate advanced features interactively:
 
 ```bash
-./scripts/activate-features.sh
+./scripts/core/activate-features.sh
 ```
 
 **Available Features:**
@@ -190,9 +190,9 @@ scripts/
 
 **evo-agents:**
 ```bash
-./scripts/setup-multi-agent.sh analyst developer tester
-./scripts/add-agent.sh designer "UI Designer" 🎨
-./scripts/activate-features.sh
+./scripts/core/setup-multi-agent.sh analyst developer tester
+./scripts/core/add-agent.sh designer "UI Designer" 🎨
+./scripts/core/activate-features.sh
 ```
 
 **Benefits:** One-click completion, Error-free, Repeatable

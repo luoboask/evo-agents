@@ -37,7 +37,7 @@ curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh 
 安装完成后，交互式激活高级功能：
 
 ```bash
-./scripts/activate-features.sh
+./scripts/core/activate-features.sh
 ```
 
 **可激活功能：**
@@ -66,14 +66,14 @@ curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh 
 ### setup-multi-agent.sh - 批量创建
 
 ```bash
-./scripts/setup-multi-agent.sh designer writer ops
+./scripts/core/setup-multi-agent.sh designer writer ops
 # 创建：designer-agent, writer-agent, ops-agent
 ```
 
 ### add-agent.sh - 新增单个
 
 ```bash
-./scripts/add-agent.sh designer UI/UX 设计师 🎨
+./scripts/core/add-agent.sh designer UI/UX 设计师 🎨
 # 创建：designer-agent (UI/UX 设计师 🎨)
 ```
 
@@ -168,9 +168,9 @@ evo-agents/
 
 **evo-agents 优化：**
 ```bash
-./scripts/setup-multi-agent.sh analyst developer tester
-./scripts/add-agent.sh designer "UI 设计师" 🎨
-./scripts/activate-features.sh
+./scripts/core/setup-multi-agent.sh analyst developer tester
+./scripts/core/add-agent.sh designer "UI 设计师" 🎨
+./scripts/core/activate-features.sh
 ```
 
 **优势：** 一键完成、不易出错、可重复

@@ -152,7 +152,7 @@ After installation:
 cd ~/.openclaw/workspace-my-agent
 
 # Activate advanced features
-./scripts/activate-features.sh
+./scripts/core/activate-features.sh
 
 # Check installed skills
 ls skills/
@@ -325,7 +325,7 @@ openclaw agents list | grep my-agent
 cd ~/.openclaw/workspace-my-agent
 
 # 激活高级功能
-./scripts/activate-features.sh
+./scripts/core/activate-features.sh
 
 # 查看已安装的技能
 ls skills/

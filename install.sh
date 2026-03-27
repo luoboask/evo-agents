@@ -128,7 +128,7 @@ echo "   ✅ 目录创建完成 / Directories created"
 # 5. 测试 / Test
 echo ""
 echo "5️⃣  测试 / Testing..."
-python3 scripts/session_recorder.py -t event -c "$AGENT_NAME 初始化完成" --agent $AGENT_NAME 2>/dev/null && \
+python3 scripts/core/session_recorder.py -t event -c "$AGENT_NAME 初始化完成" --agent $AGENT_NAME 2>/dev/null && \
     echo "   ✅ 测试通过 / Test passed" || echo "   ⚠️  测试跳过（可选）/ Test skipped (optional)"
 
 # 6. 激活功能 / Activate Features (可选)
@@ -157,14 +157,14 @@ if [[ -n "$ACTIVATE" ]]; then
     echo "   ✅ 基础功能已激活 / Basic features activated"
     echo ""
     echo "   更多功能可以稍后运行 / For more features, run later:"
-    echo "   ./scripts/activate-features.sh"
+    echo "   ./scripts/core/activate-features.sh"
 else
     echo "5️⃣  功能激活 / Feature Activation"
     echo ""
     echo "   要激活高级功能（语义搜索、RAG 等），请运行："
     echo "   To activate advanced features (semantic search, RAG, etc.):"
     echo ""
-    echo "   ./scripts/activate-features.sh"
+    echo "   ./scripts/core/activate-features.sh"
     echo ""
     echo "   或者使用 --activate 参数自动激活："
     echo "   Or use --activate flag for auto activation:"
@@ -186,7 +186,7 @@ echo "   Agent: $AGENT_NAME"
 echo ""
 echo "🚀 下一步 / Next Steps:"
 echo "   cd $WORKSPACE_ROOT"
-echo "   ./scripts/activate-features.sh  # 激活高级功能 / Activate features"
+echo "   ./scripts/core/activate-features.sh  # 激活高级功能 / Activate features"
 echo ""
 echo "📖 文档 / Documentation:"
 echo "   - README.md - 快速入门 / Quick Start"

@@ -20,7 +20,7 @@ Describe what you've already attempted.
 **Example Code/Commands**
 ```bash
 # Your commands or code here
-./scripts/setup-multi-agent.sh designer writer
+./scripts/core/setup-multi-agent.sh designer writer
 ```
 
 **Expected Outcome**
