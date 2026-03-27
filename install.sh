@@ -84,7 +84,7 @@ if [ -d "$WORKSPACE_ROOT" ]; then
             echo ""
             
             # 下载脚本到临时文件
-            TEMP_SCRIPT=$(mktemp /tmp/install-XXXXXX.sh)
+            TEMP_SCRIPT="/tmp/install-$$.sh"
             curl -s -o "$TEMP_SCRIPT" "https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh"
             chmod +x "$TEMP_SCRIPT"
             
