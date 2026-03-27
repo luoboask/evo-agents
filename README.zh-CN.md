@@ -260,5 +260,68 @@ evo-agents/
 
 ---
 
-**最后更新：** 2026-03-26  
+**最后更新：** 2026-03-27  
 **GitHub:** https://github.com/luoboask/evo-agents
+
+---
+
+## 🧠 记忆系统与自动记录
+
+### 自动记录
+
+**默认状态:** 手动触发（隐私保护设计）
+
+**启用自动记录:**
+
+```bash
+# 编辑 HEARTBEAT.md
+nano ~/.openclaw/workspace/HEARTBEAT.md
+
+# 添加记录命令:
+python3 scripts/core/session_recorder.py -t event -c "对话" --agent main
+```
+
+**频率:**
+- **HEARTBEAT:** 约每 30 分钟（默认）
+- **Cron:** 自定义（如每小时）
+
+### 手动记录
+
+```bash
+# 记录对话
+python3 scripts/core/session_recorder.py -t event -c "内容" --agent main
+
+# 查看记忆
+cat ~/.openclaw/workspace/memory/$(date +%Y-%m-%d).md
+
+# 查看统计
+python3 scripts/core/memory_stats.py --agent main
+```
+
+### RAG 自动指标
+
+**状态:** ✅ 默认启用
+
+- 搜索查询自动记录
+- RAG 指标跟踪（延迟、结果数、分数）
+- 每周自动调优（周一 10:00）
+
+---
+
+## 📋 定时任务
+
+**默认任务 (共 18 个):**
+
+| 任务 | 时间 | 说明 |
+|------|------|------|
+| 每日索引 | 3:00 AM | 记忆索引 |
+| 每周压缩 | 周一 4:00 AM | 记忆压缩 |
+| 每周评估 | 周一 9:00 AM | RAG 评估 |
+| 每周调优 | 周一 10:00 AM | RAG 自动调优 |
+| 心跳检查 | 8/10/20 点 | 系统检查 |
+
+**添加自定义任务:**
+```bash
+openclaw cron add --name "记录" --every "3600" \
+  --command "python3 scripts/core/session_recorder.py -t event -c '自动' --agent main"
+```

@@ -282,8 +282,73 @@ scripts/
 
 ---
 
-**Last Updated:** 2026-03-26  
+**Last Updated:** 2026-03-27  
 **GitHub:** https://github.com/luoboask/evo-agents
+
+---
+
+## 🧠 Memory System & Auto-Record | 记忆系统与自动记录
+
+### Auto-Record | 自动记录
+
+**Default:** Manual trigger (privacy by design)  
+**默认:** 手动触发（隐私保护设计）
+
+**Enable Auto-Record | 启用自动记录:**
+
+```bash
+# Edit HEARTBEAT.md
+nano ~/.openclaw/workspace/HEARTBEAT.md
+
+# Add record command:
+python3 scripts/core/session_recorder.py -t event -c "Dialog" --agent main
+```
+
+**Frequency | 频率:**
+- **HEARTBEAT:** Every ~30 min (default)
+- **Cron:** Custom (e.g., every hour)
+
+### Manual Record | 手动记录
+
+```bash
+# Record dialog
+python3 scripts/core/session_recorder.py -t event -c "Content" --agent main
+
+# View memory
+cat ~/.openclaw/workspace/memory/$(date +%Y-%m-%d).md
+
+# View stats
+python3 scripts/core/memory_stats.py --agent main
+```
+
+### RAG Auto-Metrics | RAG 自动指标
+
+**Status:** ✅ Enabled by default  
+**状态:** ✅ 默认启用
+
+- Search queries are auto-recorded
+- RAG metrics tracked (latency, results, score)
+- Weekly auto-tune (Monday 10:00 AM)
+
+---
+
+## 📋 Cron Tasks | 定时任务
+
+**Default Tasks | 默认任务 (18 total):**
+
+| Task | Schedule | Description |
+|------|----------|-------------|
+| Daily Index | 3:00 AM | Memory indexing |
+| Weekly Compress | Mon 4:00 AM | Memory compression |
+| Weekly Eval | Mon 9:00 AM | RAG evaluation |
+| Weekly Tune | Mon 10:00 AM | RAG auto-tune |
+| Heartbeat | 8/10/20 AM | System check |
+
+**Add Custom Task | 添加自定义任务:**
+```bash
+openclaw cron add --name "record" --every "3600" \
+  --command "python3 scripts/core/session_recorder.py -t event -c 'Auto' --agent main"
+```
 
 ---
 

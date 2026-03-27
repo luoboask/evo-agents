@@ -356,3 +356,71 @@ cd ~/.openclaw/workspace-my-agent
 ---
 
 **🎉 准备开始！/ Ready to start!**
+
+---
+
+## 🧠 Memory System & Auto-Record | 记忆系统与自动记录
+
+### Enable Auto-Record | 启用自动记录
+
+**Default:** Manual trigger (privacy by design)  
+**默认:** 手动触发（隐私保护设计）
+
+**Quick Setup | 快速配置:**
+
+```bash
+# Edit HEARTBEAT.md | 编辑 HEARTBEAT.md
+nano ~/.openclaw/workspace-my-agent/HEARTBEAT.md
+
+# Add this line | 添加这行:
+python3 scripts/core/session_recorder.py -t event -c "Dialog" --agent my-agent
+```
+
+**Frequency | 频率:**
+- **HEARTBEAT:** ~30 min (default) | 约 30 分钟
+- **Cron:** Custom | 自定义
+
+### Manual Record | 手动记录
+
+```bash
+# Record dialog | 记录对话
+python3 scripts/core/session_recorder.py -t event -c "Content" --agent my-agent
+
+# View memory | 查看记忆
+cat ~/.openclaw/workspace-my-agent/memory/$(date +%Y-%m-%d).md
+
+# View stats | 查看统计
+python3 scripts/core/memory_stats.py --agent my-agent
+```
+
+### RAG Auto-Metrics | RAG 自动指标
+
+**✅ Enabled by default | 默认启用**
+
+- Search queries auto-recorded | 搜索自动记录
+- RAG metrics tracked | RAG 指标跟踪
+- Weekly auto-tune | 每周自动调优
+
+### Cron Tasks | 定时任务
+
+**Default (18 tasks) | 默认 (18 个任务):**
+
+| Task | Schedule | Description |
+|------|----------|-------------|
+| Daily Index | 3:00 AM | Memory indexing |
+| Weekly Compress | Mon 4:00 AM | Memory compression |
+| Weekly Eval | Mon 9:00 AM | RAG evaluation |
+| Weekly Tune | Mon 10:00 AM | RAG auto-tune |
+
+**Add Custom | 添加自定义:**
+```bash
+openclaw cron add --name "record" --every "3600" \
+  --command "python3 scripts/core/session_recorder.py -t event -c 'Auto' --agent my-agent"
+```
+
+---
+
+**📖 More Docs | 更多文档:**
+- `docs/AGENT_INSTRUCTIONS.md` - Agent instructions
+- `docs/WORKSPACE_RULES.md` - Workspace rules
+- `docs/UNINSTALL.md` - Uninstall guide

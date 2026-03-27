@@ -1,18 +1,19 @@
-# evo-agents - Agent Configuration Template
-# Copy this file and customize for your agents
+# Multi-Agent Configuration
+# Main agent
+growth-agents:
+  name: growth-agents
+  role: coordinator
+  data_path: data/growth-agents
+  memory_path: memory
 
-agents:
-  # Example agent configuration
-  # - name: my-agent
-  #   workspace: ~/.openclaw/workspace-my-agent
-  #   model: bailian/qwen3.5-plus
-  #   enabled: true
-  
-  # Add your agents here
+# Sub-agents
+  name: test2-agent
+  role: test2
+  data_path: agents/test2-agent/data
+  memory_path: agents/test2-agent/memory
 
-# Sub-agent: demo-agent
-demo-agent:
-  name: demo-agent
-  role: demo
-  data_path: agents/demo-agent/data
-  memory_path: agents/demo-agent/memory
+  name: test3-agent
+  role: test3
+  data_path: agents/test3-agent/data
+  memory_path: agents/test3-agent/memory
+
