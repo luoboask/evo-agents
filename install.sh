@@ -43,20 +43,20 @@ if [ -d "$WORKSPACE_ROOT" ]; then
         echo "⚠️  检测到 $AGENT_NAME 的 workspace 已存在"
         echo "   Workspace for $AGENT_NAME already exists"
         echo ""
-        echo "🔄 继续安装将更新此 workspace："
-        echo "   Continuing will update this workspace:"
+        echo "🔄 继续安装将更新通用模板文件："
+        echo "   Continuing will update template files:"
         echo ""
         echo "   ✅ 保留以下内容（不会删除）:"
         echo "      - 您的个人配置 (USER.md, SOUL.md 等)"
         echo "      - 记忆数据 (memory/ 目录)"
         echo "      - 知识库 (public/ 目录)"
+        echo "      - 您添加的技能（skills/ 目录）"
+        echo "      - 您的脚本和数据"
         echo ""
-        echo "   ⚠️  可能删除以下内容:"
-        echo "      - 特定 Agent 的技能（非通用技能）"
-        echo "      - 与模板冲突的配置文件"
-        echo ""
-        echo "   💡 建议：如有重要修改，请先备份"
-        echo "      Backup important changes before continuing"
+        echo "   📦 将更新以下内容:"
+        echo "      - 通用技能（memory-search, rag, self-evolution, web-knowledge）"
+        echo "      - 脚本工具（scripts/ 目录）"
+        echo "      - 文档（README.md 等）"
         echo ""
         
         echo "❓ 是否继续？/ Continue?"
@@ -114,46 +114,23 @@ else
     echo "   ✅ 注册完成 / Registration complete"
 fi
 
-# 3. 创建目录结构 / Create directory structure
+# 4. 创建目录结构 / Create directory structure
 echo ""
-echo "3️⃣  创建目录结构 / Creating directory structure..."
+echo "4️⃣  创建目录结构 / Creating directory structure..."
 mkdir -p memory/weekly memory/monthly memory/archive
 mkdir -p data/index data/$AGENT_NAME
 echo "   ✅ 目录创建完成 / Directories created"
 
-# 4. 如果是迁移，清理特定技能 / If migration, clean up specific skills
-if [ -d "skills" ] && [ "$(ls -A skills 2>/dev/null)" ]; then
-    SKILL_COUNT=$(ls -d skills/*/ 2>/dev/null | wc -l)
-    if [ "$SKILL_COUNT" -gt 4 ]; then
-        echo ""
-        echo "🗑️  清理特定技能 / Cleaning up specific skills..."
-        
-        # 保留通用技能 / Keep universal skills
-        KEEP_SKILLS="memory-search rag self-evolution web-knowledge"
-        
-        cd skills
-        for dir in */; do
-            skill=$(basename "$dir")
-            if [[ ! " $KEEP_SKILLS " =~ " $skill " ]]; then
-                echo "   🗑️  删除 / Removing: $skill"
-                rm -rf "$dir"
-            fi
-        done
-        cd ..
-        echo "   ✅ 清理完成 / Cleanup complete"
-    fi
-fi
-
 # 5. 测试 / Test
 echo ""
-echo "4️⃣  测试 / Testing..."
+echo "5️⃣  测试 / Testing..."
 python3 scripts/session_recorder.py -t event -c "$AGENT_NAME 初始化完成" --agent $AGENT_NAME 2>/dev/null && \
     echo "   ✅ 测试通过 / Test passed" || echo "   ⚠️  测试跳过（可选）/ Test skipped (optional)"
 
 # 6. 激活功能 / Activate Features (可选)
 echo ""
 if [[ -n "$ACTIVATE" ]]; then
-    echo "5️⃣  激活功能 / Activating features..."
+    echo "6️⃣  激活功能 / Activating features..."
     echo ""
     
     # 检查 Ollama
@@ -192,6 +169,8 @@ else
 fi
 
 # 7. 完成 / Complete
+echo ""
+echo "8️⃣  完成 / Complete"
 echo ""
 echo "╔════════════════════════════════════════════════════════╗"
 echo "║  ✅ 安装完成！/ Installation Complete!                   ║"
