@@ -154,13 +154,7 @@ setup_knowledge_base() {
     echo ""
     
     python3 << EOF
-import sys
-from pathlib import Path
-
-# 添加 workspace 的 libs 目录到路径
-workspace = Path('$WORKSPACE_ROOT').resolve()
-sys.path.insert(0, str(workspace / 'libs'))
-
+# sitecustomize.py 会自动添加 libs 到路径
 from memory_hub import MemoryHub
 
 hub = MemoryHub('$AGENT_NAME')
