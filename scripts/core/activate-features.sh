@@ -154,7 +154,14 @@ setup_knowledge_base() {
     echo ""
     
     python3 << EOF
-from libs.memory_hub import MemoryHub
+import sys
+from pathlib import Path
+
+# 添加 workspace 的 libs 目录到路径
+workspace = Path('$WORKSPACE_ROOT').resolve()
+sys.path.insert(0, str(workspace / 'libs'))
+
+from memory_hub import MemoryHub
 
 hub = MemoryHub('$AGENT_NAME')
 
@@ -221,7 +228,7 @@ setup_self_evolution() {
     
     echo "   📝 初始化自进化系统..."
     python3 << EOF
-from memory_stream import MemoryStream
+from storage import MemoryStream
 
 ms = MemoryStream()
 ms.add_memory(
