@@ -40,24 +40,24 @@ if [ -d "$WORKSPACE_ROOT" ]; then
         echo ""
         cd "$WORKSPACE_ROOT"
     else
-        # 检查是否已安装过 evo-agents | Check if evo-agents is already installed
-        if [ -f "$WORKSPACE_ROOT/skills/memory-search/search.py" ] || \
-           [ -f "$WORKSPACE_ROOT/README.md" ]; then
-            echo "🔄 检测到现有 evo-agents workspace，将进行迁移改造"
-            echo "   Detected existing evo-agents workspace, will migrate"
-            echo ""
-            echo "   保留 / Preserve:"
-            echo "   - ✅ 个人配置 (USER.md, SOUL.md 等) / Personal configs"
-            echo "   - ✅ 记忆数据 (memory/, public/) / Memory & knowledge"
-            echo ""
-            echo "   清理 / Clean up:"
-            echo "   - 🗑️ 特定 Agent 技能 / Agent-specific skills"
-            echo ""
-        else
-            echo "⚠️  检测到非 evo-agents workspace，将覆盖安装"
-            echo "   Detected non-evo-agents workspace, will overwrite"
-            echo ""
-        fi
+        echo "⚠️  检测到 $AGENT_NAME 的 workspace 已存在"
+        echo "   Workspace for $AGENT_NAME already exists"
+        echo ""
+        echo "🔄 继续安装将更新此 workspace："
+        echo "   Continuing will update this workspace:"
+        echo ""
+        echo "   ✅ 保留以下内容（不会删除）:"
+        echo "      - 您的个人配置 (USER.md, SOUL.md 等)"
+        echo "      - 记忆数据 (memory/ 目录)"
+        echo "      - 知识库 (public/ 目录)"
+        echo ""
+        echo "   ⚠️  可能删除以下内容:"
+        echo "      - 特定 Agent 的技能（非通用技能）"
+        echo "      - 与模板冲突的配置文件"
+        echo ""
+        echo "   💡 建议：如有重要修改，请先备份"
+        echo "      Backup important changes before continuing"
+        echo ""
         
         echo "❓ 是否继续？/ Continue?"
         echo "   y - 继续（迁移改造 / Migrate and update）"
