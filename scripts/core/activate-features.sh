@@ -369,7 +369,7 @@ fi
 
 if [[ " $FEATURES " =~ " 2 " ]]; then
     echo "   # 查看知识库"
-    echo "   python3 -c \"from libs.memory_hub import MemoryHub; print(MemoryHub('$AGENT_NAME').knowledge.list_categories())\""
+    echo "   python3 -c \"import sys; sys.path.insert(0, 'libs'); from memory_hub import MemoryHub; print(MemoryHub('$AGENT_NAME').knowledge.list_categories())\""
     echo ""
 fi
 
