@@ -365,43 +365,52 @@ build/
 ./scripts/core/cleanup.sh ~/.openclaw/workspace-my-agent
 ```
 
-**清理内容：**
-- ✅ `data/*/work/` - Agent 临时工作目录
-- ✅ `agents/*/data/*/work/` - 子 Agent 临时工作目录
-- ✅ `node_modules/`, `__pycache__/` - 构建产物
+**清理脚本会询问：**
+```
+❓ 要清理哪些内容？
+   1) 只清理构建产物 (node_modules, __pycache__, *.log 等)
+   2) 清理构建产物 + work/ 目录（请确认 work/ 是临时的）
+   3) 取消
+```
+
+**构建产物（安全清理）：**
+- ✅ `node_modules/` - npm 依赖
+- ✅ `__pycache__/` - Python 缓存
 - ✅ `*.log`, `*.tmp`, `*.pyc` - 临时文件
 
-**不会清理：**
-- ❌ `data/<agent>/memory/` - Agent 记忆
-- ❌ `agents/<agent>/agent/` - Agent 配置
-- ❌ `agents/<agent>/sessions/` - 聊天会话
-- ❌ `memory/` - 日常记忆
-- ❌ `public/` - 知识库
+**work/ 目录（需要确认）：**
+- ⚠️ 脚本**无法判断**是临时还是长期项目
+- ⚠️ 需要**手动确认**后再清理
+- ✅ 只有你确认是临时的才清理
+
+---
 
 **work/ 目录说明：**
 
-`work/` 是**临时工作目录**，用于：
-- ✅ 临时克隆的 Git 项目
-- ✅ 临时处理的文件
-- ✅ 构建产物
-- ✅ 测试数据
+`work/` 是**工作目录**，可能包含：
+- 📦 临时项目（分析完就删除）
+- 📦 长期项目（持续开发）
+- 📦 测试数据
 
-**不是**用于：
-- ❌ 永久配置
-- ❌ 重要数据
-- ❌ 长期项目
+**脚本无法区分，需要你手动决定！**
 
-**正确使用：**
+**建议做法：**
 ```bash
-# ✅ 临时工作
+# 方式 1: 使用 /tmp/ 存放真正的临时工作
+cd /tmp/
+git clone https://github.com/xxx/project.git
+# 用完就删除
+
+# 方式 2: 使用 ~/projects/ 存放长期项目
+cd ~/projects/
+git clone https://github.com/xxx/project.git
+# 长期保存
+
+# 方式 3: 使用 data/<agent>/work/ 但要手动清理
 cd data/my-agent/work/
 git clone https://github.com/xxx/project.git
-# 分析完成后清理
+# 完成后手动删除
 rm -rf work/project/
-
-# ✅ 永久数据放在其他地方
-cd data/my-agent/
-mkdir config/  # 永久配置
 ```
 
 ---
