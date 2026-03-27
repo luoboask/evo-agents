@@ -14,7 +14,13 @@ evo-agents/
 │   ├── ISSUE_TEMPLATE/      # Issue templates
 │   └── PULL_REQUEST_TEMPLATE.md
 │
-├── 📁 agents/               # Agent configs (empty, .gitkeep only)
+├── 📁 agents/               # Sub-agent directories (created by add-agent.sh)
+│   └── <agent-name>/        # Each sub-agent
+│       ├── scripts → ../../scripts   # Symlink to parent scripts
+│       ├── skills → ../../skills     # Symlink to parent skills
+│       ├── libs → ../../libs         # Symlink to parent libs
+│       ├── AGENTS.md, SOUL.md, MEMORY.md
+│       └── config.yaml
 ├── 📁 config/               # Configuration templates (empty)
 ├── 📁 data/                 # Runtime data (excluded from git)
 ├── 📁 docs/                 # Documentation
@@ -197,9 +203,23 @@ skills/
 ### 📝 Naming Conventions
 
 #### Scripts
-- **System:** `scripts/core/script-name.sh` or `scripts/core/script_name.py`
-- **User:** `scripts/my-script.sh` or `scripts/my_tool.py`
-- **Style:** lowercase, hyphens for shell, underscores for Python
+
+**System scripts (template managed):**
+- Location: `scripts/core/`
+- Naming: `script-name.sh` or `script_name.py`
+
+**User scripts (create your own):**
+- Location: `scripts/` root directory
+- Naming: `my-script.sh` or `my_tool.py`
+
+**Agent scripts:**
+- Location: `scripts/` root (shared by all agents)
+- Sub-agents access via symlink: `agents/<agent>/scripts → ../../scripts`
+- Created by: You (not by add-agent.sh or setup-multi-agent.sh)
+
+**Style:**
+- Shell: lowercase + hyphens (`add-agent.sh`)
+- Python: lowercase + underscores (`session_recorder.py`)
 
 #### Skills
 - **Universal:** `skills/memory-search/`, `skills/rag/`, etc.
@@ -458,9 +478,23 @@ skills/
 ### 📝 命名规范
 
 #### 脚本
-- **系统：** `scripts/core/script-name.sh` 或 `scripts/core/script_name.py`
-- **用户：** `scripts/my-script.sh` 或 `scripts/my_tool.py`
-- **风格：** 小写，Shell 用连字符，Python 用下划线
+
+**系统脚本（模板管理）：**
+- 位置：`scripts/core/`
+- 命名：`script-name.sh` 或 `script_name.py`
+
+**用户脚本（自己创建）：**
+- 位置：`scripts/` 根目录
+- 命名：`my-script.sh` 或 `my_tool.py`
+
+**Agent 脚本：**
+- 位置：`scripts/` 根目录（所有 Agent 共享）
+- 子 Agent 通过符号链接访问：`agents/<agent>/scripts → ../../scripts`
+- 创建：你自己创建（`add-agent.sh` 和 `setup-multi-agent.sh` 不创建脚本）
+
+**风格：**
+- Shell：小写 + 连字符（`add-agent.sh`）
+- Python：小写 + 下划线（`session_recorder.py`）
 
 #### 技能
 - **位置：** `skills/` 目录（OpenClaw 原生结构）
@@ -469,9 +503,27 @@ skills/
 - **必需文件：** `SKILL.md`, `skill.json`
 
 #### Agent
-- **Workspace：** `~/.openclaw/workspace-<agent-name>/`
-- **Agent 目录：** `~/.openclaw/agents/<agent-name>/`
-- **风格：** 小写，连字符
+
+**主 Agent（Workspace）：**
+- 位置：`~/.openclaw/workspace-<agent-name>/`
+- 包含：完整的 skills/, scripts/, memory/, public/ 等
+
+**子 Agent（通过脚本创建）：**
+- 位置：`<workspace>/agents/<agent-name>/`
+- 创建：`./scripts/core/add-agent.sh <name>` 或 `./scripts/core/setup-multi-agent.sh <name1> <name2>`
+- 目录结构：
+  ```
+  agents/<agent-name>/
+  ├── scripts → ../../scripts   # 符号链接到父 workspace
+  ├── skills → ../../skills     # 符号链接到父 workspace
+  ├── libs → ../../libs         # 符号链接到父 workspace
+  ├── AGENTS.md, SOUL.md, MEMORY.md
+  ├── config.yaml
+  └── data/, memory/
+  ```
+- **注意：** `add-agent.sh` 和 `setup-multi-agent.sh` **不创建脚本**，只创建符号链接
+
+**风格：** 小写，连字符（`my-agent`, `test-agent`）
 
 #### 记忆文件
 - **每日：** `memory/YYYY-MM-DD.md`
@@ -529,3 +581,42 @@ skills/
 ---
 
 **记住：模板是为了提供通用框架，不是覆盖用户的个性化配置！**
+
+---
+
+## ❓ FAQ | 常见问题
+
+### Q: `add-agent.sh` 创建的脚本在哪里？
+
+**A:** `add-agent.sh` 和 `setup-multi-agent.sh` **不创建脚本**。它们创建：
+1. Agent 目录结构（`agents/<agent-name>/`）
+2. 配置文件（AGENTS.md, SOUL.md, config.yaml 等）
+3. 符号链接（`scripts → ../../scripts`）
+
+**你的脚本应该放在：** `scripts/` 根目录（所有 Agent 共享）
+
+### Q: 子 Agent 如何访问脚本？
+
+**A:** 通过符号链接：
+```
+agents/<agent-name>/scripts → ../../scripts
+```
+子 Agent 可以使用 `python3 scripts/session_recorder.py`，实际访问的是父 workspace 的 `scripts/`。
+
+### Q: 我可以为特定 Agent 创建脚本吗？
+
+**A:** 可以，有两种方式：
+1. **共享脚本**（推荐）：放在 `scripts/` 根目录，所有 Agent 共享
+2. **Agent 特定脚本**：放在 `agents/<agent-name>/scripts-custom/`（需要自己创建目录）
+
+### Q: skills 目录的结构是怎样的？
+
+**A:** OpenClaw 原生结构，所有技能在一个目录：
+```
+skills/
+├── memory-search/         # 模板技能（更新）
+├── rag/                   # 模板技能（更新）
+├── self-evolution/        # 模板技能（更新）
+├── web-knowledge/         # 模板技能（更新）
+└── my-custom-skill/       # 你的技能（保留）
+```
