@@ -142,15 +142,6 @@ echo "   python3 scripts/session_recorder.py -t event -c '内容' --agent $AGENT
 echo "   openclaw agent --agent $AGENT_NAME --message '任务'"
 echo ""
 
-# 创建符号链接到父 workspace 的 scripts/ 和 skills/
-echo ""
-echo "🔗 创建符号链接到共享资源..."
-WORKSPACE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-cd "agents/$AGENT_NAME"
-ln -sf ../../scripts scripts 2>/dev/null || true
-ln -sf ../../skills skills 2>/dev/null || true
-ln -sf ../../libs libs 2>/dev/null || true
-echo "   ✅ 已创建 scripts -> ../../scripts"
-echo "   ✅ 已创建 skills -> ../../skills"
-echo "   ✅ 已创建 libs -> ../../libs"
-cd "$WORKSPACE_ROOT"
+# 子 Agent 共享父 workspace 的 scripts/ 和 skills/
+# 直接使用即可，不需要符号链接
+

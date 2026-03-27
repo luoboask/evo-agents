@@ -1,0 +1,15 @@
+{
+  "id": "868c740e-9417-4d2e-9463-98dc2d598f84",
+  "title": "Memory Hub 完整使用指南",
+  "content": "\nMemory Hub 完整使用指南 (2025):\n\n1. 导入和初始化\n   ```python\n   from libs.memory_hub import MemoryHub\n   hub = MemoryHub('ai-baby')\n   ```\n\n2. 记忆操作\n   ```python\n   # 添加记忆\n   hub.add(content=\"内容\", memory_type=\"observation\", importance=5.0)\n   \n   # 搜索记忆\n   results = hub.search(\"关键词\", top_k=5, semantic=True)\n   \n   # 统计信息\n   stats = hub.stats()\n   ```\n\n3. 知识管理\n   ```python\n   # 添加知识\n   hub.knowledge.add(title=\"标题\", content=\"内容\", category=\"tutorial\")\n   \n   # 搜索知识\n   results = hub.knowledge.search(\"关键词\")\n   \n   # 按 ID 获取\n   knowledge = hub.knowledge.get_by_id(\"id\")\n   ```\n\n4. RAG 评估\n   ```python\n   # 记录评估\n   hub.evaluation.record(\n       query=\"查询\",\n       retrieved_count=5,\n       latency_ms=50.0,\n       feedback=\"positive\"\n   )\n   \n   # 生成报告\n   report = hub.evaluation.generate_report(days=7)\n   ```\n\n5. 目录结构\n   ```\n   data/<agent>/memory/\n   ├── <agent>_memory_stream.db    # 记忆流\n   ├── <agent>_knowledge_base.db   # 知识库\n   └── evolution.db                # 进化事件\n   ```\n",
+  "category": "tutorial",
+  "tags": [
+    "Memory Hub",
+    "使用指南",
+    "API",
+    "教程"
+  ],
+  "is_public": true,
+  "created_at": "2026-03-24T02:01:35.809747",
+  "updated_at": "2026-03-24T02:01:35.809748"
+}

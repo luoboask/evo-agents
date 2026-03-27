@@ -11,278 +11,114 @@
 ```
 evo-agents/
 ├── 📁 .github/              # GitHub configuration
-│   ├── ISSUE_TEMPLATE/      # Issue templates
-│   └── PULL_REQUEST_TEMPLATE.md
-│
-├── 📁 agents/               # Sub-agent directories (created by add-agent.sh)
-│   └── <agent-name>/        # Each sub-agent
-│       ├── scripts → ../../scripts   # Symlink to parent scripts
-│       ├── skills → ../../skills     # Symlink to parent skills
-│       ├── libs → ../../libs         # Symlink to parent libs
-│       ├── AGENTS.md, SOUL.md, MEMORY.md
-│       └── config.yaml
-├── 📁 config/               # Configuration templates (empty)
-├── 📁 data/                 # Runtime data (excluded from git)
+├── 📁 agents/               # Sub-agents (created by scripts)
+├── 📁 config/               # Configuration
+├── 📁 data/                 # Runtime data (excluded)
 ├── 📁 docs/                 # Documentation
 ├── 📁 libs/                 # Shared libraries
-├── 📁 memory/               # Memory data (excluded from git)
-├── 📁 public/               # Knowledge base (excluded from git)
-├── 📁 scripts/              # Scripts
-│   ├── core/                # System scripts (updated by template)
-│   └── *.sh, *.py           # User scripts (safe)
-│
-├── 📁 skills/               # Skills (OpenClaw native structure)
+├── 📁 memory/               # Memory data (excluded)
+├── 📁 public/               # Knowledge base (excluded)
+├── 📁 scripts/              # Scripts (all agents share)
+│   ├── core/                # System scripts (updated)
+│   └── *.sh, *.py           # Your scripts
+├── 📁 skills/               # Skills (OpenClaw native)
 │   ├── memory-search/       # Template skill (updated)
 │   ├── rag/                 # Template skill (updated)
 │   ├── self-evolution/      # Template skill (updated)
 │   ├── web-knowledge/       # Template skill (updated)
-│   └── <your-skill>/        # Your skills (preserved)
-│
-├── 📄 .gitignore            # Git ignore rules
-├── 📄 install.sh            # One-click install script
-│
-├── 📄 AGENTS.md             # Workspace guide (local)
-├── 📄 CHANGELOG.md          # Changelog
-├── 📄 CODE_OF_CONDUCT.md    # Code of conduct
-├── 📄 CONTRIBUTING.md       # Contributing guide
-├── 📄 FEATURE_ACTIVATION_GUIDE.md
-├── 📄 GITHUB_PUSH_RULES.md  # GitHub push guidelines
-├── 📄 LICENSE               # License
-├── 📄 README.md             # Main readme (English)
-├── 📄 README.zh-CN.md       # Main readme (Chinese)
-├── 📄 SECURITY.md           # Security policy
-├── 📄 workspace-setup.md    # Setup guide
-│
-└── 📄 USER.md               # User info (local, excluded)
-└── 📄 SOUL.md               # Agent personality (local, excluded)
-└── 📄 IDENTITY.md           # Identity (local, excluded)
-└── 📄 MEMORY.md             # Long-term memory (local, excluded)
-└── 📄 HEARTBEAT.md          # Heartbeat config (local, excluded)
-└── 📄 TOOLS.md              # Tool configs (local, excluded)
+│   └── <your-skill>/        # Your skill (preserved)
+├── 📄 .gitignore
+├── 📄 install.sh
+└── 📄 *.md                  # Documentation
 ```
 
 ---
 
 ### 📋 File Categories
 
-#### 1. Template Files (Updated by install)
+#### 1. Template Files (Updated)
 
-**Location:** Root directory, `scripts/core/`, `skills/` (universal), `docs/`
-
-**Behavior:**
-- 📦 Updated during re-installation
-- 🔄 Managed by template
-- ✏️ Can be modified, but will be overwritten
+**Location:** Root, `scripts/core/`, `skills/` (4 universal), `docs/`
 
 **Files:**
-```
-README.md, README.zh-CN.md
-workspace-setup.md
-CHANGELOG.md, CONTRIBUTING.md
-scripts/core/*.sh, scripts/core/*.py
-skills/memory-search/, skills/rag/
-skills/self-evolution/, skills/web-knowledge/
-docs/*.md
-install.sh
-```
+- README.md, workspace-setup.md
+- scripts/core/*.sh, scripts/core/*.py
+- skills/memory-search/, skills/rag/
+- skills/self-evolution/, skills/web-knowledge/
+- docs/*.md
 
-#### 2. Local Files (Preserved)
+#### 2. Your Files (Preserved)
 
-**Location:** Root directory
-
-**Behavior:**
-- ✅ Never deleted or overwritten
-- 👤 Personal configuration
-- 🔒 Excluded from git (in `.gitignore`)
+**Location:** Anywhere
 
 **Files:**
+- Personal configs: USER.md, SOUL.md, etc. (excluded by .gitignore)
+- Your scripts: scripts/*.sh, scripts/*.py
+- Your skills: skills/<your-skill>/
+- Runtime data: memory/, public/, data/
+
+#### 3. Sub-Agents
+
+**Created by:** `scripts/core/add-agent.sh` or `scripts/core/setup-multi-agent.sh`
+
+**Location:** `agents/<agent-name>/`
+
+**Structure:**
 ```
-USER.md, SOUL.md, IDENTITY.md
-MEMORY.md, HEARTBEAT.md, TOOLS.md
-AGENTS.md (may have local modifications)
-```
-
-#### 3. Runtime Data (Excluded)
-
-**Location:** `memory/`, `public/`, `data/`, `agents/`
-
-**Behavior:**
-- ✅ Generated at runtime
-- 📁 Excluded from git
-- 💾 Backed up before install
-
-**Directories:**
-```
-memory/         # Daily memory files, databases
-public/         # Knowledge base (RAG)
-data/           # Agent-specific data
-agents/         # Registered agent configs
+agents/<agent-name>/
+├── agent/                   # Agent config
+├── memory/                  # Agent memory
+├── sessions/                # Chat sessions
+├── AGENTS.md, SOUL.md
+└── data/
 ```
 
-#### 4. User Scripts (Safe)
-
-**Location:** `scripts/` root directory
-
-**Behavior:**
-- ✅ Never overwritten
-- 🛠️ User's custom scripts
-- 📝 Not in `.gitignore` (can commit if desired)
-
-**Example:**
-```
-scripts/
-├── core/              # System scripts (updated)
-├── my-backup.sh       # User script (safe) ✅
-├── custom-tool.py     # User script (safe) ✅
-└── deploy.sh          # User script (safe) ✅
-```
-
-#### 5. Skills Directory (OpenClaw Native)
-
-**Location:** `skills/` root directory
-
-**Behavior:**
-- ✅ All skills in one directory (OpenClaw native)
-- 📦 Template skills updated: `memory-search/`, `rag/`, `self-evolution/`, `web-knowledge/`
-- ✅ Your skills preserved: any other skill directories
-
-**Example:**
-```
-skills/
-├── memory-search/         # Template skill (updated) 📦
-├── rag/                   # Template skill (updated) 📦
-├── self-evolution/        # Template skill (updated) 📦
-├── web-knowledge/         # Template skill (updated) 📦
-├── my-tool/               # Your skill (preserved) ✅
-└── xhs-agent/             # Your skill (preserved) ✅
-```
-
-**How it works:**
-- Template updates only the 4 universal skills
-- All other skills are preserved
-- No special naming required
-- This is the standard OpenClaw skills structure
-
----
-
-### 🔒 .gitignore Rules
-
-```gitignore
-# Personal configs (local only)
-USER.md
-SOUL.md
-IDENTITY.md
-MEMORY.md
-HEARTBEAT.md
-TOOLS.md
-
-# Runtime data
-memory/
-public/
-data/
-agents/
-
-# Python
-__pycache__/
-*.py[cod]
-*.egg-info/
-
-# User scripts (optional - can commit)
-scripts/*.py
-scripts/*.sh
-!scripts/core/
-
-# Skills directory (OpenClaw native)
-# Template updates only: memory-search, rag, self-evolution, web-knowledge
-# All other skills are preserved
-skills/
-```
+**Note:** Sub-agents share parent's scripts/ and skills/ (no symlinks needed)
 
 ---
 
 ### 📝 Naming Conventions
 
 #### Scripts
-
-**System scripts (template managed):**
-- Location: `scripts/core/`
-- Naming: `script-name.sh` or `script_name.py`
-
-**User scripts (create your own):**
-- Location: `scripts/` root directory
-- Naming: `my-script.sh` or `my_tool.py`
-
-**Agent scripts:**
-- Location: `scripts/` root (shared by all agents)
-- Sub-agents access via symlink: `agents/<agent>/scripts → ../../scripts`
-- Created by: You (not by add-agent.sh or setup-multi-agent.sh)
-
-**Style:**
-- Shell: lowercase + hyphens (`add-agent.sh`)
-- Python: lowercase + underscores (`session_recorder.py`)
+- **System:** `scripts/core/script-name.sh` or `script_name.py`
+- **User:** `scripts/my-script.sh` or `my_tool.py`
+- **Style:** Lowercase, hyphens for shell, underscores for Python
 
 #### Skills
 - **Universal:** `skills/memory-search/`, `skills/rag/`, etc.
-- **Custom:** `skills/my-skill/` or `skills/agent-name/`
-- **Required files:** `SKILL.md`, `skill.json`
+- **Custom:** `skills/my-skill/`
+- **Required:** `SKILL.md`, `skill.json`
 
 #### Agents
 - **Workspace:** `~/.openclaw/workspace-<agent-name>/`
-- **Agent dir:** `~/.openclaw/agents/<agent-name>/`
-- **Style:** lowercase, hyphens
-
-#### Memory Files
-- **Daily:** `memory/YYYY-MM-DD.md`
-- **Weekly:** `memory/weekly/YYYY-Www.md`
-- **Monthly:** `memory/monthly/YYYY-MM.md`
+- **Sub-agent:** `agents/<agent-name>/`
+- **Style:** Lowercase, hyphens
 
 ---
 
 ### 🚀 Installation Flow
 
 ```
-1. Check if workspace exists
-   ├─ No → Fresh install
-   │  └─ Clone template, register agent
-   │
-   └─ Yes → Re-installation
-      ├─ Ask: Backup before install? (y/n)
-      │  └─ Yes → Backup to /tmp/workspace-backup-<agent>-<timestamp>/
-      │
-      ├─ Show: What will be preserved/updated
-      │
-      ├─ Ask: Continue? (y/n)
-      │
-      └─ Yes → Update template files only
-         ├─ Update: scripts/core/, skills/memory-search/, skills/rag/, skills/self-evolution/, skills/web-knowledge/, docs/
-         └─ Preserve: USER.md, memory/, public/, scripts/*, skills/ (your skills)
+1. Check workspace exists
+   ├─ No → Fresh install (clone + register)
+   └─ Yes → Re-install
+      ├─ Backup? (y/n)
+      ├─ Show preserve/update list
+      ├─ Confirm? (y/n)
+      └─ Update template files only
+         ├─ Update: scripts/core/, 4 universal skills, docs/
+         └─ Preserve: USER.md, memory/, public/, scripts/*, skills/*
 ```
 
 ---
 
 ### 🛡️ Safety Rules
 
-1. **Never delete user data**
-   - `memory/`, `public/`, `data/` always preserved
-   - Personal configs (USER.md, SOUL.md) never touched
-
-2. **Never delete user scripts**
-   - `scripts/` root directory safe
-   - Only `scripts/core/` updated
-
-3. **Skills directory is safe**
-   - `skills/` is OpenClaw native structure
-   - Only 4 template skills updated
-   - Your skills preserved
-
-4. **Always backup before changes**
-   - Auto backup before re-installation
-   - Backup before restore operations
-
-5. **Clear communication**
-   - Show what will be preserved
-   - Show what will be updated
-   - Ask for confirmation
+1. **Never delete user data** - memory/, public/, data/ always preserved
+2. **Never delete user scripts** - scripts/ root is safe
+3. **Never delete user skills** - skills/ root is safe (except 4 universal)
+4. **Always backup** - Auto backup before re-install
+5. **Clear communication** - Show what's preserved/updated
 
 ---
 
@@ -293,260 +129,88 @@ skills/
 ```
 evo-agents/
 ├── 📁 .github/              # GitHub 配置
-│   ├── ISSUE_TEMPLATE/      # Issue 模板
-│   └── PULL_REQUEST_TEMPLATE.md
-│
-├── 📁 agents/               # Agent 配置（空，仅.gitkeep）
-├── 📁 config/               # 配置模板（空）
+├── 📁 agents/               # 子 Agent（脚本创建）
+├── 📁 config/               # 配置
 ├── 📁 data/                 # 运行时数据（不提交）
 ├── 📁 docs/                 # 文档
 ├── 📁 libs/                 # 共享库
 ├── 📁 memory/               # 记忆数据（不提交）
 ├── 📁 public/               # 知识库（不提交）
-├── 📁 scripts/              # 脚本
-│   ├── core/                # 系统脚本（模板更新）
-│   └── *.sh, *.py           # 用户脚本（安全）
-│
-├── 📁 skills/               # 技能（OpenClaw 原生结构）
+├── 📁 scripts/              # 脚本（所有 Agent 共享）
+│   ├── core/                # 系统脚本（更新）
+│   └── *.sh, *.py           # 你的脚本
+├── 📁 skills/               # 技能（OpenClaw 原生）
 │   ├── memory-search/       # 模板技能（更新）
 │   ├── rag/                 # 模板技能（更新）
 │   ├── self-evolution/      # 模板技能（更新）
 │   ├── web-knowledge/       # 模板技能（更新）
 │   └── <your-skill>/        # 你的技能（保留）
-│
-├── 📄 .gitignore            # Git 忽略规则
-├── 📄 install.sh            # 一键安装脚本
-│
-├── 📄 AGENTS.md             # 工作区说明（本地）
-├── 📄 CHANGELOG.md          # 更新日志
-├── 📄 CODE_OF_CONDUCT.md    # 行为准则
-├── 📄 CONTRIBUTING.md       # 贡献指南
-├── 📄 FEATURE_ACTIVATION_GUIDE.md
-├── 📄 GITHUB_PUSH_RULES.md  # GitHub 推送规范
-├── 📄 LICENSE               # 许可证
-├── 📄 README.md             # 主说明（英文）
-├── 📄 README.zh-CN.md       # 主说明（中文）
-├── 📄 SECURITY.md           # 安全策略
-├── 📄 workspace-setup.md    # 安装指南
-│
-└── 📄 USER.md               # 用户信息（本地，不提交）
-└── 📄 SOUL.md               # Agent 人格（本地，不提交）
-└── 📄 IDENTITY.md           # 身份标识（本地，不提交）
-└── 📄 MEMORY.md             # 长期记忆（本地，不提交）
-└── 📄 HEARTBEAT.md          # 心跳配置（本地，不提交）
-└── 📄 TOOLS.md              # 工具配置（本地，不提交）
+├── 📄 .gitignore
+├── 📄 install.sh
+└── 📄 *.md                  # 文档
 ```
 
 ---
 
 ### 📋 文件分类
 
-#### 1. 模板文件（安装时更新）
+#### 1. 模板文件（更新）
 
-**位置：** 根目录，`scripts/core/`, `skills/`（4 个通用技能）, `docs/`
-
-**行为：**
-- 📦 重新安装时更新
-- 🔄 由模板管理
-- ✏️ 可修改，但会被覆盖
+**位置：** 根目录，`scripts/core/`, `skills/`（4 个通用）, `docs/`
 
 **文件：**
-```
-README.md, README.zh-CN.md
-workspace-setup.md
-CHANGELOG.md, CONTRIBUTING.md
-scripts/core/*.sh, scripts/core/*.py
-skills/memory-search/, skills/rag/
-skills/self-evolution/, skills/web-knowledge/
-docs/*.md
-install.sh
-```
+- README.md, workspace-setup.md
+- scripts/core/*.sh, scripts/core/*.py
+- skills/memory-search/, skills/rag/
+- skills/self-evolution/, skills/web-knowledge/
+- docs/*.md
 
-#### 2. 本地文件（保留）
+#### 2. 你的文件（保留）
 
-**位置：** 根目录
-
-**行为：**
-- ✅ 永不删除或覆盖
-- 👤 个人配置
-- 🔒 在 `.gitignore` 中排除
+**位置：** 任意位置
 
 **文件：**
+- 个人配置：USER.md, SOUL.md 等（.gitignore 排除）
+- 你的脚本：scripts/*.sh, scripts/*.py
+- 你的技能：skills/<your-skill>/
+- 运行时数据：memory/, public/, data/
+
+#### 3. 子 Agent
+
+**创建：** `scripts/core/add-agent.sh` 或 `scripts/core/setup-multi-agent.sh`
+
+**位置：** `agents/<agent-name>/`
+
+**结构：**
 ```
-USER.md, SOUL.md, IDENTITY.md
-MEMORY.md, HEARTBEAT.md, TOOLS.md
-AGENTS.md（可能有本地修改）
-```
-
-#### 3. 运行时数据（排除）
-
-**位置：** `memory/`, `public/`, `data/`, `agents/`
-
-**行为：**
-- ✅ 运行时生成
-- 📁 不提交到 git
-- 💾 安装前备份
-
-**目录：**
-```
-memory/         # 日常记忆文件、数据库
-public/         # 知识库（RAG）
-data/           # Agent 特定数据
-agents/         # 已注册的 Agent 配置
+agents/<agent-name>/
+├── agent/                   # Agent 配置
+├── memory/                  # Agent 记忆
+├── sessions/                # 聊天会话
+├── AGENTS.md, SOUL.md
+└── data/
 ```
 
-#### 4. 脚本目录（OpenClaw 原生 + Agent 共享）
-
-**位置：** `scripts/` 根目录
-
-**行为：**
-- ✅ 所有脚本放在一个目录（OpenClaw 原生）
-- ✅ 所有 Agent 共享（主 Agent + 子 Agent）
-- ✅ 子 Agent 通过符号链接访问
-- 📦 系统脚本在 `scripts/core/`（模板更新）
-- ✅ 用户脚本在 `scripts/` 根目录（保留）
-
-**示例：**
-```
-scripts/
-├── core/                    # 系统脚本（模板更新）📦
-│   ├── activate-features.sh
-│   ├── add-agent.sh
-│   └── ...
-│
-├── my-backup.sh             # 用户脚本（保留）✅
-├── custom-tool.py           # 用户脚本（保留）✅
-└── agent-created.sh         # Agent 执行时创建的脚本（保留）✅
-```
-
-**Agent 创建脚本的约束：**
-
-| Agent 类型 | 创建位置 | 实际存储 |
-|-----------|---------|---------|
-| **主 Agent** | `scripts/<script>` | `<workspace>/scripts/<script>` |
-| **子 Agent** | `agents/<agent>/scripts/<script>` | `<workspace>/scripts/<script>` (通过符号链接) |
-
-**规则：**
-- ✅ 所有脚本放在 `scripts/` 根目录
-- ✅ 所有 Agent 共享脚本
-- ❌ 不要在 `agents/<agent>/` 下创建独立脚本目录
-
-#### 5. Skills 目录（OpenClaw 原生）
-
-**位置：** `skills/` 根目录
-
-**行为：**
-- ✅ 所有技能放在一个目录（OpenClaw 原生）
-- 📦 模板更新 4 个技能：`memory-search/`, `rag/`, `self-evolution/`, `web-knowledge/`
-- ✅ 你的技能保留：其他所有技能目录
-
-**示例：**
-```
-skills/
-├── memory-search/         # 模板技能（更新）📦
-├── rag/                   # 模板技能（更新）📦
-├── self-evolution/        # 模板技能（更新）📦
-├── web-knowledge/         # 模板技能（更新）📦
-├── my-tool/               # 你的技能（保留）✅
-└── xhs-agent/             # 你的技能（保留）✅
-```
-
-**工作原理：**
-- 模板只更新 4 个通用技能
-- 其他所有技能都保留
-- 不需要特殊命名
-- 这就是 OpenClaw 原生的 skills 结构
-
----
-
-### 🔒 .gitignore 规则
-
-```gitignore
-# 个人配置（仅本地）
-USER.md
-SOUL.md
-IDENTITY.md
-MEMORY.md
-HEARTBEAT.md
-TOOLS.md
-
-# 运行时数据
-memory/
-public/
-data/
-agents/
-
-# Python
-__pycache__/
-*.py[cod]
-*.egg-info/
-
-# 用户脚本（可选 - 可提交）
-scripts/*.py
-scripts/*.sh
-!scripts/core/
-
-# Skills 目录（OpenClaw 原生）
-# 模板只更新 4 个通用技能，其他技能保留
-skills/
-```
+**注意：** 子 Agent 共享父 workspace 的 scripts/ 和 skills/（不需要符号链接）
 
 ---
 
 ### 📝 命名规范
 
 #### 脚本
-
-**系统脚本（模板管理）：**
-- 位置：`scripts/core/`
-- 命名：`script-name.sh` 或 `script_name.py`
-
-**用户脚本（自己创建）：**
-- 位置：`scripts/` 根目录
-- 命名：`my-script.sh` 或 `my_tool.py`
-
-**Agent 脚本：**
-- 位置：`scripts/` 根目录（所有 Agent 共享）
-- 子 Agent 通过符号链接访问：`agents/<agent>/scripts → ../../scripts`
-- 创建：你自己创建（`add-agent.sh` 和 `setup-multi-agent.sh` 不创建脚本）
-
-**风格：**
-- Shell：小写 + 连字符（`add-agent.sh`）
-- Python：小写 + 下划线（`session_recorder.py`）
+- **系统：** `scripts/core/script-name.sh` 或 `script_name.py`
+- **用户：** `scripts/my-script.sh` 或 `my_tool.py`
+- **风格：** 小写，Shell 用连字符，Python 用下划线
 
 #### 技能
-- **位置：** `skills/` 目录（OpenClaw 原生结构）
-- **模板技能：** `memory-search/`, `rag/`, `self-evolution/`, `web-knowledge/`
-- **你的技能：** 直接放在 `skills/` 下，任何命名都可以
-- **必需文件：** `SKILL.md`, `skill.json`
+- **通用：** `skills/memory-search/`, `skills/rag/` 等
+- **自定义：** `skills/my-skill/`
+- **必需：** `SKILL.md`, `skill.json`
 
 #### Agent
-
-**主 Agent（Workspace）：**
-- 位置：`~/.openclaw/workspace-<agent-name>/`
-- 包含：完整的 skills/, scripts/, memory/, public/ 等
-
-**子 Agent（通过脚本创建）：**
-- 位置：`<workspace>/agents/<agent-name>/`
-- 创建：`./scripts/core/add-agent.sh <name>` 或 `./scripts/core/setup-multi-agent.sh <name1> <name2>`
-- 目录结构：
-  ```
-  agents/<agent-name>/
-  ├── scripts → ../../scripts   # 符号链接到父 workspace
-  ├── skills → ../../skills     # 符号链接到父 workspace
-  ├── libs → ../../libs         # 符号链接到父 workspace
-  ├── AGENTS.md, SOUL.md, MEMORY.md
-  ├── config.yaml
-  └── data/, memory/
-  ```
-- **注意：** `add-agent.sh` 和 `setup-multi-agent.sh` **不创建脚本**，只创建符号链接
-
-**风格：** 小写，连字符（`my-agent`, `test-agent`）
-
-#### 记忆文件
-- **每日：** `memory/YYYY-MM-DD.md`
-- **每周：** `memory/weekly/YYYY-Www.md`
-- **每月：** `memory/monthly/YYYY-MM.md`
+- **Workspace：** `~/.openclaw/workspace-<agent-name>/`
+- **子 Agent：** `agents/<agent-name>/`
+- **风格：** 小写，连字符
 
 ---
 
@@ -554,80 +218,63 @@ skills/
 
 ```
 1. 检查 workspace 是否存在
-   ├─ 否 → 新安装
-   │  └─ 克隆模板，注册 Agent
-   │
+   ├─ 否 → 新安装（克隆 + 注册）
    └─ 是 → 重新安装
-      ├─ 询问：安装前备份？(y/n)
-      │  └─ 是 → 备份到 /tmp/workspace-backup-<agent>-<timestamp>/
-      │
-      ├─ 显示：保留/更新的内容
-      │
-      ├─ 询问：继续？(y/n)
-      │
-      └─ 是 → 仅更新模板文件
-         ├─ 更新：scripts/core/, skills/memory-search/, skills/rag/, skills/self-evolution/, skills/web-knowledge/, docs/
-         └─ 保留：USER.md, memory/, public/, scripts/*, skills/*（其他技能）
+      ├─ 备份？(y/n)
+      ├─ 显示保留/更新列表
+      ├─ 确认？(y/n)
+      └─ 仅更新模板文件
+         ├─ 更新：scripts/core/, 4 个通用技能，docs/
+         └─ 保留：USER.md, memory/, public/, scripts/*, skills/*
 ```
 
 ---
 
 ### 🛡️ 安全规则
 
-1. **永不删除用户数据**
-   - `memory/`, `public/`, `data/` 始终保留
-   - 个人配置（USER.md, SOUL.md）永不触碰
-
-2. **永不删除用户脚本**
-   - `scripts/` 根目录安全
-   - 只更新 `scripts/core/`
-
-3. **Skills 目录安全**
-   - `skills/` 是 OpenClaw 原生结构
-   - 只更新 4 个模板技能
-   - 你的技能保留
-
-4. **更改前始终备份**
-   - 重新安装前自动备份
-   - 恢复操作前备份
-
-5. **清晰沟通**
-   - 显示保留内容
-   - 显示更新内容
-   - 询问确认
-
----
-
-**记住：模板是为了提供通用框架，不是覆盖用户的个性化配置！**
+1. **永不删除用户数据** - memory/, public/, data/ 始终保留
+2. **永不删除用户脚本** - scripts/ 根目录安全
+3. **永不删除用户技能** - skills/ 根目录安全（除了 4 个通用技能）
+4. **始终备份** - 重新安装前自动备份
+5. **清晰沟通** - 显示保留/更新内容
 
 ---
 
 ## ❓ FAQ | 常见问题
 
-### Q: `add-agent.sh` 创建的脚本在哪里？
+### Q: Agent 执行时创建的脚本放在哪里？
 
-**A:** `add-agent.sh` 和 `setup-multi-agent.sh` **不创建脚本**。它们创建：
-1. Agent 目录结构（`agents/<agent-name>/`）
-2. 配置文件（AGENTS.md, SOUL.md, config.yaml 等）
-3. 符号链接（`scripts → ../../scripts`）
+**A:** 所有脚本都放在 `scripts/` 根目录：
 
-**你的脚本应该放在：** `scripts/` 根目录（所有 Agent 共享）
+**主 Agent：**
+```bash
+cat > scripts/backup.sh
+```
+
+**子 Agent：**
+```bash
+cd agents/<agent-name>/
+cat > scripts/agent-backup.sh  # 实际存储在父 workspace 的 scripts/
+```
+
+**规则：**
+- ✅ 所有脚本放在 `scripts/` 根目录
+- ✅ 所有 Agent 共享
+- ❌ 不要在 `agents/<agent>/` 下创建独立脚本目录
+
+---
 
 ### Q: 子 Agent 如何访问脚本？
 
-**A:** 通过符号链接：
+**A:** 子 Agent 直接使用父 workspace 的 scripts/：
+```bash
+# 在 agents/<agent-name>/ 目录下
+python3 scripts/session_recorder.py  # 使用父 workspace 的脚本
 ```
-agents/<agent-name>/scripts → ../../scripts
-```
-子 Agent 可以使用 `python3 scripts/session_recorder.py`，实际访问的是父 workspace 的 `scripts/`。
 
-### Q: 我可以为特定 Agent 创建脚本吗？
+---
 
-**A:** 可以，有两种方式：
-1. **共享脚本**（推荐）：放在 `scripts/` 根目录，所有 Agent 共享
-2. **Agent 特定脚本**：放在 `agents/<agent-name>/scripts-custom/`（需要自己创建目录）
-
-### Q: skills 目录的结构是怎样的？
+### Q: skills 目录结构是怎样的？
 
 **A:** OpenClaw 原生结构，所有技能在一个目录：
 ```
@@ -639,37 +286,6 @@ skills/
 └── my-custom-skill/       # 你的技能（保留）
 ```
 
-### Q: Agent 执行命令时创建的脚本放在哪里？
+---
 
-**A:** 所有 Agent（主 Agent 和子 Agent）创建的脚本都放在 `scripts/` 根目录：
-
-**主 Agent：**
-```bash
-# 直接创建
-cat > scripts/backup.sh << 'EOF'
-#!/bin/bash
-echo "Backup script"
-EOF
-```
-
-**子 Agent：**
-```bash
-# 通过符号链接创建（实际存储在父 workspace 的 scripts/）
-cd agents/<agent-name>/
-cat > scripts/agent-backup.sh << 'EOF'
-#!/bin/bash
-echo "Agent backup script"
-EOF
-# 实际文件位置：<workspace>/scripts/agent-backup.sh
-```
-
-**约束规则：**
-- ✅ 所有脚本放在 `scripts/` 根目录
-- ✅ 所有 Agent 共享脚本
-- ✅ 子 Agent 通过符号链接访问
-- ❌ 不要在 `agents/<agent>/` 下创建脚本目录
-
-**好处：**
-- 脚本集中管理
-- 所有 Agent 共享
-- 便于维护和复用
+**记住：模板是为了提供通用框架，不是覆盖用户的个性化配置！**
