@@ -47,18 +47,31 @@ if [ -d "$WORKSPACE_ROOT" ]; then
     
     # 使用 /dev/tty 读取输入（支持 curl | bash 方式运行）
     if [ -t 0 ]; then
+        # 标准终端输入
         read -p "请输入 / Enter (y/N): " -n 1 -r
-        REPLY="$REPLY"
+        echo ""
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "❌ 已取消 / Cancelled"
+            exit 1
+        fi
     else
-        # 从终端设备读取
-        read -p "请输入 / Enter (y/N): " -n 1 REPLY < /dev/tty 2>/dev/null || REPLY=""
+        # 管道输入，尝试从 /dev/tty 读取
+        if [ -e /dev/tty ]; then
+            exec </dev/tty
+            read -p "请输入 / Enter (y/N): " -n 1 -r
+            echo ""
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                echo "❌ 已取消 / Cancelled"
+                exit 1
+            fi
+        else
+            # 没有终端，默认取消
+            echo "⚠️  无法读取输入，默认取消 / Cannot read input, cancelling"
+            exit 1
+        fi
     fi
-    echo ""
     
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "❌ 已取消 / Cancelled"
-        exit 1
-    fi
+    echo "✅ 继续安装 / Continuing installation..."
     
     echo "✅ 继续安装 / Continuing installation..."
     cd "$WORKSPACE_ROOT"
