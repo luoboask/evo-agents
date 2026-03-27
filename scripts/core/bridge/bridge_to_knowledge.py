@@ -24,7 +24,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Tuple
 
-WORKSPACE = Path(__file__).resolve().parent.parent.parent
+WORKSPACE = Path(__file__).resolve().parent.parent.parent.parent
 MEMORY_DIR = WORKSPACE / "memory"
 
 # 加载锁工具

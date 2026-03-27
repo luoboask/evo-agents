@@ -20,7 +20,7 @@ from pathlib import Path
 
 # 添加当前目录到路径
 BRIDGE_DIR = Path(__file__).resolve().parent
-WORKSPACE = BRIDGE_DIR.parent.parent.parent
+WORKSPACE = BRIDGE_DIR.parent.parent.parent.parent
 sys.path.insert(0, str(WORKSPACE / "scripts" / "core"))
 
 from bridge_to_markdown import sync_to_markdown

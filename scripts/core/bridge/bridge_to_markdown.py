@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict
 
-WORKSPACE = Path(__file__).resolve().parent.parent.parent
+WORKSPACE = Path(__file__).resolve().parent.parent.parent.parent
 MEMORY_DIR = WORKSPACE / "memory"
 
 sys.path.insert(0, str(WORKSPACE / "scripts" / "core"))
