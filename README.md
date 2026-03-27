@@ -22,13 +22,29 @@ curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh 
 
 **Already have an existing workspace?**
 
+**Option 1: Interactive (Recommended)**
 ```bash
-curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s existing-agent
+# Download and run interactively
+curl -sO https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh
+bash install.sh existing-agent
+# Will ask for confirmation: y/n
+```
+
+**Option 2: Force (Skip Confirmation)**
+```bash
+# Force migration without confirmation
+curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s existing-agent --force
+```
+
+**Option 3: With Auto Activation**
+```bash
+# Migrate + activate basic features (Ollama + embedding model)
+bash install.sh existing-agent --activate
 ```
 
 The script will:
 1. ⚠️ Detect existing workspace
-2. ❓ Ask for migration confirmation
+2. ❓ Ask for migration confirmation (unless --force)
 3. ✅ **Preserve your data** (USER.md, SOUL.md, memory/, public/)
 4. 🗑️ Clean up agent-specific skills
 5. 📦 Update to universal template
