@@ -18,46 +18,21 @@ Reusable self-evolving agent workspace with explicit runtime context (`--workspa
 curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s my-agent
 ```
 
-### Migration | 迁移改造
+### 🔄 Migration | 迁移改造
 
-**Already have an existing workspace?**
+**Already have a workspace?**
 
-**Option 1: Interactive (Recommended) ⭐**
 ```bash
-# Download and execute with full interaction support
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh)" -s existing-agent
-# Will ask for confirmation: y/n
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh)" -s my-agent
 ```
 
-**Option 2: Download First**
-```bash
-# Download script
-curl -sO https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh
+**What happens:**
+- ✅ Detects existing workspace
+- ✅ Asks for confirmation
+- ✅ Preserves your data (USER.md, SOUL.md, memory/, public/)
+- ✅ Updates template files
 
-# Run interactively
-bash install.sh existing-agent
-```
-
-**Option 3: Force (Skip Confirmation)**
-```bash
-# Force migration without confirmation
-curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s existing-agent --force
-```
-
-**Option 4: With Auto Activation**
-```bash
-# Migrate + activate basic features (Ollama + embedding model)
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh)" -s existing-agent --activate
-```
-
-The script will:
-1. ⚠️ Detect existing workspace
-2. ❓ Ask for migration confirmation (unless --force)
-3. ✅ **Preserve your data** (USER.md, SOUL.md, memory/, public/)
-4. 🗑️ Clean up agent-specific skills
-5. 📦 Update to universal template
-
-**📖 See [docs/MIGRATION.md](docs/MIGRATION.md) for details.**
+**📖 Details:** [docs/MIGRATION.md](docs/MIGRATION.md)
 
 ---
 

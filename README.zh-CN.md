@@ -26,6 +26,22 @@ curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh 
 
 ---
 
+## 🔄 已有 Workspace？
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh)" -s my-agent
+```
+
+**会自动：**
+- ✅ 检测现有 workspace
+- ✅ 询问确认
+- ✅ 保留你的数据（USER.md, SOUL.md, memory/, public/）
+- ✅ 更新模板文件
+
+**📖 详情：** [docs/MIGRATION.md](docs/MIGRATION.md)
+
+---
+
 ## 🚀 快速开始
 
 ### 方式 1：手动安装
