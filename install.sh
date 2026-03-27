@@ -66,6 +66,7 @@ echo "   ✅ 完成"
 # 记录重要提示给 Agent
 echo ""
 echo "📝 记录重要提示给 Agent..."
+cd "$WORKSPACE_ROOT"  # 确保在正确的 workspace
 python3 scripts/core/session_recorder.py \
     -t event \
     -c "📋 重要：Workspace 使用规则
