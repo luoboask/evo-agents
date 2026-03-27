@@ -12,63 +12,78 @@ You are an AI assistant working in this workspace. Follow these rules to keep th
 
 ---
 
-### 📋 Workspace Rules
+### 📋 Quick Rules | 快速规则
 
-**When working in this workspace:**
+**✅ Always Do:**
+- Scripts → `scripts/` directory
+- Git projects → `/tmp/` or `~/projects/` or `data/<agent>/work/`
+- Clean up after completing tasks
 
-#### 1. Scripts | 脚本
-- ✅ **Create in:** `scripts/` directory
-- ❌ **Don't create in:** Root directory
+**❌ Never Do:**
+- Don't clone git in workspace root
+- Don't create projects in root
+- Don't leave temporary files in root
+
+**Full rules:** [WORKSPACE_RULES.md](WORKSPACE_RULES.md)
+
+---
+
+### 📁 Directory Usage
+
+| Directory | Purpose | Can I use? |
+|-----------|---------|------------|
+| `scripts/` | Scripts only | ✅ Yes - for your scripts |
+| `skills/` | Skills only | ✅ Yes - for your skills |
+| `data/<agent>/work/` | Temporary work | ✅ Yes - for agent work |
+| `memory/` | Memory files | ❌ No - system use only |
+| `public/` | Knowledge base | ❌ No - system use only |
+| Root `/` | Workspace root | ❌ No - keep clean |
+
+**External directories:**
+- `/tmp/` - Temporary work ✅
+- `~/projects/` - Long-term projects ✅
+
+---
+
+### 🛠️ Common Tasks
+
+#### Creating Scripts
 
 ```bash
 # ✅ Correct
 cd scripts/
 cat > my-tool.sh
+chmod +x my-tool.sh
 
 # ❌ Wrong
 cd ..
-cat > my-tool.sh
+cat > my-tool.sh  # Don't create in root!
 ```
 
-#### 2. Skills | 技能
-- ✅ **Create in:** `skills/` directory
-- ❌ **Don't create in:** Root directory
+#### Git Projects
 
 ```bash
-# ✅ Correct
-cd skills/
-mkdir my-skill/
-
-# ❌ Wrong
-cd ..
-mkdir my-skill/
-```
-
-#### 3. Git Projects | Git 项目
-- ✅ **Use:** `/tmp/` or `~/projects/` or `data/<agent>/work/`
-- ❌ **Don't clone in:** Root directory
-
-```bash
-# ✅ Correct
+# ✅ Correct - Temporary
 cd /tmp/
 git clone https://github.com/xxx/project.git
+# Work here, then delete when done
 
-# Or
+# ✅ Correct - Long-term
 cd ~/projects/
 git clone https://github.com/xxx/project.git
+# Keep here
 
-# Or (for agent-specific work)
+# ✅ Correct - Agent-specific
 cd data/my-agent/work/
 git clone https://github.com/xxx/project.git
+# Clean up when done
 
 # ❌ Wrong
 cd ..
-git clone https://github.com/xxx/project.git
+git clone https://github.com/xxx/project.git  # Don't clone in root!
 ```
 
-#### 4. Projects/Engineering | 项目/工程
-- ✅ **Create in:** `~/projects/` or `data/<agent>/work/`
-- ❌ **Don't create in:** Root directory
+#### Creating Projects
 
 ```bash
 # ✅ Correct
@@ -81,95 +96,38 @@ npm init
 
 # ❌ Wrong
 cd ..
-npm init
-```
-
-#### 5. Temporary Files | 临时文件
-- ✅ **Use:** `/tmp/` or `data/<agent>/work/`
-- ❌ **Don't leave in:** Root directory
-
-```bash
-# ✅ Correct
-cd /tmp/
-# Work with temporary files
-
-# Or
-cd data/my-agent/work/
-# Work with temporary files
-
-# ❌ Wrong
-cd ..
-# Don't leave temporary files here
-```
-
-#### 6. Cleanup | 清理
-- ✅ **Clean up** after completing tasks
-- ✅ **Remove** temporary files
-- ✅ **Remove** build artifacts (`node_modules/`, `__pycache__/`, `*.log`)
-
----
-
-### 📁 Directory Structure
-
-```
-workspace/
-├── scripts/           # Your scripts go here ✅
-├── skills/            # Your skills go here ✅
-├── memory/            # Memory files only
-├── public/            # Knowledge base only
-├── data/
-│   └── <agent>/
-│       └── work/      # Temporary work here ✅
-└── agents/            # Sub-agents only
-```
-
-**External:**
-```
-~/projects/            # Your projects (recommended) ✅
-/tmp/                  # Temporary work ✅
+npm init  # Don't create in root!
 ```
 
 ---
 
-### 🚫 Never Do This
+### 🧹 Cleanup
+
+**After completing tasks:**
 
 ```bash
-# ❌ Don't clone in workspace root
-cd ~/.openclaw/workspace-my-agent/
-git clone https://github.com/xxx/project.git
-
-# ❌ Don't create projects in root
-mkdir my-project
-npm init
-
-# ❌ Don't create scripts in root
-cat > script.sh
-
-# ❌ Don't leave temporary files
-ls *.tmp *.log
-```
-
----
-
-### ✅ Always Do This
-
-```bash
-# ✅ Use external directories for projects
-cd ~/projects/
-git clone https://github.com/xxx/project.git
-
-# ✅ Use scripts/ for scripts
-cd scripts/
-cat > my-script.sh
-
-# ✅ Use data/<agent>/work/ for agent-specific work
-cd data/my-agent/work/
-# Work here
-
-# ✅ Clean up after work
+# Clean temporary files
 rm -rf /tmp/temp-*
 rm -rf data/my-agent/work/temp-*
+
+# Or run cleanup script
+./scripts/core/cleanup.sh
 ```
+
+**What cleanup script does:**
+- ✅ Cleans `node_modules/`, `__pycache__/`
+- ✅ Cleans `*.log`, `*.tmp`, `*.pyc`
+- ❌ Does NOT clean `work/` directories (you decide)
+
+---
+
+### 📖 More Information
+
+| Topic | Document |
+|-------|----------|
+| Full workspace rules | [WORKSPACE_RULES.md](WORKSPACE_RULES.md) |
+| Structure overview | [STRUCTURE_RULES.md](STRUCTURE_RULES.md) |
+| Quick reference | [AGENT_RULES.md](AGENT_RULES.md) |
 
 ---
 
@@ -181,63 +139,78 @@ rm -rf data/my-agent/work/temp-*
 
 ---
 
-### 📋 Workspace 规则
+### 📋 快速规则
 
-**在这个 workspace 工作时：**
+**✅ 永远这样做：**
+- 脚本 → `scripts/` 目录
+- Git 项目 → `/tmp/` 或 `~/projects/` 或 `data/<agent>/work/`
+- 完成后清理
 
-#### 1. 脚本
-- ✅ **创建在：** `scripts/` 目录
-- ❌ **不要创建在：** 根目录
+**❌ 永远不要：**
+- 不要在根目录克隆 git
+- 不要在根目录创建项目
+- 不要把临时文件留在根目录
+
+**完整规则：** [WORKSPACE_RULES.md](WORKSPACE_RULES.md)
+
+---
+
+### 📁 目录使用
+
+| 目录 | 用途 | 可以用吗？ |
+|------|------|-----------|
+| `scripts/` | 仅脚本 | ✅ 可以 - 放你的脚本 |
+| `skills/` | 仅技能 | ✅ 可以 - 放你的技能 |
+| `data/<agent>/work/` | 临时工作 | ✅ 可以 - Agent 工作 |
+| `memory/` | 记忆文件 | ❌ 不行 - 系统使用 |
+| `public/` | 知识库 | ❌ 不行 - 系统使用 |
+| 根目录 `/` | Workspace 根 | ❌ 不行 - 保持整洁 |
+
+**外部目录：**
+- `/tmp/` - 临时工作 ✅
+- `~/projects/` - 长期项目 ✅
+
+---
+
+### 🛠️ 常见任务
+
+#### 创建脚本
 
 ```bash
 # ✅ 正确
 cd scripts/
 cat > my-tool.sh
+chmod +x my-tool.sh
 
 # ❌ 错误
 cd ..
-cat > my-tool.sh
+cat > my-tool.sh  # 不要在根目录创建！
 ```
 
-#### 2. 技能
-- ✅ **创建在：** `skills/` 目录
-- ❌ **不要创建在：** 根目录
+#### Git 项目
 
 ```bash
-# ✅ 正确
-cd skills/
-mkdir my-skill/
-
-# ❌ 错误
-cd ..
-mkdir my-skill/
-```
-
-#### 3. Git 项目
-- ✅ **使用：** `/tmp/` 或 `~/projects/` 或 `data/<agent>/work/`
-- ❌ **不要克隆在：** 根目录
-
-```bash
-# ✅ 正确
+# ✅ 正确 - 临时
 cd /tmp/
 git clone https://github.com/xxx/project.git
+# 在这里工作，完成后删除
 
-# 或
+# ✅ 正确 - 长期
 cd ~/projects/
 git clone https://github.com/xxx/project.git
+# 保存在这里
 
-# 或（Agent 特定工作）
+# ✅ 正确 - Agent 特定
 cd data/my-agent/work/
 git clone https://github.com/xxx/project.git
+# 完成后清理
 
 # ❌ 错误
 cd ..
-git clone https://github.com/xxx/project.git
+git clone https://github.com/xxx/project.git  # 不要在根目录克隆！
 ```
 
-#### 4. 项目/工程
-- ✅ **创建在：** `~/projects/` 或 `data/<agent>/work/`
-- ❌ **不要创建在：** 根目录
+#### 创建项目
 
 ```bash
 # ✅ 正确
@@ -250,96 +223,40 @@ npm init
 
 # ❌ 错误
 cd ..
-npm init
-```
-
-#### 5. 临时文件
-- ✅ **使用：** `/tmp/` 或 `data/<agent>/work/`
-- ❌ **不要留在：** 根目录
-
-```bash
-# ✅ 正确
-cd /tmp/
-# 处理临时文件
-
-# 或
-cd data/my-agent/work/
-# 处理临时文件
-
-# ❌ 错误
-cd ..
-# 不要把临时文件留在这里
-```
-
-#### 6. 清理
-- ✅ **完成后清理**
-- ✅ **删除**临时文件
-- ✅ **删除**构建产物（`node_modules/`, `__pycache__/`, `*.log`）
-
----
-
-### 📁 目录结构
-
-```
-workspace/
-├── scripts/           # 你的脚本放这里 ✅
-├── skills/            # 你的技能放这里 ✅
-├── memory/            # 仅记忆文件
-├── public/            # 仅知识库
-├── data/
-│   └── <agent>/
-│       └── work/      # 临时工作放这里 ✅
-└── agents/            # 仅子 Agent
-```
-
-**外部：**
-```
-~/projects/            # 你的项目（推荐）✅
-/tmp/                  # 临时工作 ✅
+npm init  # 不要在根目录创建！
 ```
 
 ---
 
-### 🚫 永远不要这样做
+### 🧹 清理
+
+**完成任务后：**
 
 ```bash
-# ❌ 不要在 workspace 根目录克隆
-cd ~/.openclaw/workspace-my-agent/
-git clone https://github.com/xxx/project.git
-
-# ❌ 不要在根目录创建项目
-mkdir my-project
-npm init
-
-# ❌ 不要在根目录创建脚本
-cat > script.sh
-
-# ❌ 不要留下临时文件
-ls *.tmp *.log
-```
-
----
-
-### ✅ 永远这样做
-
-```bash
-# ✅ 使用外部目录进行项目
-cd ~/projects/
-git clone https://github.com/xxx/project.git
-
-# ✅ 在 scripts/ 创建脚本
-cd scripts/
-cat > my-script.sh
-
-# ✅ 在 data/<agent>/work/ 进行 Agent 特定工作
-cd data/my-agent/work/
-# 在这里工作
-
-# ✅ 工作后清理
+# 清理临时文件
 rm -rf /tmp/temp-*
 rm -rf data/my-agent/work/temp-*
+
+# 或运行清理脚本
+./scripts/core/cleanup.sh
 ```
+
+**清理脚本做什么：**
+- ✅ 清理 `node_modules/`, `__pycache__/`
+- ✅ 清理 `*.log`, `*.tmp`, `*.pyc`
+- ❌ 不清理 `work/` 目录（你自己决定）
 
 ---
 
-**记住：保持 workspace 整洁，让所有 Agent 高效工作！** 🚀
+### 📖 更多信息
+
+| 主题 | 文档 |
+|------|------|
+| 完整 workspace 规则 | [WORKSPACE_RULES.md](WORKSPACE_RULES.md) |
+| 结构概览 | [STRUCTURE_RULES.md](STRUCTURE_RULES.md) |
+| 快速参考 | [AGENT_RULES.md](AGENT_RULES.md) |
+
+---
+
+**Remember: Keep the workspace clean for everyone!**  
+**记住：保持 workspace 整洁，让大家高效工作！** 🚀
