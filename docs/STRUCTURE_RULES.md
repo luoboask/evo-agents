@@ -25,9 +25,12 @@ evo-agents/
 │   ├── core/                # System scripts (updated by template)
 │   └── *.sh, *.py           # User scripts (safe)
 │
-├── 📁 skills/               # Skills
-│   ├── core/                # Universal skills (updated)
-│   └── */                   # Custom skills (safe)
+├── 📁 skills/               # Skills (all in root)
+│   ├── memory-search/       # Universal skill (updated)
+│   ├── rag/                 # Universal skill (updated)
+│   ├── self-evolution/      # Universal skill (updated)
+│   ├── web-knowledge/       # Universal skill (updated)
+│   └── my-custom-skill/     # Custom skill (safe)
 │
 ├── 📄 .gitignore            # Git ignore rules
 ├── 📄 install.sh            # One-click install script
@@ -58,7 +61,7 @@ evo-agents/
 
 #### 1. Template Files (Updated by install)
 
-**Location:** Root directory, `scripts/core/`, `skills/core/`, `docs/`
+**Location:** Root directory, `scripts/core/`, `skills/` (universal), `docs/`
 
 **Behavior:**
 - 📦 Updated during re-installation
@@ -71,7 +74,8 @@ README.md, README.zh-CN.md
 workspace-setup.md
 CHANGELOG.md, CONTRIBUTING.md
 scripts/core/*.sh, scripts/core/*.py
-skills/core/*/
+skills/memory-search/, skills/rag/
+skills/self-evolution/, skills/web-knowledge/
 docs/*.md
 install.sh
 ```
@@ -139,16 +143,25 @@ scripts/
 **Example:**
 ```
 skills/
-├── core/                  # Universal skills (updated)
-│   ├── memory-search/
-│   ├── rag/
-│   ├── self-evolution/
-│   └── web-knowledge/
+├── memory-search/         # Universal skill (updated) 📦
+├── rag/                   # Universal skill (updated) 📦
+├── self-evolution/        # Universal skill (updated) 📦
+├── web-knowledge/         # Universal skill (updated) 📦
 │
 ├── my-custom-skill/       # User skill (safe) ✅
 ├── xhs-agent/             # Agent-specific skill (safe) ✅
 └── pinterest-bot/         # Agent-specific skill (safe) ✅
 ```
+
+**Universal skills (updated by template):**
+- `memory-search/`
+- `rag/`
+- `self-evolution/`
+- `web-knowledge/`
+
+**User skills (safe):**
+- All other skill directories
+- Naming: `my-skill/`, `agent-name/`, `xxx-bot/`
 
 ---
 
@@ -180,9 +193,15 @@ scripts/*.sh
 !scripts/core/
 
 # User skills (optional - can commit)
-skills/aura-*/
+# Universal skills are updated by template, user skills are safe
+skills/my-*/
 skills/*-agent/
 skills/*-bot/
+# Universal skills (template managed, not recommended to modify)
+# skills/memory-search/
+# skills/rag/
+# skills/self-evolution/
+# skills/web-knowledge/
 ```
 
 ---
@@ -195,7 +214,7 @@ skills/*-bot/
 - **Style:** lowercase, hyphens for shell, underscores for Python
 
 #### Skills
-- **Universal:** `skills/core/memory-search/`
+- **Universal:** `skills/memory-search/`, `skills/rag/`, etc.
 - **Custom:** `skills/my-skill/` or `skills/agent-name/`
 - **Required files:** `SKILL.md`, `skill.json`
 
@@ -227,8 +246,8 @@ skills/*-bot/
       ├─ Ask: Continue? (y/n)
       │
       └─ Yes → Update template files only
-         ├─ Update: scripts/core/, skills/core/, docs/
-         └─ Preserve: USER.md, memory/, public/, scripts/*, skills/*
+         ├─ Update: scripts/core/, skills/memory-search/, skills/rag/, skills/self-evolution/, skills/web-knowledge/, docs/
+         └─ Preserve: USER.md, memory/, public/, scripts/*, skills/* (other skills)
 ```
 
 ---
@@ -245,7 +264,7 @@ skills/*-bot/
 
 3. **Never delete user skills**
    - `skills/` root directory safe
-   - Only `skills/core/` updated
+   - Only universal skills updated (memory-search, rag, self-evolution, web-knowledge)
 
 4. **Always backup before changes**
    - Auto backup before re-installation
@@ -279,9 +298,12 @@ evo-agents/
 │   ├── core/                # 系统脚本（模板更新）
 │   └── *.sh, *.py           # 用户脚本（安全）
 │
-├── 📁 skills/               # 技能
-│   ├── core/                # 通用技能（更新）
-│   └── */                   # 自定义技能（安全）
+├── 📁 skills/               # 技能（都在根目录）
+│   ├── memory-search/       # 通用技能（模板更新）
+│   ├── rag/                 # 通用技能（模板更新）
+│   ├── self-evolution/      # 通用技能（模板更新）
+│   ├── web-knowledge/       # 通用技能（模板更新）
+│   └── my-custom-skill/     # 自定义技能（安全）
 │
 ├── 📄 .gitignore            # Git 忽略规则
 ├── 📄 install.sh            # 一键安装脚本
@@ -312,7 +334,7 @@ evo-agents/
 
 #### 1. 模板文件（安装时更新）
 
-**位置：** 根目录，`scripts/core/`, `skills/core/`, `docs/`
+**位置：** 根目录，`scripts/core/`, `skills/`（通用技能）, `docs/`
 
 **行为：**
 - 📦 重新安装时更新
@@ -325,7 +347,8 @@ README.md, README.zh-CN.md
 workspace-setup.md
 CHANGELOG.md, CONTRIBUTING.md
 scripts/core/*.sh, scripts/core/*.py
-skills/core/*/
+skills/memory-search/, skills/rag/
+skills/self-evolution/, skills/web-knowledge/
 docs/*.md
 install.sh
 ```
@@ -393,16 +416,25 @@ scripts/
 **示例：**
 ```
 skills/
-├── core/                  # 通用技能（更新）
-│   ├── memory-search/
-│   ├── rag/
-│   ├── self-evolution/
-│   └── web-knowledge/
+├── memory-search/         # 通用技能（模板更新）📦
+├── rag/                   # 通用技能（模板更新）📦
+├── self-evolution/        # 通用技能（模板更新）📦
+├── web-knowledge/         # 通用技能（模板更新）📦
 │
 ├── my-custom-skill/       # 用户技能（安全）✅
 ├── xhs-agent/             # Agent 特定技能（安全）✅
 └── pinterest-bot/         # Agent 特定技能（安全）✅
 ```
+
+**通用技能（会被模板更新）：**
+- `memory-search/`
+- `rag/`
+- `self-evolution/`
+- `web-knowledge/`
+
+**用户技能（安全）：**
+- 所有其他技能目录
+- 命名建议：`my-skill/`, `agent-name/`, `xxx-bot/`
 
 ---
 
@@ -434,9 +466,15 @@ scripts/*.sh
 !scripts/core/
 
 # 用户技能（可选 - 可提交）
-skills/aura-*/
+# 通用技能会被模板更新，用户技能安全
+skills/my-*/
 skills/*-agent/
 skills/*-bot/
+# 通用技能（模板管理，不建议修改）
+# skills/memory-search/
+# skills/rag/
+# skills/self-evolution/
+# skills/web-knowledge/
 ```
 
 ---
@@ -449,7 +487,7 @@ skills/*-bot/
 - **风格：** 小写，Shell 用连字符，Python 用下划线
 
 #### 技能
-- **通用：** `skills/core/memory-search/`
+- **通用：** `skills/memory-search/`, `skills/rag/` 等
 - **自定义：** `skills/my-skill/` 或 `skills/agent-name/`
 - **必需文件：** `SKILL.md`, `skill.json`
 
@@ -481,8 +519,8 @@ skills/*-bot/
       ├─ 询问：继续？(y/n)
       │
       └─ 是 → 仅更新模板文件
-         ├─ 更新：scripts/core/, skills/core/, docs/
-         └─ 保留：USER.md, memory/, public/, scripts/*, skills/*
+         ├─ 更新：scripts/core/, skills/memory-search/, skills/rag/, skills/self-evolution/, skills/web-knowledge/, docs/
+         └─ 保留：USER.md, memory/, public/, scripts/*, skills/*（其他技能）
 ```
 
 ---
@@ -499,7 +537,7 @@ skills/*-bot/
 
 3. **永不删除用户技能**
    - `skills/` 根目录安全
-   - 只更新 `skills/core/`
+   - 只更新通用技能（memory-search, rag, self-evolution, web-knowledge）
 
 4. **更改前始终备份**
    - 重新安装前自动备份
