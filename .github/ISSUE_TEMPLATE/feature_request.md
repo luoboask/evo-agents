@@ -6,28 +6,14 @@ labels: enhancement
 assignees: ''
 ---
 
-**Is your feature request related to a problem? Please describe.**
+## Is your feature request related to a problem? | 问题相关
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-**Describe the solution you'd like**
+## Describe the solution you'd like | 期望方案
 A clear and concise description of what you want to happen.
 
-**Describe alternatives you've considered**
+## Describe alternatives you've considered | 其他方案
 A clear and concise description of any alternative solutions or features you've considered.
 
-**Use Case**
-How would this feature be used? Who would benefit from it?
-
-**Example Usage**
-```bash
-# Example of how this feature would be used
-./scripts/core/setup-multi-agent.sh designer writer editor
-```
-
-**Additional context**
+## Additional context | 其他信息
 Add any other context or screenshots about the feature request here.
-
-**Checklist**
-- [ ] I have searched existing feature requests
-- [ ] This feature would benefit other users
-- [ ] I can help implement this feature (optional)

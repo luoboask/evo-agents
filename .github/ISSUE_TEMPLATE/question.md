@@ -1,35 +1,21 @@
 ---
 name: ❓ Question
-about: Ask a question about evo-agents
+about: Ask a question about this project
 title: '[QUESTION] '
 labels: question
 assignees: ''
 ---
 
-**Your Question**
-A clear and concise question.
+## Your question | 你的问题
+A clear and concise description of your question.
 
-**What have you tried?**
-Describe what you've already attempted.
+## Context | 背景
+What are you trying to do? What have you tried so far?
 
-**Relevant Information**
-* OS: [e.g., macOS, Windows, Linux]
-* OpenClaw Version: [e.g., 2026.3.13]
-* Python Version: [e.g., 3.10]
+## Environment | 环境（如果相关）
+- OS: [e.g. macOS, Linux, Windows]
+- Python version: [e.g. 3.10]
+- OpenClaw version: [e.g. 2026.3.13]
 
-**Example Code/Commands**
-```bash
-# Your commands or code here
-./scripts/core/setup-multi-agent.sh designer writer
-```
-
-**Expected Outcome**
-What were you trying to achieve?
-
-**Additional context**
-Add any other details that might help answer your question.
-
-**Checklist**
-- [ ] I have searched existing issues
-- [ ] I have checked the documentation
-- [ ] This is a specific question (not a bug report)
+## Additional context | 其他信息
+Add any other context or screenshots here.

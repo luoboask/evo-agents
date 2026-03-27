@@ -4,44 +4,6 @@
 # Usage: curl -s https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s <agent-name> [--force] [--activate]
 
 set -e
-#!/bin/bash
-# Color codes
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-NC='\033[0m' # No Color
-
-# Progress bar
-show_progress() {
-    local task="$1"
-    local current="$2"
-    local total="$3"
-    local percent=$((current * 100 / total))
-    local filled=$((percent / 5))
-    local empty=$((20 - filled))
-    
-    printf "\r${CYAN}[%s>%s]${NC} %3d%% - %s" \
-        "$(printf '#%.0s' $(seq 1 $filled))" \
-        "$(printf '=%.0s' $(seq 1 $empty))" \
-        $percent \
-        "$task"
-}
-
-echo_step() {
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${GREEN}✓${NC} $1"
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-}
-
-echo_error() {
-    echo -e "${RED}✗${NC} $1" >&2
-}
-
-echo_warning() {
-    echo -e "${YELLOW}⚠${NC} $1"
-}
 
 AGENT_NAME="${1:-my-agent}"
 FORCE=""
@@ -180,7 +142,7 @@ if [ -d "$WORKSPACE_ROOT" ]; then
     fi
 else
     # 1. 克隆模板 / Clone template
-    echo_step "1️⃣  克隆 evo-agents 模板 / Cloning template..."
+    echo "1️⃣  克隆 evo-agents 模板 / Cloning template..."
     git clone --depth 1 https://github.com/luoboask/evo-agents.git "$WORKSPACE_ROOT"
     echo "   ✅ 克隆完成 / Clone complete"
     cd "$WORKSPACE_ROOT"
@@ -199,7 +161,7 @@ fi
 
 # 2. 注册到 OpenClaw / Register to OpenClaw
 echo ""
-echo_step "2️⃣  注册到 OpenClaw / Registering to OpenClaw..."
+echo "2️⃣  注册到 OpenClaw / Registering to OpenClaw..."
 if openclaw agents list 2>/dev/null | grep -q "^$AGENT_NAME"; then
     echo "   ⚠️  Agent 已注册，跳过 / Agent already registered, skipping"
 else
@@ -248,7 +210,7 @@ if [[ -n "$ACTIVATE" ]]; then
     echo "   更多功能可以稍后运行 / For more features, run later:"
     echo "   ./scripts/core/activate-features.sh"
 else
-    echo_step "5️⃣  功能激活 / Feature Activation"
+    echo "5️⃣  功能激活 / Feature Activation"
     echo ""
     echo "   要激活高级功能（语义搜索、RAG 等），请运行："
     echo "   To activate advanced features (semantic search, RAG, etc.):"
@@ -263,7 +225,7 @@ fi
 
 # 7. 完成 / Complete
 echo ""
-echo_step "8️⃣  完成 / Complete"
+echo "8️⃣  完成 / Complete"
 echo ""
 echo "╔════════════════════════════════════════════════════════╗"
 echo "║  ✅ 安装完成！/ Installation Complete!                   ║"
