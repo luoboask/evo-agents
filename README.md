@@ -96,7 +96,40 @@ cd ~/.openclaw/workspace-my-agent
 ./scripts/core/setup-multi-agent.sh researcher writer editor
 ```
 
-### 3. Use Memory Search
+### 3. Uninstall Agent
+
+**Uninstall entire workspace:**
+
+```bash
+# Interactive (recommended)
+cd ~/.openclaw/workspace-my-agent
+./scripts/core/uninstall-workspace.sh
+
+# Or specify agent name
+./scripts/core/uninstall-workspace.sh my-agent
+```
+
+**What it does:**
+1. ⚠️  Asks for confirmation (type agent name)
+2. 📝  Unregisters from OpenClaw (`openclaw agents delete --force`)
+3. 🗑️  Deletes workspace directory
+4. 💾  Optional backup before deletion
+
+**Uninstall sub-agent:**
+
+```bash
+cd ~/.openclaw/workspace-my-agent
+./scripts/core/uninstall-agent.sh assistant-agent
+```
+
+**⚠️  Warnings:**
+- Backup your data first: `cp -r ~/.openclaw/workspace-my-agent /tmp/backup`
+- Uninstall is permanent (workspace goes to trash, but OpenClaw config is deleted)
+- Sub-agents inside workspace won't be auto-uninstalled
+
+---
+
+### 4. Use Memory Search
 
 ```bash
 python3 skills/memory-search/search.py "your query"

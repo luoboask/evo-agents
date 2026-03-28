@@ -96,13 +96,44 @@ cd ~/.openclaw/workspace-my-agent
 ./scripts/core/setup-multi-agent.sh researcher writer editor
 ```
 
-### 3. 使用记忆搜索
+### 3. 卸载 Agent
+
+**卸载整个 workspace：**
+
+```bash
+# 交互式（推荐）
+cd ~/.openclaw/workspace-my-agent
+./scripts/core/uninstall-workspace.sh
+
+# 或指定 agent 名称
+./scripts/core/uninstall-workspace.sh my-agent
+```
+
+**卸载流程：**
+1. ⚠️  要求确认（输入 agent 名称）
+2. 📝  从 OpenClaw 注销（`openclaw agents delete --force`）
+3. 🗑️  删除 workspace 目录
+4. 💾  可选备份
+
+**卸载子 Agent：**
+
+```bash
+cd ~/.openclaw/workspace-my-agent
+./scripts/core/uninstall-agent.sh assistant-agent
+```
+
+**⚠️  警告：**
+- 先备份：`cp -r ~/.openclaw/workspace-my-agent /tmp/backup`
+- 卸载是永久的（workspace 移到回收站，OpenClaw 配置被删除）
+- workspace 内的子 Agent 不会自动卸载
+
+### 4. 使用记忆搜索
 
 ```bash
 python3 skills/memory-search/search.py "你的查询"
 ```
 
-### 4. 记录会话
+### 5. 记录会话
 
 ```bash
 python3 scripts/core/session_recorder.py -t event -c "你的内容" --agent my-agent
