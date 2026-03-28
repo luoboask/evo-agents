@@ -24,6 +24,10 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Tuple
 
+# 添加 core 目录到路径（支持从子目录导入 path_utils）
+BRIDGE_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(BRIDGE_DIR.parent))
+
 from path_utils import resolve_workspace
 
 WORKSPACE = resolve_workspace()
