@@ -94,6 +94,10 @@ skills/star-*/
 skills/tarot-*/
 skills/danger-*/
 
+# Skills runtime data
+skills/*/learning_demo_result.json
+skills/*/*.result.json
+
 # -----------------------------------------------------------------------------
 # Projects (specific to certain agents)
 # -----------------------------------------------------------------------------
