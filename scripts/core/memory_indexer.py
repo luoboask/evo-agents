@@ -28,7 +28,9 @@ try:
 except ImportError:
     HAS_JIEBA = False
 
-WORKSPACE = Path(__file__).resolve().parent.parent
+from path_utils import resolve_workspace, resolve_data_dir
+
+WORKSPACE = resolve_workspace()
 
 sys.path.insert(0, str(WORKSPACE / "scripts"))
 from lock_utils import file_lock, open_db

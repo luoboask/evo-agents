@@ -16,7 +16,9 @@ import sqlite3
 from pathlib import Path
 import sys
 
-WORKSPACE = Path(__file__).resolve().parent.parent
+from path_utils import resolve_workspace, resolve_agent_memory, resolve_data_dir
+
+WORKSPACE = resolve_workspace()
 MEMORY_DIR = WORKSPACE / "memory"
 
 
@@ -30,8 +32,9 @@ def content_hash(s: str) -> str:
 
 
 def check(agent_name: str, fix: bool = False):
-    db_path = WORKSPACE / "data" / agent_name / "memory" / "memory_stream.db"
-    index_db = WORKSPACE / "data" / "index" / "memory_index.db"
+    agent_memory_dir = resolve_agent_memory(agent_name)
+    db_path = agent_memory_dir.parent / "memory_stream.db"
+    index_db = resolve_data_dir("index") / "memory_index.db"
     issues = []
 
     print("=" * 55)

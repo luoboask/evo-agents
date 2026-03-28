@@ -23,7 +23,9 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict
 
-WORKSPACE = Path(__file__).resolve().parent.parent.parent.parent
+from path_utils import resolve_workspace, resolve_agent_memory
+
+WORKSPACE = resolve_workspace()
 MEMORY_DIR = WORKSPACE / "memory"
 
 sys.path.insert(0, str(WORKSPACE / "scripts" / "core"))
@@ -39,7 +41,8 @@ TYPE_MAP = {
 
 
 def get_db_path(agent_name: str) -> Path:
-    return WORKSPACE / "data" / agent_name / "memory" / "memory_stream.db"
+    agent_memory = resolve_agent_memory(agent_name)
+    return agent_memory.parent / "memory_stream.db"
 
 
 def fetch_new_memories(db_path: Path, since: str) -> List[Dict]:

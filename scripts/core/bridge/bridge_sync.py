@@ -18,9 +18,9 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
-# 添加当前目录到路径
-BRIDGE_DIR = Path(__file__).resolve().parent
-WORKSPACE = BRIDGE_DIR.parent.parent.parent.parent
+from path_utils import resolve_workspace
+
+WORKSPACE = resolve_workspace()
 sys.path.insert(0, str(WORKSPACE / "scripts" / "core"))
 
 from bridge_to_markdown import sync_to_markdown

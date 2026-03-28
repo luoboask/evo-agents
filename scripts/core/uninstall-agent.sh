@@ -4,7 +4,9 @@
 
 set -e
 
-WORKSPACE="$(cd "$(dirname "$0")/../.." && pwd)"
+# 优先从 .install-config 读取配置
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+WORKSPACE="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$WORKSPACE"
 
 AGENT_NAME="$1"

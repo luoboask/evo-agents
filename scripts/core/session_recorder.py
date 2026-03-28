@@ -20,27 +20,17 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-WORKSPACE = Path(__file__).resolve().parent.parent
-MEMORY_DIR = WORKSPACE / "memory"
+from path_utils import resolve_workspace, resolve_agent_memory
+
+WORKSPACE = resolve_workspace()
 
 # 支持多 Agent - 通过 --agent 参数指定
 DEFAULT_AGENT = None  # 默认使用 workspace 根目录的 memory/
 
 
 def get_agent_memory_dir(agent: str = None) -> Path:
-    """获取指定 Agent 的记忆目录"""
-    if not agent:
-        return WORKSPACE / "memory"
-    
-    # 支持两种路径格式：
-    # 1. agents/<agent>/memory/ (多 Agent 模式)
-    # 2. memory/ (默认模式)
-    agent_memory = WORKSPACE / "agents" / agent / "memory"
-    if agent_memory.exists():
-        return agent_memory
-    
-    # 如果 agents/<agent>/memory 不存在，回退到默认
-    return WORKSPACE / "memory"
+    """获取指定 Agent 的记忆目录（兼容旧接口）"""
+    return resolve_agent_memory(agent)
 
 TYPE_MAP = {
     "event":      ("📌 事件",),

@@ -10,8 +10,10 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-WORKSPACE = Path(__file__).resolve().parent.parent
-LOCK_DIR = WORKSPACE / "data" / ".locks"
+from path_utils import resolve_workspace, resolve_data_dir
+
+WORKSPACE = resolve_workspace()
+LOCK_DIR = resolve_data_dir(".locks")
 
 
 @contextmanager

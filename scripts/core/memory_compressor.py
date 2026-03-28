@@ -21,7 +21,9 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Tuple
 
-WORKSPACE = Path(__file__).resolve().parent.parent
+from path_utils import resolve_workspace
+
+WORKSPACE = resolve_workspace()
 sys.path.insert(0, str(WORKSPACE / "scripts"))
 from lock_utils import file_lock
 

@@ -4,11 +4,26 @@
 
 set -e
 
-WORKSPACE="$(cd "$(dirname "$0")/../.." && pwd)"
-AGENT_NAME=$(basename "$WORKSPACE" | sed 's/workspace-//')
+# 优先从 .install-config 读取配置
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+WORKSPACE="$(cd "$SCRIPT_DIR/../.." && pwd)"
+CONFIG_FILE="$WORKSPACE/.install-config"
+
+if [ -f "$CONFIG_FILE" ]; then
+    source "$CONFIG_FILE"
+    WORKSPACE="$workspace_path"
+    AGENT_NAME="$agent_name"
+else
+    # 回退到推导
+    AGENT_NAME=$(basename "$WORKSPACE" | sed 's/workspace-//')
+fi
 
 if [ -n "$1" ]; then
     AGENT_NAME="$1"
+    # 如果指定了 agent 名称，重新计算 workspace
+    if [ -z "$WORKSPACE_ROOT" ]; then
+        WORKSPACE="$HOME/.openclaw/workspace-$AGENT_NAME"
+    fi
 fi
 
 echo "╔════════════════════════════════════════════════════════╗"

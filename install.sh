@@ -61,6 +61,17 @@ fi
 echo "📁 创建目录..."
 mkdir -p memory/weekly memory/monthly memory/archive
 mkdir -p data/index data/$AGENT_NAME
+mkdir -p scripts/user
+echo "   ✅ 完成"
+
+# 创建安装配置文件（用于路径解析）
+echo "📝 创建安装配置..."
+cat > "$WORKSPACE_ROOT/.install-config" <<EOF
+agent_name=$AGENT_NAME
+workspace_path=$WORKSPACE_ROOT
+install_time=$(date -Iseconds)
+openclaw_registered=true
+EOF
 echo "   ✅ 完成"
 
 # 记录重要提示给 Agent

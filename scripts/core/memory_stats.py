@@ -13,7 +13,9 @@ from datetime import datetime
 from pathlib import Path
 import sys
 
-WORKSPACE = Path(__file__).resolve().parent.parent
+from path_utils import resolve_workspace, resolve_data_dir
+
+WORKSPACE = resolve_workspace()
 MEMORY_DIR = WORKSPACE / "memory"
 WEEKLY_DIR = MEMORY_DIR / "weekly"
 MONTHLY_DIR = MEMORY_DIR / "monthly"
