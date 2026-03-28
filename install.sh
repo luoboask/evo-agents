@@ -24,6 +24,15 @@ if [ -d "$WORKSPACE_ROOT" ]; then
     if [[ "$FORCE" == "--force" ]] || [[ "$FORCE" == "-f" ]]; then
         echo "⚠️  Workspace 已存在，强制继续"
         cd "$WORKSPACE_ROOT"
+        # 清理开发文件（即使已存在）
+        echo "🧹 清理开发文件..."
+        rm -rf .github/ 2>/dev/null || true
+        rm -f CONTRIBUTING.md CODE_OF_CONDUCT.md SECURITY.md 2>/dev/null || true
+        rm -f GITHUB_PUSH_RULES.md CHANGELOG.md workspace-setup.md 2>/dev/null || true
+        rm -rf examples/ libs/ 2>/dev/null || true
+        rm -f skills/self-evolution/README_*.md skills/self-evolution/ARCHITECTURE.md 2>/dev/null || true
+        rm -f skills/rag/report.html 2>/dev/null || true
+        echo "   ✅ 完成"
     else
         echo "⚠️  Workspace 已存在"
         echo ""

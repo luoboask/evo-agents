@@ -97,7 +97,7 @@ echo ""
 
 # 先从 OpenClaw 注销主 Agent（在删除 workspace 之前）
 echo "📝 从 OpenClaw 注销主 Agent / Unregister main agent from OpenClaw..."
-if openclaw agents list 2>/dev/null | grep -q "^$AGENT_NAME"; then
+if openclaw agents list 2>/dev/null | grep -E "^- $AGENT_NAME$" >/dev/null; then
     echo "   运行 / Running: openclaw agents delete $AGENT_NAME --force"
     openclaw agents delete "$AGENT_NAME" --force 2>/dev/null && \
         echo "   ✅ 已注销 / Unregistered" || \
