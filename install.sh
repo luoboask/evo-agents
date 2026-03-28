@@ -2,14 +2,20 @@
 # install.sh - evo-agents 一键安装
 # 
 # 用法:
-#   推荐：curl -sO https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh && bash install.sh my-agent
-#   管道：curl -fsSL https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s my-agent
+#   推荐（国内）：curl -fsSL https://gitee.com/luoboask/evo-agents/raw/master/install.sh | bash -s my-agent
+#   海外：curl -fsSL https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s my-agent
 
 set -e
 
 AGENT_NAME="${1:-my-agent}"
 FORCE="${2:-}"
 WORKSPACE_ROOT="$HOME/.openclaw/workspace-$AGENT_NAME"
+
+# 多个下载源（自动选择最快的）
+SOURCES=(
+  "https://gitee.com/luoboask/evo-agents/raw/master"
+  "https://raw.githubusercontent.com/luoboask/evo-agents/master"
+)
 
 echo "╔════════════════════════════════════════════════════════╗"
 echo "║  evo-agents 一键安装                                     ║"
@@ -51,9 +57,31 @@ if [ -d "$WORKSPACE_ROOT" ]; then
         cd "$WORKSPACE_ROOT"
     fi
 else
-    # 克隆模板
+    # 克隆模板（自动选择最快的源）
     echo "📥 克隆模板..."
-    git clone --depth 1 https://github.com/luoboask/evo-agents.git "$WORKSPACE_ROOT"
+    
+    CLONE_SUCCESS=false
+    for SOURCE in "${SOURCES[@]}"; do
+        # 从 URL 推断 git 仓库地址
+        if [[ "$SOURCE" == *"gitee.com"* ]]; then
+            GIT_URL="https://gitee.com/luoboask/evo-agents.git"
+        else
+            GIT_URL="https://github.com/luoboask/evo-agents.git"
+        fi
+        
+        echo "   尝试：$GIT_URL"
+        if git clone --depth 1 "$GIT_URL" "$WORKSPACE_ROOT" 2>/dev/null; then
+            echo "   ✅ 成功：$GIT_URL"
+            CLONE_SUCCESS=true
+            break
+        fi
+    done
+    
+    if [ "$CLONE_SUCCESS" = false ]; then
+        echo "❌ 所有源都失败，请检查网络连接"
+        exit 1
+    fi
+    
     cd "$WORKSPACE_ROOT"
     
     # 清理用户不需要感知的开发文件
