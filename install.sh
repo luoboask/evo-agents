@@ -11,11 +11,16 @@ AGENT_NAME="${1:-my-agent}"
 FORCE="${2:-}"
 WORKSPACE_ROOT="$HOME/.openclaw/workspace-$AGENT_NAME"
 
-# 多个下载源（自动选择最快的）
-SOURCES=(
-  "https://gitee.com/luoboask/evo-agents/raw/master"
-  "https://raw.githubusercontent.com/luoboask/evo-agents/master"
-)
+# 检测脚本来源，自动选择对应 Git 源
+if [[ "${BASH_SOURCE[0]}" == *"gitee.com"* ]] || [[ "$0" == *"gitee.com"* ]]; then
+    # 从 Gitee 下载，使用 Gitee Git 源
+    GIT_URL="https://gitee.com/luoboask/evo-agents.git"
+    SOURCE_NAME="Gitee"
+else
+    # 从 GitHub 下载，优先尝试 Gitee（国内更快）
+    GIT_URL="https://gitee.com/luoboask/evo-agents.git"
+    SOURCE_NAME="Gitee (优先)"
+fi
 
 echo "╔════════════════════════════════════════════════════════╗"
 echo "║  evo-agents 一键安装                                     ║"
@@ -57,29 +62,23 @@ if [ -d "$WORKSPACE_ROOT" ]; then
         cd "$WORKSPACE_ROOT"
     fi
 else
-    # 克隆模板（自动选择最快的源）
+    # 克隆模板
     echo "📥 克隆模板..."
+    echo "   源：$SOURCE_NAME ($GIT_URL)"
     
-    CLONE_SUCCESS=false
-    for SOURCE in "${SOURCES[@]}"; do
-        # 从 URL 推断 git 仓库地址
-        if [[ "$SOURCE" == *"gitee.com"* ]]; then
-            GIT_URL="https://gitee.com/luoboask/evo-agents.git"
-        else
+    if ! git clone --depth 1 "$GIT_URL" "$WORKSPACE_ROOT" 2>/dev/null; then
+        # Gitee 失败时尝试 GitHub
+        if [[ "$GIT_URL" == *"gitee.com"* ]]; then
+            echo "   ⚠️  Gitee 失败，尝试 GitHub..."
             GIT_URL="https://github.com/luoboask/evo-agents.git"
+            if ! git clone --depth 1 "$GIT_URL" "$WORKSPACE_ROOT" 2>/dev/null; then
+                echo "❌ 所有源都失败，请检查网络连接"
+                exit 1
+            fi
+        else
+            echo "❌ 克隆失败，请检查网络连接"
+            exit 1
         fi
-        
-        echo "   尝试：$GIT_URL"
-        if git clone --depth 1 "$GIT_URL" "$WORKSPACE_ROOT" 2>/dev/null; then
-            echo "   ✅ 成功：$GIT_URL"
-            CLONE_SUCCESS=true
-            break
-        fi
-    done
-    
-    if [ "$CLONE_SUCCESS" = false ]; then
-        echo "❌ 所有源都失败，请检查网络连接"
-        exit 1
     fi
     
     cd "$WORKSPACE_ROOT"
