@@ -158,7 +158,7 @@ import sys
 from pathlib import Path
 
 # 添加 workspace 的 libs 目录到路径
-workspace = Path('$WORKSPACE_ROOT').resolve()
+workspace = Path('$WORKSPACE').resolve()
 sys.path.insert(0, str(workspace / 'libs'))
 
 from memory_hub import MemoryHub
