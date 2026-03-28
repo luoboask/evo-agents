@@ -23,6 +23,15 @@ python3 scripts/core/self_check.py
 python3 scripts/core/self_check.py --full
 ```
 
+**自动修复（推荐）：**
+```bash
+# 先预览
+python3 scripts/core/self_check.py --dry-run
+
+# 执行修复
+python3 scripts/core/self_check.py --fix
+```
+
 **生成 JSON 报告：**
 ```bash
 python3 scripts/core/self_check.py --report
@@ -49,6 +58,35 @@ python3 scripts/core/self_check.py --report
 
 **错误：** `❌ 文件：README.md: 主文档 不存在`
 
+### 🔧 自动修复
+
+**可自动修复的问题：**
+
+| 问题类型 | 修复方式 |
+|---------|---------|
+| 缺失目录 | 创建目录 + .gitkeep |
+| 异常目录 | 删除目录（如 scripts/data） |
+| data/ 脏数据 | 清理非 .gitkeep 文件 |
+| 索引数据库损坏 | 运行 memory_indexer.py --full |
+
+**修复流程：**
+```bash
+# 1. 预览（推荐先看）
+python3 scripts/core/self_check.py --dry-run
+
+# 输出示例：
+#   📝 [预览] 创建目录：memory
+#   📝 [预览] 删除目录：scripts/data
+
+# 2. 执行修复
+python3 scripts/core/self_check.py --fix
+
+# 输出示例：
+#   ✅ 已创建目录：memory
+#   ✅ 已删除目录：scripts/data
+#   ✅ 已修复：2 个问题
+```
+
 ### 📊 JSON 报告示例
 
 ```json
@@ -71,24 +109,30 @@ Agent 可以在以下时机自动执行自检：
 1. **启动时** - 检测环境完整性
 2. **心跳检查** - 定期检查
 3. **执行敏感操作前** - 确保环境正常
+4. **发现问题时** - 自动修复
 
 **示例代码：**
 ```python
 import subprocess
 import json
 
+# 自动修复模式
 result = subprocess.run(
-    ["python3", "scripts/core/self_check.py", "--report"],
+    ["python3", "scripts/core/self_check.py", "--fix", "--report"],
     capture_output=True,
     text=True
 )
 report = json.loads(result.stdout)
 
 if report["errors"] > 0:
-    print(f"⚠️ 发现 {report['errors']} 个错误")
+    print(f"⚠️ 发现 {report['errors']} 个无法修复的错误")
     for r in report["results"]:
         if not r["passed"] and r["severity"] == "error":
             print(f"  - {r['name']}: {r['suggestion']}")
+elif report["warnings"] > 0:
+    print(f"✅ 已修复所有可修复的问题，还有 {report['warnings']} 个警告")
+else:
+    print(f"✅ Workspace 状态良好，已修复 {report.get('fixed', 0)} 个问题")
 ```
 
 ---
