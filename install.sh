@@ -156,40 +156,13 @@ echo ""
 echo "📊 位置：$WORKSPACE_ROOT"
 echo ""
 
-# 激活高级特性
+# 提示激活高级特性
 echo "🔮 激活高级特性..."
 echo ""
-echo "💡 提示：现在将自动进入 Agent 会话并激活高级特性"
-echo "   按 Ctrl+C 可跳过，稍后手动运行：./scripts/core/activate-features.sh"
+echo "💡 提示：安装完成后，建议激活高级特性："
 echo ""
-sleep 3
-
-# 进入 Agent 会话并激活特性
-echo "🚀 进入 Agent 会话..."
+echo "   cd $WORKSPACE_ROOT"
+echo "   ./scripts/core/activate-features.sh"
 echo ""
-
-# 使用 openclaw 命令进入会话并执行激活脚本
-openclaw agents use "$AGENT_NAME" << 'ACTIVATE_SCRIPT'
-# 自动激活高级特性
-if [ -f "scripts/core/activate-features.sh" ]; then
-    echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "🔮 开始激活高级特性"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
-    
-    # 执行激活脚本（非交互模式）
-    bash scripts/core/activate-features.sh --auto || {
-        echo ""
-        echo "💡 稍后可以手动运行：./scripts/core/activate-features.sh"
-    }
-else
-    echo "⚠️  未找到激活脚本"
-fi
-ACTIVATE_SCRIPT
-
-echo ""
-echo "╔════════════════════════════════════════════════════════╗"
-echo "║  ✅ 全部完成！                                          ║"
-echo "╚════════════════════════════════════════════════════════╝"
+echo "   或者在 OpenClaw 中直接使用，需要时再激活"
 echo ""
