@@ -5,7 +5,7 @@
 set -e
 
 # 使用 path_utils 统一路径解析（与其他脚本保持一致）
-WORKSPACE="$(cd "$(dirname "$0")" && pwd)"
+WORKSPACE="$(cd "$(dirname "$0")/../.." WORKSPACE="$(cd "$(dirname "$0")" && pwd)"WORKSPACE="$(cd "$(dirname "$0")" && pwd)" pwd)"
 cd "$WORKSPACE"
 
 # 获取 Agent 名称
