@@ -98,8 +98,8 @@ echo ""
 # 先从 OpenClaw 注销主 Agent（在删除 workspace 之前）
 echo "📝 从 OpenClaw 注销主 Agent / Unregister main agent from OpenClaw..."
 if openclaw agents list 2>/dev/null | grep -q "^$AGENT_NAME"; then
-    echo "   运行 / Running: openclaw agents remove $AGENT_NAME"
-    openclaw agents remove "$AGENT_NAME" 2>/dev/null && \
+    echo "   运行 / Running: openclaw agents delete $AGENT_NAME --force"
+    openclaw agents delete "$AGENT_NAME" --force 2>/dev/null && \
         echo "   ✅ 已注销 / Unregistered" || \
         echo "   ⚠️  注销失败 / Unregister failed (可能需要手动清理)"
 else
@@ -114,7 +114,7 @@ if [ "$SUB_AGENTS" -gt 0 ]; then
         if [ -d "$agent_dir" ]; then
             sub_agent=$(basename "$agent_dir")
             echo "   - $sub_agent"
-            openclaw agents remove "$sub_agent" 2>/dev/null || true
+            openclaw agents delete "$sub_agent" --force 2>/dev/null || true
         fi
     done
     echo "   ✅ 子 Agent 已注销 / Sub-agents unregistered"

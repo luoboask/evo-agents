@@ -76,8 +76,8 @@ fi
 # 从 OpenClaw 注销
 echo "📝 从 OpenClaw 注销 / Unregister from OpenClaw..."
 if openclaw agents list 2>/dev/null | grep -q "^$AGENT_NAME"; then
-    echo "   运行 / Running: openclaw agents remove $AGENT_NAME"
-    openclaw agents remove "$AGENT_NAME" 2>/dev/null && \
+    echo "   运行 / Running: openclaw agents delete $AGENT_NAME --force"
+    openclaw agents delete "$AGENT_NAME" --force 2>/dev/null && \
         echo "   ✅ 已注销 / Unregistered" || \
         echo "   ⚠️  注销失败 / Unregister failed"
 else
