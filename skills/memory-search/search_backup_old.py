@@ -11,7 +11,7 @@ from pathlib import Path
 
 def search_memory(query, max_results=5, case_sensitive=False):
     """Search through memory files."""
-    workspace = Path("/Users/dhr/.openclaw/workspace")
+    workspace = Path(__file__).parent.parent.parent
     memory_dir = workspace / "memory"
     
     results = []

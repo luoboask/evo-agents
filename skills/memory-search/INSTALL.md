@@ -182,7 +182,7 @@ EMBEDDING_MODEL = "nomic-embed-text"
     ├── MEMORY.md           # 长期记忆
     ├── knowledge_base.db   # 知识库数据库
     ├── memory_stream.db    # 记忆流数据库
-    ├── ai-baby_*.db        # AI Baby 专用数据库
+    ├── my-agent_*.db        # AI Baby 专用数据库
     └── vector_db/          # 向量数据库（Ollama）
 ```
 

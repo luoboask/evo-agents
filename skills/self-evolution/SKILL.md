@@ -124,7 +124,7 @@ status()
 
 ```yaml
 workspace: "/path/to/workspace"
-agent: "ai-baby"
+agent: "my-agent"
 ollama:
   url: "http://localhost:11434"
   embedding_model: "nomic-embed-text"

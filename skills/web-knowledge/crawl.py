@@ -24,7 +24,7 @@ class WebCrawler:
     """智能网页爬虫"""
     
     def __init__(self):
-        self.workspace = Path("/Users/dhr/.openclaw/workspace")
+        self.workspace = Path(__file__).parent.parent.parent
         self.cache_dir = self.workspace / "memory" / "web_cache"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         

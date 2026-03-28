@@ -50,7 +50,7 @@ def cosine_similarity(a, b):
 
 def load_memory_files():
     """Load all memory files."""
-    workspace = Path("/Users/dhr/.openclaw/workspace")
+    workspace = Path(__file__).parent.parent.parent
     memory_dir = workspace / "memory"
     
     documents = []
@@ -148,7 +148,7 @@ def main():
     
     args = parser.parse_args()
     
-    cache_file = "/Users/dhr/.openclaw/workspace/memory/.semantic_cache.pkl"
+    cache_file = Path(__file__).parent.parent.parent / "memory" / ".semantic_cache.pkl"
     
     # Load documents
     documents = load_memory_files()

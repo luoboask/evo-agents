@@ -3,7 +3,7 @@
   "version": "5.0.0",
   "description": "自进化系统 v5.0，基于 Generative Agents 的完整架构",
   "homepage": "https://github.com/luoboask/evo-agents",
-  "author": "ai-baby",
+  "author": "evo-agents",
   "license": "MIT",
   "updated_at": "2026-03-24",
   "changelog": "5.0.0: 完整实现记忆流、分形思考、夜间循环架构"

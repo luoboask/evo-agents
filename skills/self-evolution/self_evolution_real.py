@@ -18,7 +18,7 @@ class RealSelfEvolution:
     """真实自我进化系统（支持多 Agent 数据隔离）"""
     
     def __init__(self, agent_id: str = None, db_path: str = None):
-        self.workspace = Path('/Users/dhr/.openclaw/workspace-ai-baby')
+        self.workspace = Path(__file__).parent.parent.parent
         
         if db_path:
             self.evolution_db = Path(db_path)
@@ -27,11 +27,11 @@ class RealSelfEvolution:
             self.evolution_db = self.workspace / 'data' / agent_id / 'memory' / 'evolution.db'
         else:
             # 默认数据库 (使用 ai-baby)
-            agent_name = os.environ.get('OPENCLAW_AGENT', 'ai-baby')
+            agent_name = os.environ.get('OPENCLAW_AGENT', 'my-agent')
             self.evolution_db = self.workspace / 'data' / agent_name / 'memory' / 'evolution.db'
         
         self.agent_id = agent_id
-        self.memory_dir = self.workspace / 'data' / (agent_id or 'ai-baby') / 'memory'
+        self.memory_dir = self.workspace / 'data' / (agent_id or 'my-agent') / 'memory'
         
         # 初始化数据库表
         self._init_db()

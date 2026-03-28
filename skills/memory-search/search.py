@@ -23,7 +23,7 @@ class IntegratedHybridMemory:
     """
     
     def __init__(self):
-        self.workspace = Path("/Users/dhr/.openclaw/workspace")
+        self.workspace = Path(__file__).parent.parent.parent
         self.memory_dir = self.workspace / "memory"
         self.vector_dir = self.memory_dir / "vector_db"
         self.vector_dir.mkdir(parents=True, exist_ok=True)

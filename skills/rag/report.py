@@ -9,8 +9,8 @@ from pathlib import Path
 from datetime import datetime, timedelta
 
 SKILLS_DIR = Path(__file__).parent
-# 使用统一路径：data/ai-baby/logs/evaluations.jsonl
-DATA_DIR = SKILLS_DIR.parent.parent / "data" / "ai-baby"
+# 使用统一路径：data/${agent_name}/logs/evaluations.jsonl
+DATA_DIR = SKILLS_DIR.parent.parent / "data" / os.environ.get("OPENCLAW_AGENT", "my-agent")"
 LOGS_DIR = DATA_DIR / "logs"
 EVALUATIONS_FILE = LOGS_DIR / "evaluations.jsonl"
 

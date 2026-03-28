@@ -26,7 +26,7 @@ def cmd_status(args):
     
     # 检查数据库
     import os
-    agent_name = os.environ.get('OPENCLAW_AGENT', 'ai-baby')
+    agent_name = os.environ.get('OPENCLAW_AGENT', 'my-agent')
     db_files = [
         f'data/{agent_name}/memory/{agent_name}_memory_stream.db',
         f'data/{agent_name}/memory/{agent_name}_knowledge_base.db',
@@ -34,7 +34,7 @@ def cmd_status(args):
     
     print("\n📊 数据库状态:")
     for db in db_files:
-        full_path = Path('/Users/dhr/.openclaw/workspace-ai-baby') / db
+        full_path = Path(__file__).parent.parent.parent
         if full_path.exists():
             size_mb = full_path.stat().st_size / 1024 / 1024
             print(f"   ✅ {db} ({size_mb:.2f}MB)")

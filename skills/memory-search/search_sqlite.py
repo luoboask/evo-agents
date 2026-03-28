@@ -23,7 +23,7 @@ except ImportError:
 class SQLiteMemorySearch:
     """SQLite 记忆搜索 - 使用 Memory Hub"""
     
-    def __init__(self, agent_name='demo-agent'):
+    def __init__(self, agent_name=None):
         """
         初始化记忆搜索
         
@@ -121,7 +121,7 @@ def main():
     parser.add_argument('--stats', '-s', action='store_true', help='统计信息')
     parser.add_argument('--limit', '-n', type=int, default=10, help='返回数量')
     parser.add_argument('--semantic', action='store_true', help='使用语义搜索')
-    parser.add_argument('--agent', default='demo-agent', help='Agent 名称')
+    parser.add_argument('--agent', default=None, help='Agent 名称')
     
     args = parser.parse_args()
     

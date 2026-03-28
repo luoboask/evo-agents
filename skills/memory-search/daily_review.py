@@ -25,7 +25,7 @@ def get_today_date():
 
 def read_memory_file(date_str):
     """Read a memory file for a specific date."""
-    workspace = Path("/Users/dhr/.openclaw/workspace")
+    workspace = Path(__file__).parent.parent.parent
     memory_file = workspace / "memory" / f"{date_str}.md"
     
     if memory_file.exists():
@@ -36,7 +36,7 @@ def read_memory_file(date_str):
 
 def create_today_memory():
     """Create memory file for today if it doesn't exist."""
-    workspace = Path("/Users/dhr/.openclaw/workspace")
+    workspace = Path(__file__).parent.parent.parent
     memory_dir = workspace / "memory"
     memory_dir.mkdir(exist_ok=True)
     
@@ -79,7 +79,7 @@ def get_yesterday_memory_summary():
 def check_first_session_today():
     """Check if this is the first session today by looking at today's memory file."""
     today = get_today_date()
-    workspace = Path("/Users/dhr/.openclaw/workspace")
+    workspace = Path(__file__).parent.parent.parent
     memory_file = workspace / "memory" / f"{today}.md"
     
     if not memory_file.exists():

@@ -42,7 +42,7 @@ class RAGEvaluator:
             agent_name: Agent 名称（默认从环境变量获取）
         """
         if agent_name is None:
-            agent_name = os.environ.get('OPENCLAW_AGENT', 'ai-baby')
+            agent_name = os.environ.get('OPENCLAW_AGENT')
         
         self.agent_name = agent_name
         self.config = self._load_config()
