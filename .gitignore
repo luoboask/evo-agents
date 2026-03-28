@@ -36,6 +36,14 @@ scripts/*.sh
 scripts/user/
 !scripts/user/.gitkeep
 
+# -----------------------------------------------------------------------------
+# Script runtime data (脚本运行时数据)
+# -----------------------------------------------------------------------------
+scripts/data/
+!scripts/data/.gitkeep
+scripts/memory/
+!scripts/memory/.gitkeep
+
 # 虚拟环境
 env/
 venv/
@@ -56,8 +64,9 @@ Thumbs.db
 # -----------------------------------------------------------------------------
 # Runtime data (运行时数据) - 本地保留，不提交
 # -----------------------------------------------------------------------------
-data/*.json
-data/**/*.json
+data/
+!data/.gitkeep
+!data/README.md
 data/*/work/
 agents/*/data/*/work/
 memory/*.md
