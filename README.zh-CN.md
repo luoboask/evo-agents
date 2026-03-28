@@ -14,13 +14,24 @@
 
 ## ⚡ 快速开始
 
-**一行命令安装：**
+### 一行命令安装
 
+**国内用户（推荐，快 50 倍）：**
+```bash
+curl -fsSL https://gitee.com/luoboask/evo-agents/raw/master/install.sh | bash -s my-agent
+```
+
+**海外用户：**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s my-agent
 ```
 
 **就这么简单！** 几秒钟内拥有一个功能完整的 Agent workspace。
+
+**💡 访问加速：**
+- 🇨🇳 国内用户：使用 Gitee 源，速度快 50 倍
+- 🌏 海外用户：使用 GitHub 源
+- ⚡ 安装脚本会自动选择最快的源
 
 ---
 

@@ -14,11 +14,22 @@ A reusable, self-evolving agent workspace with strict data isolation, shared cap
 
 ## ⚡ Quick Start
 
-**One-line installation:**
+### One-line Installation
 
+**Global:**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s my-agent
 ```
+
+**China (Faster):**
+```bash
+curl -fsSL https://gitee.com/luoboask/evo-agents/raw/master/install.sh | bash -s my-agent
+```
+
+**中文说明：**
+- 🌏 海外用户：使用 GitHub 源
+- 🇨🇳 国内用户：使用 Gitee 源（快 50 倍）
+- ⚡ 安装脚本会自动选择最快的源
 
 **That's it!** You'll have a fully functional agent workspace in seconds.
 
