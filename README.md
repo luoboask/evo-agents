@@ -273,3 +273,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Made with ❤️ by the evo-agents team**
+
+---
+
+## 🔧 重装/修复
+
+如果 skills 有问题或需要更新：
+
+```bash
+cd ~/.openclaw/workspace-my-agent
+./scripts/core/reinstall.sh
+```
+
+**选项：**
+1. 🔧 仅修复 skills（推荐）- 更新并修复硬编码
+2. 🔄 完全重装（保留数据）- 重新拉取代码，保留记忆数据
+3. 🗑️ 完全重置（删除所有数据）- 清空所有数据（带备份）
