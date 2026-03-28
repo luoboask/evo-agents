@@ -127,9 +127,44 @@ cd ~/.openclaw/workspace-my-agent
 - Uninstall is permanent (workspace goes to trash, but OpenClaw config is deleted)
 - Sub-agents inside workspace won't be auto-uninstalled
 
+### 4. Self-Check & Auto-Repair
+
+**Check workspace health:**
+
+```bash
+cd ~/.openclaw/workspace-my-agent
+python3 scripts/core/self_check.py
+```
+
+**Auto-fix issues:**
+
+```bash
+# Preview fixes
+python3 scripts/core/self_check.py --dry-run
+
+# Apply fixes
+python3 scripts/core/self_check.py --fix
+```
+
+**What it checks:**
+- ✅ Directory structure integrity
+- ✅ Critical files existence
+- ✅ Runtime data (forbidden directories)
+- ✅ Git configuration
+- ✅ OpenClaw registration
+- ✅ Path system functionality
+- ✅ Skills completeness
+- ✅ Database health
+
+**What it can auto-fix:**
+- 🔧 Create missing directories (with .gitkeep)
+- 🔧 Delete forbidden directories (scripts/data, scripts/memory)
+- 🔧 Clean data/ directory
+- 🔧 Rebuild index database
+
 ---
 
-### 4. Use Memory Search
+### 5. Use Memory Search
 
 ```bash
 python3 skills/memory-search/search.py "your query"

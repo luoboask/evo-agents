@@ -15,6 +15,9 @@
 | **setup-multi-agent.sh** | Add multiple sub-agents at once | ✅ Yes |
 | **cleanup.sh** | Clean build artifacts (node_modules, __pycache__, etc.) | ✅ Yes |
 | **session_recorder.py** | Record chat sessions to memory | ✅ Yes |
+| **self-check.py** | Workspace health check + auto-repair | ✅ Yes (NEW) |
+| **path_utils.py** | Unified path resolution | ✅ Yes |
+| **new_script.py** | Script template generator | ✅ Yes |
 
 ### ⚠️ Optional Scripts (Feature-specific)
 

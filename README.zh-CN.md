@@ -127,7 +127,44 @@ cd ~/.openclaw/workspace-my-agent
 - 卸载是永久的（workspace 移到回收站，OpenClaw 配置被删除）
 - workspace 内的子 Agent 不会自动卸载
 
-### 4. 使用记忆搜索
+### 4. 自检与自动修复
+
+**检查工作区健康状态：**
+
+```bash
+cd ~/.openclaw/workspace-my-agent
+python3 scripts/core/self_check.py
+```
+
+**自动修复问题：**
+
+```bash
+# 预览修复
+python3 scripts/core/self_check.py --dry-run
+
+# 执行修复
+python3 scripts/core/self_check.py --fix
+```
+
+**检查项目：**
+- ✅ 目录结构完整性
+- ✅ 关键文件存在性
+- ✅ 运行时数据（不应该存在的目录）
+- ✅ Git 配置
+- ✅ OpenClaw 注册状态
+- ✅ 路径系统功能
+- ✅ 技能完整性
+- ✅ 数据库健康
+
+**可自动修复：**
+- 🔧 创建缺失目录（自动添加 .gitkeep）
+- 🔧 删除异常目录（scripts/data, scripts/memory）
+- 🔧 清理 data/ 目录
+- 🔧 重建索引数据库
+
+---
+
+### 5. 使用记忆搜索
 
 ```bash
 python3 skills/memory-search/search.py "你的查询"

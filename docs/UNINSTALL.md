@@ -12,6 +12,33 @@ You have two uninstall options:
 
 1. **Uninstall a sub-agent** - Remove one sub-agent, keep workspace
 2. **Uninstall entire workspace** - Remove everything
+3. **Self-check before uninstall** - Verify workspace health
+
+---
+
+### Option 0: Self-Check (Recommended Before Uninstall)
+
+**Use case:** Check workspace health before uninstalling.
+
+```bash
+cd ~/.openclaw/workspace-my-agent
+python3 scripts/core/self_check.py
+```
+
+**Auto-fix issues:**
+```bash
+# Preview fixes
+python3 scripts/core/self_check.py --dry-run
+
+# Apply fixes
+python3 scripts/core/self_check.py --fix
+```
+
+**Why check first?**
+- ✅ Ensures uninstall scripts are present
+- ✅ Verifies OpenClaw registration
+- ✅ Detects potential issues
+- ✅ Can auto-fix common problems
 
 ---
 
