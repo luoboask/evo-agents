@@ -61,6 +61,7 @@ else
     rm -rf .github/  # GitHub 开发配置
     rm -f CONTRIBUTING.md CODE_OF_CONDUCT.md SECURITY.md  # 贡献者文档
     rm -f GITHUB_PUSH_RULES.md CHANGELOG.md workspace-setup.md  # 维护文档
+    rm -f README.zh-CN.md  # 冗余（README.md 已包含中文）
     rm -rf examples/  # 示例（用户不需要）
     rm -rf libs/  # 库源代码（内部使用）
     rm -f skills/self-evolution/README_*.md  # 技能内部文档
