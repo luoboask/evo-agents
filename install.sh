@@ -40,7 +40,7 @@ if [ -d "$WORKSPACE_ROOT" ]; then
         rm -rf .github/ 2>/dev/null || true
         rm -f CONTRIBUTING.md CODE_OF_CONDUCT.md SECURITY.md 2>/dev/null || true
         rm -f GITHUB_PUSH_RULES.md CHANGELOG.md workspace-setup.md 2>/dev/null || true
-        rm -rf examples/ libs/ 2>/dev/null || true
+        rm -rf examples/ 2>/dev/null || true  # 保留 libs/
         rm -f skills/self-evolution/README_*.md skills/self-evolution/ARCHITECTURE.md 2>/dev/null || true
         rm -f skills/rag/report.html 2>/dev/null || true
         echo "   ✅ 完成"
