@@ -4,6 +4,7 @@
 
 set -e
 
+# 使用 path_utils 统一路径解析（与其他脚本保持一致）
 WORKSPACE="$(cd "$(dirname "$0")" && pwd)"
 cd "$WORKSPACE"
 
@@ -157,8 +158,11 @@ setup_knowledge_base() {
 import sys
 from pathlib import Path
 
-# 添加 workspace 的 libs 目录到路径
-workspace = Path('$WORKSPACE').resolve()
+# 使用 path_utils 统一路径解析（与其他脚本保持一致）
+sys.path.insert(0, '$WORKSPACE')
+from path_utils import resolve_workspace
+
+workspace = resolve_workspace()
 sys.path.insert(0, str(workspace / 'libs'))
 
 from memory_hub import MemoryHub
