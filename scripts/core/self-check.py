@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-self_check.py - Workspace 完整性自检
+self_check.py - Workspace 完整性自检 + 自动修复
 
 检测 workspace 是否存在问题，帮助 Agent 自主发现问题并修复。
 
@@ -8,16 +8,19 @@ self_check.py - Workspace 完整性自检
     python3 scripts/core/self_check.py              # 快速检查
     python3 scripts/core/self_check.py --full       # 完整检查
     python3 scripts/core/self_check.py --fix        # 自动修复
+    python3 scripts/core/self_check.py --dry-run    # 预览修复（不实际修改）
     python3 scripts/core/self_check.py --report     # 生成报告
 """
 import argparse
 import json
 import os
+import shutil
 import sqlite3
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 # 添加 core 目录到路径
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -62,10 +65,15 @@ class CheckResult:
 class WorkspaceChecker:
     """Workspace 完整性检查器"""
     
-    def __init__(self, workspace: Path, verbose: bool = False):
+    def __init__(self, workspace: Path, verbose: bool = False, 
+                 fix: bool = False, dry_run: bool = False):
         self.workspace = workspace
         self.verbose = verbose
+        self.fix = fix
+        self.dry_run = dry_run
         self.results: List[CheckResult] = []
+        self.fixed_count = 0
+        self.failed_fix_count = 0
     
     def check(self) -> List[CheckResult]:
         """执行所有检查"""
@@ -95,6 +103,10 @@ class WorkspaceChecker:
         
         # 8. 数据库健康检查
         self._check_databases()
+        
+        # 如果需要修复
+        if self.fix:
+            self._fix_issues()
         
         # 打印摘要
         self._print_summary()
@@ -412,6 +424,153 @@ class WorkspaceChecker:
                 severity="info"
             ))
     
+    # =========================================================================
+    # 自动修复功能
+    # =========================================================================
+    
+    def _fix_issues(self):
+        """自动修复可修复的问题"""
+        print(f"\n{Colors.BOLD}🔧 开始自动修复...{Colors.RESET}\n")
+        
+        fixable = [r for r in self.results if not r.passed]
+        
+        if not fixable:
+            print(f"{Colors.GREEN}✅ 没有需要修复的问题{Colors.RESET}\n")
+            return
+        
+        for result in fixable:
+            fixed = self._try_fix(result)
+            if fixed:
+                self.fixed_count += 1
+                result.passed = True
+                result.message = f"已修复：{result.message}"
+            else:
+                self.failed_fix_count += 1
+    
+    def _try_fix(self, result: CheckResult) -> bool:
+        """尝试修复单个问题"""
+        name = result.name.lower()
+        
+        # 1. 创建缺失的目录
+        if name.startswith("目录："):
+            dir_path = name.replace("目录：", "").strip()
+            return self._fix_create_directory(dir_path)
+        
+        # 2. 删除不应该存在的目录
+        if name.startswith("异常目录："):
+            dir_path = name.replace("异常目录：", "").strip()
+            return self._fix_delete_directory(dir_path)
+        
+        # 3. 创建缺失的 .gitkeep 文件
+        if "data/" in name and "包含运行时数据" in result.message:
+            return self._fix_clean_data_directory()
+        
+        # 4. 重建索引数据库
+        if "数据库损坏" in result.message or "memory_indexer" in result.suggestion:
+            return self._fix_rebuild_index()
+        
+        # 其他问题无法自动修复
+        print(f"  ⚠️  无法自动修复：{result.name}")
+        print(f"     建议：{result.suggestion}\n")
+        return False
+    
+    def _fix_create_directory(self, dir_path: str) -> bool:
+        """创建缺失的目录"""
+        full_path = self.workspace / dir_path
+        
+        if self.dry_run:
+            print(f"  📝 [预览] 创建目录：{dir_path}")
+            return True
+        
+        try:
+            full_path.mkdir(parents=True, exist_ok=True)
+            # 如果是空目录，创建 .gitkeep
+            gitkeep = full_path / ".gitkeep"
+            if not gitkeep.exists():
+                gitkeep.touch()
+            
+            print(f"  {Colors.GREEN}✅ 已创建目录：{dir_path}{Colors.RESET}")
+            return True
+        except Exception as e:
+            print(f"  {Colors.RED}❌ 创建目录失败：{e}{Colors.RESET}")
+            return False
+    
+    def _fix_delete_directory(self, dir_path: str) -> bool:
+        """删除不应该存在的目录"""
+        full_path = self.workspace / dir_path
+        
+        if not full_path.exists():
+            return True
+        
+        if self.dry_run:
+            print(f"  📝 [预览] 删除目录：{dir_path}")
+            return True
+        
+        try:
+            shutil.rmtree(full_path)
+            print(f"  {Colors.GREEN}✅ 已删除目录：{dir_path}{Colors.RESET}")
+            return True
+        except Exception as e:
+            print(f"  {Colors.RED}❌ 删除目录失败：{e}{Colors.RESET}")
+            return False
+    
+    def _fix_clean_data_directory(self) -> bool:
+        """清理 data/ 目录，只保留 .gitkeep"""
+        data_dir = self.workspace / "data"
+        
+        if self.dry_run:
+            print(f"  📝 [预览] 清理 data/ 目录")
+            return True
+        
+        try:
+            for item in data_dir.iterdir():
+                if item.name != ".gitkeep" and item.name != "README.md":
+                    if item.is_dir():
+                        shutil.rmtree(item)
+                    else:
+                        item.unlink()
+            
+            print(f"  {Colors.GREEN}✅ 已清理 data/ 目录{Colors.RESET}")
+            return True
+        except Exception as e:
+            print(f"  {Colors.RED}❌ 清理 data/ 失败：{e}{Colors.RESET}")
+            return False
+    
+    def _fix_rebuild_index(self) -> bool:
+        """重建索引数据库"""
+        indexer_script = self.workspace / "scripts" / "core" / "memory_indexer.py"
+        
+        if not indexer_script.exists():
+            print(f"  {Colors.RED}❌ memory_indexer.py 不存在{Colors.RESET}")
+            return False
+        
+        if self.dry_run:
+            print(f"  📝 [预览] 重建索引数据库")
+            return True
+        
+        try:
+            print(f"  🔄 运行 memory_indexer.py --full...")
+            result = subprocess.run(
+                [sys.executable, str(indexer_script), "--full"],
+                cwd=str(self.workspace),
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+            
+            if result.returncode == 0:
+                print(f"  {Colors.GREEN}✅ 索引重建成功{Colors.RESET}")
+                return True
+            else:
+                print(f"  {Colors.RED}❌ 索引重建失败：{result.stderr}{Colors.RESET}")
+                return False
+        except subprocess.TimeoutExpired:
+            print(f"  {Colors.RED}❌ 索引重建超时{Colors.RESET}")
+            return False
+        except Exception as e:
+            print(f"  {Colors.RED}❌ 索引重建失败：{e}{Colors.RESET}")
+            return False
+    
     def _print_summary(self):
         """打印摘要"""
         print(f"\n{Colors.BOLD}{'='*60}{Colors.RESET}")
@@ -430,10 +589,25 @@ class WorkspaceChecker:
         print(f"  - 错误：{errors}")
         print(f"  - 警告：{warnings}")
         
-        if errors > 0:
+        # 显示修复结果
+        if self.fix:
+            print(f"\n{Colors.BOLD}🔧 修复结果:{Colors.RESET}")
+            if self.fixed_count > 0:
+                print(f"{Colors.GREEN}✅ 已修复：{self.fixed_count} 个问题{Colors.RESET}")
+            if self.failed_fix_count > 0:
+                print(f"{Colors.YELLOW}⚠️  无法修复：{self.failed_fix_count} 个问题（需要手动处理）{Colors.RESET}")
+        
+        if errors > 0 and not self.fix:
             print(f"\n{Colors.RED}⚠️  发现严重问题，需要立即修复！{Colors.RESET}")
-        elif warnings > 0:
+            print(f"{Colors.BLUE}💡 提示：运行 --fix 自动修复可修复的问题{Colors.RESET}")
+        elif warnings > 0 and not self.fix:
             print(f"\n{Colors.YELLOW}⚠️  发现警告，建议修复{Colors.RESET}")
+            print(f"{Colors.BLUE}💡 提示：运行 --fix 自动修复可修复的问题{Colors.RESET}")
+        elif self.fix:
+            if self.failed_fix_count == 0:
+                print(f"\n{Colors.GREEN}✅ 所有问题已修复！{Colors.RESET}")
+            else:
+                print(f"\n{Colors.YELLOW}⚠️  还有问题需要手动处理{Colors.RESET}")
         else:
             print(f"\n{Colors.GREEN}✅ Workspace 状态良好！{Colors.RESET}")
         
@@ -474,11 +648,17 @@ def main():
     parser = argparse.ArgumentParser(description="Workspace 完整性自检")
     parser.add_argument("--full", action="store_true", help="完整检查（包括所有可选检查）")
     parser.add_argument("--fix", action="store_true", help="自动修复可修复的问题")
+    parser.add_argument("--dry-run", action="store_true", help="预览修复（不实际修改）")
     parser.add_argument("--report", action="store_true", help="生成 JSON 报告")
     parser.add_argument("--verbose", "-v", action="store_true", help="详细输出")
     args = parser.parse_args()
     
-    checker = WorkspaceChecker(WORKSPACE, verbose=args.verbose)
+    checker = WorkspaceChecker(
+        WORKSPACE, 
+        verbose=args.verbose,
+        fix=args.fix,
+        dry_run=args.dry_run
+    )
     results = checker.check()
     
     if args.report:
