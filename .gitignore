@@ -36,14 +36,6 @@ scripts/*.sh
 scripts/user/
 !scripts/user/.gitkeep
 
-# -----------------------------------------------------------------------------
-# Script runtime data (脚本运行时数据)
-# -----------------------------------------------------------------------------
-scripts/data/
-!scripts/data/.gitkeep
-scripts/memory/
-!scripts/memory/.gitkeep
-
 # 虚拟环境
 env/
 venv/
