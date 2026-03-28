@@ -385,5 +385,5 @@ if [[ " $FEATURES " =~ " 5 " ]]; then
     echo ""
 fi
 
-echo "📖 详细文档：FEATURE_ACTIVATION_GUIDE.md"
+echo "📖 详细文档：docs/FEATURE_ACTIVATION_GUIDE.md"
 echo ""
