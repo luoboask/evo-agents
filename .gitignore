@@ -78,7 +78,6 @@ node_modules/
 # -----------------------------------------------------------------------------
 # Config with secrets
 # -----------------------------------------------------------------------------
-config/agents.yaml
 config/*.env
 config/*.secret
 config/*.key
@@ -109,17 +108,12 @@ prompts/
 souls/
 
 # -----------------------------------------------------------------------------
-# Public data (user-generated) - 本地保留，不提交
+# Public data (user-generated knowledge) - 本地保留，不提交
 # -----------------------------------------------------------------------------
-public/*/
-!public/common/
-!public/domain/
-!public/faq/
-!public/prompt/
-!public/rag/
-!public/security/
-!public/skills/
-!public/tutorial/
+public/**/*.json
+public/**/*.md
+!public/.gitkeep
+!public/README.md
 
 # -----------------------------------------------------------------------------
 # Agent Instance Files (每个 Agent 自己创建，不提交)
