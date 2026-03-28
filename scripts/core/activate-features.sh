@@ -121,16 +121,36 @@ setup_ollama() {
     if command -v ollama &> /dev/null; then
         echo "   ✅ Ollama 已安装"
         
-        # 检查模型（不阻塞）
-        if ollama list 2>/dev/null | grep -q "bge-m3"; then
-            echo "   ✅ 已有嵌入模型：bge-m3"
-        else
-            echo "   ⚠️  缺少嵌入模型"
-            echo "   运行：ollama pull bge-m3"
+        # 显示已有模型
+        echo ""
+        echo "   📋 已有模型:"
+        ollama list 2>/dev/null | grep -E "^[a-z]" | while read line; do
+            echo "      $line"
+        done
+        echo ""
+        
+        # 询问是否拉取新模型
+        echo "   需要拉取新的嵌入模型吗？"
+        echo "   推荐：bge-m3 (中文优化), nomic-embed-text (英文优化)"
+        echo ""
+        read -p "   输入模型名称（直接回车跳过）: " MODEL_NAME
+        
+        if [ -n "$MODEL_NAME" ]; then
+            echo "   📥 正在拉取：$MODEL_NAME ..."
+            if ollama pull "$MODEL_NAME" 2>&1 | tail -3; then
+                echo "   ✅ 模型拉取成功"
+            else
+                echo "   ⚠️  模型拉取失败"
+            fi
         fi
     else
         echo "   ⚠️  Ollama 未安装"
         echo "   访问：https://ollama.com"
+        echo ""
+        read -p "   是否现在安装？(y/N): " INSTALL_OLLAMA
+        if [[ "$INSTALL_OLLAMA" =~ ^[Yy]$ ]]; then
+            echo "   请访问 https://ollama.com 下载安装"
+        fi
     fi
     echo ""
 }
