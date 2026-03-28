@@ -221,7 +221,7 @@ knowledge (
 ### 快速开始
 
 ```bash
-cd <workspace-root>/skills/self-evolution
+cd /Users/dhr/.openclaw/workspace/skills/self-evolution
 
 # 1. 运行分形思考
 python3 fractal_thinking.py

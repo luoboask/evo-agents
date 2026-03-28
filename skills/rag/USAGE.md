@@ -45,7 +45,7 @@ python3 skills/rag/auto_tune.py --next
 
 ## 集成到对话流程
 
-### 在主对话中
+### 在 ai-baby 主对话中
 
 每次用户提问时：
 

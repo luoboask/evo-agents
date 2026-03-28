@@ -28,7 +28,7 @@ class NightlyEvolutionCycle:
     """夜间进化循环系统"""
     
     def __init__(self):
-        self.workspace = Path(__file__).resolve().parents[2]
+        self.workspace = Path('/Users/dhr/.openclaw/workspace-ai-baby')
         self.memory_dir = self.workspace / 'memory'
         self.learning_dir = self.memory_dir / 'learning'
         

@@ -174,7 +174,7 @@
 ### 快速开始
 
 ```bash
-cd <workspace-root>/skills/self-evolution
+cd /Users/dhr/.openclaw/workspace/skills/self-evolution
 
 # 查看系统状态
 python3 main.py status

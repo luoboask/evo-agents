@@ -1,5 +1,5 @@
 #!/bin/bash
-# Simple memory search using rg
+# Simple memory search using grep
 
 QUERY="$1"
 MAX_RESULTS="${2:-5}"
@@ -14,14 +14,12 @@ echo ""
 
 # Search in memory files
 count=0
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKSPACE_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-for file in "${WORKSPACE_ROOT}"/memory/*.md "${WORKSPACE_ROOT}"/MEMORY.md; do
+for file in /Users/dhr/.openclaw/workspace/memory/*.md /Users/dhr/.openclaw/workspace/MEMORY.md; do
     if [ -f "$file" ]; then
-        results=$(rg -i -n --max-count 3 "$QUERY" "$file" 2>/dev/null)
+        results=$(grep -i -n "$QUERY" "$file" 2>/dev/null | head -3)
         if [ -n "$results" ]; then
             echo "📄 $(basename $file):"
-            echo "$results"
+            echo "$results" | head -3
             echo ""
             ((count++))
             if [ $count -ge $MAX_RESULTS ]; then

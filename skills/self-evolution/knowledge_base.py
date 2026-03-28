@@ -13,18 +13,14 @@ class KnowledgeBase:
     """知识库系统（支持多 Agent 数据隔离）"""
     
     def __init__(self, agent_id: str = None, shared: bool = False, db_path: str = None):
-        workspace = Path(__file__).resolve().parents[2]
-        memory_dir = workspace / 'memory'
-        memory_dir.mkdir(parents=True, exist_ok=True)
-
         if db_path:
             self.db_path = db_path
         elif shared:
-            self.db_path = str(memory_dir / 'knowledge_base_shared.db')
+            self.db_path = '/Users/dhr/.openclaw/workspace-ai-baby/memory/knowledge_base_shared.db'
         elif agent_id:
-            self.db_path = str(memory_dir / f'{agent_id}_knowledge_base.db')
+            self.db_path = f'/Users/dhr/.openclaw/workspace-ai-baby/memory/{agent_id}_knowledge_base.db'
         else:
-            self.db_path = str(memory_dir / 'knowledge_base.db')
+            self.db_path = '/Users/dhr/.openclaw/workspace-ai-baby/memory/knowledge_base.db'
         
         self.agent_id = agent_id
         self.shared = shared
@@ -232,7 +228,7 @@ class KnowledgeBase:
     def export_to_json(self, output_path=None):
         """导出为 JSON"""
         if output_path is None:
-            output_path = str((Path(__file__).resolve().parents[2] / 'memory' / 'knowledge_base.json'))
+            output_path = '/Users/dhr/.openclaw/workspace-ai-baby/memory/knowledge_base.json'
         
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row

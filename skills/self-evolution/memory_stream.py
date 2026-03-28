@@ -4,6 +4,7 @@
 基于 Generative Agents 论文
 """
 
+import os
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -32,13 +33,16 @@ class MemoryStream:
     - goal: 目标/意图
     """
     
-    def __init__(self, agent_name: str = 'demo-agent'):
+    def __init__(self, agent_name: str = None):
         """
         初始化记忆流
         
         Args:
             agent_name: Agent 名称（默认从环境变量获取）
         """
+        if agent_name is None:
+            agent_name = os.environ.get('OPENCLAW_AGENT', 'ai-baby')
+        
         self.agent_name = agent_name
         
         if MEMORY_HUB_ENABLED:
@@ -187,12 +191,12 @@ if __name__ == '__main__':
     parser.add_argument('--stats', action='store_true', help='统计信息')
     parser.add_argument('--limit', '-n', type=int, default=10, help='返回数量')
     parser.add_argument('--reflect', action='store_true', help='生成反思')
-    parser.add_argument('--agent', default='demo-agent', help='Agent 名称')
     
     args = parser.parse_args()
     
     # 创建记忆流
-    ms = MemoryStream(agent_name=args.agent)
+    agent_name = os.environ.get('OPENCLAW_AGENT', 'ai-baby')
+    ms = MemoryStream(agent_name=agent_name)
     
     # 添加记忆
     if args.add:

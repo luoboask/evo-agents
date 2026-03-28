@@ -1,19 +1,15 @@
-# Multi-Agent Configuration
-# Main agent
-growth-agents:
-  name: growth-agents
-  role: coordinator
-  data_path: data/growth-agents
-  memory_path: memory
-
-# Sub-agents
-  name: test2-agent
-  role: test2
-  data_path: agents/test2-agent/data
-  memory_path: agents/test2-agent/memory
-
-  name: test3-agent
-  role: test3
-  data_path: agents/test3-agent/data
-  memory_path: agents/test3-agent/memory
-
+# Multi-Agent Configuration Template
+# Copy this file to configure your agents
+# 
+# Example:
+# main-agent:
+#   name: main-agent
+#   role: coordinator
+#   data_path: data/main-agent
+#   memory_path: memory/main-agent
+#
+# sub-agent:
+#   name: sub-agent
+#   role: assistant
+#   data_path: data/sub-agent
+#   memory_path: memory/sub-agent

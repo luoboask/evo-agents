@@ -59,7 +59,7 @@ class WebCrawler:
             headers.extend(['-H', f'Referer: https://www.google.com/search?q={parsed.netloc}'])
         
         result = subprocess.run(
-            ['curl', '-s', '--compressed'] + headers + [url],
+            ['curl', '-s'] + headers + [url],
             capture_output=True, text=True, timeout=self.fetch_timeout + 5
         )
         

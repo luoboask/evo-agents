@@ -1,0 +1,10 @@
+{
+  "name": "rag",
+  "version": "1.0.0",
+  "description": "RAG 评估系统，记录、分析和优化检索增强生成性能",
+  "homepage": "https://github.com/luoboask/evo-agents",
+  "author": "ai-baby",
+  "license": "MIT",
+  "updated_at": "2026-03-24",
+  "changelog": "1.0.0: 初始版本，支持 RAG 评估、自动调优和可视化报告"
+}

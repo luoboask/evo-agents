@@ -15,14 +15,14 @@
 
 - **核心代码**: `nightly_cycle.py`
 - **记忆流**: `memory_stream.py`
-- **数据库**: `<workspace-root>/data/demo-agent/memory/memory_stream.db`
+- **数据库**: `/Users/dhr/.openclaw/workspace/memory/memory_stream.db`
 
 ## 🚀 使用方法
 
 ### 手动运行
 
 ```bash
-cd <workspace-root>/skills/self-evolution
+cd /Users/dhr/.openclaw/workspace/skills/self-evolution
 python3 nightly_cycle.py
 ```
 
@@ -35,7 +35,7 @@ python3 nightly_cycle.py
 crontab -e
 
 # 添加任务（每天 02:00）
-0 2 * * * cd <workspace-root>/skills/self-evolution && python3 nightly_cycle.py >> /tmp/nightly_cycle.log 2>&1
+0 2 * * * cd /Users/dhr/.openclaw/workspace/skills/self-evolution && python3 nightly_cycle.py >> /tmp/nightly_cycle.log 2>&1
 ```
 
 ### OpenClaw Cron (推荐)

@@ -8,6 +8,7 @@
 """
 
 import json
+import os
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -17,9 +18,7 @@ class RealSelfEvolution:
     """真实自我进化系统（支持多 Agent 数据隔离）"""
     
     def __init__(self, agent_id: str = None, db_path: str = None):
-        self.workspace = Path(__file__).resolve().parents[2]
-        self.memory_dir = self.workspace / 'memory'
-        self.memory_dir.mkdir(parents=True, exist_ok=True)
+        self.workspace = Path('/Users/dhr/.openclaw/workspace-ai-baby')
         
         if db_path:
             self.evolution_db = Path(db_path)
@@ -27,12 +26,12 @@ class RealSelfEvolution:
             # 每个 Agent 独立的进化数据库 (放在 data/<agent>/memory/)
             self.evolution_db = self.workspace / 'data' / agent_id / 'memory' / 'evolution.db'
         else:
-            # 默认数据库（使用 main）
-            agent_name = 'demo-agent'
+            # 默认数据库 (使用 ai-baby)
+            agent_name = os.environ.get('OPENCLAW_AGENT', 'ai-baby')
             self.evolution_db = self.workspace / 'data' / agent_name / 'memory' / 'evolution.db'
         
         self.agent_id = agent_id
-        self.evolution_db.parent.mkdir(parents=True, exist_ok=True)
+        self.memory_dir = self.workspace / 'data' / (agent_id or 'ai-baby') / 'memory'
         
         # 初始化数据库表
         self._init_db()
