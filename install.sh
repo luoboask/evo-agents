@@ -93,7 +93,7 @@ else
     rm -f FEATURE_ACTIVATION_GUIDE.md  # 功能激活指南（移到 docs/）
     mv -f FEATURE_ACTIVATION_GUIDE.md docs/ 2>/dev/null || true  # 移到 docs/
     rm -rf examples/  # 示例（用户不需要）
-    rm -rf libs/  # 库源代码（内部使用）
+    # rm -rf libs/  # 保留 libs/memory_hub（知识库系统需要）
     rm -f skills/self-evolution/README_*.md  # 技能内部文档
     rm -f skills/self-evolution/ARCHITECTURE.md
     rm -f skills/rag/report.html  # 运行时生成
