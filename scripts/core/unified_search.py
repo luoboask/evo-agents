@@ -29,9 +29,11 @@ try:
 except ImportError:
     HAS_JIEBA = False
 
-WORKSPACE = Path(__file__).resolve().parent.parent
+from path_utils import resolve_workspace, resolve_data_dir
+
+WORKSPACE = resolve_workspace()
 MEMORY_DIR = WORKSPACE / "memory"
-INDEX_DB = WORKSPACE / "data" / "index" / "memory_index.db"
+INDEX_DB = resolve_data_dir("index") / "memory_index.db"
 OLLAMA_URL = "http://localhost:11434/api/embeddings"
 EMBED_MODEL = "bge-m3"
 
