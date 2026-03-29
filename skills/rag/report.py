@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 
 SKILLS_DIR = Path(__file__).parent
 # 使用统一路径：data/${agent_name}/logs/evaluations.jsonl
-DATA_DIR = SKILLS_DIR.parent.parent / "data" / os.environ.get("OPENCLAW_AGENT", os.path.basename(str(resolve_workspace())).replace("workspace-", ""))"
+DATA_DIR = SKILLS_DIR.parent.parent / "data" / os.environ.get("OPENCLAW_AGENT", os.path.basename(str(resolve_workspace())).replace("workspace-", ""))
 LOGS_DIR = DATA_DIR / "logs"
 EVALUATIONS_FILE = LOGS_DIR / "evaluations.jsonl"
 
