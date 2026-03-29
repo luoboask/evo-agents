@@ -137,6 +137,9 @@ class IntegratedHybridMemory:
         import time
         start_time = time.time()
         
+        import time
+        start_time = time.time()
+        
         results = []
         
         # L1: 工作记忆（总是搜索）
