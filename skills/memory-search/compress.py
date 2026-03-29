@@ -15,12 +15,11 @@ class MemoryIndexCompressor:
     
     def __init__(self, workspace):
         self.workspace = Path(workspace) if isinstance(workspace, str) else workspace
-        self.vector_dir = self.workspace / 'memory' / 'vector_db'
-        self.vector_dir.mkdir(parents=True, exist_ok=True)
     
     def compress_cache(self, days_old=30):
         """压缩旧的缓存文件"""
-        cache_file = self.vector_dir / "integrated_cache.json"
+        # JSON 缓存已弃用，使用 SQLite 统一索引
+        # cache_file = self.memory_dir / 'vector_db.deprecated' / "integrated_cache.json"
         
         if not cache_file.exists():
             print("⚠️  缓存文件不存在")
@@ -52,7 +51,7 @@ class MemoryIndexCompressor:
             
             # 压缩旧记录
             if old_entries:
-                compressed_file = self.vector_dir / f"cache_{days_old}days.json.gz"
+                compressed_file = self.memory_dir / 'vector_db.deprecated' / f"cache_{days_old}days.json.gz"
                 with gzip.open(compressed_file, 'wt', encoding='utf-8') as f:
                     json.dump(old_entries, f, ensure_ascii=False)
                 
@@ -82,7 +81,7 @@ class MemoryIndexCompressor:
         """解压缩缓存文件"""
         if compressed_file is None:
             # 查找最新的压缩文件
-            compressed_files = list(self.vector_dir.glob("cache_*days.json.gz"))
+            compressed_files = list(self.memory_dir / 'vector_db.deprecated'.glob("cache_*days.json.gz"))
             if not compressed_files:
                 print("⚠️  没有压缩文件")
                 return 0
@@ -93,7 +92,8 @@ class MemoryIndexCompressor:
             old_entries = json.load(f)
         
         # 加载当前缓存
-        cache_file = self.vector_dir / "integrated_cache.json"
+        # JSON 缓存已弃用，使用 SQLite 统一索引
+        # cache_file = self.memory_dir / 'vector_db.deprecated' / "integrated_cache.json"
         if cache_file.exists():
             with open(cache_file, 'r', encoding='utf-8') as f:
                 cache = json.load(f)
@@ -116,8 +116,8 @@ class MemoryIndexCompressor:
     def get_compression_stats(self):
         """获取压缩统计"""
         stats = {
-            'cache_file': self.vector_dir / "integrated_cache.json",
-            'compressed_files': list(self.vector_dir.glob("cache_*days.json.gz")),
+            'cache_file': self.memory_dir / 'vector_db.deprecated' / "integrated_cache.json",
+            'compressed_files': list(self.memory_dir / 'vector_db.deprecated'.glob("cache_*days.json.gz")),
             'total_size': 0,
             'compressed_size': 0
         }

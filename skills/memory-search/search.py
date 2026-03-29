@@ -32,17 +32,18 @@ class IntegratedHybridMemory:
     def __init__(self):
         self.workspace = Path(__file__).parent.parent.parent
         self.memory_dir = self.workspace / "memory"
-        self.vector_dir = self.memory_dir / "vector_db"
-        self.vector_dir.mkdir(parents=True, exist_ok=True)
         
         # 三层记忆
         self.working_memory = deque(maxlen=50)  # 增加到50条
         self.vector_cache = {}
-        self._load_vector_cache()
         
         # 知识图谱
         self.kg_file = self.memory_dir / "knowledge_graph.json"
         self.knowledge_graph = self._load_kg()
+        
+        # Phase 4: 统一索引
+        from unified_index import UnifiedMemoryIndex
+        self.unified_index = UnifiedMemoryIndex(self.workspace)
         
         # 加载今日工作记忆
         self._load_today_working_memory()
@@ -241,8 +242,7 @@ class IntegratedHybridMemory:
                 "entry": entry,
                 "embedding": embedding
             }
-            self._save_vector_cache()
-    
+        
     def _search_vector(self, query, top_k=5):
         """搜索向量记忆"""
         query_embedding = self._get_embedding(query)
@@ -262,19 +262,8 @@ class IntegratedHybridMemory:
         results.sort(key=lambda x: -x["score"])
         return results[:top_k]
     
-    def _load_vector_cache(self):
-        """加载向量缓存"""
-        cache_file = self.vector_dir / "integrated_cache.json"
-        if cache_file.exists():
-            with open(cache_file, 'r') as f:
-                self.vector_cache = json.load(f)
-    
-    def _save_vector_cache(self):
-        """保存向量缓存"""
-        cache_file = self.vector_dir / "integrated_cache.json"
-        with open(cache_file, 'w') as f:
-            json.dump(self.vector_cache, f, ensure_ascii=False, indent=2)
-    
+
+
     def _index_existing_memories(self):
         """索引已有记忆文件（Phase 2: 使用统一索引）"""
         if hasattr(self, 'unified_index'):
@@ -307,8 +296,7 @@ class IntegratedHybridMemory:
                         pass
             
             if count > 0:
-                self._save_vector_cache()
-                print(f"✅ 自动索引 {count} 条已有记忆")
+                        print(f"✅ 自动索引 {count} 条已有记忆")
     
     # ═══════════════════════════════════════════════════════════════
     # L3: 知识图谱实现

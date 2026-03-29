@@ -15,8 +15,6 @@ class MemoryCleanupTask:
     
     def __init__(self, workspace):
         self.workspace = Path(workspace) if isinstance(workspace, str) else workspace
-        self.vector_dir = self.workspace / 'memory' / 'vector_db'
-        self.vector_dir.mkdir(parents=True, exist_ok=True)
         self.db_path = self.workspace / 'data' / 'memory_index.db'
     
     def cleanup_old_memories(self, days_old=90, min_importance=3.0):
@@ -44,7 +42,7 @@ class MemoryCleanupTask:
             conn.close()
         
         # 2. 清理向量缓存
-        cache_file = self.vector_dir / "integrated_cache.json"
+        cache_file = self.memory_dir / 'vector_db.deprecated' / "integrated_cache.json"
         if cache_file.exists():
             with open(cache_file, 'r', encoding='utf-8') as f:
                 cache = json.load(f)
@@ -135,7 +133,7 @@ class MemoryCleanupTask:
             conn.close()
         
         # 统计向量缓存
-        cache_file = self.vector_dir / "integrated_cache.json"
+        cache_file = self.memory_dir / 'vector_db.deprecated' / "integrated_cache.json"
         if cache_file.exists():
             with open(cache_file, 'r', encoding='utf-8') as f:
                 cache = json.load(f)
