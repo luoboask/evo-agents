@@ -12,6 +12,7 @@ import os
 import sqlite3
 from datetime import datetime
 from pathlib import Path
+from path_utils import resolve_workspace
 import sys
 
 # 添加 libs 到路径
