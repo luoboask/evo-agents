@@ -126,9 +126,10 @@ def search_grep(query: str, limit: int = 10) -> List[Dict]:
     return results
 
 
-def search_knowledge(query: str, agent_name: str = None  # 运行时推导,
-                     limit: int = 10) -> List[Dict]:
+def search_knowledge(query: str, agent_name: str = None, limit: int = 10) -> List[Dict]:
     """搜索 SQLite 知识系统"""
+    if agent_name is None:
+        agent_name = WORKSPACE.name.replace("workspace-", "")
     db_path = WORKSPACE / "data" / agent_name / "memory" / "memory_stream.db"
     if not db_path.exists():
         return []
@@ -294,7 +295,7 @@ def main():
     parser.add_argument("--limit", "-n", type=int, default=10)
     parser.add_argument("--source", choices=["all", "markdown", "knowledge", "semantic"],
                         default="all", help="搜索范围")
-    parser.add_argument("--agent", default=None  # 运行时推导)
+    parser.add_argument("--agent", default=None)  # 运行时推导
     args = parser.parse_args()
 
     mode = "语义" if (args.semantic or args.source == "semantic") else "关键词"

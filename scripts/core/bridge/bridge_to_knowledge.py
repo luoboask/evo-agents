@@ -257,7 +257,7 @@ def _sync_to_knowledge_inner(agent_name: str, since: str) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(description="Markdown → 知识系统桥")
-    parser.add_argument("--agent", default=None  # 运行时推导, help="Agent 名称（默认：当前 workspace）")
+parser.add_argument("--agent", default=None, help="Agent 名称（默认：当前 workspace）")  # 运行时推导
     parser.add_argument("--since", default=None, help="起始日期 (YYYY-MM-DD)")
     parser.add_argument("--days", type=int, default=2, help="同步最近几天（默认 2）")
     args = parser.parse_args()
