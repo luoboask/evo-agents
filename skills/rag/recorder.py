@@ -14,7 +14,7 @@ from typing import Optional, Dict, Any
 # 配置
 SKILLS_DIR = Path(__file__).parent
 # 使用 memory_hub 的相同路径：data/${agent_name}/logs/evaluations.jsonl
-DATA_DIR = SKILLS_DIR.parent.parent / "data" / os.environ.get("OPENCLAW_AGENT", "my-agent")"
+DATA_DIR = SKILLS_DIR.parent.parent / "data" / os.environ.get("OPENCLAW_AGENT", os.path.basename(os.getcwd()).replace("workspace-", ""))"
 LOGS_DIR = DATA_DIR / "logs"
 EVALUATIONS_FILE = LOGS_DIR / "evaluations.jsonl"
 
