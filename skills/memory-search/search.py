@@ -16,7 +16,10 @@ from pathlib import Path
 try:
     from auto_record import record_search_query
 except ImportError:
-    record_search_query = None
+    try:
+        from .auto_record import record_search_query
+    except (ImportError, ValueError):
+        record_search_query = None
 import sys
 
 # 添加 libs 到路径
@@ -116,13 +119,13 @@ class IntegratedHybridMemory:
                 return "high"
         
         # Medium: 一般信息
-    def search(self, query, context="medium", top_k=5, auto_record: bool = True):
+        if len(content) > 50 or role == "assistant":
             return "medium"
         
         # Low: 简短对话
         return "low"
     
-    def search(self, query, context="medium", top_k=5):
+    def search(self, query, context="medium", top_k=5, auto_record: bool = True):
         """
         混合检索记忆
         
