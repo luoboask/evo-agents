@@ -242,18 +242,23 @@ setup_self_evolution() {
         return 1
     fi
     
-    cd skills/self-evolution
+    # 保存 WORKSPACE_ROOT（避免 cd 后路径错误）
+    WORKSPACE_ROOT="$(pwd)"
+    AGENT_NAME=$(basename "$WORKSPACE_ROOT" | sed 's/workspace-//')
     
-    # 检查状态（不阻塞）
-    if python3 main.py status 2>&1 | grep -q "✅"; then
+    # 检查状态（使用绝对路径）
+    if python3 "$WORKSPACE_ROOT/skills/self-evolution/main.py" status 2>&1 | grep -q "✅"; then
         echo "   ✅ 自进化系统已激活"
-        cd ../..
         return 0
     fi
     
     echo "   📝 初始化自进化系统..."
+    # 设置正确的 agent 名称
+    export OPENCLAW_AGENT="$AGENT_NAME"
     python3 << EOF
-from storage import MemoryStream
+import sys
+sys.path.insert(0, '$WORKSPACE_ROOT/skills/self-evolution')
+from memory_stream import MemoryStream
 
 ms = MemoryStream()
 ms.add_memory(
@@ -264,7 +269,6 @@ ms.add_memory(
 print("   ✅ 初始化完成")
 EOF
     
-    cd ../..
     echo "   ✅ 自进化系统已激活"
     echo ""
 }
