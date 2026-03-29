@@ -10,6 +10,7 @@ import os
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
+sys.path.insert(0, str(LIBS_DIR))
 from path_utils import resolve_workspace, resolve_data_dir
 from typing import Dict, List, Optional, Any
 import statistics
@@ -17,7 +18,6 @@ import statistics
 # 导入 Memory Hub (共享库)
 # 添加 libs 目录到路径
 LIBS_DIR = Path(__file__).parent.parent.parent / 'libs'
-sys.path.insert(0, str(LIBS_DIR))
 
 try:
     from memory_hub import MemoryHub

@@ -7,13 +7,14 @@
 import os
 import sys
 from pathlib import Path
+LIBS_DIR = Path(__file__).parent.parent.parent / 'libs'
+sys.path.insert(0, str(LIBS_DIR))
+
 from path_utils import resolve_workspace, resolve_data_dir
 from datetime import datetime
 from typing import List, Dict, Optional
 
 # 添加 libs 目录到路径以支持 Memory Hub 导入
-LIBS_DIR = Path(__file__).parent.parent.parent / 'libs'
-sys.path.insert(0, str(LIBS_DIR))
 
 # 导入 Memory Hub (共享库)
 try:
