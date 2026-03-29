@@ -120,6 +120,17 @@ def record(entry_type: str, content: str, date: str = None, sync: bool = False, 
     # 用文件锁防止并发写入冲突
     # 锁住 md 文件本身，确保 read-modify-write 原子性
     filepath.parent.mkdir(parents=True, exist_ok=True)
+    
+    # 如果指定了 agent，自动创建 agent 的数据目录
+    if agent:
+        from path_utils import resolve_data_dir
+        agent_data_dir = resolve_data_dir(agent)
+        agent_data_dir.mkdir(parents=True, exist_ok=True)
+        # 创建 .gitkeep 保持目录在 git 中
+        gitkeep = agent_data_dir / ".gitkeep"
+        if not gitkeep.exists():
+            gitkeep.touch()
+    
     # 确保文件存在
     if not filepath.exists():
         # 先创建空文件
