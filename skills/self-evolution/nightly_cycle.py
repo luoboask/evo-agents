@@ -22,6 +22,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).parent))
 from memory_stream import MemoryStream
+from opengclaw_session_importer import OpenClawSessionImporter
 from self_evolution_real import RealSelfEvolution
 
 
