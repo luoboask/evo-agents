@@ -46,7 +46,6 @@ def cmd_status(args):
     try:
         # 添加 libs 到路径
         libs_dir = Path(__file__).parent.parent.parent / 'libs'
-        sys.path.insert(0, str(libs_dir))
         from memory_hub import MemoryHub
         hub = MemoryHub(agent_name)
         stats = hub.stats()

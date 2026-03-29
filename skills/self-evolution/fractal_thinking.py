@@ -24,7 +24,6 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict
 
 sys.path.insert(0, str(Path(__file__).parent))
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'libs'))
 
 from memory_stream import MemoryStream
 from self_evolution_real import RealSelfEvolution
