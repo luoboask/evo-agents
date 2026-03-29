@@ -1,0 +1,1 @@
+{"role": "assistant", "content": "User: 测试 OpenClaw 会话集成\nAgent: 这是测试回复", "metadata": {"type": "dialogue", "user_message": "测试 OpenClaw 会话集成", "agent_response": "这是测试回复", "importance": 5.0}, "importance": "medium", "timestamp": "2026-03-30T02:51:48.994682"}
