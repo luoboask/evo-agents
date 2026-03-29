@@ -27,11 +27,11 @@ class RealSelfEvolution:
             self.evolution_db = self.workspace / 'data' / agent_id / 'memory' / 'evolution.db'
         else:
             # 默认数据库 (使用 ai-baby)
-            agent_name = os.environ.get('OPENCLAW_AGENT', 'my-agent')
+            agent_name = os.environ.get('OPENCLAW_AGENT', os.path.basename(os.getcwd()).replace('workspace-', ''))
             self.evolution_db = self.workspace / 'data' / agent_name / 'memory' / 'evolution.db'
         
         self.agent_id = agent_id
-        self.memory_dir = self.workspace / 'data' / (agent_id or 'my-agent') / 'memory'
+        self.memory_dir = self.workspace / 'data' / (agent_id or os.path.basename(os.getcwd()).replace('workspace-', '')) / 'memory'
         
         # 初始化数据库表
         self._init_db()
