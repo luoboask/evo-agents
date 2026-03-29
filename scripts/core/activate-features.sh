@@ -257,6 +257,7 @@ setup_self_evolution() {
     export OPENCLAW_AGENT="$AGENT_NAME"
     python3 << EOF
 import sys
+sys.path.insert(0, '$WORKSPACE_ROOT/scripts/core')
 sys.path.insert(0, '$WORKSPACE_ROOT/skills/self-evolution')
 from memory_stream import MemoryStream
 
