@@ -14,9 +14,12 @@ from pathlib import Path
 
 # 自动记录模块
 try:
-    from .auto_record import record_search_query
+    from auto_record import record_search_query
 except ImportError:
-    record_search_query = None
+    try:
+        from .auto_record import record_search_query
+    except (ImportError, ValueError):
+        record_search_query = None
 import sys
 
 # 添加 libs 到路径
