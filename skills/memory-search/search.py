@@ -213,11 +213,6 @@ class IntegratedHybridMemory:
                 })
         
         results.sort(key=lambda x: -x["score"])
-        # 自动记录搜索查询
-        if auto_record and record_search_query:
-            latency_ms = (time.time() - start_time) * 1000
-            record_search_query(query, len(results), latency_ms)
-        
         return results[:top_k]
     
     # ═══════════════════════════════════════════════════════════════
