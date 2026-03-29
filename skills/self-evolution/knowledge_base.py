@@ -56,6 +56,7 @@ class KnowledgeBase:
                 learning_type TEXT,
                 outcome TEXT,
                 tags TEXT,
+                source TEXT,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
         ''')
@@ -97,21 +98,22 @@ class KnowledgeBase:
         
         cursor.execute('''
             INSERT INTO knowledge 
-            (timestamp, domain, subtopic, content, insight, thinking, key_point, difficulty, time_spent, learning_type, outcome, tags)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (timestamp, domain, subtopic, content, insight, thinking, key_point, difficulty, time_spent, learning_type, outcome, tags, source)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             learning.get('timestamp'),
             details.get('domain', ''),
             details.get('subtopic', ''),
             learning.get('content', ''),
-            learning.get('收获', ''),
-            learning.get('思考', ''),
-            learning.get('知识点', ''),
+            learning.get('insight', ''),
+            details.get('thinking', ''),
+            details.get('key_point', ''),
             details.get('difficulty', ''),
             details.get('time_spent', ''),
-            learning.get('type', ''),
-            learning.get('outcome', ''),
-            tags
+            details.get('learning_type', ''),
+            details.get('outcome', ''),
+            tags,
+            learning.get('source', '')
         ))
         
         knowledge_id = cursor.lastrowid
