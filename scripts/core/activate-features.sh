@@ -130,10 +130,21 @@ setup_ollama() {
         echo ""
         
         # 询问是否拉取新模型
-        echo "   需要拉取新的嵌入模型吗？"
-        echo "   推荐：bge-m3 (中文优化), nomic-embed-text (英文优化)"
+        echo "   需要拉取新的嵌入模型模型吗？"
         echo ""
-        read -p "   输入模型名称（直接回车跳过）: " MODEL_NAME
+        echo "   推荐模型："
+        echo "   • bge-m3              - 中文最佳 (推荐，~2.3GB)"
+        echo "   • mxbai-embed-large   - 性能王者 (~1.2GB)"
+        echo "   • nomic-embed-text    - 轻量首选 (~500MB)"
+        echo "   • bge-large-zh        - 中文专用 (~1.2GB)"
+        echo ""
+        read -p "   输入模型名称（直接回车使用 bge-m3）: " MODEL_NAME
+        
+        # 默认使用 bge-m3
+        if [ -z "$MODEL_NAME" ]; then
+            MODEL_NAME="bge-m3"
+            echo "   ✅ 已选择：bge-m3 (中文最佳)"
+        fi
         
         if [ -n "$MODEL_NAME" ]; then
             echo "   📥 正在下载：$MODEL_NAME"
