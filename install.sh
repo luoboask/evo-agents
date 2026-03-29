@@ -188,3 +188,12 @@ echo "   ./scripts/core/activate-features.sh"
 echo ""
 echo "   或者在 OpenClaw 中直接使用，需要时再激活"
 echo ""
+
+# 清理开发/测试文档（用户不需要）
+echo "🧹 清理开发文档..."
+rm -rf docs/dev docs/internal 2>/dev/null || true
+rm -f docs/OPTIMIZATION_PROPOSAL.md docs/OPTIMIZATION_STATUS.md 2>/dev/null || true
+rm -f docs/PHASE12_SUMMARY.md docs/PHASE3_SUMMARY.md 2>/dev/null || true
+rm -f docs/STANDARD_TEST.md docs/TEST_REGRESSION_CHECKLIST.md 2>/dev/null || true
+rm -f docs/INTELLIGENCE_VERIFICATION.md 2>/dev/null || true
+echo "   ✅ 完成"
