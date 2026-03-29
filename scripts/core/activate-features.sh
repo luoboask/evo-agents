@@ -127,6 +127,27 @@ setup_ollama() {
         ollama list 2>/dev/null | grep -E "^[a-z]" | while read line; do
             echo "      $line"
         done
+        
+        # 初始化向量数据库
+        echo ""
+        echo "   📊 初始化向量数据库..."
+        python3 << 'PYINIT'
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path.cwd() / 'scripts' / 'core'))
+from memory_indexer import get_db_path, init_db
+import sqlite3
+
+try:
+    db_path = get_db_path()
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(db_path))
+    init_db(conn)
+    conn.close()
+    print("   ✅ 向量数据库初始化成功")
+except Exception as e:
+    print(f"   ⚠️  向量数据库初始化失败：{e}")
+PYINIT
         echo ""
         
         # 询问是否拉取新模型

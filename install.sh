@@ -115,6 +115,30 @@ mkdir -p data/index data/$AGENT_NAME
 mkdir -p scripts/user
 echo "   ✅ 完成"
 
+# 创建必要文件
+echo "📝 创建必要文件..."
+cat > memory/MEMORY.md << 'MEMEOF'
+# MEMORY.md - 长期记忆
+
+_重要的人、事、偏好、决定_
+
+---
+
+## 用户
+- 名称：待填写
+- 时区：Asia/Shanghai
+
+## 重要事件
+
+## 技能
+
+## 偏好
+
+## 决定
+MEMEOF
+touch data/.gitkeep
+echo "   ✅ 完成"
+
 # 创建安装配置文件（用于路径解析）
 echo "📝 创建安装配置..."
 cat > "$WORKSPACE_ROOT/.install-config" <<EOF

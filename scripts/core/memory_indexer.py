@@ -48,6 +48,10 @@ def tokenize(text: str) -> str:
     return text
 
 
+def get_db_path() -> Path:
+    """获取数据库路径"""
+    return resolve_data_dir("index") / "memory_index.db"
+
 def init_db(conn: sqlite3.Connection):
     conn.executescript("""
         CREATE TABLE IF NOT EXISTS documents (
