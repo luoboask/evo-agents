@@ -276,33 +276,39 @@ class IntegratedHybridMemory:
             json.dump(self.vector_cache, f, ensure_ascii=False, indent=2)
     
     def _index_existing_memories(self):
-        """索引已有记忆文件"""
-        indexed_files = set()
-        for entry in self.vector_cache:
-            if isinstance(entry, dict) and 'metadata' in entry:
-                indexed_files.add(entry['metadata'].get('source', ''))
-        
-        count = 0
-        for md_file in self.memory_dir.glob('*.md'):
-            if str(md_file) not in indexed_files:
-                try:
-                    content = md_file.read_text(encoding='utf-8')
-                    for line in content.split('\n'):
-                        if line.startswith('- [') and ']' in line:
-                            start = line.find(']') + 1
-                            if start > 0 and line[start:].strip():
-                                entry = {
-                                    'content': line[start:].strip(),
-                                    'metadata': {'source': str(md_file), 'type': 'file'}
-                                }
-                                self._add_to_vector(entry)
-                                count += 1
-                except Exception as e:
-                    pass
-        
-        if count > 0:
-            self._save_vector_cache()
-            print(f"✅ 自动索引 {count} 条已有记忆")
+        """索引已有记忆文件（Phase 2: 使用统一索引）"""
+        if hasattr(self, 'unified_index'):
+            count = self.unified_index.index_all()
+            if count > 0:
+                print(f"✅ 统一索引 {count} 条记忆")
+        else:
+            # 回退到旧方法
+            indexed_files = set()
+            for entry in self.vector_cache:
+                if isinstance(entry, dict) and 'metadata' in entry:
+                    indexed_files.add(entry['metadata'].get('source', ''))
+            
+            count = 0
+            for md_file in self.memory_dir.glob('*.md'):
+                if str(md_file) not in indexed_files:
+                    try:
+                        content = md_file.read_text(encoding='utf-8')
+                        for line in content.split('\n'):
+                            if line.startswith('- [') and ']' in line:
+                                start = line.find(']') + 1
+                                if start > 0 and line[start:].strip():
+                                    entry = {
+                                        'content': line[start:].strip(),
+                                        'metadata': {'source': str(md_file), 'type': 'file'}
+                                    }
+                                    self._add_to_vector(entry)
+                                    count += 1
+                    except Exception as e:
+                        pass
+            
+            if count > 0:
+                self._save_vector_cache()
+                print(f"✅ 自动索引 {count} 条已有记忆")
     
     # ═══════════════════════════════════════════════════════════════
     # L3: 知识图谱实现
