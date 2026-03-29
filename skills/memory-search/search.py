@@ -116,13 +116,13 @@ class IntegratedHybridMemory:
                 return "high"
         
         # Medium: 一般信息
-        if len(content) > 50 or role == "assistant":
+    def search(self, query, context="medium", top_k=5, auto_record: bool = True):
             return "medium"
         
         # Low: 简短对话
         return "low"
     
-    def search(self, query, context="medium", top_k=5, auto_record: bool = True):
+    def search(self, query, context="medium", top_k=5):
         """
         混合检索记忆
         
