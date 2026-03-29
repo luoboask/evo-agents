@@ -30,9 +30,7 @@
 
 ---
 
-## 🏗️ 架构文档（安装时删除）
-
-位于 `docs/arch/` 目录：
+## 🏗️ 架构文档（保留）
 
 - **ARCHITECTURE_GENERIC_CN.md** - 架构说明（中文）
 - **ARCHITECTURE_GENERIC_EN.md** - 架构说明（英文）
