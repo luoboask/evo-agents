@@ -6,6 +6,7 @@ RAG 评估指标计算
 
 import json
 from pathlib import Path
+from path_utils import resolve_workspace, resolve_data_dir
 from datetime import datetime, timedelta
 from typing import List, Dict
 import math

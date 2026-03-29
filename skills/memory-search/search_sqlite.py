@@ -6,6 +6,7 @@ SQLite 记忆搜索 - 使用 Memory Hub
 
 import argparse
 from pathlib import Path
+from path_utils import resolve_workspace, resolve_data_dir
 
 # 导入 Memory Hub (共享库)
 # 添加 libs 目录到路径

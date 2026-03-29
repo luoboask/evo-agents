@@ -7,6 +7,7 @@ import argparse
 import os
 import re
 from pathlib import Path
+from path_utils import resolve_workspace, resolve_data_dir
 
 
 def search_memory(query, max_results=5, case_sensitive=False):

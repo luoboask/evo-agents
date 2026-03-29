@@ -12,13 +12,14 @@ import time
 import random
 from datetime import datetime
 from pathlib import Path
+from path_utils import resolve_workspace, resolve_data_dir
 from typing import Dict, List, Tuple
 import statistics
 
 # 配置
 SKILLS_DIR = Path(__file__).parent
 # 使用 memory_hub 的相同路径：data/${agent_name}/logs/evaluations.jsonl
-DATA_DIR = SKILLS_DIR.parent.parent / "data" / os.environ.get("OPENCLAW_AGENT", os.path.basename(os.getcwd()).replace("workspace-", ""))"
+DATA_DIR = SKILLS_DIR.parent.parent / "data" / os.environ.get("OPENCLAW_AGENT", os.path.basename(str(resolve_workspace())).replace("workspace-", ""))"
 LOGS_DIR = DATA_DIR / "logs"
 CONFIG_FILE = SKILLS_DIR / "config.json"
 EVALUATIONS_FILE = LOGS_DIR / "evaluations.jsonl"

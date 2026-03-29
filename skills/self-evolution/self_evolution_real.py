@@ -12,6 +12,7 @@ import os
 import sqlite3
 from datetime import datetime
 from pathlib import Path
+from path_utils import resolve_workspace, resolve_data_dir
 from typing import Optional, Dict, List
 
 class RealSelfEvolution:
@@ -27,11 +28,11 @@ class RealSelfEvolution:
             self.evolution_db = self.workspace / 'data' / agent_id / 'memory' / 'evolution.db'
         else:
             # 默认数据库 (使用 ai-baby)
-            agent_name = os.environ.get('OPENCLAW_AGENT', os.path.basename(os.getcwd()).replace('workspace-', ''))
+            agent_name = os.environ.get('OPENCLAW_AGENT', os.path.basename(str(resolve_workspace())).replace('workspace-', ''))
             self.evolution_db = self.workspace / 'data' / agent_name / 'memory' / 'evolution.db'
         
         self.agent_id = agent_id
-        self.memory_dir = self.workspace / 'data' / (agent_id or os.path.basename(os.getcwd()).replace('workspace-', '')) / 'memory'
+        self.memory_dir = self.workspace / 'data' / (agent_id or os.path.basename(str(resolve_workspace())).replace('workspace-', '')) / 'memory'
         
         # 初始化数据库表
         self._init_db()

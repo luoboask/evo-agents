@@ -7,6 +7,7 @@
 import os
 import sys
 from pathlib import Path
+from path_utils import resolve_workspace, resolve_data_dir
 from datetime import datetime
 from typing import List, Dict, Optional
 
@@ -41,7 +42,7 @@ class MemoryStream:
             agent_name: Agent 名称（默认从环境变量获取）
         """
         if agent_name is None:
-            agent_name = os.environ.get('OPENCLAW_AGENT', os.path.basename(os.getcwd()).replace('workspace-', ''))
+            agent_name = os.environ.get('OPENCLAW_AGENT', os.path.basename(str(resolve_workspace())).replace('workspace-', ''))
         
         self.agent_name = agent_name
         
@@ -195,7 +196,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     # 创建记忆流
-    agent_name = os.environ.get('OPENCLAW_AGENT', os.path.basename(os.getcwd()).replace('workspace-', ''))
+    agent_name = os.environ.get('OPENCLAW_AGENT', os.path.basename(str(resolve_workspace())).replace('workspace-', ''))
     ms = MemoryStream(agent_name=agent_name)
     
     # 添加记忆

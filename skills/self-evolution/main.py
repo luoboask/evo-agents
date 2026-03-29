@@ -8,6 +8,7 @@
 import argparse
 import sys
 from pathlib import Path
+from path_utils import resolve_workspace, resolve_data_dir
 from datetime import datetime
 
 # 添加当前目录到路径
@@ -26,7 +27,7 @@ def cmd_status(args):
     
     # 检查数据库
     import os
-    agent_name = os.environ.get('OPENCLAW_AGENT', os.path.basename(os.getcwd()).replace('workspace-', ''))
+    agent_name = os.environ.get('OPENCLAW_AGENT', os.path.basename(str(resolve_workspace())).replace('workspace-', ''))
     db_files = [
         f'data/{agent_name}/memory/{agent_name}_memory_stream.db',
         f'data/{agent_name}/memory/{agent_name}_knowledge_base.db',

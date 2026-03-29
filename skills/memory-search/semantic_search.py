@@ -11,6 +11,7 @@ import os
 import pickle
 from datetime import datetime
 from pathlib import Path
+from path_utils import resolve_workspace, resolve_data_dir
 
 
 OLLAMA_HOST = "http://127.0.0.1:11434"

@@ -6,6 +6,7 @@ RAG 集成测试 - 验证记忆搜索与 RAG 评估的集成
 import sys
 import time
 from pathlib import Path
+from path_utils import resolve_workspace, resolve_data_dir
 
 # 添加路径
 SKILLS_DIR = Path(__file__).parent.parent
