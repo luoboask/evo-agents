@@ -136,11 +136,17 @@ setup_ollama() {
         read -p "   输入模型名称（直接回车跳过）: " MODEL_NAME
         
         if [ -n "$MODEL_NAME" ]; then
-            echo "   📥 正在拉取：$MODEL_NAME ..."
-            if ollama pull "$MODEL_NAME" 2>&1 | tail -3; then
-                echo "   ✅ 模型拉取成功"
+            echo "   📥 正在下载：$MODEL_NAME"
+            echo "   ℹ️  提示：大模型可能需要几分钟，请耐心等待..."
+            echo ""
+            
+            # 显示下载进度（不过滤，让用户看到实时输出）
+            if ollama pull "$MODEL_NAME" 2>&1; then
+                echo ""
+                echo "   ✅ 模型下载并安装成功！"
             else
-                echo "   ⚠️  模型拉取失败"
+                echo ""
+                echo "   ⚠️  模型下载失败，请检查网络连接"
             fi
         fi
     else
