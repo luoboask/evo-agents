@@ -7,6 +7,10 @@ import argparse
 import os
 import re
 from pathlib import Path
+import sys
+
+# 添加 libs 到路径
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "libs"))
 from path_utils import resolve_workspace, resolve_data_dir
 
 
