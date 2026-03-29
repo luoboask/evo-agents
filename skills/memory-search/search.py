@@ -8,12 +8,12 @@ import argparse
 import json
 import os
 import sys
-import subprocess
-from datetime import datetime, timedelta
-from pathlib import Path
-import sys
 
-# 添加 libs 到路径
+# 自动记录模块
+try:
+    from .auto_record import record_search_query
+except ImportError:
+    record_search_query = None
 from collections import deque
 
 
@@ -116,7 +116,7 @@ class IntegratedHybridMemory:
         # Low: 简短对话
         return "low"
     
-    def search(self, query, context="medium", top_k=5):
+    def search(self, query, context="medium", top_k=5, auto_record: bool = True):
         """
         混合检索记忆
         
@@ -125,6 +125,9 @@ class IntegratedHybridMemory:
             context: small/medium/large
             top_k: 返回数量
         """
+        import time
+        start_time = time.time()
+        
         results = []
         
         # L1: 工作记忆（总是搜索）
