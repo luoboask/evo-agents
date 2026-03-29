@@ -5,6 +5,7 @@ Memory Hub - 记忆中心
 """
 
 from pathlib import Path
+from path_utils import resolve_workspace
 from typing import List, Dict, Optional
 
 try:
@@ -22,7 +23,7 @@ class MemoryHub:
     
     def __init__(self, agent_name: str):
         self.agent_name = agent_name
-        self.workspace_root = Path(__file__).parent.parent.parent
+        self.workspace_root = resolve_workspace()
         
         # 数据路径
         self.data_path = self.workspace_root / 'data' / agent_name
