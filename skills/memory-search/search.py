@@ -16,10 +16,7 @@ from pathlib import Path
 try:
     from auto_record import record_search_query
 except ImportError:
-    try:
-        from .auto_record import record_search_query
-    except (ImportError, ValueError):
-        record_search_query = None
+    record_search_query = None
 import sys
 
 # 添加 libs 到路径
@@ -210,6 +207,11 @@ class IntegratedHybridMemory:
                 })
         
         results.sort(key=lambda x: -x["score"])
+        # 自动记录搜索查询
+        if auto_record and record_search_query:
+            latency_ms = (time.time() - start_time) * 1000
+            record_search_query(query, len(results), latency_ms)
+        
         return results[:top_k]
     
     # ═══════════════════════════════════════════════════════════════
