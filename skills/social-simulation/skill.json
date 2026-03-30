@@ -1,0 +1,43 @@
+{
+  "name": "social-simulation",
+  "version": "1.0.0",
+  "description": "多 Agent 社会模拟系统，让 Agent 自主对话、协作、发展剧情",
+  "author": "evo-agents",
+  "homepage": "https://github.com/luoboask/evo-agents",
+  "license": "MIT",
+  "category": "simulation",
+  "tags": ["simulation", "multi-agent", "society", "role-play", "dialogue"],
+  "dependencies": {
+    "python": ">=3.10",
+    "skills": ["self-evolution"],
+    "packages": ["pyyaml"]
+  },
+  "main": "social_simulation.py",
+  "exports": [
+    "init_society",
+    "join_society",
+    "start_simulation",
+    "stop_simulation",
+    "get_society_status",
+    "observe",
+    "generate_narrative",
+    "interact_with"
+  ],
+  "config": {
+    "default_config_file": "config/society.yaml",
+    "data_dir": "data/social",
+    "log_level": "INFO"
+  },
+  "examples": [
+    {
+      "name": "快速开始",
+      "description": "初始化社会并加入",
+      "code": "init_society()\njoin_society('merchant', name='钱老板')\nstart_simulation(speed=10)"
+    },
+    {
+      "name": "上帝视角",
+      "description": "观察社会并生成叙事",
+      "code": "status = get_society_status()\nstory = generate_narrative()\nprint(story)"
+    }
+  ]
+}
