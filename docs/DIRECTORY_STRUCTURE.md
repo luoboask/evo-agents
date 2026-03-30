@@ -1,6 +1,6 @@
 # evo-agents 完整目录结构
 
-本文档详细说明 evo-agents 安装后的目录结构，帮助用户理解每个文件和目录的用途。
+本文档详细说明 evo-agents 安装后的目录结构。
 
 ---
 
@@ -10,124 +10,126 @@
 workspace-my-agent/
 │
 ├── 📄 根目录配置文件
-│   ├── .gitignore                    # Git 忽略规则
-│   ├── .install-config               # 安装配置信息
-│   ├── AGENTS.md                     # Agent 系统说明
-│   ├── SOUL.md                       # Agent 灵魂设定
-│   ├── IDENTITY.md                   # Agent 身份信息
-│   ├── USER.md                       # 用户信息配置
-│   ├── TOOLS.md                      # 工具配置说明
-│   ├── HEARTBEAT.md                  # 心跳配置
-│   ├── README.md                     # 项目说明（英文）
-│   └── README.zh-CN.md               # 项目说明（中文）
+│   ├── .gitignore              # Git 忽略规则
+│   ├── .install-config         # 安装配置
+│   ├── AGENTS.md               # Agent 系统说明
+│   ├── SOUL.md                 # Agent 灵魂设定
+│   ├── IDENTITY.md             # Agent 身份信息
+│   ├── USER.md                 # 用户信息
+│   ├── TOOLS.md                # 工具配置
+│   ├── HEARTBEAT.md            # 心跳配置
+│   ├── README.md               # 项目说明（英文）
+│   └── README.zh-CN.md         # 项目说明（中文）
 │
-├── 📁 agents/                        # 子 Agent 目录
+├── 📁 agents/                  # 子 Agent 配置目录
 │   ├── .gitkeep
-│   └── agent-name/                   # 每个子 Agent 的独立目录
+│   └── agent-name/             # 子 Agent 配置
 │       ├── agent/
-│       │   ├── agent.json            # OpenClaw Agent 配置
-│       │   └── sessions/             # 会话记录
-│       ├── memory/                   # Agent 记忆
-│       │   └── YYYY-MM-DD.md         # 每日记忆文件
-│       ├── data/                     # Agent 数据
-│       │   └── memory/
-│       │       ├── memory_stream.db  # 记忆流数据库
-│       │       └── knowledge_base.db # 知识库数据库
-│       └── config.yaml               # Agent 配置
+│       │   ├── agent.json      # OpenClaw Agent 配置
+│       │   └── sessions/       # 会话记录（JSONL）
+│       └── config.yaml         # Agent 配置
 │
-├── 📁 data/                          # 数据目录
+├── 📁 data/                    # 统一数据目录
 │   ├── .gitkeep
 │   ├── index/
-│   │   └── memory_index.db           # 记忆索引数据库
-│   ├── my-agent/                     # 主 Agent 数据
+│   │   └── memory_index.db     # 共享索引数据库
+│   ├── my-agent/               # 主 Agent 数据
 │   │   └── memory/
-│   ├── agent-1/                      # 子 Agent 1 数据
+│   │       ├── memory_stream.db    # 记忆流数据库
+│   │       └── knowledge_base.db   # 知识库数据库
+│   ├── agent-1/                # 子 Agent 1 数据
 │   │   └── memory/
-│   └── .locks/                       # 文件锁
+│   │       ├── memory_stream.db
+│   │       └── knowledge_base.db
+│   └── .locks/                 # 文件锁
 │
-├── 📁 memory/                        # 记忆文件目录
+├── 📁 memory/                  # 记忆文件目录（Markdown）
 │   ├── .gitkeep
-│   ├── YYYY-MM-DD.md                 # 每日记忆
-│   ├── working_memory_*.jsonl        # 工作记忆
-│   ├── weekly/                       # 周记忆（压缩后）
-│   ├── monthly/                      # 月记忆（压缩后）
-│   └── archive/                      # 归档记忆
+│   ├── YYYY-MM-DD.md           # 每日记忆文件
+│   ├── working_memory_*.jsonl  # 工作记忆
+│   ├── weekly/                 # 周记忆（压缩后）
+│   ├── monthly/                # 月记忆（压缩后）
+│   └── archive/                # 归档记忆
 │
-├── 📁 public/                        # 公共知识库
-│   ├── README.md
+├── 📁 public/                  # 公共知识库
 │   └── ...
 │
-├── 📁 scripts/                       # 脚本目录
-│   ├── core/                         # 核心脚本
-│   │   ├── activate-features.sh      # 激活高级功能
-│   │   ├── add-agent.sh              # 添加子 Agent
-│   │   ├── bridge/                   # 桥接脚本
-│   │   │   ├── bridge_sync.py        # 双向同步
-│   │   │   ├── bridge_to_knowledge.py
-│   │   │   └── bridge_to_markdown.py
-│   │   ├── health_check.py           # 健康检查
-│   │   ├── memory_indexer.py         # 记忆索引
-│   │   ├── memory_compressor.py      # 记忆压缩
-│   │   ├── self-check.py             # 自检工具
-│   │   ├── session_recorder.py       # 会话记录
-│   │   ├── unified_search.py         # 统一搜索
-│   │   ├── uninstall-agent.sh        # 卸载子 Agent
-│   │   └── uninstall-workspace.sh    # 卸载 workspace
-│   └── user/                         # 用户自定义脚本
+├── 📁 scripts/                 # 脚本目录
+│   ├── core/                   # 核心脚本
+│   │   ├── activate-features.sh
+│   │   ├── add-agent.sh
+│   │   ├── bridge/
+│   │   ├── health_check.py
+│   │   ├── memory_indexer.py
+│   │   ├── self-check.py
+│   │   ├── session_recorder.py
+│   │   ├── unified_search.py
+│   │   ├── uninstall-agent.sh
+│   │   └── uninstall-workspace.sh
+│   └── user/                   # 用户自定义脚本
 │       └── .gitkeep
 │
-├── 📁 skills/                        # 技能目录
+├── 📁 skills/                  # 技能目录
 │   ├── README.md
-│   ├── memory-search/                # 记忆搜索技能
-│   ├── rag/                          # RAG 评估技能
-│   ├── self-evolution/               # 自进化技能
-│   └── web-knowledge/                # 网络知识技能
+│   ├── memory-search/
+│   ├── rag/
+│   ├── self-evolution/
+│   └── web-knowledge/
 │
-├── 📁 libs/                          # 库目录
-│   ├── memory_hub/                   # 记忆中心库
-│   └── path_utils/                   # 路径工具库
+├── 📁 libs/                    # 库目录
+│   ├── memory_hub/
+│   └── path_utils/
 │
-└── 📁 docs/                          # 文档目录
+└── 📁 docs/                    # 文档目录
     ├── README.md
+    ├── DIRECTORY_STRUCTURE.md
     ├── AGENT_INSTRUCTIONS.md
     ├── SELF_CHECK.md
-    ├── UNINSTALL.md
-    ├── WORKSPACE_RULES.md
-    └── DIRECTORY_STRUCTURE.md        # 本文档
+    └── UNINSTALL.md
 ```
 
 ---
 
 ## 📋 关键目录详解
 
-### **1. agents/ - 子 Agent 目录**
+### **1. agents/ vs data/ 的区别**
 
-每个子 Agent 都有独立的配置和数据：
+这是最容易混淆的地方：
 
+| 目录 | 用途 | 内容 |
+|------|------|------|
+| **`agents/agent-name/`** | Agent 配置 | agent.json, config.yaml, sessions/ |
+| **`data/agent-name/`** | Agent 数据 | memory_stream.db, knowledge_base.db |
+
+**为什么分开？**
+- `agents/` - OpenClaw 管理的 Agent 配置
+- `data/` - 应用层的数据存储（数据库文件）
+
+**示例：**
 ```
 agents/assistant/
-├── agent/agent.json       # OpenClaw Agent 配置
-├── memory/2026-03-30.md   # 记忆文件
-├── data/assistant/memory/ # 数据目录
+├── agent/agent.json       # OpenClaw 配置
+├── sessions/*.jsonl       # 会话记录
 └── config.yaml            # Agent 配置
-```
 
-**创建子 Agent：**
-```bash
-bash scripts/core/add-agent.sh assistant "我的助手"
+data/assistant/
+└── memory/
+    ├── memory_stream.db   # 记忆流数据库
+    └── knowledge_base.db  # 知识库数据库
 ```
 
 ---
 
-### **2. data/ - 数据目录**
+### **2. data/ - 统一数据目录**
 
-按 Agent 隔离存储数据：
+所有 Agent 的数据都存放在这里，按 Agent 隔离：
 
 ```
 data/
-├── index/memory_index.db    # 共享索引数据库
+├── index/memory_index.db    # 共享索引（所有 Agent 共用）
 ├── my-agent/memory/         # 主 Agent 数据
-├── assistant/memory/        # 子 Agent 数据
+├── assistant/memory/        # 子 Agent assistant 数据
+├── researcher/memory/       # 子 Agent researcher 数据
 └── .locks/                  # 文件锁
 ```
 
@@ -137,17 +139,17 @@ data/
 
 ---
 
-### **3. memory/ - 记忆目录**
+### **3. memory/ - 记忆文件目录**
 
-存储所有记忆文件：
+存储 Markdown 格式的记忆文件：
 
 ```
 memory/
 ├── 2026-03-30.md           # 每日记忆
-├── working_memory.jsonl    # 工作记忆（JSONL 格式）
-├── weekly/2026-W14.md      # 周记忆（压缩后）
-├── monthly/2026-03.md      # 月记忆（压缩后）
-└── archive/2025/           # 归档记忆
+├── working_memory.jsonl    # 工作记忆（JSONL）
+├── weekly/2026-W14.md      # 周记忆
+├── monthly/2026-03.md      # 月记忆
+└── archive/2025/           # 归档
 ```
 
 **每日记忆文件格式：**
@@ -162,35 +164,32 @@ memory/
 
 ## 📚 学习
 - [09:10] 学习到...
-
-## 💭 反思
-- [09:15] 反思...
 ```
 
 ---
 
-### **4. scripts/core/ - 核心脚本**
+### **4. agents/ - 子 Agent 配置目录**
 
-| 脚本 | 功能 | 常用命令 |
-|------|------|---------|
-| `activate-features.sh` | 激活高级功能 | 交互式选择 |
-| `add-agent.sh` | 添加子 Agent | `./add-agent.sh name "描述"` |
-| `memory_indexer.py` | 索引记忆 | `--full`, `--incremental`, `--embed` |
-| `unified_search.py` | 搜索记忆 | `关键词` |
-| `self-check.py` | 自检工具 | 无参数 |
-| `uninstall-agent.sh` | 卸载子 Agent | `agent-name` |
-| `uninstall-workspace.sh` | 卸载 workspace | 交互式 |
+每个子 Agent 的配置：
 
----
+```
+agents/assistant/
+├── agent/
+│   ├── agent.json          # OpenClaw Agent 配置
+│   └── sessions/           # 会话记录
+│       ├── sessions.json
+│       └── *.jsonl
+└── config.yaml             # Agent 配置
+```
 
-### **5. skills/ - 技能目录**
+**创建子 Agent：**
+```bash
+bash scripts/core/add-agent.sh assistant "我的助手"
+```
 
-| 技能 | 用途 |
-|------|------|
-| `memory-search/` | 记忆搜索（关键词 + 语义） |
-| `rag/` | RAG 评估系统 |
-| `self-evolution/` | 自进化系统 |
-| `web-knowledge/` | 网络知识获取 |
+这会自动创建：
+- `agents/assistant/` - 配置目录
+- `data/assistant/` - 数据目录
 
 ---
 
@@ -213,9 +212,12 @@ bash scripts/core/add-agent.sh assistant "我的助手"
 ```
 workspace-my-agent/
 ├── agents/
-│   └── assistant/      # 新增子 Agent
+│   └── assistant/      # 新增：配置
+│       ├── agent/agent.json
+│       └── config.yaml
 ├── data/
-│   └── assistant/      # 新增数据目录
+│   └── assistant/      # 新增：数据
+│       └── memory/
 └── memory/
     └── 2026-03-30.md   # 开始记录记忆
 ```
@@ -244,37 +246,38 @@ workspace-my-agent/
 
 | 类别 | 数量 | 说明 |
 |------|------|------|
-| **配置文件** | ~5 个 | 安装配置、Agent 配置 |
+| **配置文件** | ~5 个 | .install-config, agent.json, config.yaml |
 | **记忆文件** | 每日 1 个 | Markdown 格式 |
 | **数据库** | 每 Agent 2 个 | memory_stream + knowledge_base |
-| **核心脚本** | ~15 个 | scripts/core/ |
+| **核心脚本** | ~12 个 | scripts/core/ |
 | **技能** | 4 个基础 | memory-search, rag, self-evolution, web-knowledge |
-| **文档** | ~12 个 | docs/ 目录 |
 
 ---
 
 ## 💡 常见问题
 
-### **Q: agents/ 目录什么时候创建？**
-A: 使用 `add-agent.sh` 创建子 Agent 时自动创建。
+### **Q: agents/ 和 data/ 都有 agent-name，有什么区别？**
+**A:** 
+- `agents/agent-name/` - OpenClaw 管理的配置
+- `data/agent-name/` - 应用层的数据存储
 
-### **Q: data/ 目录为什么有多个子目录？**
-A: 每个 Agent 有独立的数据目录，实现数据隔离。
+### **Q: 为什么数据不放在 agents/agent-name/ 下？**
+**A:** 
+- 数据统一存放在 `data/` 便于管理和备份
+- `agents/` 只存放配置，由 OpenClaw 管理
 
 ### **Q: memory/ 目录的文件会很多吗？**
-A: 每天一个文件，定期会压缩成周记忆、月记忆。
-
-### **Q: 可以手动修改记忆文件吗？**
-A: 可以，但建议使用 `session_recorder.py` 记录。
+**A:** 
+- 每天一个文件，定期压缩成周记忆、月记忆
+- 不会无限增长
 
 ---
 
 ## 📝 相关文档
 
 - [AGENT_INSTRUCTIONS.md](AGENT_INSTRUCTIONS.md) - Agent 指令
-- [SELF_CHECK.md](SELF_CHECK.md) - 自检工具说明
+- [SELF_CHECK.md](SELF_CHECK.md) - 自检工具
 - [UNINSTALL.md](UNINSTALL.md) - 卸载指南
-- [WORKSPACE_RULES.md](WORKSPACE_RULES.md) - workspace 规则
 
 ---
 
