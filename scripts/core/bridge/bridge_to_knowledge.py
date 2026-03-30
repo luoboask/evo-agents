@@ -11,7 +11,7 @@ bridge_to_knowledge.py - Markdown → 知识系统桥
 用法:
     python3 scripts/bridge/bridge_to_knowledge.py                    # 同步今天+昨天
     python3 scripts/bridge/bridge_to_knowledge.py --since 2026-03-24
-    python3 scripts/bridge/bridge_to_knowledge.py --agent demo-agent
+    python3 scripts/bridge/bridge_to_knowledge.py --agent test5-agent
 """
 
 import argparse

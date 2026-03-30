@@ -8,7 +8,7 @@ unified_search.py - 统一搜索
     python3 scripts/unified_search.py '关键词'
     python3 scripts/unified_search.py '如何改进记忆系统' --semantic
     python3 scripts/unified_search.py '记忆系统' --limit 5
-    python3 scripts/unified_search.py '知识' --source knowledge --agent demo-agent
+    python3 scripts/unified_search.py '知识' --source knowledge --agent test5-agent
     python3 scripts/unified_search.py '知识' --source markdown
 """
 

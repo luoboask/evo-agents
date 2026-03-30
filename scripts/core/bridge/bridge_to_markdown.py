@@ -11,7 +11,7 @@ bridge_to_markdown.py - 知识系统 → Markdown 桥
 用法:
     python3 scripts/bridge/bridge_to_markdown.py                    # 同步今天的
     python3 scripts/bridge/bridge_to_markdown.py --since 2026-03-24 # 指定日期起
-    python3 scripts/bridge/bridge_to_markdown.py --agent demo-agent # 指定 agent
+    python3 scripts/bridge/bridge_to_markdown.py --agent test5-agent # 指定 agent
 """
 
 import argparse

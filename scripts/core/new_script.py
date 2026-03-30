@@ -19,7 +19,7 @@ TEMPLATE = '''#!/usr/bin/env python3
     python3 scripts/{script_name}.py [options]
     
 示例:
-    python3 scripts/{script_name}.py --agent demo-agent
+    python3 scripts/{script_name}.py --agent test5-agent
     EVO_WORKSPACE=/tmp/test python3 scripts/{script_name}.py
 """
 import argparse
@@ -38,7 +38,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例:
-    python3 scripts/{script_name}.py --agent demo-agent
+    python3 scripts/{script_name}.py --agent test5-agent
     python3 scripts/{script_name}.py --workspace /tmp/my-workspace
         """
     )
@@ -110,7 +110,7 @@ def main():
     print("")
     print("🧪 测试:")
     print(f"   python3 {output} --help")
-    print(f"   python3 {output} --agent demo-agent --verbose")
+    print(f"   python3 {output} --agent test5-agent --verbose")
 
 
 if __name__ == "__main__":

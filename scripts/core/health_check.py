@@ -5,8 +5,8 @@ health_check.py - 记忆系统健康检查
 校验两套系统的数据一致性，发现问题自动修复。
 
 用法:
-    python3 scripts/health_check.py --agent demo-agent
-    python3 scripts/health_check.py --agent demo-agent --fix
+    python3 scripts/health_check.py --agent test5-agent
+    python3 scripts/health_check.py --agent test5-agent --fix
 """
 
 import argparse

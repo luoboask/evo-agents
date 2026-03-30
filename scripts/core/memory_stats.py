@@ -4,7 +4,7 @@ memory_stats.py - 记忆系统全面统计
 
 用法:
     python3 scripts/memory_stats.py
-    python3 scripts/memory_stats.py --agent demo-agent
+    python3 scripts/memory_stats.py --agent test5-agent
 """
 
 import argparse
@@ -41,7 +41,7 @@ def count_md_entries(filepath: Path) -> int:
 
 def main():
     parser = argparse.ArgumentParser(description="记忆系统统计")
-    parser.add_argument("--agent", default="demo-agent")
+    parser.add_argument("--agent", default=None)  # 运行时推导
     args = parser.parse_args()
 
     print("=" * 55)

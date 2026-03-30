@@ -10,7 +10,7 @@ bridge_sync.py - 双向同步入口
     python3 scripts/bridge/bridge_sync.py                     # 双向同步
     python3 scripts/bridge/bridge_sync.py --direction to-md   # 只同步到 markdown
     python3 scripts/bridge/bridge_sync.py --direction to-kb   # 只同步到知识系统
-    python3 scripts/bridge/bridge_sync.py --agent demo-agent --days 7
+    python3 scripts/bridge/bridge_sync.py --agent test5-agent --days 7
 """
 
 import argparse
