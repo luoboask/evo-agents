@@ -18,6 +18,7 @@
 
 | Document | Description | For |
 |----------|-------------|-----|
+| **[DIRECTORY_STRUCTURE.md](DIRECTORY_STRUCTURE.md)** | 📁 Complete directory structure | Everyone |
 | **[STRUCTURE_RULES.md](STRUCTURE_RULES.md)** | Project structure rules | Everyone |
 | **[WORKSPACE_RULES.md](WORKSPACE_RULES.md)** | Workspace usage rules | Everyone |
 | **[AGENT_INSTRUCTIONS.md](AGENT_INSTRUCTIONS.md)** | Agent instructions | AI Agents |
