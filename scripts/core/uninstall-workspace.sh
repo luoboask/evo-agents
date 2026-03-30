@@ -50,12 +50,12 @@ echo "📊 Workspace 大小:"
 du -sh "$WORKSPACE" 2>/dev/null || echo "   (无法计算)"
 echo ""
 
-# 列出子 Agent
-SUB_AGENTS=$(ls -1 "$WORKSPACE/agents/" 2>/dev/null | wc -l || echo "0")
+# 列出子 Agent（过滤 .gitkeep）
+SUB_AGENTS=$(ls -1d "$WORKSPACE/agents/"*/ 2>/dev/null | wc -l || echo "0")
 echo "📦 子 Agent 数量：$SUB_AGENTS"
 if [ "$SUB_AGENTS" -gt 0 ]; then
     echo "   子 Agent:"
-    ls -1 "$WORKSPACE/agents/" 2>/dev/null | sed 's/^/      - /'
+    ls -1d "$WORKSPACE/agents/"*/ 2>/dev/null | xargs -n1 basename | sed 's/^/      - /'
 fi
 echo ""
 
@@ -113,6 +113,10 @@ if [ "$SUB_AGENTS" -gt 0 ]; then
     for agent_dir in "$WORKSPACE/agents/"*/; do
         if [ -d "$agent_dir" ]; then
             sub_agent=$(basename "$agent_dir")
+            # 跳过 .gitkeep
+            if [ "$sub_agent" = ".gitkeep" ]; then
+                continue
+            fi
             echo "   - $sub_agent"
             openclaw agents delete "$sub_agent" --force 2>/dev/null || true
         fi
