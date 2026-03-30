@@ -152,13 +152,15 @@ cd "agents/$AGENT_NAME"
 mkdir -p scripts libs 2>/dev/null || true
 echo "   ✅ 已创建 scripts/, libs/ 目录（可放置 Agent 特定资源）"
 
-# 创建 skills/ 符号链接到父 workspace（共享技能）
+# 创建 skills/ 目录（专属技能）
 mkdir -p skills
 echo "   ✅ skills/（专属技能）"
-ln -sf ../../skills-parent skills-parent
-echo "   ✅ skills-parent/（共享父 Agent 技能）" 2>/dev/null || true
-echo "   ✅ 已创建 skills/ → ../../skills（共享父 workspace 技能）"
 
-echo "   💡 提示：scripts/ 和 libs/ 可以放置 Agent 特定资源"
+# 创建符号链接到父 workspace（共享技能）
+ln -sf ../../skills skills-parent 2>/dev/null || true
+echo "   ✅ skills-parent/（共享父 Agent 技能）"
+
+echo ""
+echo "   💡 提示：skills/ 放置专属技能，skills-parent 共享父 Agent 技能"
 cd "$WORKSPACE_ROOT"
 
