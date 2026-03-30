@@ -47,8 +47,8 @@ echo ""
 
 # 1. 创建目录
 echo "📁 创建目录..."
-mkdir -p "agents/$AGENT_NAME/memory" "agents/$AGENT_NAME/data"
-echo "   ✅ agents/$AGENT_NAME/{memory,data}"
+mkdir -p "agents/$AGENT_NAME/memory"
+echo "   ✅ agents/$AGENT_NAME/memory"
 
 # 2. 创建配置文件
 echo ""
