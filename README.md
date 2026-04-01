@@ -60,6 +60,24 @@ evo-agents is a **production-ready template** for creating isolated OpenClaw age
 
 ---
 
+## 🧠 Memory Systems
+
+**Two complementary memory systems:**
+
+| System | Records | Isolation | Purpose |
+|--------|---------|-----------|---------|
+| **OpenClaw Native** | All conversations | Session-level | Privacy & history |
+| **evo-agents** | Important events (≥5.0) | Agent-level | Knowledge & continuity |
+
+**Why two systems?**
+- OpenClaw: Automatic session recording with isolation
+- evo-agents: Manual important event recording with cross-session continuity
+- **Complementary** - no integration needed!
+
+**Learn more:** [docs/MEMORY_SYSTEMS_COMPARISON.md](docs/MEMORY_SYSTEMS_COMPARISON.md)
+
+---
+
 ## 📦 Installation
 
 ### New Installation
