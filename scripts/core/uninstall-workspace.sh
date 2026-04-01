@@ -42,6 +42,27 @@ if [[ "$WORKSPACE" != *"/workspace-$AGENT_NAME"* ]]; then
     exit 1
 fi
 
+# 验证目录存在（早期验证）
+if [ ! -d "$WORKSPACE" ]; then
+    echo "❌ 错误：Workspace 目录不存在"
+    echo "   路径：$WORKSPACE"
+    echo ""
+    echo "可能的原因："
+    echo "   1. .install-config 配置错误"
+    echo "   2. agent 名称不正确"
+    echo "   3. 目录已被删除"
+    echo ""
+    echo "可用的 workspace:"
+    ls -la ~/.openclaw/ | grep workspace || echo "   (无)"
+    echo ""
+    echo "解决方法："
+    echo "   1. 检查 .install-config: cat $WORKSPACE/.install-config"
+    echo "   2. 手动指定 agent 名称：$0 <agent-name>"
+    echo "   3. 列出可用 workspace: ls ~/.openclaw/ | grep workspace"
+    echo ""
+    exit 1
+fi
+
 # 显示将要删除的内容
 echo "🔍 将要删除的内容:"
 echo "   - $WORKSPACE/ (整个 workspace)"
@@ -138,16 +159,43 @@ fi
 
 echo ""
 
-# 备份（可选）
+# 备份（可选）- 在删除前立即执行
+echo ""
 read -p "是否在删除前完整备份？/ Full backup before delete? (y/N): " -n 1 -r
 echo ""
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
+    # 再次验证 workspace 目录存在
+    if [ ! -d "$WORKSPACE" ]; then
+        echo "❌ 错误：Workspace 目录不存在 / Workspace directory not found"
+        echo "   路径 / Path: $WORKSPACE"
+        echo ""
+        echo "可能的原因 / Possible reasons:"
+        echo "   1. 目录已被删除 / Directory already deleted"
+        echo "   2. .install-config 配置错误 / .install-config config error"
+        echo "   3. agent 名称不正确 / Incorrect agent name"
+        echo ""
+        echo "请检查 / Please check:"
+        echo "   ls -la ~/.openclaw/ | grep workspace"
+        echo ""
+        exit 1
+    fi
+    
     BACKUP_DIR="/tmp/backup-workspace-$AGENT_NAME-$(date +%Y%m%d-%H%M%S)"
     echo "📦 完整备份 / Full backup to: $BACKUP_DIR"
-    cp -r "$WORKSPACE" "$BACKUP_DIR"
-    echo "   ✅ 备份完成 / Backup complete"
-    echo "   大小 / Size: $(du -sh "$BACKUP_DIR" | cut -f1)"
+    echo "   源目录 / Source: $WORKSPACE"
+    echo ""
+    
+    # 执行备份
+    if cp -r "$WORKSPACE" "$BACKUP_DIR" 2>&1; then
+        echo "   ✅ 备份完成 / Backup complete"
+        echo "   大小 / Size: $(du -sh "$BACKUP_DIR" | cut -f1)"
+    else
+        echo "   ❌ 备份失败 / Backup failed"
+        echo "   请检查磁盘空间 / Please check disk space"
+        echo ""
+        exit 1
+    fi
     echo ""
 fi
 
