@@ -26,15 +26,9 @@ if [ -n "$1" ]; then
     fi
 fi
 
-echo "╔════════════════════════════════════════════════════════╗"
-echo "║  卸载 Workspace / Uninstall Workspace                    ║"
-echo "╚════════════════════════════════════════════════════════╝"
-echo ""
-echo "📁 Agent: $AGENT_NAME"
-echo "📂 Workspace: $WORKSPACE"
-echo ""
+# ========== 早期验证（在显示任何内容之前）==========
 
-# 确认 workspace 路径
+# 验证 1: workspace 路径格式
 if [[ "$WORKSPACE" != *"/workspace-$AGENT_NAME"* ]]; then
     echo "❌ 错误：Workspace 路径不匹配"
     echo "   预期包含 /workspace-$AGENT_NAME"
@@ -42,7 +36,7 @@ if [[ "$WORKSPACE" != *"/workspace-$AGENT_NAME"* ]]; then
     exit 1
 fi
 
-# 验证目录存在（早期验证）
+# 验证 2: 目录是否存在（最关键）
 if [ ! -d "$WORKSPACE" ]; then
     echo "❌ 错误：Workspace 目录不存在"
     echo "   路径：$WORKSPACE"
@@ -62,6 +56,15 @@ if [ ! -d "$WORKSPACE" ]; then
     echo ""
     exit 1
 fi
+
+# ========== 验证通过后才显示标题 ==========
+echo "╔════════════════════════════════════════════════════════╗"
+echo "║  卸载 Workspace / Uninstall Workspace                    ║"
+echo "╚════════════════════════════════════════════════════════╝"
+echo ""
+echo "📁 Agent: $AGENT_NAME"
+echo "📂 Workspace: $WORKSPACE"
+echo ""
 
 # 显示将要删除的内容
 echo "🔍 将要删除的内容:"
@@ -165,22 +168,6 @@ read -p "是否在删除前完整备份？/ Full backup before delete? (y/N): " 
 echo ""
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-    # 再次验证 workspace 目录存在
-    if [ ! -d "$WORKSPACE" ]; then
-        echo "❌ 错误：Workspace 目录不存在 / Workspace directory not found"
-        echo "   路径 / Path: $WORKSPACE"
-        echo ""
-        echo "可能的原因 / Possible reasons:"
-        echo "   1. 目录已被删除 / Directory already deleted"
-        echo "   2. .install-config 配置错误 / .install-config config error"
-        echo "   3. agent 名称不正确 / Incorrect agent name"
-        echo ""
-        echo "请检查 / Please check:"
-        echo "   ls -la ~/.openclaw/ | grep workspace"
-        echo ""
-        exit 1
-    fi
-    
     BACKUP_DIR="/tmp/backup-workspace-$AGENT_NAME-$(date +%Y%m%d-%H%M%S)"
     echo "📦 完整备份 / Full backup to: $BACKUP_DIR"
     echo "   源目录 / Source: $WORKSPACE"
@@ -192,9 +179,21 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo "   大小 / Size: $(du -sh "$BACKUP_DIR" | cut -f1)"
     else
         echo "   ❌ 备份失败 / Backup failed"
-        echo "   请检查磁盘空间 / Please check disk space"
         echo ""
-        exit 1
+        echo "可能的原因："
+        echo "   1. 目录已被删除（可能在其他终端）"
+        echo "   2. 磁盘空间不足"
+        echo "   3. 权限问题"
+        echo ""
+        echo "💡 建议："
+        echo "   检查目录是否存在：ls -la $WORKSPACE"
+        echo "   如果已删除，无需备份，可继续卸载"
+        echo ""
+        read -p "继续删除（不备份）? (y/N): " CONTINUE
+        if [[ ! $CONTINUE =~ ^[Yy]$ ]]; then
+            echo "已取消 / Cancelled"
+            exit 0
+        fi
     fi
     echo ""
 fi
