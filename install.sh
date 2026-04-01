@@ -117,6 +117,35 @@ echo "   ✅ 完成"
 
 # 创建必要文件
 echo "📝 创建必要文件..."
+
+# 创建 AGENTS.md（从模板复制）
+if [ -f "AGENTS.md" ]; then
+    echo "   ✓ AGENTS.md 已存在"
+else
+    if [ -f "$HOME/.openclaw/workspace/AGENTS_TEMPLATE.md" ]; then
+        cp "$HOME/.openclaw/workspace/AGENTS_TEMPLATE.md" AGENTS.md
+        echo "   ✓ 已创建 AGENTS.md"
+    else
+        echo "   ⊘ AGENTS_TEMPLATE.md 不存在，创建基础版本"
+        cat > AGENTS.md << 'AGENTSEOF'
+# AGENTS.md - Your Workspace
+
+## Session Startup
+1. Read SOUL.md
+2. Read USER.md  
+3. Read memory/YYYY-MM-DD.md
+4. Read MEMORY.md (main session only)
+
+### 🎯 Quick Rules
+- Search memory before answering about prior work
+- Don't share private info in group chats
+- Write important things to files
+
+**Full rules:** See `docs/`
+AGENTSEOF
+    fi
+fi
+
 cat > memory/MEMORY.md << 'MEMEOF'
 # MEMORY.md - 长期记忆
 
@@ -139,6 +168,84 @@ MEMEOF
 touch data/.gitkeep
 echo "   ✅ 完成"
 
+# 复制技能使用规则（如果源文件存在）
+echo "📋 配置技能使用规则..."
+if [ -d "docs" ]; then
+    echo "   ✓ docs 目录已存在"
+else
+    mkdir -p docs
+    echo "   ✓ 创建 docs 目录"
+fi
+
+if [ -f "docs/SKILL_RULES.md" ]; then
+    echo "   ✓ 技能规则已存在"
+else
+    if [ -f "$HOME/.openclaw/workspace/docs/SKILL_RULES.md" ]; then
+        cp "$HOME/.openclaw/workspace/docs/SKILL_RULES.md" docs/
+        echo "   ✓ 已复制 SKILL_RULES.md"
+    else
+        echo "   ⊘ SKILL_RULES.md 不存在（可稍后手动添加）"
+    fi
+fi
+
+if [ -f "docs/SCHEDULER.md" ]; then
+    echo "   ✓ 定时任务配置已存在"
+else
+    if [ -f "$HOME/.openclaw/workspace/docs/SCHEDULER.md" ]; then
+        cp "$HOME/.openclaw/workspace/docs/SCHEDULER.md" docs/
+        echo "   ✓ 已复制 SCHEDULER.md"
+    else
+        echo "   ⊘ SCHEDULER.md 不存在（可稍后手动添加）"
+    fi
+fi
+
+if [ -f "docs/WORKSPACE_RULES.md" ]; then
+    echo "   ✓ Workspace 规则已存在"
+else
+    if [ -f "$HOME/.openclaw/workspace/docs/WORKSPACE_RULES.md" ]; then
+        cp "$HOME/.openclaw/workspace/docs/WORKSPACE_RULES.md" docs/
+        echo "   ✓ 已复制 WORKSPACE_RULES.md"
+    else
+        echo "   ⊘ WORKSPACE_RULES.md 不存在（可稍后手动添加）"
+    fi
+fi
+
+if [ -f "docs/KNOWLEDGE_BASE_RULES.md" ]; then
+    echo "   ✓ 知识库规则已存在"
+else
+    if [ -f "$HOME/.openclaw/workspace/docs/KNOWLEDGE_BASE_RULES.md" ]; then
+        cp "$HOME/.openclaw/workspace/docs/KNOWLEDGE_BASE_RULES.md" docs/
+        echo "   ✓ 已复制 KNOWLEDGE_BASE_RULES.md"
+    else
+        echo "   ⊘ KNOWLEDGE_BASE_RULES.md 不存在（可稍后手动添加）"
+    fi
+fi
+
+if [ -f "docs/SUBAGENT_RULES.md" ]; then
+    echo "   ✓ 子 Agent 规则已存在"
+else
+    if [ -f "$HOME/.openclaw/workspace/docs/SUBAGENT_RULES.md" ]; then
+        cp "$HOME/.openclaw/workspace/docs/SUBAGENT_RULES.md" docs/
+        echo "   ✓ 已复制 SUBAGENT_RULES.md"
+    else
+        echo "   ⊘ SUBAGENT_RULES.md 不存在（可稍后手动添加）"
+    fi
+fi
+
+if [ -f "docs/AGENT_BEHAVIOR.md" ]; then
+    echo "   ✓ Agent 行为规范已存在"
+else
+    if [ -f "$HOME/.openclaw/workspace/docs/AGENT_BEHAVIOR.md" ]; then
+        cp "$HOME/.openclaw/workspace/docs/AGENT_BEHAVIOR.md" docs/
+        echo "   ✓ 已复制 AGENT_BEHAVIOR.md"
+    else
+        echo "   ⊘ AGENT_BEHAVIOR.md 不存在（可稍后手动添加）"
+    fi
+fi
+
+# AGENTS.md 已经由上面的逻辑创建，这里不需要再更新
+echo "   ✓ AGENTS.md 配置完成"
+
 # 创建安装配置文件（用于路径解析）
 echo "📝 创建安装配置..."
 cat > "$WORKSPACE_ROOT/.install-config" <<EOF
@@ -158,20 +265,47 @@ python3 scripts/core/session_recorder.py \
     -c "📋 重要：Workspace 使用规则
 
 请阅读以下文档：
-1. docs/AGENT_INSTRUCTIONS.md - Agent 指令（必读）
-2. docs/WORKSPACE_RULES.md - 使用规范
+1. docs/WORKSPACE_RULES.md - 使用规范
+2. docs/KNOWLEDGE_BASE_RULES.md - 知识库管理
 
 重要规则：
 - 脚本放在 scripts/ 目录
 - Git 项目放在 /tmp/ 或 ~/projects/ 或 data/<agent>/work/
 - 不要在根目录创建文件或克隆项目
-- 记忆数据自动保存在 memory/ 和 data/ 目录" \
+- 记忆数据自动保存在 memory/ 和 data/ 目录
+- Git 是单向流动（下载→使用，不要上传）" \
     --agent "$AGENT_NAME" 2>/dev/null && \
     echo "   ✅ 已记录给 Agent" || echo "   ⚠️  跳过"
 
 # 完成
 echo ""
 echo "╔════════════════════════════════════════════════════════╗"
+echo "║  ✅ 安装完成！                                           ║"
+echo "╚════════════════════════════════════════════════════════╝"
+echo ""
+echo "📊 位置：$WORKSPACE_ROOT"
+echo ""
+
+# 提示激活高级特性
+echo "🔮 激活高级特性..."
+echo ""
+echo "💡 提示：安装完成后，建议激活高级特性："
+echo ""
+echo "   cd $WORKSPACE_ROOT"
+echo "   ./scripts/core/activate-features.sh"
+echo ""
+echo "   或者在 OpenClaw 中直接使用，需要时再激活"
+echo ""
+
+# 清理开发/测试文档（用户不需要）
+echo "🧹 清理开发文档..."
+rm -rf docs/dev docs/internal 2>/dev/null || true
+rm -f docs/OPTIMIZATION_PROPOSAL.md docs/OPTIMIZATION_STATUS.md 2>/dev/null || true
+rm -f docs/PHASE12_SUMMARY.md docs/PHASE3_SUMMARY.md 2>/dev/null || true
+rm -f docs/STANDARD_TEST.md docs/TEST_REGRESSION_CHECKLIST.md 2>/dev/null || true
+rm -f docs/INTELLIGENCE_VERIFICATION.md 2>/dev/null || true
+echo "   ✅ 完成"
+═══════════════════════════════════════════════════════╗"
 echo "║  ✅ 安装完成！                                           ║"
 echo "╚════════════════════════════════════════════════════════╝"
 echo ""
