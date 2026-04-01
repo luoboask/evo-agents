@@ -169,33 +169,28 @@ echo ""
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     BACKUP_DIR="/tmp/backup-workspace-$AGENT_NAME-$(date +%Y%m%d-%H%M%S)"
-    echo "📦 完整备份 / Full backup to: $BACKUP_DIR"
-    echo "   源目录 / Source: $WORKSPACE"
-    echo ""
     
-    # 执行备份
-    if cp -r "$WORKSPACE" "$BACKUP_DIR" 2>&1; then
-        echo "   ✅ 备份完成 / Backup complete"
-        echo "   大小 / Size: $(du -sh "$BACKUP_DIR" | cut -f1)"
+    # 备份前再次检查目录
+    if [ ! -d "$WORKSPACE" ]; then
+        echo "⚠️  目录已不存在 / Directory does not exist"
+        echo "   可能已被删除 / May already be deleted"
+        echo "   跳过备份 / Skipping backup"
+        echo ""
     else
-        echo "   ❌ 备份失败 / Backup failed"
+        echo "📦 完整备份 / Full backup to: $BACKUP_DIR"
+        echo "   源目录 / Source: $WORKSPACE"
         echo ""
-        echo "可能的原因："
-        echo "   1. 目录已被删除（可能在其他终端）"
-        echo "   2. 磁盘空间不足"
-        echo "   3. 权限问题"
-        echo ""
-        echo "💡 建议："
-        echo "   检查目录是否存在：ls -la $WORKSPACE"
-        echo "   如果已删除，无需备份，可继续卸载"
-        echo ""
-        read -p "继续删除（不备份）? (y/N): " CONTINUE
-        if [[ ! $CONTINUE =~ ^[Yy]$ ]]; then
-            echo "已取消 / Cancelled"
-            exit 0
+        
+        # 执行备份
+        if cp -r "$WORKSPACE" "$BACKUP_DIR" 2>&1; then
+            echo "   ✅ 备份完成 / Backup complete"
+            echo "   大小 / Size: $(du -sh "$BACKUP_DIR" | cut -f1)"
+        else
+            echo "   ❌ 备份失败 / Backup failed"
+            echo "   继续执行删除 / Continuing with deletion"
+            echo ""
         fi
     fi
-    echo ""
 fi
 
 # 删除 workspace
