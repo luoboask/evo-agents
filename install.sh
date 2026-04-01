@@ -299,10 +299,6 @@ else
     echo "   cd $WORKSPACE_ROOT"
     echo "   ./scripts/core/activate-features.sh"
 fi
-echo ""
-E_RULES.md, docs/AGENT_BEHAVIOR.md" \
-    --agent "$AGENT_NAME" 2>/dev/null && \
-    echo "   ✓ Rules recorded" || echo "   ⊘ Skipped"
 
 # 创建安装配置文件
 echo "📝 创建安装配置..."
