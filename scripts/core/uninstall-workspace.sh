@@ -98,10 +98,30 @@ echo "   - MEMORY.md, HEARTBEAT.md, TOOLS.md"
 echo "   (但这些文件可能也包含重要数据)"
 echo ""
 
-# 备份建议
-echo "💡 强烈建议先备份 / Strongly recommend backup:"
+# 询问是否备份（在确认删除前）
+echo "💡 建议先备份 / Suggest backup:"
 echo "   cp -r $WORKSPACE /tmp/backup-workspace-$AGENT_NAME-$(date +%Y%m%d)"
 echo ""
+read -p "是否在继续前备份？/ Backup before continue? (y/N): " -n 1 -r
+echo ""
+
+BACKUP_DIR=""
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    BACKUP_DIR="/tmp/backup-workspace-$AGENT_NAME-$(date +%Y%m%d-%H%M%S)"
+    echo "📦 完整备份 / Full backup to: $BACKUP_DIR"
+    
+    if [ ! -d "$WORKSPACE" ]; then
+        echo "⚠️  目录已不存在，跳过备份"
+    else
+        if cp -r "$WORKSPACE" "$BACKUP_DIR" 2>&1; then
+            echo "   ✅ 备份完成 / Backup complete"
+            echo "   大小 / Size: $(du -sh "$BACKUP_DIR" | cut -f1)"
+        else
+            echo "   ❌ 备份失败 / Backup failed"
+        fi
+    fi
+    echo ""
+fi
 
 # 询问确认
 echo "❓ 是否继续？/ Continue?"
@@ -137,7 +157,6 @@ if [ "$SUB_AGENTS" -gt 0 ]; then
     for agent_dir in "$WORKSPACE/agents/"*/; do
         if [ -d "$agent_dir" ]; then
             sub_agent=$(basename "$agent_dir")
-            # 跳过 .gitkeep
             if [ "$sub_agent" = ".gitkeep" ]; then
                 continue
             fi
@@ -147,50 +166,6 @@ if [ "$SUB_AGENTS" -gt 0 ]; then
     done
     echo "   ✅ 子 Agent 已注销 / Sub-agents unregistered"
     echo ""
-fi
-
-
-# 最终确认
-echo "⚠️  最后确认 / Final confirmation:"
-read -p "   确定要删除整个 workspace 吗？/ Sure to delete entire workspace? (YES/NO): " FINAL_CONFIRM
-
-if [ "$FINAL_CONFIRM" != "YES" ]; then
-    echo ""
-    echo "❌ 已取消 / Cancelled"
-    exit 0
-fi
-
-echo ""
-
-# 备份（可选）- 在删除前立即执行
-echo ""
-read -p "是否在删除前完整备份？/ Full backup before delete? (y/N): " -n 1 -r
-echo ""
-
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    BACKUP_DIR="/tmp/backup-workspace-$AGENT_NAME-$(date +%Y%m%d-%H%M%S)"
-    
-    # 备份前再次检查目录
-    if [ ! -d "$WORKSPACE" ]; then
-        echo "⚠️  目录已不存在 / Directory does not exist"
-        echo "   可能已被删除 / May already be deleted"
-        echo "   跳过备份 / Skipping backup"
-        echo ""
-    else
-        echo "📦 完整备份 / Full backup to: $BACKUP_DIR"
-        echo "   源目录 / Source: $WORKSPACE"
-        echo ""
-        
-        # 执行备份
-        if cp -r "$WORKSPACE" "$BACKUP_DIR" 2>&1; then
-            echo "   ✅ 备份完成 / Backup complete"
-            echo "   大小 / Size: $(du -sh "$BACKUP_DIR" | cut -f1)"
-        else
-            echo "   ❌ 备份失败 / Backup failed"
-            echo "   继续执行删除 / Continuing with deletion"
-            echo ""
-        fi
-    fi
 fi
 
 # 删除 workspace
