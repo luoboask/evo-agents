@@ -142,24 +142,24 @@ git clone ...
 **临时文件存放位置：**
 ```
 ✅ data/<agent>/work/     # Agent 工作临时文件
-✅ data/<agent>/tmp/      # Agent 临时缓存
+✅ data/<agent>/archive/  # 归档目录（用户清理）
 ✅ /tmp/                  # 系统临时目录
 ❌ workspace 根目录        # 禁止
 ❌ memory/                # 系统专用
 ❌ docs/                  # 规则文档专用
 ```
 
-**清理责任：**
-- ✅ 任务完成后清理临时文件
-- ✅ 长时间任务定期清理中间结果
-- ✅ 用户要求保留时移动到持久位置
-- ❌ 不要遗留临时文件超过 24 小时
+**归档规则（重要）：**
+- ✅ 任务完成后 → 移动到 `data/<agent>/archive/`
+- ✅ 定期（每周）→ 提醒用户清理 archive 目录
+- ✅ 用户明确说"删除" → 才执行删除
+- ❌ **不要主动删除临时文件**（除非用户明确授权）
 
-**临时 vs 持久：**
+**临时 vs 归档 vs 持久：**
 | 类型 | 示例 | 位置 | 清理 |
 |------|------|------|------|
-| 临时 | 搜索结果、中间计算 | `data/<agent>/work/` | 任务完成后 |
-| 短期 | 会话记录、草稿 | `data/<agent>/drafts/` | 24 小时内 |
+| 临时 | 搜索结果、中间计算 | `data/<agent>/work/` | 任务完成 → archive |
+| 归档 | 已完成任务的临时文件 | `data/<agent>/archive/` | 用户决定 |
 | 持久 | 用户要求保存、重要数据 | `data/<agent>/` | 用户决定 |
 
 **示例：**
@@ -170,16 +170,28 @@ cat > temp_20260401_search_results.json << 'EOF'
 {"results": [...]}
 EOF
 
-# 任务完成后清理
-rm temp_20260401_search_results.json
+# 任务完成后 → 移动到归档目录
+mv temp_20260401_search_results.json ../archive/
 
-# ✅ 正确：用户要求保留
-mv temp_20260401_search_results.json search_results_20260401.json
+# 定期提醒用户清理
+echo "提示：archive 目录有 $(ls ../archive/ | wc -l) 个文件待清理"
+
+# ✅ 正确：用户明确说"删除"后才执行
+rm ../archive/temp_20260401_search_results.json
+
+# ❌ 错误：主动删除临时文件
+rm temp_20260401_search_results.json  # 不要这样做！
 
 # ❌ 错误：在根目录创建
 cd ~/workspace
 cat > temp.txt  # 禁止！
 ```
+
+**删除操作黄金法则：**
+1. ✅ 用户必须明确说"删除"或"确认删除"
+2. ✅ 执行前二次确认
+3. ✅ 优先移动到 archive/ 而非直接删除
+4. ✅ 删除后报告位置和恢复方式
 
 ---
 

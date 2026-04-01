@@ -100,9 +100,9 @@ else
 fi
 
 # 创建目录
-echo "📁 创建目录..."
+echo "📁 Creating directories..."
 mkdir -p memory/weekly memory/monthly memory/archive
-mkdir -p data/index data/$AGENT_NAME
+mkdir -p data/index data/$AGENT_NAME/work data/$AGENT_NAME/archive data/$AGENT_NAME/drafts
 mkdir -p scripts/user
 echo "   ✅ 完成"
 
