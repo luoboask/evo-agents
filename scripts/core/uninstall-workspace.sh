@@ -195,9 +195,18 @@ fi
 
 # 删除 workspace
 echo "🗑️  删除 workspace / Deleting workspace..."
-cd /tmp  # 切换到临时目录再删除
-rm -rf "$WORKSPACE"
-echo "   ✅ 已删除 / Deleted"
+echo "   目标 / Target: $WORKSPACE"
+
+# 最后一次验证
+if [ ! -d "$WORKSPACE" ]; then
+    echo "   ⚠️  目录已不存在 / Directory does not exist"
+    echo "   可能已被删除 / May already be deleted"
+    echo "   跳过删除 / Skipping deletion"
+else
+    cd /tmp  # 切换到临时目录再删除
+    rm -rf "$WORKSPACE"
+    echo "   ✅ 已删除 / Deleted"
+fi
 echo ""
 
 echo "╔════════════════════════════════════════════════════════╗"
