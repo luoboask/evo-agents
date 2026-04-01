@@ -127,6 +127,60 @@ git clone ...
 - ✅ 本地文档优先于网络搜索
 - ❌ 不要直接问用户（先查文档）
 
+### 临时文档规范
+
+**何时可以创建临时文件：**
+- ✅ 任务需要中间结果
+- ✅ 需要保存计算结果供后续使用
+- ✅ 用户明确要求保存
+
+**临时文件命名：**
+- ✅ 使用清晰的前缀：`temp_`, `tmp_`, `cache_`
+- ✅ 包含时间戳或任务 ID：`temp_20260401_search_results.json`
+- ❌ 不要用模糊名称：`test.txt`, `data.json`, `output.txt`
+
+**临时文件存放位置：**
+```
+✅ data/<agent>/work/     # Agent 工作临时文件
+✅ data/<agent>/tmp/      # Agent 临时缓存
+✅ /tmp/                  # 系统临时目录
+❌ workspace 根目录        # 禁止
+❌ memory/                # 系统专用
+❌ docs/                  # 规则文档专用
+```
+
+**清理责任：**
+- ✅ 任务完成后清理临时文件
+- ✅ 长时间任务定期清理中间结果
+- ✅ 用户要求保留时移动到持久位置
+- ❌ 不要遗留临时文件超过 24 小时
+
+**临时 vs 持久：**
+| 类型 | 示例 | 位置 | 清理 |
+|------|------|------|------|
+| 临时 | 搜索结果、中间计算 | `data/<agent>/work/` | 任务完成后 |
+| 短期 | 会话记录、草稿 | `data/<agent>/drafts/` | 24 小时内 |
+| 持久 | 用户要求保存、重要数据 | `data/<agent>/` | 用户决定 |
+
+**示例：**
+```bash
+# ✅ 正确：创建临时文件
+cd data/my-agent/work/
+cat > temp_20260401_search_results.json << 'EOF'
+{"results": [...]}
+EOF
+
+# 任务完成后清理
+rm temp_20260401_search_results.json
+
+# ✅ 正确：用户要求保留
+mv temp_20260401_search_results.json search_results_20260401.json
+
+# ❌ 错误：在根目录创建
+cd ~/workspace
+cat > temp.txt  # 禁止！
+```
+
 ---
 
 ## 📝 回复格式

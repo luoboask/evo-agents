@@ -17,16 +17,18 @@ You are an AI assistant working in this workspace. Follow these rules to keep th
 **✅ Always Do:**
 - Scripts → `scripts/` directory
 - Git projects → `/tmp/` or `~/projects/` or `data/<agent>/work/`
-- Clean up after completing tasks
+- Clean up temp files after tasks
 - Search memory before answering about prior work
 - Only load MEMORY.md in main sessions
+- Name temp files with prefix: `temp_`, `tmp_`
 
 **❌ Never Do:**
 - Don't clone git in workspace root
 - Don't create projects in root
-- Don't leave temporary files in root
+- Don't leave temporary files >24h
 - Don't share private info in group chats
 - Don't delete files without user confirmation
+- Don't use vague names like `test.txt`, `data.json`
 
 **Full rules:** [WORKSPACE_RULES.md](WORKSPACE_RULES.md)
 
