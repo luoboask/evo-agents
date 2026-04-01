@@ -11,32 +11,38 @@
 | Document | Description | Time |
 |----------|-------------|------|
 | **[README.md](../README.md)** | Overview and quick start | 5 min |
-| **[workspace-setup.md](../workspace-setup.md)** | Complete installation guide | 15 min |
 | **[docs/QUICKSTART.md](QUICKSTART.md)** | 5-minute quick start | 5 min |
+| **[docs/FAQ.md](FAQ.md)** | Frequently asked questions | 10 min |
 
-### 📋 Rules & Guidelines
+### 🤖 Agent Rules (For AI Agents)
+
+**These documents define agent behavior and rules.**
+
+| Document | Description | Priority |
+|----------|-------------|----------|
+| **[AGENT_INSTRUCTIONS.md](AGENT_INSTRUCTIONS.md)** | 🎯 Main agent instructions (must read) | ⭐⭐⭐⭐⭐ |
+| **[AGENT_BEHAVIOR.md](AGENT_BEHAVIOR.md)** | Core behavior rules | ⭐⭐⭐⭐⭐ |
+| **[SKILL_RULES.md](SKILL_RULES.md)** | When to use which skill | ⭐⭐⭐⭐⭐ |
+| **[WORKSPACE_RULES.md](WORKSPACE_RULES.md)** | Workspace organization | ⭐⭐⭐⭐⭐ |
+| **[KNOWLEDGE_BASE_RULES.md](KNOWLEDGE_BASE_RULES.md)** | Knowledge base management | ⭐⭐⭐⭐⭐ |
+| **[SUBAGENT_RULES.md](SUBAGENT_RULES.md)** | Sub-agent rules | ⭐⭐⭐⭐ |
+| **[SCHEDULER.md](SCHEDULER.md)** | Scheduled tasks | ⭐⭐⭐⭐ |
+
+**Index:** [docs/INDEX.md](INDEX.md) - Complete documentation index
+
+### 📁 Workspace Structure
 
 | Document | Description | For |
 |----------|-------------|-----|
 | **[DIRECTORY_STRUCTURE.md](DIRECTORY_STRUCTURE.md)** | 📁 Complete directory structure | Everyone |
-| **[STRUCTURE_RULES.md](STRUCTURE_RULES.md)** | Project structure rules | Everyone |
 | **[WORKSPACE_RULES.md](WORKSPACE_RULES.md)** | Workspace usage rules | Everyone |
-| **[AGENT_INSTRUCTIONS.md](AGENT_INSTRUCTIONS.md)** | Agent instructions | AI Agents |
-| **[GITHUB_PUSH_RULES.md](../GITHUB_PUSH_RULES.md)** | GitHub push guidelines | Developers |
 
 ### 🏗️ Architecture
 
 | Document | Description | Level |
 |----------|-------------|-------|
 | **[ARCHITECTURE_GENERIC_EN.md](ARCHITECTURE_GENERIC_EN.md)** | System architecture (English) | Technical |
-| **[SCRIPTS_INVENTORY.md](SCRIPTS_INVENTORY.md)** | Scripts catalog | Technical |
-
-### 🔄 Migration & Updates
-
-| Document | Description | When |
-|----------|-------------|------|
-| **[MIGRATION.md](MIGRATION.md)** | Migration guide | Upgrading |
-| **[CHANGELOG.md](../CHANGELOG.md)** | Version history | Updates |
+| **[DIRECTORY_STRUCTURE.md](DIRECTORY_STRUCTURE.md)** | Directory structure | Technical |
 
 ### 🛠️ Features
 
@@ -48,110 +54,102 @@
 
 | Document | Description |
 |----------|-------------|
-| **[UNINSTALL.md](UNINSTALL.md)** | Uninstall guide |
-| **[scripts/core/uninstall-agent.sh](../scripts/core/uninstall-agent.sh)** | Uninstall sub-agent |
-| **[scripts/core/uninstall-workspace.sh](../scripts/core/uninstall-workspace.sh)** | Uninstall workspace |
-
-### 📞 Support
-
-| Document | Description |
-|----------|-------------|
-| **[CONTRIBUTING.md](../CONTRIBUTING.md)** | How to contribute |
-| **[SECURITY.md](../SECURITY.md)** | Security policy |
-| **[CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md)** | Code of conduct |
+| **[UNINSTALL.md](UNINSTALL.md)** | Complete uninstall guide |
 
 ---
 
 ## 中文 {#中文}
 
-### 🚀 入门
+### 🚀 快速开始
 
 | 文档 | 说明 | 时间 |
 |------|------|------|
 | **[README.md](../README.md)** | 概述和快速开始 | 5 分钟 |
-| **[workspace-setup.md](../workspace-setup.md)** | 完整安装指南 | 15 分钟 |
-| **[docs/QUICKSTART.md](QUICKSTART.md)** | 5 分钟快速入门 | 5 分钟 |
+| **[docs/QUICKSTART.md](QUICKSTART.md)** | 5 分钟快速开始 | 5 分钟 |
+| **[docs/FAQ.md](FAQ.md)** | 常见问题 | 10 分钟 |
 
-### 📋 规则与指南
+### 🤖 Agent 规则（AI 助手必读）
 
-| 文档 | 说明 | 对象 |
+**这些文档定义了 Agent 的行为规范和规则。**
+
+| 文档 | 说明 | 优先级 |
+|------|------|--------|
+| **[AGENT_INSTRUCTIONS.md](AGENT_INSTRUCTIONS.md)** | 🎯 Agent 主指令（必读） | ⭐⭐⭐⭐⭐ |
+| **[AGENT_BEHAVIOR.md](AGENT_BEHAVIOR.md)** | 核心行为规范 | ⭐⭐⭐⭐⭐ |
+| **[SKILL_RULES.md](SKILL_RULES.md)** | 技能使用规则 | ⭐⭐⭐⭐⭐ |
+| **[WORKSPACE_RULES.md](WORKSPACE_RULES.md)** | Workspace 规范 | ⭐⭐⭐⭐⭐ |
+| **[KNOWLEDGE_BASE_RULES.md](KNOWLEDGE_BASE_RULES.md)** | 知识库管理 | ⭐⭐⭐⭐⭐ |
+| **[SUBAGENT_RULES.md](SUBAGENT_RULES.md)** | 子 Agent 规则 | ⭐⭐⭐⭐ |
+| **[SCHEDULER.md](SCHEDULER.md)** | 定时任务配置 | ⭐⭐⭐⭐ |
+
+**索引：** [docs/INDEX.md](INDEX.md) - 完整文档索引
+
+### 📁 Workspace 结构
+
+| 文档 | 说明 | 读者 |
 |------|------|------|
-| **[STRUCTURE_RULES.md](STRUCTURE_RULES.md)** | 项目结构规则 | 所有人 |
+| **[DIRECTORY_STRUCTURE.md](DIRECTORY_STRUCTURE.md)** | 📁 完整目录结构 | 所有人 |
 | **[WORKSPACE_RULES.md](WORKSPACE_RULES.md)** | Workspace 使用规则 | 所有人 |
-| **[AGENT_INSTRUCTIONS.md](AGENT_INSTRUCTIONS.md)** | Agent 指令 | AI 助手 |
-| **[GITHUB_PUSH_RULES.md](../GITHUB_PUSH_RULES.md)** | GitHub 推送规范 | 开发者 |
 
 ### 🏗️ 架构
 
 | 文档 | 说明 | 级别 |
 |------|------|------|
 | **[ARCHITECTURE_GENERIC_CN.md](ARCHITECTURE_GENERIC_CN.md)** | 系统架构（中文） | 技术 |
-| **[SCRIPTS_INVENTORY.md](SCRIPTS_INVENTORY.md)** | 脚本清单 | 技术 |
-
-### 🔄 迁移与更新
-
-| 文档 | 说明 | 时机 |
-|------|------|------|
-| **[MIGRATION.md](MIGRATION.md)** | 迁移指南 | 升级时 |
-| **[CHANGELOG.md](../CHANGELOG.md)** | 版本历史 | 更新时 |
+| **[DIRECTORY_STRUCTURE.md](DIRECTORY_STRUCTURE.md)** | 目录结构 | 技术 |
 
 ### 🛠️ 功能
 
 | 文档 | 说明 | 时机 |
 |------|------|------|
-| **[FEATURE_ACTIVATION_GUIDE.md](../FEATURE_ACTIVATION_GUIDE.md)** | 功能激活 | 安装后 |
+| **[FEATURE_ACTIVATION_GUIDE.md](../FEATURE_ACTIVATION_GUIDE.md)** | 激活高级功能 | 安装后 |
 
-### 📞 支持
+### 🗑️ 卸载
 
 | 文档 | 说明 |
 |------|------|
-| **[CONTRIBUTING.md](../CONTRIBUTING.md)** | 如何贡献 |
-| **[SECURITY.md](../SECURITY.md)** | 安全策略 |
-| **[CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md)** | 行为准则 |
+| **[UNINSTALL.md](UNINSTALL.md)** | 完整卸载指南 |
 
 ---
 
-## 📊 Document Map | 文档地图
+## 📊 Documentation Categories | 文档分类
 
-```
-evo-agents/
-├── 📄 README.md                    # Start here / 从这里开始
-├── 📄 workspace-setup.md           # Installation / 安装
-├── 📄 GITHUB_PUSH_RULES.md         # Push rules / 推送规则
-├── 📄 FEATURE_ACTIVATION_GUIDE.md  # Features / 功能
-│
-└── 📁 docs/
-    ├── 📄 README.md                # This file / 本文件
-    ├── 📄 QUICKSTART.md            # 5-min guide / 5 分钟指南
-    │
-    ├── 📄 STRUCTURE_RULES.md       # Structure / 结构
-    ├── 📄 WORKSPACE_RULES.md       # Usage / 使用
-    ├── 📄 AGENT_INSTRUCTIONS.md    # Agent rules / Agent 规则
-    │
-    ├── 📄 ARCHITECTURE_GENERIC_*.md # Architecture / 架构
-    ├── 📄 SCRIPTS_INVENTORY.md     # Scripts / 脚本
-    │
-    ├── 📄 MIGRATION.md             # Migration / 迁移
-    ├── 📄 TODO.md                  # TODO / 待办
-    │
-    └── 📄 CODE_OF_CONDUCT.md       # Conduct / 准则 (in root)
-```
+### 🤖 Agent Rules | Agent 规则
+**For AI agents to read and follow**
 
----
+- AGENT_INSTRUCTIONS.md - Main instructions (bilingual)
+- AGENT_BEHAVIOR.md - Core behavior
+- SKILL_RULES.md - Skill usage
+- WORKSPACE_RULES.md - Workspace organization
+- KNOWLEDGE_BASE_RULES.md - Knowledge management
+- SUBAGENT_RULES.md - Sub-agent rules
+- SCHEDULER.md - Scheduled tasks
 
-## 🎯 Quick Navigation | 快速导航
+### 📖 User Docs | 用户文档
+**For users to reference**
 
-**I want to... | 我想要...**
+- README.md - Project overview
+- QUICKSTART.md - Quick start guide
+- FAQ.md - Frequently asked questions
+- UNINSTALL.md - Uninstall guide
+- FEATURE_ACTIVATION_GUIDE.md - Feature activation
 
-- **Install evo-agents** → [README.md](../README.md) or [workspace-setup.md](../workspace-setup.md)
-- **Understand structure** → [STRUCTURE_RULES.md](STRUCTURE_RULES.md)
-- **Learn workspace rules** → [WORKSPACE_RULES.md](WORKSPACE_RULES.md)
-- **Set up agents** → [AGENT_INSTRUCTIONS.md](AGENT_INSTRUCTIONS.md)
-- **Migrate from old version** → [MIGRATION.md](MIGRATION.md)
-- **See script list** → [SCRIPTS_INVENTORY.md](SCRIPTS_INVENTORY.md)
-- **Understand architecture** → [ARCHITECTURE_GENERIC_CN.md](ARCHITECTURE_GENERIC_CN.md)
+### 🏗️ Architecture | 架构文档
+**For developers**
+
+- ARCHITECTURE_GENERIC_CN.md - Chinese architecture
+- ARCHITECTURE_GENERIC_EN.md - English architecture
+- DIRECTORY_STRUCTURE.md - Directory structure
+- SUB_AGENT_STRUCTURE.md - Sub-agent structure
+- SUB_AGENT_DATA.md - Sub-agent data
+
+### 🔧 Internal | 内部文档
+**For system use**
+
+- INDEX.md - Documentation index
+- SELF_CHECK.md - System self-check
+- PERFORMANCE_OPTIMIZATION_PLAN.md - Performance optimization
 
 ---
 
-**Last updated:** 2026-03-27  
-**文档最后更新：** 2026-03-27
+_Updated: 2026-04-01 | Version: 2.0.0_
