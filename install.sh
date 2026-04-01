@@ -116,13 +116,13 @@ else
 fi
 
 # 在 AGENTS.md 中追加规则引用（OpenClaw 已创建 AGENTS.md）
-echo "📋 配置 Agent 规则..."
+echo "📋 Configuring Agent rules..."
 if [ -f "AGENTS.md" ]; then
     # 检查是否已包含规则引用
     if grep -q "SKILL_RULES\|AGENT_BEHAVIOR" AGENTS.md; then
-        echo "   ✓ AGENTS.md 已包含规则引用"
+        echo "   ✓ AGENTS.md already has rule references"
     else
-        # 追加规则到 AGENTS.md 末尾
+        # 追加规则到 AGENTS.md 末尾（统一英文）
         cat >> AGENTS.md << 'EOF'
 
 ---
@@ -172,10 +172,10 @@ if [ -f "AGENTS.md" ]; then
 
 **Full rules:** See `docs/SUBAGENT_RULES.md`
 EOF
-        echo "   ✓ 已追加规则到 AGENTS.md"
+        echo "   ✓ Rules appended to AGENTS.md"
     fi
 else
-    echo "   ⚠️  AGENTS.md 不存在（跳过）"
+    echo "   ⚠️  AGENTS.md not found (skip)"
 fi
 
 # 复制规则文档到 docs/
