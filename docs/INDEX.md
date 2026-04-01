@@ -1,83 +1,203 @@
-# 文档索引
+# docs/ 目录索引
 
-**更新日期：** 2026-03-29
-
----
-
-## 📚 用户文档（安装后保留）
-
-### 快速开始
-- **[QUICKSTART.md](QUICKSTART.md)** - 快速开始指南
-
-### 使用指南
-- **[FAQ.md](FAQ.md)** - 常见问题解答
-- **[SELF_CHECK.md](SELF_CHECK.md)** - 自检工具使用
-- **[UNINSTALL.md](UNINSTALL.md)** - 卸载指南
-- **[AGENT_INSTRUCTIONS.md](AGENT_INSTRUCTIONS.md)** - Agent 指令
-- **[WORKSPACE_RULES.md](WORKSPACE_RULES.md)** - Workspace 使用规范
+_文档分类和用途说明_
 
 ---
 
-## 👨‍💻 开发者文档（安装时删除）
+## 📚 文档分类
 
-位于 `docs/dev/` 目录：
+### 🤖 Agent 规则文档（Agent 需要感知）
 
-- **SCRIPT_DEVELOPMENT.md** - 脚本开发规范
-- **STRUCTURE_RULES.md** - 结构规则
-- **SCRIPTS_INVENTORY.md** - 脚本清单
+**这些文档让 Agent 启动时读取，了解行为规范。**
 
-**用途：** 开发新脚本或维护模板时参考
+| 文档 | 作用 | 优先级 |
+|------|------|--------|
+| [AGENT_INSTRUCTIONS.md](AGENT_INSTRUCTIONS.md) | **Agent 主指令**（必读） | ⭐⭐⭐⭐⭐ |
+| [AGENT_BEHAVIOR.md](AGENT_BEHAVIOR.md) | 核心行为规范 | ⭐⭐⭐⭐⭐ |
+| [SKILL_RULES.md](SKILL_RULES.md) | 技能使用规则 | ⭐⭐⭐⭐⭐ |
+| [WORKSPACE_RULES.md](WORKSPACE_RULES.md) | Workspace 规范 | ⭐⭐⭐⭐⭐ |
+| [KNOWLEDGE_BASE_RULES.md](KNOWLEDGE_BASE_RULES.md) | 知识库管理 | ⭐⭐⭐⭐⭐ |
+| [SUBAGENT_RULES.md](SUBAGENT_RULES.md) | 子 Agent 规则 | ⭐⭐⭐⭐ |
+| [SCHEDULER.md](SCHEDULER.md) | 定时任务配置 | ⭐⭐⭐⭐ |
 
----
-
-## 🏗️ 架构文档（保留）
-
-- **ARCHITECTURE_GENERIC_CN.md** - 架构说明（中文）
-- **ARCHITECTURE_GENERIC_EN.md** - 架构说明（英文）
-- **PERFORMANCE_OPTIMIZATION_PLAN.md** - 性能优化方案
-
-**用途：** 了解系统架构和性能优化
-
----
-
-## 🔒 内部文档（安装时删除）
-
-位于 `docs/internal/` 目录：
-
-- **TEST_REGRESSION_CHECKLIST.md** - 测试回归清单
-- **REGRESSION_TEST_FINAL_2026-03-29.md** - 测试报告
-- **RELEASE_2026-03-28.md** - 发布说明
-- **SUB_AGENT_TEST.md** - 子 agent 测试报告
-- **MIGRATION.md** - 迁移指南
-- **TODO.md** - 待办事项
-
-**用途：** 开发团队内部使用
+**安装流程：**
+```bash
+# install.sh 自动配置
+1. OpenClaw 创建 Agent → 生成 AGENTS.md
+2. install.sh 追加规则引用到 AGENTS.md
+3. 复制 docs/ 规则文档
+4. Agent 启动时读取 AGENTS.md → 看到规则引用 → 读取 docs/
+```
 
 ---
 
-## 📊 安装后文档结构
+### 📖 用户文档（用户参考）
 
-用户安装后，docs/ 目录只保留：
+**这些文档供用户参考，Agent 不需要主动读取。**
+
+| 文档 | 作用 | 读者 |
+|------|------|------|
+| [README.md](README.md) | 项目介绍 | 用户 |
+| [QUICKSTART.md](QUICKSTART.md) | 快速开始 | 用户 |
+| [FAQ.md](FAQ.md) | 常见问题 | 用户 |
+| [UNINSTALL.md](UNINSTALL.md) | 卸载指南 | 用户 |
+| [FEATURE_ACTIVATION_GUIDE.md](FEATURE_ACTIVATION_GUIDE.md) | 功能激活 | 用户 |
+
+---
+
+### 🏗️ 架构文档（开发参考）
+
+**这些文档描述系统架构，供开发参考。**
+
+| 文档 | 作用 | 读者 |
+|------|------|------|
+| [ARCHITECTURE_GENERIC_CN.md](ARCHITECTURE_GENERIC_CN.md) | 中文架构文档 | 开发者 |
+| [ARCHITECTURE_GENERIC_EN.md](ARCHITECTURE_GENERIC_EN.md) | English architecture | Developer |
+| [DIRECTORY_STRUCTURE.md](DIRECTORY_STRUCTURE.md) | 目录结构说明 | 开发者 |
+| [SUB_AGENT_STRUCTURE.md](SUB_AGENT_STRUCTURE.md) | 子 Agent 结构 | 开发者 |
+| [SUB_AGENT_DATA.md](SUB_AGENT_DATA.md) | 子 Agent 数据 | 开发者 |
+
+---
+
+### 🔧 内部文档（系统使用）
+
+**这些文档用于系统内部，用户和 Agent 都不需要主动读取。**
+
+| 文档 | 作用 |
+|------|------|
+| [INDEX.md](INDEX.md) | 本文档（索引） |
+| [SELF_CHECK.md](SELF_CHECK.md) | 系统自检 |
+| [PERFORMANCE_OPTIMIZATION_PLAN.md](PERFORMANCE_OPTIMIZATION_PLAN.md) | 性能优化计划 |
+| [AGENT_RULES_INDEX.md](AGENT_RULES_INDEX.md) | 规则索引（旧版） |
+| [CONFIG_FLOW.md](CONFIG_FLOW.md) | 配置流程（旧版） |
+| [RULES_CHECKLIST.md](RULES_CHECKLIST.md) | 规则检查清单（旧版） |
+| [AGENT_SKILL_RULES.md](AGENT_SKILL_RULES.md) | 技能规则（旧版） |
+| [SKILL_SCHEDULER.md](SKILL_SCHEDULER.md) | 定时任务（旧版） |
+| [SKILL_USAGE_RULES.md](SKILL_USAGE_RULES.md) | 技能使用（旧版） |
+
+---
+
+## 🎯 Agent 启动流程
+
+```
+Agent 启动
+    ↓
+读取 AGENTS.md（OpenClaw 生成 + install.sh 追加）
+    ↓
+看到规则引用：
+  - docs/AGENT_BEHAVIOR.md
+  - docs/SKILL_RULES.md
+  - docs/WORKSPACE_RULES.md
+  - docs/KNOWLEDGE_BASE_RULES.md
+  - docs/SUBAGENT_RULES.md
+    ↓
+根据需要读取详细文档
+    ↓
+遵守规则执行任务
+```
+
+---
+
+## 📋 install.sh 配置流程
+
+```bash
+# 1. 克隆 evo-agents 仓库
+git clone https://gitee.com/luoboask/evo-agents.git
+
+# 2. 清理开发文件
+rm -rf .github/ docs/dev/ examples/
+
+# 3. 注册到 OpenClaw（生成 AGENTS.md）
+openclaw agents add my-agent
+
+# 4. 追加规则到 AGENTS.md
+cat >> AGENTS.md << 'EOF'
+## 🎯 Agent Rules
+...
+EOF
+
+# 5. 复制规则文档
+cp docs/AGENT_INSTRUCTIONS.md docs/
+cp docs/AGENT_BEHAVIOR.md docs/
+cp docs/SKILL_RULES.md docs/
+cp docs/WORKSPACE_RULES.md docs/
+cp docs/KNOWLEDGE_BASE_RULES.md docs/
+cp docs/SUBAGENT_RULES.md docs/
+cp docs/SCHEDULER.md docs/
+```
+
+---
+
+## 📊 文档优先级
+
+### ⭐⭐⭐⭐⭐ 必须（Agent 启动必读）
+- AGENT_INSTRUCTIONS.md
+- AGENT_BEHAVIOR.md
+- SKILL_RULES.md
+- WORKSPACE_RULES.md
+- KNOWLEDGE_BASE_RULES.md
+
+### ⭐⭐⭐⭐ 重要（需要时读取）
+- SUBAGENT_RULES.md
+- SCHEDULER.md
+
+### ⭐⭐⭐ 参考（用户/开发者）
+- README.md
+- QUICKSTART.md
+- FAQ.md
+- ARCHITECTURE_*.md
+
+### ⭐⭐ 内部（系统使用）
+- SELF_CHECK.md
+- PERFORMANCE_OPTIMIZATION_PLAN.md
+- 旧版文档（*_OLD.md）
+
+---
+
+## 🗂️ 建议的目录结构
 
 ```
 docs/
-├── QUICKSTART.md          # 快速开始
-├── FAQ.md                 # 常见问题
-├── SELF_CHECK.md          # 自检工具
-├── UNINSTALL.md           # 卸载指南
-├── AGENT_INSTRUCTIONS.md  # Agent 指令
-└── WORKSPACE_RULES.md     # 使用规范
+├── 🤖 Agent Rules（Agent 规则）
+│   ├── AGENT_INSTRUCTIONS.md      ← 主指令（必读）
+│   ├── AGENT_BEHAVIOR.md          ← 行为规范
+│   ├── SKILL_RULES.md             ← 技能使用
+│   ├── WORKSPACE_RULES.md         ← Workspace 规范
+│   ├── KNOWLEDGE_BASE_RULES.md    ← 知识库管理
+│   ├── SUBAGENT_RULES.md          ← 子 Agent 规则
+│   └── SCHEDULER.md               ← 定时任务
+│
+├── 📖 User Docs（用户文档）
+│   ├── README.md
+│   ├── QUICKSTART.md
+│   ├── FAQ.md
+│   └── UNINSTALL.md
+│
+├── 🏗️ Architecture（架构文档）
+│   ├── ARCHITECTURE_GENERIC_CN.md
+│   ├── ARCHITECTURE_GENERIC_EN.md
+│   ├── DIRECTORY_STRUCTURE.md
+│   ├── SUB_AGENT_STRUCTURE.md
+│   └── SUB_AGENT_DATA.md
+│
+└── 🔧 Internal（内部文档）
+    ├── INDEX.md                   ← 本文档
+    ├── SELF_CHECK.md
+    ├── PERFORMANCE_OPTIMIZATION_PLAN.md
+    └── (旧版文档)
 ```
-
-**共 6 个文档，简洁清晰！**
 
 ---
 
-## 🎯 文档分类原则
+## 🎯 核心原则
 
-1. **用户文档** - 日常使用需要参考
-2. **开发者文档** - 开发维护时参考
-3. **架构文档** - 了解系统设计
-4. **内部文档** - 团队内部使用
+1. **Agent 规则文档** - 精简、清晰、可执行
+2. **用户文档** - 易懂、实用、示例丰富
+3. **架构文档** - 详细、准确、技术导向
+4. **内部文档** - 不干扰 Agent 和用户
 
-**安装时自动清理后 3 类，用户只看到必要的文档。**
+**install.sh 只复制 Agent 规则文档，其他文档由用户按需阅读。**
+
+---
+
+_版本：1.0.0 | 2026-04-01_

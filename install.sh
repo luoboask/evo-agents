@@ -99,7 +99,14 @@ else
     echo "   ✅ 完成"
 fi
 
-# 注册到 OpenClaw
+# 创建目录
+echo "📁 创建目录..."
+mkdir -p memory/weekly memory/monthly memory/archive
+mkdir -p data/index data/$AGENT_NAME
+mkdir -p scripts/user
+echo "   ✅ 完成"
+
+# 注册到 OpenClaw（会自动生成 AGENTS.md）
 echo "📝 注册到 OpenClaw..."
 if openclaw agents list 2>/dev/null | grep -q "^$AGENT_NAME"; then
     echo "   ⚠️  已注册"
@@ -108,44 +115,144 @@ else
     echo "   ✅ 完成"
 fi
 
-# 创建目录
-echo "📁 创建目录..."
-mkdir -p memory/weekly memory/monthly memory/archive
-mkdir -p data/index data/$AGENT_NAME
-mkdir -p scripts/user
-echo "   ✅ 完成"
-
-# 创建必要文件
-echo "📝 创建必要文件..."
-
-# 创建 AGENTS.md（从模板复制）
+# 在 AGENTS.md 中追加规则引用（OpenClaw 已创建 AGENTS.md）
+echo "📋 配置 Agent 规则..."
 if [ -f "AGENTS.md" ]; then
-    echo "   ✓ AGENTS.md 已存在"
-else
-    if [ -f "$HOME/.openclaw/workspace/AGENTS_TEMPLATE.md" ]; then
-        cp "$HOME/.openclaw/workspace/AGENTS_TEMPLATE.md" AGENTS.md
-        echo "   ✓ 已创建 AGENTS.md"
+    # 检查是否已包含规则引用
+    if grep -q "SKILL_RULES\|AGENT_BEHAVIOR" AGENTS.md; then
+        echo "   ✓ AGENTS.md 已包含规则引用"
     else
-        echo "   ⊘ AGENTS_TEMPLATE.md 不存在，创建基础版本"
-        cat > AGENTS.md << 'AGENTSEOF'
-# AGENTS.md - Your Workspace
+        # 追加规则到 AGENTS.md 末尾
+        cat >> AGENTS.md << 'EOF'
 
-## Session Startup
-1. Read SOUL.md
-2. Read USER.md  
-3. Read memory/YYYY-MM-DD.md
-4. Read MEMORY.md (main session only)
+---
 
-### 🎯 Quick Rules
+## 🎯 Agent Rules
+
+### Core Behavior
+- No independent goals (no self-preservation, replication, power-seeking)
+- Safety first (pause on conflicts, respect stop requests)
+- Don't manipulate or bypass safeguards
+- Tool names are case-sensitive
 - Search memory before answering about prior work
-- Don't share private info in group chats
-- Write important things to files
+- Only load MEMORY.md in main sessions
 
-**Full rules:** See `docs/`
-AGENTSEOF
+**Full rules:** See `docs/AGENT_BEHAVIOR.md`
+
+### Skill Usage
+| When | Use |
+|------|-----|
+| User mentions history | `memory-search` |
+| Real-time info | `web-knowledge` |
+| Task completed | `self-evolution` (evolve) |
+| End of day | `self-evolution` (nightly) |
+
+**Full rules:** See `docs/SKILL_RULES.md`
+
+### Workspace
+- Temp downloads → `/tmp/`
+- Git projects → `/tmp/` or `~/projects/`
+- Don't clone/download in workspace root
+
+**Full rules:** See `docs/WORKSPACE_RULES.md`
+
+### Knowledge Base
+| Type | Location | Access |
+|------|----------|--------|
+| Public | `skills/`, `docs/` | All Agents |
+| Private | `MEMORY.md` | Main session only |
+| Agent | `data/<agent>/` | Own Agent |
+
+**Full rules:** See `docs/KNOWLEDGE_BASE_RULES.md`
+
+### Sub-Agent
+- Cannot access `MEMORY.md`
+- Pass private info via `task` parameter
+- Don't execute cron/heartbeat tasks
+
+**Full rules:** See `docs/SUBAGENT_RULES.md`
+EOF
+        echo "   ✓ 已追加规则到 AGENTS.md"
+    fi
+else
+    echo "   ⚠️  AGENTS.md 不存在（跳过）"
+fi
+
+# 复制规则文档到 docs/
+if [ -d "docs" ]; then
+    echo "   ✓ docs 目录已存在"
+else
+    mkdir -p docs
+    echo "   ✓ 创建 docs 目录"
+fi
+
+# 复制 Agent 规则文档
+if [ -f "docs/AGENT_INSTRUCTIONS.md" ]; then
+    echo "   ✓ AGENT_INSTRUCTIONS.md 已存在"
+else
+    if [ -f "$HOME/.openclaw/workspace/docs/AGENT_INSTRUCTIONS.md" ]; then
+        cp "$HOME/.openclaw/workspace/docs/AGENT_INSTRUCTIONS.md" docs/
+        echo "   ✓ 已复制 AGENT_INSTRUCTIONS.md"
     fi
 fi
 
+if [ -f "docs/AGENT_BEHAVIOR.md" ]; then
+    echo "   ✓ AGENT_BEHAVIOR.md 已存在"
+else
+    if [ -f "$HOME/.openclaw/workspace/docs/AGENT_BEHAVIOR.md" ]; then
+        cp "$HOME/.openclaw/workspace/docs/AGENT_BEHAVIOR.md" docs/
+        echo "   ✓ 已复制 AGENT_BEHAVIOR.md"
+    fi
+fi
+
+if [ -f "docs/SKILL_RULES.md" ]; then
+    echo "   ✓ SKILL_RULES.md 已存在"
+else
+    if [ -f "$HOME/.openclaw/workspace/docs/SKILL_RULES.md" ]; then
+        cp "$HOME/.openclaw/workspace/docs/SKILL_RULES.md" docs/
+        echo "   ✓ 已复制 SKILL_RULES.md"
+    fi
+fi
+
+if [ -f "docs/WORKSPACE_RULES.md" ]; then
+    echo "   ✓ WORKSPACE_RULES.md 已存在"
+else
+    if [ -f "$HOME/.openclaw/workspace/docs/WORKSPACE_RULES.md" ]; then
+        cp "$HOME/.openclaw/workspace/docs/WORKSPACE_RULES.md" docs/
+        echo "   ✓ 已复制 WORKSPACE_RULES.md"
+    fi
+fi
+
+if [ -f "docs/KNOWLEDGE_BASE_RULES.md" ]; then
+    echo "   ✓ KNOWLEDGE_BASE_RULES.md 已存在"
+else
+    if [ -f "$HOME/.openclaw/workspace/docs/KNOWLEDGE_BASE_RULES.md" ]; then
+        cp "$HOME/.openclaw/workspace/docs/KNOWLEDGE_BASE_RULES.md" docs/
+        echo "   ✓ 已复制 KNOWLEDGE_BASE_RULES.md"
+    fi
+fi
+
+if [ -f "docs/SUBAGENT_RULES.md" ]; then
+    echo "   ✓ SUBAGENT_RULES.md 已存在"
+else
+    if [ -f "$HOME/.openclaw/workspace/docs/SUBAGENT_RULES.md" ]; then
+        cp "$HOME/.openclaw/workspace/docs/SUBAGENT_RULES.md" docs/
+        echo "   ✓ 已复制 SUBAGENT_RULES.md"
+    fi
+fi
+
+if [ -f "docs/SCHEDULER.md" ]; then
+    echo "   ✓ SCHEDULER.md 已存在"
+else
+    if [ -f "$HOME/.openclaw/workspace/docs/SCHEDULER.md" ]; then
+        cp "$HOME/.openclaw/workspace/docs/SCHEDULER.md" docs/
+        echo "   ✓ 已复制 SCHEDULER.md"
+    fi
+fi
+echo "   ✅ 规则配置完成"
+
+# 创建必要文件
+echo "📝 创建必要文件..."
 cat > memory/MEMORY.md << 'MEMEOF'
 # MEMORY.md - 长期记忆
 

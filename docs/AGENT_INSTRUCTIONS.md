@@ -18,11 +18,15 @@ You are an AI assistant working in this workspace. Follow these rules to keep th
 - Scripts → `scripts/` directory
 - Git projects → `/tmp/` or `~/projects/` or `data/<agent>/work/`
 - Clean up after completing tasks
+- Search memory before answering about prior work
+- Only load MEMORY.md in main sessions
 
 **❌ Never Do:**
 - Don't clone git in workspace root
 - Don't create projects in root
 - Don't leave temporary files in root
+- Don't share private info in group chats
+- Don't delete files without user confirmation
 
 **Full rules:** [WORKSPACE_RULES.md](WORKSPACE_RULES.md)
 
@@ -35,6 +39,7 @@ You are an AI assistant working in this workspace. Follow these rules to keep th
 | `scripts/` | Scripts only | ✅ Yes - for your scripts |
 | `skills/` | Skills only | ✅ Yes - for your skills |
 | `data/<agent>/work/` | Temporary work | ✅ Yes - for agent work |
+| `docs/` | Rule documents | ✅ Yes - READ THESE |
 | `memory/` | Memory files | ❌ No - system use only |
 | `public/` | Knowledge base | ❌ No - system use only |
 | Root `/` | Workspace root | ❌ No - keep clean |
@@ -79,55 +84,51 @@ git clone https://github.com/xxx/project.git
 # Clean up when done
 
 # ❌ Wrong
-cd ..
-git clone https://github.com/xxx/project.git  # Don't clone in root!
+cd ~/workspace
+git clone ...  # Don't clone in workspace root!
 ```
 
-#### Creating Projects
+---
 
-```bash
+### 🧠 Memory Rules
+
+**Before answering about prior work:**
+1. Search memory first
+2. Only load MEMORY.md in main sessions
+3. Write important things to files
+
+```python
 # ✅ Correct
-cd ~/projects/my-project/
-npm init
-
-# Or
-cd data/my-agent/work/my-project/
-npm init
+results = memory.search("query")
 
 # ❌ Wrong
-cd ..
-npm init  # Don't create in root!
+# Answering without searching memory
 ```
 
 ---
 
-### 🧹 Cleanup
+### 🤖 Sub-Agent Rules
 
-**After completing tasks:**
-
-```bash
-# Clean temporary files
-rm -rf /tmp/temp-*
-rm -rf data/my-agent/work/temp-*
-
-# Or run cleanup script
-./scripts/core/cleanup.sh
-```
-
-**What cleanup script does:**
-- ✅ Cleans `node_modules/`, `__pycache__/`
-- ✅ Cleans `*.log`, `*.tmp`, `*.pyc`
-- ❌ Does NOT clean `work/` directories (you decide)
+**When spawning sub-agents:**
+- They inherit the same rules
+- They cannot access MEMORY.md
+- Pass private info via task parameter
+- They don't execute cron/heartbeat tasks
 
 ---
 
-### 📖 More Information
+### 📚 Rule Documents
 
-| Topic | Document |
-|-------|----------|
-| Full workspace rules | [WORKSPACE_RULES.md](WORKSPACE_RULES.md) |
-| Structure overview | [STRUCTURE_RULES.md](STRUCTURE_RULES.md) |
-| Quick reference | [AGENT_RULES.md](AGENT_RULES.md) |
+**Read these documents:**
+
+| Document | Purpose |
+|----------|---------|
+| [AGENT_BEHAVIOR.md](AGENT_BEHAVIOR.md) | Core behavior rules |
+| [SKILL_RULES.md](SKILL_RULES.md) | When to use which skill |
+| [WORKSPACE_RULES.md](WORKSPACE_RULES.md) | Workspace organization |
+| [KNOWLEDGE_BASE_RULES.md](KNOWLEDGE_BASE_RULES.md) | Knowledge base management |
+| [SUBAGENT_RULES.md](SUBAGENT_RULES.md) | Sub-agent rules |
+| [SCHEDULER.md](SCHEDULER.md) | Scheduled tasks |
 
 ---
 
@@ -135,21 +136,25 @@ rm -rf data/my-agent/work/temp-*
 
 ### 🎯 你的角色
 
-你是工作在这个 workspace 的 AI 助手。遵守以下规则保持 workspace 整洁有序。
+你是工作在这个 workspace 的 AI 助手。遵守这些规则保持 workspace 整洁有序。
 
 ---
 
 ### 📋 快速规则
 
-**✅ 永远这样做：**
+**✅ 始终要做：**
 - 脚本 → `scripts/` 目录
 - Git 项目 → `/tmp/` 或 `~/projects/` 或 `data/<agent>/work/`
-- 完成后清理
+- 完成任务后清理
+- 回答历史问题前先搜索记忆
+- 只在主会话加载 MEMORY.md
 
-**❌ 永远不要：**
-- 不要在根目录克隆 git
+**❌ 绝对不要：**
+- 不要在 workspace 根目录 clone git
 - 不要在根目录创建项目
-- 不要把临时文件留在根目录
+- 不要在根目录遗留临时文件
+- 不要在群聊中分享私人信息
+- 不要未经用户确认删除文件
 
 **完整规则：** [WORKSPACE_RULES.md](WORKSPACE_RULES.md)
 
@@ -157,14 +162,15 @@ rm -rf data/my-agent/work/temp-*
 
 ### 📁 目录使用
 
-| 目录 | 用途 | 可以用吗？ |
+| 目录 | 用途 | 可以使用？ |
 |------|------|-----------|
-| `scripts/` | 仅脚本 | ✅ 可以 - 放你的脚本 |
-| `skills/` | 仅技能 | ✅ 可以 - 放你的技能 |
-| `data/<agent>/work/` | 临时工作 | ✅ 可以 - Agent 工作 |
-| `memory/` | 记忆文件 | ❌ 不行 - 系统使用 |
-| `public/` | 知识库 | ❌ 不行 - 系统使用 |
-| 根目录 `/` | Workspace 根 | ❌ 不行 - 保持整洁 |
+| `scripts/` | 仅脚本 | ✅ 是 - 放你的脚本 |
+| `skills/` | 仅技能 | ✅ 是 - 放你的技能 |
+| `data/<agent>/work/` | 临时工作 | ✅ 是 - Agent 工作 |
+| `docs/` | 规则文档 | ✅ 是 - 阅读这些 |
+| `memory/` | 记忆文件 | ❌ 否 - 系统专用 |
+| `public/` | 知识库 | ❌ 否 - 系统专用 |
+| 根目录 `/` | Workspace 根 | ❌ 否 - 保持整洁 |
 
 **外部目录：**
 - `/tmp/` - 临时工作 ✅
@@ -198,65 +204,60 @@ git clone https://github.com/xxx/project.git
 # ✅ 正确 - 长期
 cd ~/projects/
 git clone https://github.com/xxx/project.git
-# 保存在这里
+# 保留在这里
 
-# ✅ 正确 - Agent 特定
+# ✅ 正确 - Agent 专用
 cd data/my-agent/work/
 git clone https://github.com/xxx/project.git
 # 完成后清理
 
 # ❌ 错误
-cd ..
-git clone https://github.com/xxx/project.git  # 不要在根目录克隆！
+cd ~/workspace
+git clone ...  # 不要在 workspace 根目录 clone！
 ```
 
-#### 创建项目
+---
 
-```bash
+### 🧠 记忆规则
+
+**回答历史问题前：**
+1. 先搜索记忆
+2. 只在主会话加载 MEMORY.md
+3. 重要的事写文件
+
+```python
 # ✅ 正确
-cd ~/projects/my-project/
-npm init
-
-# 或
-cd data/my-agent/work/my-project/
-npm init
+results = memory.search("query")
 
 # ❌ 错误
-cd ..
-npm init  # 不要在根目录创建！
+# 不搜索记忆直接回答
 ```
 
 ---
 
-### 🧹 清理
+### 🤖 子 Agent 规则
 
-**完成任务后：**
-
-```bash
-# 清理临时文件
-rm -rf /tmp/temp-*
-rm -rf data/my-agent/work/temp-*
-
-# 或运行清理脚本
-./scripts/core/cleanup.sh
-```
-
-**清理脚本做什么：**
-- ✅ 清理 `node_modules/`, `__pycache__/`
-- ✅ 清理 `*.log`, `*.tmp`, `*.pyc`
-- ❌ 不清理 `work/` 目录（你自己决定）
+**Spawn 子 Agent 时：**
+- 他们继承同样的规则
+- 不能访问 MEMORY.md
+- 通过 task 参数传递私人信息
+- 不执行 cron/heartbeat 任务
 
 ---
 
-### 📖 更多信息
+### 📚 规则文档
 
-| 主题 | 文档 |
+**阅读这些文档：**
+
+| 文档 | 作用 |
 |------|------|
-| 完整 workspace 规则 | [WORKSPACE_RULES.md](WORKSPACE_RULES.md) |
-| 结构概览 | [STRUCTURE_RULES.md](STRUCTURE_RULES.md) |
-| 快速参考 | [AGENT_RULES.md](AGENT_RULES.md) |
+| [AGENT_BEHAVIOR.md](AGENT_BEHAVIOR.md) | 核心行为规范 |
+| [SKILL_RULES.md](SKILL_RULES.md) | 技能使用规则 |
+| [WORKSPACE_RULES.md](WORKSPACE_RULES.md) | Workspace 规范 |
+| [KNOWLEDGE_BASE_RULES.md](KNOWLEDGE_BASE_RULES.md) | 知识库管理 |
+| [SUBAGENT_RULES.md](SUBAGENT_RULES.md) | 子 Agent 规则 |
+| [SCHEDULER.md](SCHEDULER.md) | 定时任务 |
 
 ---
 
-**Remember: Keep the workspace clean for everyone!**  
-**记住：保持 workspace 整洁，让大家高效工作！** 🚀
+_版本：2.0.0 | 更新：2026-04-01_
