@@ -96,7 +96,16 @@ git clone ...  # Don't clone in workspace root!
 **Before answering about prior work:**
 1. Search memory first
 2. Only load MEMORY.md in main sessions
-3. Write important things to files
+3. Don't access private memory in sub-sessions/group chats
+4. Write important things to files
+
+**Session types:**
+| Type | MEMORY.md | Private Data |
+|------|-----------|--------------|
+| Main | ✅ Yes | ✅ Can reference |
+| Sub-agent | ❌ No | ⚠️ Via task only |
+| Group | ❌ No | ❌ Don't leak |
+| Isolated | ❌ No | ❌ No context |
 
 ```python
 # ✅ Correct
@@ -104,7 +113,10 @@ results = memory.search("query")
 
 # ❌ Wrong
 # Answering without searching memory
+# Referencing private memory in group chat
 ```
+
+**Full rules:** [SESSION_ISOLATION.md](SESSION_ISOLATION.md)
 
 ---
 

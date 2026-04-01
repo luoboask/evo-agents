@@ -17,6 +17,7 @@ _文档分类和用途说明_
 | [SKILL_RULES.md](SKILL_RULES.md) | 技能使用规则 | ⭐⭐⭐⭐⭐ |
 | [WORKSPACE_RULES.md](WORKSPACE_RULES.md) | Workspace 规范 | ⭐⭐⭐⭐⭐ |
 | [KNOWLEDGE_BASE_RULES.md](KNOWLEDGE_BASE_RULES.md) | 知识库管理 | ⭐⭐⭐⭐⭐ |
+| [SESSION_ISOLATION.md](SESSION_ISOLATION.md) | 会话隔离与记忆 | ⭐⭐⭐⭐⭐ |
 | [SUBAGENT_RULES.md](SUBAGENT_RULES.md) | 子 Agent 规则 | ⭐⭐⭐⭐ |
 | [SCHEDULER.md](SCHEDULER.md) | 定时任务配置 | ⭐⭐⭐⭐ |
 
