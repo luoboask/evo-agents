@@ -144,6 +144,13 @@ else
     echo "📋 Configuring AGENTS.md..."
 fi
 if [ -f "AGENTS.md" ] && ! grep -q "SKILL_RULES" AGENTS.md; then
+    # 修改 Session Startup 部分，添加规则文档读取
+    if grep -q "Read \`SOUL.md\`" AGENTS.md; then
+        # 在 "Read SOUL.md" 后添加规则文档读取
+        sed -i.bak 's/Read `SOUL.md` — this is who you are/Read `SOUL.md` — this is who you are\n5. Read `docs\/AGENT_BEHAVIOR.md`, `docs\/WORKSPACE_RULES.md`, `docs\/KNOWLEDGE_BASE_RULES.md` — workspace rules/' AGENTS.md
+        rm -f AGENTS.md.bak
+    fi
+    
     cat >> AGENTS.md << 'EOF'
 
 ---
