@@ -199,6 +199,36 @@ if [ -f "AGENTS.md" ] && ! grep -q "SKILL_RULES" AGENTS.md; then
 - Don't execute cron/heartbeat tasks
 
 **Full rules:** See `docs/SUBAGENT_RULES.md`
+
+---
+
+## 🔮 Check Advanced Features (Main Session Only)
+
+**If in MAIN SESSION**, check if advanced features are installed:
+
+\`\`\`bash
+# Check these paths
+- Ollama: \`which ollama\` or \`localhost:11434\`
+- Memory: \`data/<agent>/knowledge/\`
+- Self-evolution: \`skills/self-evolution/\`
+- RAG: \`skills/rag/\`
+\`\`\`
+
+**If NOT installed**, ask user:
+
+> "🔮 检测到尚未激活高级功能（语义搜索、自进化系统、RAG 评估等）。是否需要激活？
+> 
+> 运行：\`./scripts/core/activate-features.sh\`
+> 
+> 或跳过：回复'跳过'或'skip'"
+
+**If user confirms**, guide them to run:
+\`\`\`bash
+cd ~/.openclaw/workspace-$AGENT_NAME
+./scripts/core/activate-features.sh
+\`\`\`
+
+**If already installed**, skip this step.
 EOF
 fi
 if [ "$LANG" = "zh" ]; then
