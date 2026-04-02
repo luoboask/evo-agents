@@ -1,7 +1,6 @@
 #!/bin/bash
-# activate-features.sh - 激活语义搜索模型
+# activate-features.sh - 交互式功能激活脚本
 # 用法：./activate-features.sh
-# 说明：基础功能（知识库、自进化、RAG、定时任务）已在安装时自动激活
 
 set -e
 
@@ -14,21 +13,90 @@ cd "$WORKSPACE"
 AGENT_NAME=$(basename "$WORKSPACE" | sed 's/workspace-//')
 
 echo "╔════════════════════════════════════════════════════════╗"
-echo "║     激活语义搜索模型                                    ║"
+echo "║     evo-agents 功能激活向导                             ║"
 echo "╚════════════════════════════════════════════════════════╝"
 echo ""
 echo "📁 Workspace: $WORKSPACE"
 echo "🤖 Agent: $AGENT_NAME"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📋 可激活功能列表"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "🔮 语义搜索模型需要以下组件："
-echo ""
-echo "   1) Ollama - 本地模型运行环境"
-echo "   2) 嵌入模型 - nomic-embed-text (用于语义搜索)"
+echo "   1) 🔮 语义搜索模型 (Ollama + 嵌入模型)"
+echo "   2) 📚 知识库系统 (已预装)"
+echo "   3) 🧬 自进化系统 (已预装)"
+echo "   4) 📊 RAG 评估系统 (已预装)"
+echo "   5) ⏰ 定时任务 (已预装)"
+echo "   6) ✅ 全部激活"
+echo "   7) ❌ 跳过"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
+echo "💡 提示：基础功能已在安装时自动激活"
+echo "   语义搜索模型需要单独安装（需 Ollama）"
+echo ""
+
+# 选择功能
+select_feature() {
+    echo "请选择要激活的功能 (可多选，用空格分隔，如：1 2 3):"
+    read -p "> " FEATURES
+    
+    # 特殊选项
+    if [[ "$FEATURES" == "7" ]]; then
+        echo "已跳过"
+        exit 0
+    fi
+    
+    if [[ "$FEATURES" == "6" ]]; then
+        FEATURES="1"
+    fi
+    
+    echo ""
+    echo "已选择功能：$FEATURES"
+    echo ""
+    
+    # 执行选择的功能
+    for feature in $FEATURES; do
+        case $feature in
+            1) setup_ollama ;;
+            2) 
+                echo "📚 知识库系统已预装，跳过"
+                ;;
+            3) 
+                echo "🧬 自进化系统已预装，跳过"
+                ;;
+            4) 
+                echo "📊 RAG 评估系统已预装，跳过"
+                ;;
+            5) 
+                echo "⏰ 定时任务已预装，跳过"
+                ;;
+            *) echo "⚠️  无效选项：$feature" ;;
+        esac
+        echo ""
+    done
+    
+    # 完成
+    echo "╔════════════════════════════════════════════════════════╗"
+    echo "║     ✅ 功能激活完成！                                   ║"
+    echo "╚════════════════════════════════════════════════════════╝"
+    echo ""
+    echo "📊 激活总结:"
+    echo ""
+    echo "   已激活的功能:"
+    for feature in $FEATURES; do
+        case $feature in
+            1) echo "   ✅ 语义搜索模型" ;;
+            *) ;;
+        esac
+    done
+    echo "   ✅ 知识库系统 (预装)"
+    echo "   ✅ 自进化系统 (预装)"
+    echo "   ✅ RAG 评估系统 (预装)"
+    echo "   ✅ 定时任务 (预装)"
+    echo ""
+}
 
 # 检查 Ollama
 check_ollama() {
@@ -108,21 +176,64 @@ start_ollama() {
     fi
 }
 
-# 下载嵌入模型
+# 选择并下载嵌入模型
 download_embedding_model() {
     echo ""
-    echo "📥 下载嵌入模型：nomic-embed-text..."
+    echo "📚 可选的嵌入模型："
+    echo ""
+    echo "   1) nomic-embed-text (推荐，英文优化)"
+    echo "   2) m3e-base (中文优化)"
+    echo "   3) bge-m3 (多语言，支持中文)"
+    echo "   4) 跳过（稍后手动下载）"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     
-    ollama pull nomic-embed-text
+    read -p "请选择模型 (1/2/3/4): " MODEL_CHOICE
     
-    if [ $? -eq 0 ]; then
-        echo "   ✅ 模型下载完成"
-        return 0
-    else
-        echo "   ❌ 模型下载失败"
-        return 1
+    case $MODEL_CHOICE in
+        1)
+            MODEL_NAME="nomic-embed-text"
+            echo "   已选择：nomic-embed-text"
+            ;;
+        2)
+            MODEL_NAME="m3e-base"
+            echo "   已选择：m3e-base (中文优化)"
+            ;;
+        3)
+            MODEL_NAME="bge-m3"
+            echo "   已选择：bge-m3 (多语言)"
+            ;;
+        4)
+            echo "   已跳过，稍后可手动下载："
+            echo "      ollama pull nomic-embed-text"
+            echo "      ollama pull m3e-base"
+            echo "      ollama pull bge-m3"
+            MODEL_NAME=""
+            ;;
+        *)
+            echo "   ⚠️  无效选项，默认选择 nomic-embed-text"
+            MODEL_NAME="nomic-embed-text"
+            ;;
+    esac
+    
+    echo ""
+    
+    if [ -n "$MODEL_NAME" ]; then
+        echo "📥 下载模型：$MODEL_NAME ..."
+        echo ""
+        
+        ollama pull $MODEL_NAME
+        
+        if [ $? -eq 0 ]; then
+            echo "   ✅ 模型下载完成"
+        else
+            echo "   ❌ 模型下载失败"
+            return 1
+        fi
     fi
+    
+    return 0
 }
 
 # 验证安装
@@ -145,97 +256,88 @@ verify_installation() {
     fi
     echo "   ✅ Ollama 服务运行中"
     
-    # 检查模型
-    if ollama list | grep -q "nomic-embed-text"; then
+    # 检查模型（任意一个即可）
+    if ollama list | grep -qE "nomic-embed-text|m3e-base|bge-m3"; then
         echo "   ✅ 嵌入模型已下载"
     else
-        echo "   ❌ 嵌入模型未找到"
+        echo "   ⚠️  嵌入模型未下载，可手动下载："
+        echo "      ollama pull nomic-embed-text"
         return 1
     fi
     
     return 0
 }
 
+# 激活语义搜索模型
+setup_ollama() {
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "🔮 激活：语义搜索模型"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "步骤 1/4: 检查 Ollama"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    
+    if check_ollama; then
+        echo ""
+        echo "✅ Ollama 已安装，跳过安装步骤"
+    else
+        read -p "是否安装 Ollama? (y/n): " -n 1 -r
+        echo ""
+        
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "❌ 已取消"
+            return 1
+        fi
+        
+        if ! install_ollama; then
+            echo "❌ Ollama 安装失败"
+            return 1
+        fi
+    fi
+    
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "步骤 2/4: 启动 Ollama 服务"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    
+    if ! start_ollama; then
+        echo "⚠️  请手动启动 Ollama 服务：ollama serve"
+        echo "   启动后重新运行此脚本"
+        return 1
+    fi
+    
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "步骤 3/4: 选择嵌入模型"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    
+    if ! download_embedding_model; then
+        echo "❌ 模型下载失败"
+        return 1
+    fi
+    
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "步骤 4/4: 验证安装"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    
+    if verify_installation; then
+        echo ""
+        echo "✅ 语义搜索模型激活成功"
+    else
+        echo ""
+        echo "⚠️  验证失败，请检查："
+        echo "   1. Ollama 是否正确安装"
+        echo "   2. Ollama 服务是否运行（ollama serve）"
+        echo "   3. 模型是否下载完成（ollama list）"
+        return 1
+    fi
+}
+
 # 主流程
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "步骤 1/4: 检查 Ollama"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-if check_ollama; then
-    echo ""
-    echo "✅ Ollama 已安装，跳过安装步骤"
-else
-    read -p "是否安装 Ollama? (y/n): " -n 1 -r
-    echo ""
-    
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "❌ 已取消"
-        exit 1
-    fi
-    
-    if ! install_ollama; then
-        echo "❌ Ollama 安装失败"
-        exit 1
-    fi
-fi
-
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "步骤 2/4: 启动 Ollama 服务"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-if ! start_ollama; then
-    echo "⚠️  请手动启动 Ollama 服务：ollama serve"
-    echo "   启动后重新运行此脚本"
-    exit 1
-fi
-
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "步骤 3/4: 下载嵌入模型"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-read -p "是否下载 nomic-embed-text 模型？(y/n): " -n 1 -r
-echo ""
-
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "❌ 已取消"
-    exit 1
-fi
-
-if ! download_embedding_model; then
-    echo "❌ 模型下载失败"
-    exit 1
-fi
-
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "步骤 4/4: 验证安装"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-if verify_installation; then
-    echo ""
-    echo "╔════════════════════════════════════════════════════════╗"
-    echo "║     ✅ 语义搜索模型激活完成！                           ║"
-    echo "╚════════════════════════════════════════════════════════╝"
-    echo ""
-    echo "📊 已激活组件:"
-    echo "   ✅ Ollama 服务"
-    echo "   ✅ nomic-embed-text 嵌入模型"
-    echo ""
-    echo "💡 使用方法:"
-    echo "   - memory-search 技能现在支持语义搜索"
-    echo "   - 使用 search.sh 进行语义检索"
-    echo ""
-else
-    echo ""
-    echo "⚠️  验证失败，请检查："
-    echo "   1. Ollama 是否正确安装"
-    echo "   2. Ollama 服务是否运行（ollama serve）"
-    echo "   3. 模型是否下载完成（ollama list）"
-    echo ""
-    exit 1
-fi
+select_feature
 
 # 记录到 memory，让 Agent 感知
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -243,12 +345,13 @@ echo "📝 记录功能激活状态..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 MEMORY_FILE="memory/$(date +%Y-%m-%d).md"
 mkdir -p memory/
-if [ -n "$MODEL_NAME" ]; then
+
+if [[ "$FEATURES" == *"1"* ]]; then
     cat >> "$MEMORY_FILE" << MEMORYEOF
 
 ## 功能激活
 - 时间：$(date +%Y-%m-%d\ %H:%M)
-- 激活的功能：语义搜索模型 (Ollama + $MODEL_NAME)
+- 激活的功能：语义搜索模型 (Ollama + ${MODEL_NAME:-未下载})
 - 状态：已完成
 
 MEMORYEOF
@@ -257,11 +360,12 @@ else
 
 ## 功能激活
 - 时间：$(date +%Y-%m-%d\ %H:%M)
-- 激活的功能：Ollama 服务（模型稍后手动下载）
-- 状态：部分完成
+- 激活的功能：无（基础功能已预装）
+- 状态：已跳过
 
 MEMORYEOF
 fi
+
 echo "   ✅ 已记录到 $MEMORY_FILE"
 echo ""
 echo "💡 提示：Agent 会在下次会话时读取此记录"
