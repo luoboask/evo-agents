@@ -204,9 +204,8 @@ if [ "$LANG" = "zh" ]; then
         echo "   备份：$BACKUP_DIR"
     fi
     echo ""
-    echo "💡 提示:"
-    echo "   - 如需恢复，从备份复制回 agents/ 目录"
-    echo "   - 运行 'openclaw agents list' 查看剩余 Agent"
+    echo "💡 恢复数据:"
+    echo "   cp -r $BACKUP_DIR agents/$AGENT_NAME"
 else
     echo "📊 Summary:"
     echo "   Agent: $AGENT_NAME"
@@ -215,8 +214,7 @@ else
         echo "   Backup: $BACKUP_DIR"
     fi
     echo ""
-    echo "💡 Tips:"
-    echo "   - To restore, copy backup back to agents/ directory"
-    echo "   - Run 'openclaw agents list' to see remaining Agents"
+    echo "💡 Restore data:"
+    echo "   cp -r $BACKUP_DIR agents/$AGENT_NAME"
 fi
 echo ""
