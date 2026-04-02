@@ -202,33 +202,40 @@ if [ -f "AGENTS.md" ] && ! grep -q "SKILL_RULES" AGENTS.md; then
 
 ---
 
-## 🔮 Check Advanced Features (Main Session Only)
+## 🔮 Check Semantic Search (Main Session Only)
 
-**If in MAIN SESSION**, check if advanced features are installed:
+**If in MAIN SESSION** (first conversation of the day), check semantic search:
 
 \`\`\`bash
-# Check these paths
-- Ollama: \`which ollama\` or \`localhost:11434\`
-- Memory: \`data/<agent>/knowledge/\`
-- Self-evolution: \`skills/self-evolution/\`
-- RAG: \`skills/rag/\`
+# Check if Ollama + embedding model installed
+- Run: \`ollama list 2>/dev/null | grep -E "nomic|m3e|bge|text2vec"\`
+- Or check: \`curl -s http://localhost:11434/api/tags\`
 \`\`\`
 
-**If NOT installed**, ask user:
+**If NOT installed**, ask user (only once per day):
 
-> "🔮 检测到尚未激活高级功能（语义搜索、自进化系统、RAG 评估等）。是否需要激活？
+> "🔮 检测到尚未激活语义搜索能力。
 > 
-> 运行：\`./scripts/core/activate-features.sh\`
+> 语义搜索可以让记忆检索更智能（支持语义理解，不只是关键词匹配）。
 > 
-> 或跳过：回复'跳过'或'skip'"
+> 需要激活吗？
+> - ✅ 运行：\`$WORKSPACE_ROOT/scripts/core/activate-features.sh\`
+> - ⏭️  跳过：回复'跳过'或'skip'
+> - ℹ️  了解更多：\`docs/FEATURE_ACTIVATION_GUIDE.md\`"
 
-**If user confirms**, guide them to run:
-\`\`\`bash
-cd ~/.openclaw/workspace-$AGENT_NAME
-./scripts/core/activate-features.sh
-\`\`\`
+**If user says yes/好的/yes**, respond:
+> "好的！请运行以下命令：
+> \`\`\`bash
+> $WORKSPACE_ROOT/scripts/core/activate-features.sh
+> \`\`\`
+> 完成后告诉我，我会确认激活状态。"
 
-**If already installed**, skip this step.
+**If user says skip/跳过**, respond:
+> "好的，已跳过。需要时随时运行 \`./scripts/core/activate-features.sh\` 激活。"
+
+**If already installed**, skip this step (don't ask again).
+
+**Check memory**: Before asking, check \`memory/YYYY-MM-DD.md\` - if user already skipped today, don't ask again.
 EOF
 fi
 if [ "$LANG" = "zh" ]; then
