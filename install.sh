@@ -331,8 +331,8 @@ if [ "$LANG" = "zh" ]; then
     echo "📊 位置：$WORKSPACE_ROOT"
     echo ""
     echo "🔮 激活高级特性（可选）:"
-    echo "   cd $WORKSPACE_ROOT"
     echo "   ./scripts/core/activate-features.sh"
+    echo ""
 else
     echo "╔════════════════════════════════════════════════════════╗"
     echo "║  ✅ Installation Complete!                               ║"
@@ -341,6 +341,14 @@ else
     echo "📊 Location: $WORKSPACE_ROOT"
     echo ""
     echo "🔮 Activate features (optional):"
-    echo "   cd $WORKSPACE_ROOT"
     echo "   ./scripts/core/activate-features.sh"
+    echo ""
+fi
+
+# 自动切换到 workspace 目录
+cd "$WORKSPACE_ROOT"
+if [ "$LANG" = "zh" ]; then
+    echo "📁 已进入：$WORKSPACE_ROOT"
+else
+    echo "📁 Changed to: $WORKSPACE_ROOT"
 fi
