@@ -11,34 +11,18 @@ AGENT_NAME="${1:-my-agent}"
 FORCE="${2:-}"
 WORKSPACE_ROOT="$HOME/.openclaw/workspace-$AGENT_NAME"
 
-# 检测脚本来源，自动选择语言和 Git 源
-if [[ "${BASH_SOURCE[0]}" == *"gitee.com"* ]] || [[ "$0" == *"gitee.com"* ]]; then
-    # Gitee 源 - 中文
-    GIT_URL="https://gitee.com/luoboask/evo-agents.git"
-    SOURCE_NAME="Gitee"
-    LANG="zh"
-    
-    echo "╔════════════════════════════════════════════════════════╗"
-    echo "║  evo-agents 一键安装                                     ║"
-    echo "╚════════════════════════════════════════════════════════╝"
-    echo ""
-    echo "📦 Agent: $AGENT_NAME"
-    echo "📁 Workspace: $WORKSPACE_ROOT"
-    echo ""
-else
-    # GitHub 源 - English
-    GIT_URL="https://gitee.com/luoboask/evo-agents.git"
-    SOURCE_NAME="Gitee (preferred)"
-    LANG="en"
-    
-    echo "╔════════════════════════════════════════════════════════╗"
-    echo "║  evo-agents Quick Install                                ║"
-    echo "╚════════════════════════════════════════════════════════╝"
-    echo ""
-    echo "📦 Agent: $AGENT_NAME"
-    echo "📁 Workspace: $WORKSPACE_ROOT"
-    echo ""
-fi
+# 统一使用中文
+GIT_URL="https://gitee.com/luoboask/evo-agents.git"
+SOURCE_NAME="Gitee"
+LANG="zh"
+
+echo "╔════════════════════════════════════════════════════════╗"
+echo "║  evo-agents 一键安装                                     ║"
+echo "╚════════════════════════════════════════════════════════╝"
+echo ""
+echo "📦 Agent: $AGENT_NAME"
+echo "📁 Workspace: $WORKSPACE_ROOT"
+echo ""
 
 # 检查 workspace 是否存在
 if [ -d "$WORKSPACE_ROOT" ]; then
@@ -105,7 +89,7 @@ else
 fi
 
 # 创建目录
-if [ "$LANG" = "zh" ]; then
+if true; then
     echo "📁 创建目录..."
 else
     echo "📁 Creating directories..."
@@ -116,20 +100,20 @@ mkdir -p scripts/user
 echo "   ✅ Done"
 
 # 注册到 OpenClaw
-if [ "$LANG" = "zh" ]; then
+if true; then
     echo "📝 注册到 OpenClaw..."
 else
     echo "📝 Registering to OpenClaw..."
 fi
 if openclaw agents list 2>/dev/null | grep -q "^$AGENT_NAME"; then
-    if [ "$LANG" = "zh" ]; then
+    if true; then
         echo "   ⚠️  已注册"
     else
         echo "   ⚠️  Already registered"
     fi
 else
     openclaw agents add "$AGENT_NAME" --workspace "$WORKSPACE_ROOT" --non-interactive
-    if [ "$LANG" = "zh" ]; then
+    if true; then
         echo "   ✅ 完成"
     else
         echo "   ✅ Done"
@@ -137,7 +121,7 @@ else
 fi
 
 # 在 AGENTS.md 中追加规则引用
-if [ "$LANG" = "zh" ]; then
+if true; then
     echo "📋 配置 AGENTS.md..."
 else
     echo "📋 Configuring AGENTS.md..."
@@ -193,14 +177,14 @@ if [ -f "AGENTS.md" ] && ! grep -q "SKILL_RULES" AGENTS.md; then
 **Full rules:** See `docs/SUBAGENT_RULES.md`
 EOF
 fi
-if [ "$LANG" = "zh" ]; then
+if true; then
     echo "   ✓ AGENTS.md 已配置"
 else
     echo "   ✓ AGENTS.md configured"
 fi
 
 # 在 SOUL.md 中追加核心规则（如果文件存在）
-if [ "$LANG" = "zh" ]; then
+if true; then
     echo "📝 配置 SOUL.md..."
 else
     echo "📝 Configuring SOUL.md..."
@@ -230,13 +214,13 @@ RULEEOF
     mv SOUL.md.tmp SOUL.md
     rm -f SOUL.md.bak
     
-    if [ "$LANG" = "zh" ]; then
+    if true; then
         echo "   ✓ SOUL.md 已配置"
     else
         echo "   ✓ SOUL.md configured"
     fi
 else
-    if [ "$LANG" = "zh" ]; then
+    if true; then
         echo "   ⊘ SOUL.md 不存在或已配置"
     else
         echo "   ⊘ SOUL.md not found or already configured"
@@ -244,7 +228,7 @@ else
 fi
 
 # 复制规则文档到 docs/
-if [ "$LANG" = "zh" ]; then
+if true; then
     echo "📋 复制规则文档..."
 else
     echo "📋 Copying rule documents..."
@@ -257,14 +241,14 @@ for doc in AGENT_INSTRUCTIONS AGENT_BEHAVIOR SKILL_RULES WORKSPACE_RULES KNOWLED
         cp "$src" "$dst"
     fi
 done
-if [ "$LANG" = "zh" ]; then
+if true; then
     echo "   ✓ 规则已复制"
 else
     echo "   ✓ Rules copied"
 fi
 
 # 创建必要文件
-if [ "$LANG" = "zh" ]; then
+if true; then
     echo "📝 创建必要文件..."
 else
     echo "📝 Creating files..."
@@ -293,7 +277,7 @@ echo "   ✅ Done"
 
 # 记录重要提示给 Agent
 echo ""
-if [ "$LANG" = "zh" ]; then
+if true; then
     echo "📝 记录重要提示给 Agent..."
 else
     echo "📝 Recording workspace rules..."
@@ -303,11 +287,11 @@ python3 scripts/core/session_recorder.py \
     -t event \
     -c "Workspace Rules: Read docs/WORKSPACE_RULES.md, docs/KNOWLEDGE_BASE_RULES.md, docs/AGENT_BEHAVIOR.md" \
     --agent "$AGENT_NAME" 2>/dev/null && \
-    if [ "$LANG" = "zh" ]; then echo "   ✓ 已记录"; else echo "   ✓ Recorded"; fi \
-    || if [ "$LANG" = "zh" ]; then echo "   ⊘ 跳过"; else echo "   ⊘ Skipped"; fi
+    if true; then echo "   ✓ 已记录"; else echo "   ✓ Recorded"; fi \
+    || if true; then echo "   ⊘ 跳过"; else echo "   ⊘ Skipped"; fi
 
 # 创建安装配置文件
-if [ "$LANG" = "zh" ]; then
+if true; then
     echo "📝 创建安装配置..."
 else
     echo "📝 Creating install config..."
@@ -322,7 +306,7 @@ echo "   ✅ Done"
 
 # 完成
 echo ""
-if [ "$LANG" = "zh" ]; then
+if true; then
     echo "╔════════════════════════════════════════════════════════╗"
     echo "║  ✅ 安装完成！                                           ║"
     echo "╚════════════════════════════════════════════════════════╝"
