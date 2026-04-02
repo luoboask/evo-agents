@@ -343,26 +343,3 @@ else
     echo "   cd $WORKSPACE_ROOT"
     echo "   ./scripts/core/activate-features.sh"
 fi
-
-# 创建安装配置文件
-echo "📝 创建安装配置..."
-cat > "$WORKSPACE_ROOT/.install-config" <<EOF
-agent_name=$AGENT_NAME
-workspace_path=$WORKSPACE_ROOT
-install_time=$(date -Iseconds)
-openclaw_registered=true
-EOF
-echo "   ✅ 完成"
-
-# 完成
-echo ""
-echo "╔════════════════════════════════════════════════════════╗"
-echo "║  ✅ 安装完成！                                           ║"
-echo "╚════════════════════════════════════════════════════════╝"
-echo ""
-echo "📊 位置：$WORKSPACE_ROOT"
-echo ""
-echo "🔮 激活高级特性（可选）:"
-echo "   cd $WORKSPACE_ROOT"
-echo "   ./scripts/core/activate-features.sh"
-echo ""
