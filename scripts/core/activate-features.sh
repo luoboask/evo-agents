@@ -243,14 +243,25 @@ echo "📝 记录功能激活状态..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 MEMORY_FILE="memory/$(date +%Y-%m-%d).md"
 mkdir -p memory/
-cat >> "$MEMORY_FILE" << MEMORYEOF
+if [ -n "$MODEL_NAME" ]; then
+    cat >> "$MEMORY_FILE" << MEMORYEOF
 
 ## 功能激活
 - 时间：$(date +%Y-%m-%d\ %H:%M)
-- 激活的功能：语义搜索模型 (Ollama + nomic-embed-text)
+- 激活的功能：语义搜索模型 (Ollama + $MODEL_NAME)
 - 状态：已完成
 
 MEMORYEOF
+else
+    cat >> "$MEMORY_FILE" << MEMORYEOF
+
+## 功能激活
+- 时间：$(date +%Y-%m-%d\ %H:%M)
+- 激活的功能：Ollama 服务（模型稍后手动下载）
+- 状态：部分完成
+
+MEMORYEOF
+fi
 echo "   ✅ 已记录到 $MEMORY_FILE"
 echo ""
 echo "💡 提示：Agent 会在下次会话时读取此记录"
