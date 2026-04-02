@@ -4,7 +4,7 @@
 
 set -e
 
-# 获取 workspace 根目录（正确的方式）
+# 获取 workspace 根目录
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 WORKSPACE="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$WORKSPACE"
@@ -24,14 +24,17 @@ echo "📋 可激活功能列表"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "   1) 🔮 语义搜索模型 (Ollama + 嵌入模型)"
-echo "   2) 📚 知识库系统"
-echo "   3) 🧬 自进化系统 (self-evolution)"
-echo "   4) 📊 RAG 评估系统"
-echo "   5) ⏰ 定时任务 (cron)"
+echo "   2) 📚 知识库系统 (已预装)"
+echo "   3) 🧬 自进化系统 (已预装)"
+echo "   4) 📊 RAG 评估系统 (已预装)"
+echo "   5) ⏰ 定时任务 (已预装)"
 echo "   6) ✅ 全部激活"
 echo "   7) ❌ 跳过"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "💡 提示：基础功能已在安装时自动激活"
+echo "   语义搜索模型需要单独安装（需 Ollama）"
 echo ""
 
 # 选择功能
@@ -46,7 +49,7 @@ select_feature() {
     fi
     
     if [[ "$FEATURES" == "6" ]]; then
-        FEATURES="1 2 3 4 5"
+        FEATURES="1"
     fi
     
     echo ""
@@ -57,10 +60,18 @@ select_feature() {
     for feature in $FEATURES; do
         case $feature in
             1) setup_ollama ;;
-            2) setup_knowledge ;;
-            3) setup_self_evolution ;;
-            4) setup_rag ;;
-            5) setup_cron ;;
+            2) 
+                echo "📚 知识库系统已预装，跳过"
+                ;;
+            3) 
+                echo "🧬 自进化系统已预装，跳过"
+                ;;
+            4) 
+                echo "📊 RAG 评估系统已预装，跳过"
+                ;;
+            5) 
+                echo "⏰ 定时任务已预装，跳过"
+                ;;
             *) echo "⚠️  无效选项：$feature" ;;
         esac
         echo ""
@@ -77,44 +88,96 @@ select_feature() {
     for feature in $FEATURES; do
         case $feature in
             1) echo "   ✅ 语义搜索模型" ;;
-            2) echo "   ✅ 知识库系统" ;;
-            3) echo "   ✅ 自进化系统" ;;
-            4) echo "   ✅ RAG 评估系统" ;;
-            5) echo "   ✅ 定时任务" ;;
+            *) ;;
         esac
     done
-    echo ""
-    echo "🎯 使用示例:"
-    echo ""
-    if [[ " $FEATURES " =~ " 1 " ]]; then
-        echo "   # 查看嵌入模型"
-        echo "   ollama list"
-        echo ""
-    fi
-    if [[ " $FEATURES " =~ " 2 " ]]; then
-        echo "   # 查看知识库"
-        echo "   python3 -c \"import sys; sys.path.insert(0, 'libs'); from memory_hub import MemoryHub; print(MemoryHub('$AGENT_NAME').knowledge.list_categories())\""
-        echo ""
-    fi
-    if [[ " $FEATURES " =~ " 3 " ]]; then
-        echo "   # 自进化状态"
-        echo "   cd skills/self-evolution && python3 main.py status"
-        echo ""
-    fi
-    if [[ " $FEATURES " =~ " 5 " ]]; then
-        echo "   # 查看定时任务"
-        echo "   openclaw cron list"
-        echo ""
-    fi
-    echo "📖 详细文档：docs/FEATURE_ACTIVATION_GUIDE.md"
+    echo "   ✅ 知识库系统 (预装)"
+    echo "   ✅ 自进化系统 (预装)"
+    echo "   ✅ RAG 评估系统 (预装)"
+    echo "   ✅ 定时任务 (预装)"
     echo ""
 }
 
-# 激活语义搜索模型
-setup_ollama() {
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "🔮 激活：语义搜索模型"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+# 检查 Ollama
+check_ollama() {
+    if command -v ollama &> /dev/null; then
+        echo "✅ Ollama 已安装"
+        return 0
+    else
+        echo "⚠️  Ollama 未安装"
+        return 1
+    fi
+}
+
+# 安装 Ollama
+install_ollama() {
+    echo ""
+    echo "📥 安装 Ollama..."
+    echo ""
+    
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        if command -v brew &> /dev/null; then
+            echo "   使用 Homebrew 安装..."
+            brew install ollama
+        else
+            echo "   ⚠️  Homebrew 未安装，请先安装 Homebrew："
+            echo "      /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+            return 1
+        fi
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        # Linux
+        echo "   使用官方脚本安装..."
+        curl -fsSL https://ollama.com/install.sh | sh
+    else
+        echo "   ⚠️  未知系统类型，请手动安装 Ollama"
+        echo "      https://ollama.com/download"
+        return 1
+    fi
+    
+    echo "   ✅ Ollama 安装完成"
+    return 0
+}
+
+# 启动 Ollama 服务
+start_ollama() {
+    echo ""
+    echo "🚀 启动 Ollama 服务..."
+    
+    # 检查是否已在运行
+    if curl -s http://localhost:11434/api/tags &> /dev/null; then
+        echo "   ✅ Ollama 已在运行"
+        return 0
+    fi
+    
+    # 后台启动
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS - 使用后台进程
+        ollama serve &
+        sleep 3
+    else
+        # Linux - 使用 systemd 或后台
+        if systemctl is-active --quiet ollama 2>/dev/null; then
+            echo "   ✅ Ollama 服务已启动（systemd）"
+            return 0
+        else
+            ollama serve &
+            sleep 3
+        fi
+    fi
+    
+    # 验证启动
+    if curl -s http://localhost:11434/api/tags &> /dev/null; then
+        echo "   ✅ Ollama 服务已启动"
+        return 0
+    else
+        echo "   ⚠️  Ollama 服务启动失败，请手动运行：ollama serve"
+        return 1
+    fi
+}
+
+# 选择并下载嵌入模型
+download_embedding_model() {
     echo ""
     
     # 检查 Ollama
@@ -130,7 +193,7 @@ setup_ollama() {
         echo ""
         
         # 询问是否拉取新模型
-        echo "   需要拉取新的嵌入模型模型吗？"
+        echo "   需要拉取新的嵌入模型吗？"
         echo ""
         echo "   🇨🇳 中文模型推荐："
         echo "   • bge-m3              - 中文最佳 (推荐，~2.3GB)"
@@ -175,128 +238,142 @@ setup_ollama() {
         fi
     fi
     echo ""
+    
+    return 0
 }
 
-# 激活知识库系统
-setup_knowledge() {
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "📚 激活：知识库系统"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+# 验证安装
+verify_installation() {
+    echo ""
+    echo "🔍 验证安装..."
     echo ""
     
-    if [ ! -d "libs/memory_hub" ]; then
-        echo "   ⚠️  libs/memory_hub 不存在"
+    # 检查 Ollama
+    if ! command -v ollama &> /dev/null; then
+        echo "   ❌ Ollama 未找到"
+        return 1
+    fi
+    echo "   ✅ Ollama 已安装"
+    
+    # 检查服务
+    if ! curl -s http://localhost:11434/api/tags &> /dev/null; then
+        echo "   ❌ Ollama 服务未运行"
+        return 1
+    fi
+    echo "   ✅ Ollama 服务运行中"
+    
+    # 检查模型（任意一个即可）
+    if ollama list | grep -qE "nomic-embed-text|m3e-base|bge-m3"; then
+        echo "   ✅ 嵌入模型已下载"
+    else
+        echo "   ⚠️  嵌入模型未下载，可手动下载："
+        echo "      ollama pull nomic-embed-text"
         return 1
     fi
     
-    python3 << EOF
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path('$WORKSPACE') / 'libs'))
-sys.path.insert(0, str(Path('$WORKSPACE') / 'scripts' / 'core'))
-from path_utils import resolve_workspace
-from memory_hub import MemoryHub
-
-workspace = resolve_workspace()
-hub = MemoryHub('$AGENT_NAME')
-
-try:
-    print("   📝 添加基础知识...")
-    
-    hub.knowledge.add(
-        title='项目介绍',
-        content='这是我的个人项目，专注于知识管理和内容创作。',
-        category='projects',
-        tags=['项目', '介绍']
-    )
-    print("      ✅ 项目介绍")
-    
-    hub.knowledge.add(
-        title='工作流程',
-        content='标准工作流程：规划 → 创作 → 发布 → 分析',
-        category='workflow',
-        tags=['流程', '工作']
-    )
-    print("      ✅ 工作流程")
-    
-    print("")
-    print("   ✅ 知识库已激活")
-    print(f"   📊 分类：{len(hub.knowledge.list_categories())} 个")
-except Exception as e:
-    print(f"   ⚠️  知识库激活失败：{e}")
-EOF
-    
-    echo ""
+    return 0
 }
 
-# 激活自进化系统
-setup_self_evolution() {
+# 激活语义搜索模型
+setup_ollama() {
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "🧬 激活：自进化系统"
+    echo "🔮 激活：语义搜索模型"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
     
-    if [ ! -d "skills/self-evolution" ]; then
-        echo "   ⚠️  自进化系统不存在"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "步骤 1/4: 检查 Ollama"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    
+    if check_ollama; then
+        echo ""
+        echo "✅ Ollama 已安装，跳过安装步骤"
+    else
+        read -p "是否安装 Ollama? (y/n): " -n 1 -r
+        echo ""
+        
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "❌ 已取消"
+            return 1
+        fi
+        
+        if ! install_ollama; then
+            echo "❌ Ollama 安装失败"
+            return 1
+        fi
+    fi
+    
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "步骤 2/4: 启动 Ollama 服务"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    
+    if ! start_ollama; then
+        echo "⚠️  请手动启动 Ollama 服务：ollama serve"
+        echo "   启动后重新运行此脚本"
         return 1
     fi
     
-    cd skills/self-evolution
-    
-    # 检查状态（不阻塞）
-    if python3 main.py status 2>&1 | grep -q "✅"; then
-        echo "   ✅ 自进化系统已激活"
-        cd ../..
-        return 0
-    fi
-    
-    echo "   📝 初始化自进化系统..."
-    python3 << EOF
-from storage import MemoryStream
-
-ms = MemoryStream()
-ms.add_memory(
-    content='自进化系统初始化完成',
-    memory_type='observation',
-    importance=5
-)
-print("   ✅ 初始化完成")
-EOF
-    
-    cd ../..
-    echo "   ✅ 自进化系统已激活"
     echo ""
-}
-
-# 激活 RAG 评估系统
-setup_rag() {
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "📊 激活：RAG 评估系统"
+    echo "步骤 3/4: 选择嵌入模型"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
     
-    if [ ! -d "skills/rag" ]; then
-        echo "   ⚠️  skills/rag 不存在"
+    if ! download_embedding_model; then
+        echo "❌ 模型下载失败"
         return 1
     fi
     
-    echo "   ✅ RAG 评估系统已就绪"
-    echo "   📝 使用方法：cd skills/rag && python3 evaluate.py"
     echo ""
-}
-
-# 激活定时任务
-setup_cron() {
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "⏰ 激活：定时任务"
+    echo "步骤 4/4: 验证安装"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
     
-    echo "   ✅ 定时任务已就绪"
-    echo "   📝 使用方法：openclaw cron add/list/run"
-    echo ""
+    if verify_installation; then
+        echo ""
+        echo "✅ 语义搜索模型激活成功"
+    else
+        echo ""
+        echo "⚠️  验证失败，请检查："
+        echo "   1. Ollama 是否正确安装"
+        echo "   2. Ollama 服务是否运行（ollama serve）"
+        echo "   3. 模型是否下载完成（ollama list）"
+        return 1
+    fi
 }
 
 # 主流程
 select_feature
+
+# 记录到 memory，让 Agent 感知
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📝 记录功能激活状态..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+MEMORY_FILE="memory/$(date +%Y-%m-%d).md"
+mkdir -p memory/
+
+if [[ "$FEATURES" == *"1"* ]]; then
+    cat >> "$MEMORY_FILE" << MEMORYEOF
+
+## 功能激活
+- 时间：$(date +%Y-%m-%d\ %H:%M)
+- 激活的功能：语义搜索模型 (Ollama + ${MODEL_NAME:-未下载})
+- 状态：已完成
+
+MEMORYEOF
+else
+    cat >> "$MEMORY_FILE" << MEMORYEOF
+
+## 功能激活
+- 时间：$(date +%Y-%m-%d\ %H:%M)
+- 激活的功能：无（基础功能已预装）
+- 状态：已跳过
+
+MEMORYEOF
+fi
+
+echo "   ✅ 已记录到 $MEMORY_FILE"
+echo ""
+echo "💡 提示：Agent 会在下次会话时读取此记录"
+echo "   或运行 '/new' 开始新会话立即生效"
+echo ""
