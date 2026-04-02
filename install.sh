@@ -420,7 +420,7 @@ if [ "$LANG" = "zh" ]; then
     echo "   ✅ 定时任务"
     echo ""
     echo "⚠️  可选：激活语义搜索模型（需要 Ollama）"
-    echo "   运行：./scripts/core/activate-features.sh"
+    echo "   运行：$WORKSPACE_ROOT/scripts/core/activate-features.sh"
     echo "   或跳过：继续正常使用"
     echo ""
 else
@@ -437,7 +437,7 @@ else
     echo "   ✅ Cron system"
     echo ""
     echo "⚠️  Optional: Activate semantic search (requires Ollama)"
-    echo "   Run: ./scripts/core/activate-features.sh"
+    echo "   Run: $WORKSPACE_ROOT/scripts/core/activate-features.sh"
     echo "   Or skip: Continue using normally"
     echo ""
 fi
