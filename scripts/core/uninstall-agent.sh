@@ -218,3 +218,12 @@ else
     echo "   cp -r $BACKUP_DIR $AGENT_DIR"
 fi
 echo ""
+
+# 回到用户主目录
+cd ~
+if [ "$LANG" = "zh" ]; then
+    echo "🏠 已返回主目录：~"
+else
+    echo "🏠 Changed to home directory: ~"
+fi
+echo ""
