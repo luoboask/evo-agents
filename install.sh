@@ -212,22 +212,46 @@ if [ -f "AGENTS.md" ] && ! grep -q "SKILL_RULES" AGENTS.md; then
 - Or check: \`curl -s http://localhost:11434/api/tags\`
 \`\`\`
 
-**If NOT installed**, ask user (only once per day):
+**If NOT installed**, introduce and ask (only once per day):
 
-> "🔮 检测到尚未激活语义搜索能力。
+**Step 1: Introduce semantic search**
+
+> "🔮 检测到尚未激活**语义搜索**能力。
 > 
-> 语义搜索可以让记忆检索更智能（支持语义理解，不只是关键词匹配）。
+> **什么是语义搜索？**
 > 
-> 需要激活吗？
-> - ✅ 运行：\`$WORKSPACE_ROOT/scripts/core/activate-features.sh\`
+> 语义搜索使用 AI 嵌入模型理解内容的**含义**，而不仅仅是关键词匹配。
+> 
+> **激活后你可以：**
+> - 🧠 搜索'昨天看的文章' → 找到相关内容，即使没提到'文章'这个词
+> - 💡 搜索'项目进展' → 找到所有讨论进度的对话
+> - 🎯 搜索'用户反馈' → 找到所有反馈相关的记忆
+> - ⚡ 支持中文、英文、多语言混合搜索
+> 
+> **需要的资源：**
+> - Ollama（本地模型运行环境，~300MB）
+> - 嵌入模型（推荐 bge-m3，~2.3GB）
+> - 一次性下载，之后离线使用
+> 
+> **模型选择：**
+> - 🇨🇳 中文：bge-m3 (推荐)、bge-large-zh、text2vec
+> - 🇺🇸 英文：nomic-embed-text、mxbai-embed-large、all-minilm
+> - 🌍 多语言：snowflake-arctic-embed"
+
+**Step 2: Ask user**
+
+> "需要激活语义搜索吗？
+> - ✅ 激活：运行 \`$WORKSPACE_ROOT/scripts/core/activate-features.sh\`
 > - ⏭️  跳过：回复'跳过'或'skip'
-> - ℹ️  了解更多：\`docs/FEATURE_ACTIVATION_GUIDE.md\`"
+> - ℹ️  了解更多：docs/FEATURE_ACTIVATION_GUIDE.md"
 
 **If user says yes/好的/yes**, respond:
 > "好的！请运行以下命令：
 > \`\`\`bash
 > $WORKSPACE_ROOT/scripts/core/activate-features.sh
 > \`\`\`
+> 脚本会引导你安装 Ollama 并选择嵌入模型（支持中文/英文/多语言）。
+> 
 > 完成后告诉我，我会确认激活状态。"
 
 **If user says skip/跳过**, respond:
