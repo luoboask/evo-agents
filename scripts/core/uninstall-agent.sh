@@ -219,11 +219,10 @@ else
 fi
 echo ""
 
-# 回到用户主目录
-cd ~
+# 提示用户返回主目录（cd 在子 shell 中不生效）
 if [ "$LANG" = "zh" ]; then
-    echo "🏠 已返回主目录：~"
+    echo "💡 提示：运行 'cd ~' 返回主目录"
 else
-    echo "🏠 Changed to home directory: ~"
+    echo "💡 Tip: Run 'cd ~' to return to home directory"
 fi
 echo ""
