@@ -308,3 +308,23 @@ setup_cron() {
 
 # 主流程
 select_feature
+
+# 记录到 memory，让 Agent 感知
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📝 记录功能激活状态..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+MEMORY_FILE="memory/$(date +%Y-%m-%d).md"
+mkdir -p memory/
+cat >> "$MEMORY_FILE" << MEMORYEOF
+
+## 功能激活
+- 时间：$(date +%Y-%m-%d\ %H:%M)
+- 激活的功能：${FEATURES:-未选择}
+- 状态：已完成
+
+MEMORYEOF
+echo "   ✅ 已记录到 $MEMORY_FILE"
+echo ""
+echo "💡 提示：Agent 会在下次会话时读取此记录"
+echo "   或运行 '/new' 开始新会话立即生效"
+echo ""
