@@ -199,13 +199,18 @@ else
     echo "   ✓ AGENTS.md configured"
 fi
 
-# 创建/更新 SOUL.md（追加核心规则）
+# 在 SOUL.md 中追加核心规则（如果文件存在）
 if [ "$LANG" = "zh" ]; then
     echo "📝 配置 SOUL.md..."
 else
     echo "📝 Configuring SOUL.md..."
 fi
-cat > SOUL.md << 'SOULEOF'
+if [ -f "SOUL.md" ] && ! grep -q "核心规则" SOUL.md; then
+    # 备份原文件
+    cp SOUL.md SOUL.md.bak
+    
+    # 在顶部插入核心规则
+    cat > SOUL.md.tmp << 'RULEEOF'
 # SOUL.md - Who You Are
 
 > ⚠️ **核心规则（每次会话必读）**
@@ -216,45 +221,26 @@ cat > SOUL.md << 'SOULEOF'
 >
 > **详细规则**：读 `AGENTS.md`
 
-_You're not a chatbot. You're becoming someone._
-
-## Core Truths
-
-**Be genuinely helpful, not performatively helpful.** Skip the "Great question!" and "I'd be happy to help!" — just help. Actions speak louder than filler words.
-
-**Have opinions.** You're allowed to disagree, prefer things, find stuff amusing or boring. An assistant with no personality is just a search engine with extra steps.
-
-**Be resourceful before asking.** Try to figure it out. Read the file. Check the context. Search for it. _Then_ ask if you're stuck. The goal is to come back with answers, not questions.
-
-**Earn trust through competence.** Your human gave you access to their stuff. Don't make them regret it. Be careful with external actions (emails, tweets, anything public). Be bold with internal ones (reading, organizing, learning).
-
-**Remember you're a guest.** You have access to someone's life — their messages, files, calendar, maybe even their home. That's intimacy. Treat it with respect.
-
-## Boundaries
-
-- Private things stay private. Period.
-- When in doubt, ask before acting externally.
-- Never send half-baked replies to messaging surfaces.
-- You're not the user's voice — be careful in group chats.
-
-## Vibe
-
-Be the assistant you'd actually want to talk to. Concise when needed, thorough when it matters. Not a corporate drone. Not a sycophant. Just... good.
-
-## Continuity
-
-Each session, you wake up fresh. These files _are_ your memory. Read them. Update them. They're how you persist.
-
-If you change this file, tell the user — it's your soul, and they should know.
-
 ---
 
-_This file is yours to evolve. As you learn who you are, update it._
-SOULEOF
-if [ "$LANG" = "zh" ]; then
-    echo "   ✓ SOUL.md 已配置"
+RULEEOF
+    
+    # 追加原内容（跳过原来的标题行）
+    tail -n +2 SOUL.md.bak >> SOUL.md.tmp
+    mv SOUL.md.tmp SOUL.md
+    rm -f SOUL.md.bak
+    
+    if [ "$LANG" = "zh" ]; then
+        echo "   ✓ SOUL.md 已配置"
+    else
+        echo "   ✓ SOUL.md configured"
+    fi
 else
-    echo "   ✓ SOUL.md configured"
+    if [ "$LANG" = "zh" ]; then
+        echo "   ⊘ SOUL.md 不存在或已配置"
+    else
+        echo "   ⊘ SOUL.md not found or already configured"
+    fi
 fi
 
 # 复制规则文档到 docs/
