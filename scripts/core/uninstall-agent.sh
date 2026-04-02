@@ -205,7 +205,7 @@ if [ "$LANG" = "zh" ]; then
     fi
     echo ""
     echo "💡 恢复数据:"
-    echo "   cp -r $BACKUP_DIR agents/$AGENT_NAME"
+    echo "   cp -r $BACKUP_DIR $AGENT_DIR"
 else
     echo "📊 Summary:"
     echo "   Agent: $AGENT_NAME"
@@ -215,6 +215,6 @@ else
     fi
     echo ""
     echo "💡 Restore data:"
-    echo "   cp -r $BACKUP_DIR agents/$AGENT_NAME"
+    echo "   cp -r $BACKUP_DIR $AGENT_DIR"
 fi
 echo ""
