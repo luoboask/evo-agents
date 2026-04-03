@@ -168,12 +168,27 @@ if [ -f "AGENTS.md" ] && ! grep -q "SKILL_RULES" AGENTS.md; then
 **Full rules:** See `docs/AGENT_BEHAVIOR.md`
 
 ### Skill Usage
+
+#### Core Skills
 | When | Use |
 |------|-----|
 | User mentions history | `memory-search` |
 | Real-time info | `web-knowledge` |
 | Task completed | `self-evolution` (evolve) |
 | End of day | `self-evolution` (nightly) |
+
+#### Enhanced Skills (v2.0+)
+| When | Use | Command |
+|------|-----|---------|
+| Build knowledge graph | `knowledge-graph` | `cd skills/knowledge-graph && python3 builder.py` |
+| Compress memories | `memory-compression` | `cd skills/memory-search && python3 compress.py --weekly` |
+| AI entity extraction | Auto (uses `knowledge-graph`) | Optional: qwen2.5:0.5b |
+| Smart summarization | Auto (uses `memory-compression`) | Optional: qwen2.5:1.5b |
+
+**Enhanced Features:**
+- ✅ **Knowledge Graph**: AI-powered entity extraction (+50% coverage) + relation inference
+- ✅ **Memory Compression**: Daily → Weekly → Monthly → Yearly hierarchical summaries
+- ✅ **Optional Ollama**: Works without AI models (graceful fallback to basic mode)
 
 **Full rules:** See `docs/SKILL_RULES.md`
 
