@@ -167,6 +167,26 @@ if [ -f "AGENTS.md" ] && ! grep -q "SKILL_RULES" AGENTS.md; then
 
 **Full rules:** See `docs/AGENT_BEHAVIOR.md`
 
+---
+
+## 🔍 Before Responding
+
+**Before responding to any user query:**
+
+1. Use `memory-search` to find relevant context about the topic
+2. Integrate retrieved memories into your response
+3. Cite sources when using memory content (e.g., "According to 2026-04-04 memory...")
+
+**Exception:** Skip for simple greetings or when context is obvious.
+
+**Example:**
+```bash
+# User asks: "What did we discuss about Ollama?"
+# Agent should:
+python3 skills/memory-search/search.py "Ollama"
+# Then respond with retrieved context + citations
+```
+
 ### Skill Usage
 
 #### Core Skills
