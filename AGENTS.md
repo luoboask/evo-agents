@@ -255,12 +255,42 @@ This is a starting point. Add your own conventions, style, and rules as you figu
 **Full rules:** See `docs/AGENT_BEHAVIOR.md`
 
 ### Skill Usage
+
+#### Core Skills
 | When | Use |
 |------|-----|
 | User mentions history | `memory-search` |
 | Real-time info | `web-knowledge` |
 | Task completed | `self-evolution` (evolve) |
 | End of day | `self-evolution` (nightly) |
+
+#### Enhanced Skills (v2.0+)
+| When | Use | Command |
+|------|-----|---------|
+| Build knowledge graph | `knowledge-graph` | `cd skills/knowledge-graph && python3 builder.py` |
+| Compress memories | `memory-compression` | `cd skills/memory-search && python3 compress.py --weekly` |
+| AI entity extraction | `knowledge-graph` (auto) | Uses qwen2.5:0.5b (optional) |
+| Smart summarization | `memory-compression` (auto) | Uses qwen2.5:1.5b (optional) |
+
+**Features:**
+- ✅ **Knowledge Graph**: AI-powered entity extraction + relation inference
+  - Rule-based + LLM-assisted extraction (+50% coverage)
+  - Automatic relation inference (transitive closure)
+  - Output: `memory/knowledge_graph.json`
+
+- ✅ **Memory Compression**: Hierarchical summarization
+  - Daily → Weekly → Monthly → Yearly
+  - Key event extraction (importance >= 7.0)
+  - LLM-generated structured summaries
+  - Output: `memory/weekly/YYYY-Www.md`
+
+**Optional Dependencies:**
+```bash
+ollama pull qwen2.5:0.5b   # For knowledge graph AI extraction
+ollama pull qwen2.5:1.5b   # For memory compression summarization
+```
+
+**Note:** Both skills work without Ollama (basic mode with graceful fallback).
 
 **Full rules:** See `docs/SKILL_RULES.md`
 
