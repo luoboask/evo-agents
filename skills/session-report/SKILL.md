@@ -1,231 +1,266 @@
----
-name: session-report
-description: 从当前会话提取长期有价值的知识，存入记忆系统（用户偏好、项目决策、可复用模式）
-author: evo-agents
-version: 1.0.0
-tags: [memory, knowledge, reflection, report]
-disable-model-invocation: false
----
+# Session Report - Conversation Summary & Memory Saver
 
-# /session-report - 会话总结报告
-
-> **核心理念**: 会话隔离 ≠ 知识丢失  
-> **目标**: 提取跨会话有价值的知识，丢弃临时状态
+> **Core Concept**: Session isolation ≠ Knowledge loss  
+> **Purpose**: Extract cross-session valuable knowledge, discard temporary states  
+> **Status**: ✅ Production Ready | Manual Trigger | Three-Layer Filtering
 
 ---
 
-## ⚠️ 核心原则
+## 🎯 When to Use
 
-### ✅ 应该保存的（长期价值）
+### ✅ Recommended Scenarios
 
-| 类型 | 示例 | 去向 |
-|------|------|------|
-| **用户偏好** | "我不喜欢冗长回复"、"偏好 TypeScript" | MEMORY.md (Feedback) |
-| **项目决策** | "选择 Redis 因为缓存需求"、"冻结合并直到发布" | MEMORY.md (Project) |
-| **外部资源** | "API 文档在 api.example.com" | MEMORY.md (Reference) |
-| **用户角色** | "我是数据科学家"、"负责后端开发" | MEMORY.md (User) |
-| **工作流指导** | "测试必须用真实数据库" | MEMORY.md (Feedback) |
-| **不可推导的知识** | "法律合规要求这个实现方式" | MEMORY.md (Project) |
+- After completing important tasks or project milestones
+- After making key architectural decisions with clear rationale
+- After discovering new knowledge, tips, or workarounds
+- After user provides workflow guidance (correction or confirmation)
+- After learning about user's role, preferences, or goals
+- Before ending a session, want to preserve highlights
 
-### ❌ 应该丢弃的（临时状态）
+### ❌ Not Recommended
 
-| 类型 | 示例 | 原因 |
-|------|------|------|
-| **任务状态** | "正在修复 bug #123" | 会话特定，很快过时 |
-| **中间代码** | 未完成的实现 | 代码库是权威来源 |
-| **一次性对话** | "帮我看看这个文件" | 无普遍价值 |
-| **可推导信息** | Git 提交、文件结构 | `git log` / 代码可查 |
-| **调试过程** | "试了 A 不行，试 B" | 解决方案已在代码中 |
+- Just temporary debugging, no general value
+- Task still in progress, status changes frequently
+- Pure chat without substantial content
+- Involving sensitive information (passwords, keys, etc.)
 
 ---
 
-## 🎯 何时使用
+## 🚀 Quick Start
 
-### ✅ 适合场景
+### Basic Usage
 
-- 完成了重要任务或项目里程碑
-- 做出了关键架构决策并有明确原因
-- 发现了新的知识点、坑或 workaround
-- 用户给出了工作方式指导（纠正或确认）
-- 了解了用户的角色、偏好或目标
-- 会话即将结束，想保留精华内容
+```bash
+# Full flow (preview → confirm → save)
+/session-report
 
-### ❌ 不适合场景
+# Preview only, don't save
+/session-report --dry-run
 
-- 只是临时调试，没有普遍价值
-- 任务还在进行中，状态频繁变化
-- 纯聊天或简单问答，没有实质性内容
-- 涉及敏感信息（密码、密钥等）
+# Force save (skip confirmation, use with caution)
+/session-report --force
+```
+
+### Specify Type
+
+```bash
+# Only save user memory
+/session-report --type user
+
+# Only save feedback memory
+/session-report --type feedback
+
+# Only save project memory
+/session-report --type project
+
+# Only save reference memory
+/session-report --type reference
+```
+
+### Limit Scope
+
+```bash
+# Review only last 50 messages
+/session-report --limit 50
+
+# Export as Markdown file
+/session-report --export report.md
+```
 
 ---
 
-## 📋 执行流程
+## 📋 What to Save vs Discard
 
-### Step 1: 回顾会话历史
+### ✅ Should Save (Long-term Value)
+
+| Type | Example | Destination |
+|------|---------|-------------|
+| **User Preferences** | "I prefer concise replies" | MEMORY.md (Feedback) |
+| **Project Decisions** | "Choose Redis for caching needs" | MEMORY.md (Project) |
+| **External Resources** | "API docs at api.example.com" | MEMORY.md (Reference) |
+| **User Role** | "I'm a data scientist" | MEMORY.md (User) |
+| **Workflow Guidance** | "Tests must use real database" | MEMORY.md (Feedback) |
+| **Non-derivable Knowledge** | "Legal compliance requires this" | MEMORY.md (Project) |
+
+### ❌ Should Discard (Temporary States)
+
+| Type | Example | Reason |
+|------|---------|--------|
+| **Task Status** | "Fixing bug #123" | Session-specific, quickly outdated |
+| **Intermediate Code** | Unfinished implementation | Codebase is authoritative source |
+| **One-time Conversations** | "Help me check this file" | No general value |
+| **Derivable Info** | Git commits, file structure | `git log` / code can derive |
+| **Debugging Process** | "Tried A, didn't work, tried B" | Solution already in code |
+
+---
+
+## 🏗️ Execution Flow
+
+### Step 1: Review Session History
 
 ```python
-# 获取当前会话的对话记录
+# Get current session conversation records
 messages = get_session_history(limit=100)
 ```
 
-**注意**: 
-- 只回顾当前会话，不读取其他会话
-- 保持会话隔离性
-- 如果会话太长，聚焦最近 20-50 条消息
+**Note**: 
+- Only review current session, not other sessions
+- Maintain session isolation
+- If session too long, focus on last 20-50 messages
 
 ---
 
-### Step 2: 识别候选内容
+### Step 2: Identify Candidates
 
-使用以下过滤规则：
+Use three-layer filtering:
 
-#### 第 1 层：临时 vs 长期
+#### Layer 1: Temporary vs Long-term
 
 ```python
 def is_long_term_value(message):
-    """判断是否有长期价值"""
-    # ❌ 临时状态
-    if contains_temporal_refs(message):  # "现在"、"今天"、"这个 bug"
+    """Judge if has long-term value"""
+    # ❌ Temporary states
+    if contains_temporal_refs(message):  # "now", "today", "this bug"
         return False
-    if is_task_status(message):  # "正在做 X"
+    if is_task_status(message):  # "doing X"
         return False
     
-    # ✅ 长期知识
-    if is_user_preference(message):  # "我偏好..."
+    # ✅ Long-term knowledge
+    if is_user_preference(message):  # "I prefer..."
         return True
-    if is_project_decision(message):  # "我们决定..."
+    if is_project_decision(message):  # "we decided..."
         return True
-    if is_external_reference(message):  # "文档在..."
+    if is_external_reference(message):  # "docs at..."
         return True
     
     return False
 ```
 
-#### 第 2 层：私人 vs 共享
+#### Layer 2: Private vs Shared
 
 ```python
 def determine_scope(content):
-    """确定作用域"""
+    """Determine scope"""
     if is_personal_preference(content):
-        return 'private'  # 用户记忆
+        return 'private'  # User memory
     elif is_team_convention(content):
-        return 'team'     # 团队记忆
+        return 'team'     # Team memory
     else:
-        return 'project'  # 项目记忆
+        return 'project'  # Project memory
 ```
 
-#### 第 3 层：可推导 vs 不可推导
+#### Layer 3: Derivable vs Non-derivable
 
 ```python
-def is_deriviable_from_code(content):
-    """判断是否可从代码推导"""
-    # ❌ 这些不应该保存（代码/工具可查）
-    if is_file_structure(content):      # 文件列表
+def is_derivable_from_code(content):
+    """Judge if can derive from code"""
+    # ❌ Should not save (code/tools can derive)
+    if is_file_structure(content):      # File list
         return True
-    if is_git_history(content):         # 提交历史
+    if is_git_history(content):         # Commit history
         return True
-    if is_code_pattern_obvious(content): # 明显的代码模式
+    if is_code_pattern_obvious(content): # Obvious code patterns
         return True
     
-    # ✅ 这些应该保存（不可推导）
-    # - 决策原因（为什么选 A 不选 B）
-    # - 用户偏好（沟通风格）
-    # - 外部依赖（第三方系统位置）
-    # - 历史教训（过去踩过的坑）
+    # ✅ Should save (non-derivable)
+    # - Decision reasons (why A not B)
+    # - User preferences (communication style)
+    # - External dependencies (third-party system locations)
+    # - Historical lessons (past pitfalls)
     return False
 ```
 
 ---
 
-### Step 3: 生成结构化报告
+### Step 3: Generate Structured Report
 
 ```markdown
-## Session Report - {日期时间}
+## Session Report - {datetime}
 
-### 🧠 新知识（建议保存）
+### 🧠 New Knowledge (Recommended to Save)
 
-#### User Memory（用户记忆）
-- {用户角色/偏好/目标}
+#### User Memory
+- {User role/preferences/goals}
 
-#### Feedback Memory（反馈记忆）
-- {工作方式指导 + Why + How to apply}
+#### Feedback Memory
+- {Workflow guidance + Why + How to apply}
 
-#### Project Memory（项目记忆）
-- {项目决策/目标/事件 + Why + How to apply}
+#### Project Memory
+- {Project decision/goal/event + Why + How to apply}
 
-#### Reference Memory（参考记忆）
-- {外部资源位置 + 用途}
+#### Reference Memory
+- {External resource location + purpose}
 
-### 💡 可复用模式
-- {可复用的代码模式/工具类}
+### 💡 Reusable Patterns
+- {Reusable code patterns/tools}
 
-### ❌ 已丢弃（临时状态）
-- {临时任务状态}
-- {中间代码片段}
-- {一次性对话}
+### ❌ Discarded (Temporary States)
+- {Temporary task status}
+- {Intermediate code snippets}
+- {One-time conversations}
 
-### 📊 统计
-- 审查消息数：{N}
-- 建议保存：{M} 条
-- 已丢弃：{K} 条
+### 📊 Statistics
+- Messages reviewed: {N}
+- Recommended to save: {M} items
+- Discarded: {K} items
 ```
 
 ---
 
-### Step 4: 用户确认（关键！）
+### Step 4: User Confirmation (Critical!)
 
 ```markdown
-📋 Session Report 预览
+📋 Session Report Preview
 
-我分析了本次会话的 {N} 条消息，发现以下内容值得保存：
+I analyzed {N} messages from this session and found the following worth saving:
 
-**✅ 建议保存 ({M} 项):**
+**✅ Recommended to Save ({M} items):**
 
-1. **[User Memory]** 用户偏好 TypeScript 而非 JavaScript
-   - 来源：用户说"我更喜欢 TS，类型安全"
-   - 作用域：私有
+1. **[User Memory]** User prefers TypeScript over JavaScript
+   - Source: User said "I prefer TS, type safety"
+   - Scope: Private
    
-2. **[Project Memory]** 选择方案 A（Redis 缓存）因为 QPS 需求
-   - 来源：架构讨论，提到"QPS 提升 3 倍"
-   - 作用域：团队
-   - Why: 性能要求
-   - How to apply: 新 API 都应该加缓存层
+2. **[Project Memory]** Choose solution A (Redis cache) due to QPS requirements
+   - Source: Architecture discussion, mentioned "3x QPS improvement"
+   - Scope: Team
+   - Why: Performance requirements
+   - How to apply: New APIs should add cache layer
 
-3. **[Reference Memory]** API 文档在 https://api.example.com/v2
-   - 来源：用户分享链接
-   - 作用域：团队
+3. **[Reference Memory]** API docs at https://api.example.com/v2
+   - Source: User shared link
+   - Scope: Team
 
-**❌ 已丢弃 (临时状态):**
-- Bug 修复 #123 的进度（任务特定）
-- 中间的代码修改尝试（代码库可查）
-- 调试过程的试错记录（解决方案已实现）
+**❌ Discarded (Temporary States):**
+- Bug fix #123 progress (task-specific)
+- Intermediate code modification attempts (derivable from codebase)
+- Debugging trial-and-error records (solution already implemented)
 
 ---
-**操作:**
-- `y` 或 `确认` - 保存上述内容到记忆系统
-- `n` 或 `取消` - 不保存任何内容
-- `edit` - 手动编辑要保存的内容
-- `show N` - 查看第 N 项的详细内容
+**Actions:**
+- `y` or `confirm` - Save above content to memory system
+- `n` or `cancel` - Don't save anything
+- `edit` - Manually edit what to save
+- `show N` - View item N details
 ```
 
-**关键设计**:
-- ✅ 明确列出每项的来源
-- ✅ 标注作用域（私有/团队）
-- ✅ 说明为什么值得保存
-- ✅ 用户可以逐项审查
-- ✅ 默认不保存，需要明确确认
+**Key Design**:
+- ✅ Clearly list source of each item
+- ✅ Mark scope (private/team)
+- ✅ Explain why worth saving
+- ✅ User can review item by item
+- ✅ Default not saved, requires explicit confirmation
 
 ---
 
-### Step 5: 写入记忆系统
+### Step 5: Save to Memory System
 
-根据用户确认和类型调用相应接口：
+Save according to user confirmation and type:
 
 ```python
 def save_to_memory(items, user_confirmed):
     for item in items:
         if not user_confirmed.get(item.id, False):
-            continue  # 跳过未确认的
+            continue  # Skip unconfirmed
         
         if item.type == 'user':
             save_user_memory({
@@ -255,438 +290,395 @@ def save_to_memory(items, user_confirmed):
                 'content': item.location
             })
     
-    return f"✅ 成功保存 {count} 条记忆"
+    return f"✅ Successfully saved {count} memories"
 ```
 
 ---
 
-## 🔒 安全与隐私
+## 🔒 Security & Privacy
 
-### 🚫 绝对禁止保存
+### 🚫 Absolutely Forbidden to Save
 
-- 🔐 API keys、密码、token
-- 🔐 用户个人信息（邮箱、电话、地址）
-- 🔐 内部系统地址（除非用户明确允许）
-- 🔐 未公开的商业模式或机密
-- 🔐 第三方保密信息
+- 🔐 API keys, passwords, tokens
+- 🔐 User personal info (email, phone, address)
+- 🔐 Internal system addresses (unless explicitly allowed)
+- 🔐 Undisclosed business models or secrets
+- 🔐 Third-party confidential information
 
-### 🎯 作用域控制
+### 🎯 Scope Control
 
-| 内容类型 | 作用域 | 存储位置 | 可见性 |
-|----------|--------|----------|--------|
-| 个人偏好 | Private | `MEMORY.md` | 仅主会话 |
-| 用户角色 | Private | `MEMORY.md` | 仅主会话 |
-| 项目决策 | Team | `MEMORY.md` | 团队成员 |
-| 外部资源 | Team | `MEMORY.md` | 团队成员 |
+| Content Type | Scope | Storage Location | Visibility |
+|--------------|-------|------------------|------------|
+| Personal Preferences | Private | `MEMORY.md` | Main session only |
+| User Roles | Private | `MEMORY.md` | Main session only |
+| Project Decisions | Team | `MEMORY.md` | Team members |
+| External Resources | Team | `MEMORY.md` | Team members |
 
-### ⚠️ 检查清单
+### ⚠️ Checklist
 
-在保存前自动检查：
-- [ ] 不包含敏感词（password, secret, key, token）
-- [ ] 不包含完整 URL（除非是公开文档）
-- [ ] 不包含文件路径（除非是公共配置）
-- [ ] 作用域标注正确
-- [ ] 用户已明确确认
-
----
-
-## 🛠️ 命令参数
-
-```bash
-# 完整流程（回顾→筛选→确认→保存）
-/session-report
-
-# 只生成报告，不保存（dry run）
-/session-report --dry-run
-
-# 强制保存（跳过确认，慎用！）
-/session-report --force
-
-# 只保存特定类型
-/session-report --type user       # 只保存用户记忆
-/session-report --type feedback   # 只保存反馈记忆
-/session-report --type project    # 只保存项目记忆
-/session-report --type reference  # 只保存参考记忆
-
-# 指定目标记忆文件
-/session-report --target memory/YYYY-MM-DD.md
-
-# 限制回顾的消息数
-/session-report --limit 50
-
-# 导出为 Markdown 文件
-/session-report --export report.md
-```
+Before saving, automatically check:
+- [ ] No sensitive words (password, secret, key, token)
+- [ ] No complete URLs (unless public docs)
+- [ ] No file paths (unless public config)
+- [ ] Scope marked correctly
+- [ ] User explicitly confirmed
 
 ---
 
-## 📊 与会话隔离的关系
+## 📊 Relationship with Session Isolation
 
-### 不破坏隔离的设计
+### Design That Doesn't Break Isolation
 
 ```
 ┌─────────────┐              ┌─────────────┐
-│   会话 A     │              │   会话 B     │
+│  Session A  │              │  Session B  │
 │             │              │             │
-│ 临时状态     │              │ 临时状态     │
+│ Temp States │              │ Temp States │
 │ (bug #123)  │              │ (feature X) │
 │    ↓        │              │    ↓        │
-│   丢弃 ❌    │              │   丢弃 ❌    │
+│  Discard ❌ │              │  Discard ❌ │
 │             │              │             │
-│ 长期知识     │              │             │
-│ (用户偏好)   │              │             │
+│ Long-term   │              │             │
+│ Knowledge   │              │             │
+│ (preferences)│             │             │
 │    ↓        │              │    ↑        │
 │  MEMORY.md  ├──────────────┤             │
-│             │   共享知识    │             │
+│             │ Shared Knowledge            │
 └─────────────┘              └─────────────┘
 
-隔离的是：临时状态、任务上下文、中间过程
-共享的是：用户偏好、项目决策、外部资源
+Isolated: Temporary states, task context, intermediate processes
+Shared: User preferences, project decisions, external resources
 ```
 
-### 反而增强隔离的价值
+### Actually Enhances Isolation Value
 
-| 没有 session-report | 有 session-report |
-|---------------------|-------------------|
-| 会话结束后一切归零 | 知识沉淀下来 |
-| 每次重新解释背景 | 未来会话自动获得背景 |
-| 同样的错误犯两次 | 从历史经验学习 |
-| 隔离=孤立 | 隔离但互联 |
+| Without session-report | With session-report |
+|-----------------------|--------------------|
+| Everything lost after session ends | Knowledge preserved |
+| Re-explain background every time | Future sessions auto-get background |
+| Make same mistakes twice | Learn from historical experience |
+| Isolation = Isolation | Isolation but interconnected |
 
 ---
 
-## 🔄 与其他技能配合
+## 🔄 Integration with Other Skills
 
-### 与 memory-search
+### With memory-search
 
 ```
 /session-report              memory-search
      │                            │
      ▼                            ▼
-写入记忆系统  ─────────────→  检索记忆
+Write to memory ←──────────→ Retrieve memory
      │                            │
      └──────────────┬─────────────┘
                     │
                     ▼
-          未来会话自动获得背景知识
+          Future sessions auto-get context
 ```
 
-**协同效应**:
-- `session-report` 负责**写入**高质量记忆
-- `memory-search` 负责**读取**相关记忆
-- 形成完整的记忆闭环
+**Synergy**:
+- `session-report` responsible for **writing** high-quality memories
+- `memory-search` responsible for **reading** relevant memories
+- Forms complete memory loop
 
 ---
 
-### 与 self-evolution
+### With self-evolution
 
 ```
 /session-report              self-evolution
      │                            │
      ▼                            ▼
-提取经验教训  ─────────────→  进化 Agent 行为
+Extract lessons ←──────────→ Evolve agent behavior
      │                            │
      └──────────────┬─────────────┘
                     │
                     ▼
-          Agent 越来越符合用户偏好
+          Agent increasingly matches user preferences
 ```
 
-**协同效应**:
-- `session-report` 发现模式（"用户总是纠正 X"）
-- `self-evolution` 调整行为（减少 X 行为）
+**Synergy**:
+- `session-report` discovers patterns ("user always corrects X")
+- `self-evolution` adjusts behavior (reduce X behavior)
 
 ---
 
-### 与 project-explorer（待创建）
+## ⚠️ Common Mistakes & How to Avoid
 
-```
-project-explorer           /session-report
-     │                            │
-     ▼                            ▼
-分析代码库  ─────────────→  保存发现
-     │                            │
-     └──────────────┬─────────────┘
-                    │
-                    ▼
-          形成完整的项目知识库
-```
+### ❌ Mistake 1: Save All Conversations
 
----
-
-## ⚠️ 常见误区与避免方法
-
-### ❌ 误区 1: 保存所有对话
-
-**错误做法**:
+**Wrong**:
 ```markdown
-用户：帮我修一下这个 bug
-AI: 好的，正在查看...
-用户：怎么样了？
-AI: 找到了，是空指针...
+User: Help me fix this bug
+AI: OK, checking...
+User: How's it going?
+AI: Found it, null pointer...
 
-→ 全部保存 ❌
+→ Save all ❌
 ```
 
-**正确做法**:
+**Right**:
 ```markdown
-从对话中提取:
-- [Project Memory] User 服务有空指针风险，需加 null 检查 ✅
-- [Feedback Memory] 用户希望主动报告问题，不要等询问 ✅
+Extract from conversation:
+- [Project Memory] User service has null pointer risk, add null check ✅
+- [Feedback Memory] User wants proactive issue reporting, don't wait for questions ✅
 
-丢弃:
-- 临时对话流程 ❌
+Discard:
+- Temporary conversation flow ❌
 ```
 
 ---
 
-### ❌ 误区 2: 过度总结
+### ❌ Mistake 2: Over-summarize
 
-**错误做法**:
+**Wrong**:
 ```markdown
-保存："用户今天问了 3 个问题，分别是 A、B、C"
+Save: "User asked 3 questions today: A, B, C"
 ```
 
-**问题**: 这是会话状态，不是长期知识
+**Problem**: This is session state, not long-term knowledge
 
-**正确做法**:
+**Right**:
 ```markdown
-保存："用户偏好先了解背景再给解决方案"（从 3 个问题中抽象出的模式）
-```
-
----
-
-### ❌ 误区 3: 不区分作用域
-
-**错误做法**:
-```markdown
-把所有内容都保存到项目记忆
-```
-
-**问题**: 个人偏好污染项目空间
-
-**正确做法**:
-```markdown
-个人偏好 → User Memory（私有）
-项目约定 → Project Memory（团队）
+Save: "User prefers to understand background first before getting solutions" 
+(pattern abstracted from 3 questions)
 ```
 
 ---
 
-### ❌ 误区 4: 跳过用户确认
+### ❌ Mistake 3: Don't Distinguish Scope
 
-**错误做法**:
+**Wrong**:
+```markdown
+Save everything to project memory
+```
+
+**Problem**: Personal preferences pollute project space
+
+**Right**:
+```markdown
+Personal preferences → User Memory (private)
+Project conventions → Project Memory (team)
+```
+
+---
+
+### ❌ Mistake 4: Skip User Confirmation
+
+**Wrong**:
 ```python
-# 自动保存所有内容
+# Automatically save all content
 save_to_memory(extracted_items)  # ❌
 ```
 
-**正确做法**:
+**Right**:
 ```python
-# 先生成预览
+# Generate preview first
 preview = generate_preview(extracted_items)
 
-# 用户确认
+# User confirmation
 if user_confirms(preview):
     save_to_memory(extracted_items)  # ✅
 ```
 
 ---
 
-## 📝 记忆格式模板
+## 📝 Memory Format Templates
 
-### User Memory 格式
+### User Memory Format
 
 ```markdown
 ---
-name: 用户角色与偏好
+name: User Role & Preferences
 type: user
 scope: private
 ---
 
-**角色**: 数据科学家，专注于可观测性/logging 领域
+**Role**: Data scientist, focused on observability/logging domain
 
-**技术背景**:
-- 精通 Python 和 SQL
-- 熟悉数据管道和 ETL
-- 有机器学习项目经验
+**Technical Background**:
+- Proficient in Python and SQL
+- Familiar with data pipelines and ETL
+- Has machine learning project experience
 
-**沟通偏好**:
-- 喜欢详细的技术解释
-- 偏好代码示例
-- 重视性能和安全考虑
+**Communication Preferences**:
+- Prefers detailed technical explanations
+- Prefers code examples
+- Values performance and security considerations
 
-**如何应用**:
-解释问题时应该：
-- 使用数据分析相关的类比
-- 强调日志和监控的最佳实践
-- 提供可量化的结果
-- 优先推荐 Python 解决方案
+**How to Apply**:
+When explaining problems:
+- Use data analysis-related analogies
+- Emphasize logging and monitoring best practices
+- Provide quantifiable results
+- Prioritize Python solutions
 ```
 
 ---
 
-### Feedback Memory 格式
+### Feedback Memory Format
 
 ```markdown
 ---
-name: 测试必须用真实数据库
+name: Tests Must Use Real Database
 type: feedback
 scope: team
 ---
 
-集成测试必须 hit 真实数据库，不能使用 mock。
+Integration tests must hit real database, cannot use mocks.
 
 **Why**: 
-去年 mock 测试通过但生产迁移失败，mock/生产差异掩盖了损坏的迁移。
-具体事件：Q4 发布时，mock 的数据库测试全部通过，但生产迁移因字段类型不匹配失败，
-导致 2 小时停机。
+Last year mock tests passed but production migration failed, mock/prod divergence masked broken migration.
+Specific incident: Q4 release, mocked database tests all passed, but production migration failed due to field type mismatch,
+causing 2 hours downtime.
 
 **How to apply**:
-- 所有集成测试必须配置真实数据库连接
-- 使用测试数据库（非生产）
-- 单元测试可以 mock
-- 端到端测试必须真实环境
-- CI/CD 配置中启用真实数据库
+- All integration tests must configure real database connection
+- Use test database (not production)
+- Unit tests can mock
+- End-to-end tests must be real environment
+- Enable real database in CI/CD configuration
 ```
 
 ---
 
-### Project Memory 格式
+### Project Memory Format
 
 ```markdown
 ---
-name: 移动端发布冻结
+name: Mobile Release Freeze
 type: project
 scope: team
 ---
 
-2026-03-05 后冻结所有非关键合并，直到移动端发布完成。
+Freeze all non-critical merges after 2026-03-05 until mobile release completes.
 
 **Why**: 
-移动端团队需要稳定的代码库进行最终测试和发布准备。
-任何非关键变更都可能引入回归 bug，影响发布计划。
+Mobile team needs stable codebase for final testing and release preparation.
+Any non-critical changes could introduce regression bugs, affecting release schedule.
 
 **How to apply**:
-- 标记所有新 PR 为"on hold"，除非是关键 bug 修复
-- 告知团队成员冻结期
-- 发布完成后解冻（预计 2026-03-12）
-- 紧急修复需要移动端负责人批准
+- Mark all new PRs as "on hold" unless critical bug fix
+- Inform team members about freeze period
+- Unfreeze after release (expected 2026-03-12)
+- Emergency fixes require mobile lead approval
 ```
 
 ---
 
-### Reference Memory 格式
+### Reference Memory Format
 
 ```markdown
 ---
-name: Linear 项目追踪
+name: Linear Project Tracking
 type: reference
 scope: team
 ---
 
-管道相关的 bug 和需求追踪在 Linear 项目 "INGEST" 中。
+Pipeline-related bugs and requirements tracked in Linear project "INGEST".
 
 **URL**: https://linear.app/company/project/INGEST
 
-**用途**:
-- 所有管道 bug 都应该创建在这个项目
-- 需求优先级在这个项目中管理
-- 每周状态更新同步到这里
+**Purpose**:
+- All pipeline bugs should be created in this project
+- Requirements priority managed in this project
+- Weekly status updates synced here
 
-**相关团队**:
-- 数据平台团队（主要维护）
-- 后端团队（协作者）
+**Related Teams**:
+- Data platform team (primary maintenance)
+- Backend team (collaborators)
 ```
 
 ---
 
-## 🎯 最佳实践
+## 🎯 Best Practices
 
-### ✅ 应该做的
+### ✅ Do's
 
-1. **及时总结** - 会话结束后立即运行，记忆犹新
-2. **宁缺毋滥** - 只保存真正有价值的内容
-3. **明确原因** - 每条记忆都要有 Why 和 How to apply
-4. **定期回顾** - 每月检查记忆，更新或删除过时的
-5. **用户主导** - 让用户决定什么值得保存
+1. **Summarize timely** - Run immediately after session ends, memory fresh
+2. **Quality over quantity** - Only save truly valuable content
+3. **Clear rationale** - Every memory should have Why and How to apply
+4. **Regular review** - Check memories monthly, update or remove outdated ones
+5. **User-led** - Let user decide what's worth saving
 
-### ❌ 不应该做的
+### ❌ Don'ts
 
-1. **不要自动保存** - 总是需要用户确认
-2. **不要保存细节** - 保存模式和原则，不是具体对话
-3. **不要重复** - 先检查是否已有类似记忆
-4. **不要过时** - 项目决策变化后及时更新
-5. **不要敏感** - 绝不保存密码、密钥等
+1. **Don't auto-save** - Always require user confirmation
+2. **Don't save details** - Save patterns and principles, not specific conversations
+3. **Don't duplicate** - Check if similar memory exists first
+4. **Don't let become outdated** - Update promptly when project decisions change
+5. **Don't save sensitive** - Never save passwords, keys, etc.
 
 ---
 
-## 🔧 故障排查
+## 🔧 Troubleshooting
 
-### 问题 1: 找不到会话历史
+### Problem 1: Cannot Find Session History
 
-**可能原因**:
-- 会话已过期或被清理
-- 权限不足无法读取历史
+**Possible causes**:
+- Session expired or cleaned up
+- Insufficient permissions to read history
 
-**解决方法**:
+**Solutions**:
 ```bash
-# 检查会话状态
+# Check session status
 openclaw sessions list
 
-# 手动指定会话
+# Manually specify session
 /session-report --session <session-id>
 ```
 
 ---
 
-### 问题 2: 提取内容太多
+### Problem 2: Too Much Extracted Content
 
-**可能原因**:
-- 会话太长，包含大量临时对话
-- 过滤规则不够严格
+**Possible causes**:
+- Session too long, contains大量 temporary conversations
+- Filtering rules not strict enough
 
-**解决方法**:
+**Solutions**:
 ```bash
-# 限制回顾的消息数
+# Limit number of messages reviewed
 /session-report --limit 30
 
-# 只关注特定类型
+# Focus on specific types
 /session-report --type feedback --type project
 ```
 
 ---
 
-### 问题 3: 用户不确定是否保存
+### Problem 3: User Unsure Whether to Save
 
-**建议**:
-- 使用 `--dry-run` 先预览
-- 逐条审查 (`show N`)
-- 从保守开始，以后可以补充
-
----
-
-## 📈 效果评估
-
-### 短期效果（1-2 周）
-
-- ✅ 重要决策不再遗忘
-- ✅ 减少重复解释背景
-- ✅ 用户感到被理解
-
-### 中期效果（1-2 月）
-
-- ✅ 形成项目知识库
-- ✅ 新成员快速上手
-- ✅ 同样错误不犯第二次
-
-### 长期效果（3 月+）
-
-- ✅ Agent 行为高度个性化
-- ✅ 团队协作效率提升
-- ✅ 知识资产持续积累
+**Suggestions**:
+- Use `--dry-run` to preview first
+- Review item by item (`show N`)
+- Start conservative, can supplement later
 
 ---
 
-_最后更新：2026-04-06_  
-_版本：1.0.0_
+## 📈 Effectiveness Evaluation
+
+### Short-term (1-2 weeks)
+
+- ✅ Important decisions no longer forgotten
+- ✅ Reduce repeated background explanations
+- ✅ Users feel understood
+
+### Medium-term (1-2 months)
+
+- ✅ Form project knowledge base
+- ✅ New members onboard quickly
+- ✅ Same mistakes not made twice
+
+### Long-term (3+ months)
+
+- ✅ Agent behavior highly personalized
+- ✅ Team collaboration efficiency improved
+- ✅ Knowledge assets continuously accumulated
+
+---
+
+_Last updated: 2026-04-06_  
+_Version: 1.0.0_  
+_Maintainer: evo-agents Team_
