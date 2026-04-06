@@ -7,14 +7,11 @@ import argparse
 import os
 import re
 from pathlib import Path
-import sys
-
-# 添加 libs 到路径
 
 
 def search_memory(query, max_results=5, case_sensitive=False):
     """Search through memory files."""
-    workspace = Path(__file__).parent.parent.parent
+    workspace = Path("/Users/dhr/.openclaw/workspace")
     memory_dir = workspace / "memory"
     
     results = []

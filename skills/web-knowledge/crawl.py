@@ -16,9 +16,6 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
-import sys
-
-# 添加 libs 到路径
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse
 
@@ -27,7 +24,7 @@ class WebCrawler:
     """智能网页爬虫"""
     
     def __init__(self):
-        self.workspace = Path(__file__).parent.parent.parent
+        self.workspace = Path("/Users/dhr/.openclaw/workspace")
         self.cache_dir = self.workspace / "memory" / "web_cache"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         

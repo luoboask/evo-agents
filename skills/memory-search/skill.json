@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "记忆搜索技能，支持关键词和语义搜索",
   "homepage": "https://github.com/luoboask/evo-agents",
-  "author": "evo-agents",
+  "author": "ai-baby",
   "license": "MIT",
   "updated_at": "2026-03-24",
   "changelog": "1.0.0: 初始版本，支持关键词搜索和语义搜索"
