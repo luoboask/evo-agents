@@ -531,3 +531,46 @@ else
     echo "   Or skip: Continue using normally"
     echo ""
 fi
+
+# Add Harness Agent usage notes to AGENTS.md
+if [ "$LANG" = "zh" ]; then
+    echo "📝 配置 Harness Agent 使用说明..."
+else
+    echo "📝 Configuring Harness Agent usage notes..."
+fi
+
+cat >> AGENTS.md << 'EOF'
+
+---
+
+## 🛠️ Harness Agent Usage / 使用说明
+
+### ⚠️ Important: Harness Agent Does NOT Use sessions_spawn
+
+**Default Behavior / 默认行为**:
+- ✅ Harness Agent executes tasks in the **current session** / 在当前会话执行
+- ❌ Does **NOT create** sub-agents (no sessions_spawn) / 不创建子 Agent
+- ✅ Single agent handles all tasks / 单个 Agent 处理所有任务
+
+**Why / 为什么**:
+1. Simple & Efficient / 简洁高效 - No overhead
+2. Context Concentration / 上下文集中 - All info in one session
+3. Minimalist Design / 简洁设计 - 150 lines plugin philosophy
+
+**Example / 示例**:
+```bash
+/harness-agent "Write a function" --domain programming
+# → Executes in current session, NO spawn
+```
+
+**Note / 注意**:
+- SUBAGENT_RULES.md applies to **manually created** sub-agents only
+- Harness Agent handles internal logic automatically
+- Reserved for future expansion if needed
+EOF
+
+if [ "$LANG" = "zh" ]; then
+    echo "   ✓ Harness Agent 使用说明已配置"
+else
+    echo "   ✓ Harness Agent usage notes configured"
+fi
