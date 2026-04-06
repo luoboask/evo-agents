@@ -198,6 +198,8 @@ python3 skills/memory-search/search.py "Ollama"
 | End of day | `self-evolution` (nightly) |
 
 #### Enhanced Skills (v2.0+)
+
+##### Memory & Knowledge
 | When | Use | Command |
 |------|-----|---------|
 | Build knowledge graph | `knowledge-graph` | `cd skills/knowledge-graph && python3 builder.py` |
@@ -205,7 +207,25 @@ python3 skills/memory-search/search.py "Ollama"
 | AI entity extraction | Auto (uses `knowledge-graph`) | Optional: qwen2.5:0.5b |
 | Smart summarization | Auto (uses `memory-compression`) | Optional: qwen2.5:1.5b |
 
-**Enhanced Features:**
+##### Harness Agent Plugins (Domain-Specific)
+| Domain | Use Case | Example Command |
+|--------|----------|----------------|
+| **Programming** | Software development | `/harness-agent "开发博客系统" --domain programming` |
+| **E-commerce** | Product/order management | `/harness-agent "双十一活动" --domain ecommerce` |
+| **Data Analysis** | BI/Statistics/Visualization | `/harness-agent "Q1 销售分析" --domain data_analysis` |
+| **DevOps** | CI/CD, Deployment, Monitoring | `/harness-agent "部署到 AWS" --domain devops` |
+| **Marketing** | Campaigns, Social Media | `/harness-agent "新品发布会" --domain marketing` |
+| **Content Creation** | Articles, Video scripts | `/harness-agent "写产品测评" --domain content_creation` |
+| **Self-Media** | Self-media operations | `/harness-agent "运营小红书" --domain self_media_content` |
+
+**Harness Agent Features:**
+- ✅ **8 Domain Plugins**: Programming, E-commerce, Data Analysis, DevOps, Marketing, Content, Self-Media
+- ✅ **Tool Safety Markers**: Auto-detect concurrency-safe vs destructive operations
+- ✅ **Input Validation**: Clear error messages for missing parameters
+- ✅ **Tech Stack Recommendations**: Best practices for each domain
+- ✅ **Simple Design**: ~150 lines per plugin, easy to understand and extend
+
+**Enhanced Memory Features:**
 - ✅ **Knowledge Graph**: AI-powered entity extraction (+50% coverage) + relation inference
 - ✅ **Memory Compression**: Daily → Weekly → Monthly → Yearly hierarchical summaries
 - ✅ **Optional Ollama**: Works without AI models (graceful fallback to basic mode)
