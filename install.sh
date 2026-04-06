@@ -450,7 +450,11 @@ if [ "$LANG" = "zh" ]; then
     echo "🔮 自动激活基础功能..."
 else
     echo "🔮 Auto-activating basic features..."
-fi
+
+# Initialize Knowledge-Graph and RAG systems
+if [ -f "scripts/core/init-knowledge-systems.sh" ]; then
+    ./scripts/core/init-knowledge-systems.sh > /dev/null 2>&1 || true
+fifi
 cd "$WORKSPACE_ROOT"
 
 # 激活知识库系统
