@@ -8,7 +8,6 @@
 import argparse
 import sys
 from pathlib import Path
-from path_utils import resolve_workspace, resolve_data_dir
 from datetime import datetime
 
 # 添加当前目录到路径
@@ -22,39 +21,43 @@ def cmd_status(args):
     print("=" * 70)
     print(f"\n📅 当前时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
-    # 添加 skills 目录到路径
-    sys.path.insert(0, str(Path(__file__).parent.parent))
-    
     # 检查数据库
-    import os
-    agent_name = os.environ.get('OPENCLAW_AGENT', os.path.basename(str(resolve_workspace())).replace('workspace-', ''))
+    from pathlib import Path
     db_files = [
-        f'data/{agent_name}/memory/{agent_name}_memory_stream.db',
-        f'data/{agent_name}/memory/{agent_name}_knowledge_base.db',
+        'memory/memory_stream.db',
+        'memory/knowledge_base.db',
+        'skills/evolution-workbench/evolution.db'
     ]
     
     print("\n📊 数据库状态:")
     for db in db_files:
-        full_path = Path(__file__).parent.parent.parent
+        full_path = Path('/Users/dhr/.openclaw/workspace') / db
         if full_path.exists():
             size_mb = full_path.stat().st_size / 1024 / 1024
             print(f"   ✅ {db} ({size_mb:.2f}MB)")
         else:
             print(f"   ❌ {db} (不存在)")
     
-    # 显示统计（使用 Memory Hub）
+    # 显示统计
     try:
-        # 添加 libs 到路径
-        libs_dir = Path(__file__).parent.parent.parent / 'libs'
-        from memory_hub import MemoryHub
-        hub = MemoryHub(agent_name)
-        stats = hub.stats()
+        from memory_stream import MemoryStream
+        ms = MemoryStream()
+        stats = ms.get_stats()
         print(f"\n🧠 记忆流:")
-        print(f"   总记忆：{stats.get('total', 0)}条")
-        for mtype, count in stats.get('by_type', {}).items():
-            print(f"   - {mtype}: {count}条")
+        print(f"   总记忆：{stats['total_memories']}条")
+        print(f"   最近 24h: {stats['recent_24h']}条")
     except Exception as e:
         print(f"   ⚠️ 无法获取记忆流统计：{e}")
+    
+    try:
+        from self_evolution_real import RealSelfEvolution
+        evolution = RealSelfEvolution()
+        summary = evolution.get_summary()
+        print(f"\n📈 进化事件:")
+        print(f"   总事件：{summary['total_events']}次")
+        print(f"   类型数：{len(summary['by_type'])}种")
+    except Exception as e:
+        print(f"   ⚠️ 无法获取进化统计：{e}")
     
     print("\n" + "=" * 70)
 
@@ -105,20 +108,21 @@ def cmd_memory(args):
         print(f"✅ 记忆已添加 (ID: {memory_id})")
     
     elif args.action == 'list':
-        memories = ms.list_memories(limit=args.limit or 20)
+        memories = ms.get_memories(
+            memory_type=args.type,
+            limit=args.limit
+        )
         print(f"\n📝 记忆列表 ({len(memories)}条):")
         for mem in memories:
-            content = mem.get('content', str(mem))[:60]
-            mtype = mem.get('memory_type', 'unknown')
-            importance = mem.get('importance', 0)
-            print(f"   [{mtype}] {content}... (重要性：{importance})")
+            print(f"   [{mem.memory_type}] {mem.content[:60]}... (重要性：{mem.importance})")
     
     elif args.action == 'stats':
         stats = ms.get_stats()
         print(f"\n📊 记忆统计:")
-        print(f"   总记忆：{stats.get('total', 0)}")
-        for mtype, count in stats.get('by_type', {}).items():
-            print(f"   - {mtype}: {count}条")
+        print(f"   总记忆：{stats['total_memories']}")
+        print(f"   最近 24h: {stats['recent_24h']}")
+        for mtype, data in stats['by_type'].items():
+            print(f"   - {mtype}: {data['count']}条 (平均重要性：{data['avg_importance']:.1f})")
 
 
 def cmd_embedding(args):

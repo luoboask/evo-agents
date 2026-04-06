@@ -19,48 +19,17 @@ import math
 import sys
 from datetime import datetime
 from pathlib import Path
-from path_utils import resolve_workspace, resolve_data_dir
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict
 
 sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent / 'memory-search'))
 
 from memory_stream import MemoryStream
 from self_evolution_real import RealSelfEvolution
 
-# 使用 Ollama API 直接获取 embedding
-import urllib.request
-import json as json_lib
-
-def get_embedding(text):
-    """获取 Ollama embedding"""
-    try:
-        payload = {
-            "model": "nomic-embed-text",
-            "prompt": text
-        }
-        req = urllib.request.Request(
-            'http://localhost:11434/api/embeddings',
-            data=json_lib.dumps(payload).encode('utf-8'),
-            headers={'Content-Type': 'application/json'}
-        )
-        response = urllib.request.urlopen(req, timeout=10)
-        data = json_lib.loads(response.read().decode())
-        return data.get('embedding', [])
-    except Exception as e:
-        print(f"⚠️  Embedding 失败：{e}")
-        return []
-
-def cosine_similarity(a, b):
-    """计算余弦相似度"""
-    if not a or not b:
-        return 0.0
-    dot_product = sum(x * y for x, y in zip(a, b))
-    norm_a = math.sqrt(sum(x * x for x in a))
-    norm_b = math.sqrt(sum(x * x for x in b))
-    if norm_a == 0 or norm_b == 0:
-        return 0.0
-    return dot_product / (norm_a * norm_b)
+# 复用 memory-search 的 Ollama embedding
+from semantic_search import get_embedding as ollama_embed, cosine_similarity
 
 
 @dataclass
@@ -379,8 +348,8 @@ class FractalThinkingEngine:
         
         直接使用 Ollama embedding + 余弦相似度
         """
-        vec1 = get_embedding(text1)
-        vec2 = get_embedding(text2)
+        vec1 = ollama_embed(text1)
+        vec2 = ollama_embed(text2)
         
         # 余弦相似度
         return cosine_similarity(vec1, vec2)
@@ -592,17 +561,12 @@ class FractalThinkingEngine:
             
             # 将分析存入记忆流
             for analysis in analyses:
-                # 将 metadata 内容合并到 content 中
-                content = analysis.description
-                if analysis.metadata:
-                    if 'meta_rules' in analysis.metadata:
-                        content += f" [元规则：{', '.join(analysis.metadata['meta_rules'])}]"
-                
                 self.memory_stream.add_memory(
-                    content=content,
+                    content=analysis.description,
                     memory_type='reflection',
                     tags=[f'Fractal_L{analysis.level}', analysis.level_name],
-                    importance=8.0 if analysis.level >= 2 else 6.0
+                    importance=8.0 if analysis.level >= 2 else 6.0,
+                    metadata=analysis.metadata
                 )
         
         # 生成总结
