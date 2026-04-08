@@ -66,12 +66,20 @@ if _hub_path.exists():
         Memory = models_module.Memory
         MemoryType = models_module.MemoryType
         Knowledge = models_module.Knowledge
+    
+    _session_path = _current_dir / 'session_manager.py'
+    if _session_path.exists():
+        spec = importlib.util.spec_from_file_location('session_manager', _session_path)
+        session_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(session_module)
+        SessionManager = session_module.SessionManager
 
 __all__ = [
     'MemoryHub',
     'KnowledgeInterface',
     'EvaluationInterface',
     'StorageManager',
+    'SessionManager',
     'Memory',
     'MemoryType',
     'Knowledge'

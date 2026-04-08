@@ -37,7 +37,7 @@ class StorageManager:
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
         
-        # 创建记忆表
+        # 创建记忆表（原始版本，无 session_id 字段）
         cur.execute('''
             CREATE TABLE IF NOT EXISTS memories (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
