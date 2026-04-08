@@ -479,24 +479,43 @@ if [ "$LANG" = "zh" ]; then
         # 使用 OpenClaw 的 cron 系统配置定时任务
         if command -v openclaw &> /dev/null; then
             echo "📝 配置 OpenClaw 定时任务..."
+            cd "$WORKSPACE_ROOT"
             
             # 会话扫描（每 30 分钟）
             echo "   - 会话扫描 (每 30 分钟)..."
-            openclaw cron add --schedule "*/30 * * * *" \
-                --message "cd $WORKSPACE_ROOT && python3 scripts/core/scan_sessions.py --agent $AGENT_NAME" \
-                --name "session-scan-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ 完成" || echo "      ⚠️  失败"
+            if openclaw cron add \
+                --cron "*/30 * * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 scripts/core/scan_sessions.py --agent $AGENT_NAME" \
+                --name "session-scan-$AGENT_NAME" >/dev/null 2>&1; then
+                echo "      ✅ 完成"
+            else
+                echo "      ⚠️  失败"
+            fi
             
             # 每日回顾（每天 09:00）
             echo "   - 每日回顾 (每天 09:00)..."
-            openclaw cron add --schedule "0 9 * * *" \
-                --message "cd $WORKSPACE_ROOT && python3 skills/memory-search/daily_review.py" \
-                --name "daily-review-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ 完成" || echo "      ⚠️  失败"
+            if openclaw cron add \
+                --cron "0 9 * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 skills/memory-search/daily_review.py" \
+                --name "daily-review-$AGENT_NAME" >/dev/null 2>&1; then
+                echo "      ✅ 完成"
+            else
+                echo "      ⚠️  失败"
+            fi
             
             # 夜间进化（每天 23:00）
             echo "   - 夜间进化 (每天 23:00)..."
-            openclaw cron add --schedule "0 23 * * *" \
-                --message "cd $WORKSPACE_ROOT && python3 skills/self-evolution/nightly_cycle.py" \
-                --name "nightly-evolution-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ 完成" || echo "      ⚠️  失败"
+            if openclaw cron add \
+                --cron "0 23 * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 skills/self-evolution/nightly_cycle.py" \
+                --name "nightly-evolution-$AGENT_NAME" >/dev/null 2>&1; then
+                echo "      ✅ 完成"
+            else
+                echo "      ⚠️  失败"
+            fi
             
             echo ""
             echo "📋 当前 OpenClaw cron 任务:"
