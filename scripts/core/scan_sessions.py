@@ -1,0 +1,374 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+scan_sessions.py - 扫描 OpenClaw Agent 会话并增量保存到记忆系统
+
+功能:
+- 扫描指定 Agent 下的所有 session
+- 检测新增/更新的会话消息
+- 增量保存到记忆数据库
+- 支持多个 Agent
+
+用法:
+    python3 scan_sessions.py --agent main-agent
+    python3 scan_sessions.py --agent main-agent --full-scan
+    python3 scan_sessions.py --all-agents
+"""
+
+import sys
+import os
+import json
+import sqlite3
+import hashlib
+from pathlib import Path
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Set
+import argparse
+
+# 添加 libs 到路径（只在 __init__ 中添加，确保使用正确的路径）
+
+# MemoryHub 将在 SessionScanner.__init__ 中导入（确保使用正确的路径）
+
+
+class SessionScanner:
+    """会话扫描器 - 扫描并增量保存会话历史"""
+    
+    def __init__(self, agent_name: str, workspace_root: Path = None):
+        self.agent_name = agent_name
+        self.workspace_root = workspace_root or self._find_workspace()
+        self.openclaw_root = Path.home() / '.openclaw'
+        self.agent_sessions_path = self.openclaw_root / 'agents' / agent_name / 'sessions'
+        
+        # 确保使用正确的 libs 路径
+        if str(self.workspace_root / 'libs') not in sys.path:
+            sys.path.insert(0, str(self.workspace_root / 'libs'))
+        
+        # 重新导入 MemoryHub（确保使用正确的路径）
+        for mod in ['memory_hub', 'hub', 'path_utils']:
+            if mod in sys.modules:
+                del sys.modules[mod]
+        
+        # 确保路径正确
+        libs_path = self.workspace_root / 'libs'
+        if str(libs_path) not in sys.path:
+            sys.path.insert(0, str(libs_path))
+        
+        from memory_hub import MemoryHub
+        
+        # 直接传入 workspace_root，避免 MemoryHub 自己查找
+        self.memory = MemoryHub(agent_name=agent_name, workspace_root=self.workspace_root)
+        
+        # 状态文件（记录已处理的会话）
+        self.state_file = self.workspace_root / 'data' / agent_name / '.session_scan_state.json'
+        self.state = self._load_state()
+    
+    def _find_workspace(self) -> Path:
+        """查找 workspace 路径"""
+        # 从脚本位置推导
+        current = Path(__file__).parent
+        for _ in range(5):
+            if (current / '.install-config').exists():
+                return current
+            if (current / '.git').exists():
+                return current
+            current = current.parent
+        
+        # 如果找不到，使用 ~/.openclaw/workspace-{agent_name}
+        # 这是 evo-agents 的标准路径
+        home_workspace = Path.home() / '.openclaw' / f'workspace-{self.agent_name}'
+        if home_workspace.exists():
+            return home_workspace
+        
+        return Path.cwd()
+    
+    def _load_state(self) -> Dict:
+        """加载扫描状态"""
+        if self.state_file.exists():
+            try:
+                return json.loads(self.state_file.read_text())
+            except:
+                pass
+        return {
+            'last_scan': None,
+            'processed_sessions': {},  # session_id -> last_message_id
+            'total_saved': 0
+        }
+    
+    def _save_state(self):
+        """保存扫描状态"""
+        self.state['last_scan'] = datetime.now().isoformat()
+        self.state_file.parent.mkdir(parents=True, exist_ok=True)
+        self.state_file.write_text(json.dumps(self.state, indent=2, ensure_ascii=False))
+    
+    def get_all_sessions(self) -> List[Dict]:
+        """获取所有会话列表"""
+        sessions_file = self.agent_sessions_path / 'sessions.json'
+        if not sessions_file.exists():
+            return []
+        
+        try:
+            data = json.loads(sessions_file.read_text())
+            if isinstance(data, dict):
+                # 新格式：{key: session_data, ...}
+                sessions = []
+                for key, session in data.items():
+                    if isinstance(session, dict):
+                        session['key'] = key
+                        sessions.append(session)
+                return sessions
+            elif isinstance(data, dict) and 'sessions' in data:
+                # 旧格式：{sessions: [...]}
+                return data['sessions']
+        except Exception as e:
+            print(f"⚠️  读取 sessions.json 失败：{e}")
+        
+        return []
+    
+    def read_session_history(self, session_id: str) -> List[Dict]:
+        """读取会话历史（JSONL 文件）"""
+        session_file = self.agent_sessions_path / f'{session_id}.jsonl'
+        if not session_file.exists():
+            return []
+        
+        messages = []
+        try:
+            with open(session_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    try:
+                        msg = json.loads(line)
+                        if msg.get('type') == 'message':
+                            messages.append(msg)
+                    except:
+                        continue
+        except Exception as e:
+            print(f"⚠️  读取 {session_file} 失败：{e}")
+        
+        return messages
+    
+    def get_last_processed_id(self, session_id: str) -> Optional[str]:
+        """获取已处理的最后一条消息 ID"""
+        return self.state['processed_sessions'].get(session_id)
+    
+    def extract_message_content(self, msg: Dict) -> str:
+        """提取消息内容"""
+        content = msg.get('message', {}).get('content', [])
+        if isinstance(content, list):
+            texts = []
+            for item in content:
+                if isinstance(item, dict):
+                    if item.get('type') == 'text':
+                        texts.append(item.get('text', ''))
+                    elif item.get('type') == 'thinking':
+                        # 可选：保存思考内容
+                        # texts.append(f"[思考] {item.get('thinking', '')}")
+                        pass
+            return '\n'.join(texts)
+        elif isinstance(content, str):
+            return content
+        return ''
+    
+    def save_message_to_memory(self, msg: Dict, session_id: str, session_key: str):
+        """保存单条消息到记忆系统"""
+        role = msg.get('message', {}).get('role', 'unknown')
+        content = self.extract_message_content(msg)
+        timestamp = msg.get('timestamp', '')
+        msg_id = msg.get('id', '')
+        
+        if not content or len(content) < 10:  # 跳过太短的消息
+            return
+        
+        # 判断消息类型
+        if role == 'user':
+            memory_type = 'observation'
+            tags = ['user-message', 'session']
+            importance = 5.0
+        elif role == 'assistant':
+            memory_type = 'observation'
+            tags = ['assistant-message', 'session']
+            importance = 6.0
+        else:
+            return
+        
+        # 添加到会话记忆（50 条限制）
+        try:
+            # 限制长度到 4000 字符（约 2000 汉字），保留完整上下文
+            memory_id = self.memory.add_session(
+                content=f"[{role.upper()}] {content[:4000]}",
+                memory_type=memory_type,
+                importance=importance,
+                tags=tags,
+                metadata={
+                    'session_id': session_id,
+                    'session_key': session_key,
+                    'message_id': msg_id,
+                    'timestamp': timestamp,
+                    'role': role
+                },
+                session_id=session_id
+            )
+            # 调试输出
+            if memory_id:
+                print(f"    ✓ 保存消息 {memory_id} 到会话 {session_id[:8]}")
+        except Exception as e:
+            print(f"⚠️  保存消息失败：{e}")
+            import traceback
+            traceback.print_exc()
+    
+    def scan_session(self, session: Dict) -> int:
+        """扫描单个会话，返回新增消息数"""
+        session_id = session.get('sessionId')
+        session_key = session.get('key', '')
+        
+        if not session_id:
+            return 0
+        
+        # 读取会话历史
+        messages = self.read_session_history(session_id)
+        if not messages:
+            return 0
+        
+        # 获取已处理的最后一条消息
+        last_processed_id = self.get_last_processed_id(session_id)
+        
+        # 找出新消息
+        new_messages = []
+        found_last = False if last_processed_id else True
+        
+        for msg in messages:
+            msg_id = msg.get('id')
+            if msg_id == last_processed_id:
+                found_last = True
+                continue
+            
+            if found_last:
+                new_messages.append(msg)
+        
+        # 保存新消息
+        for msg in new_messages:
+            self.save_message_to_memory(msg, session_id, session_key)
+        
+        # 更新状态
+        if messages:
+            self.state['processed_sessions'][session_id] = messages[-1].get('id')
+        
+        return len(new_messages)
+    
+    def scan_all_sessions(self, full_scan: bool = False) -> Dict:
+        """扫描所有会话"""
+        if full_scan:
+            print("🔄 全量扫描模式...")
+            self.state['processed_sessions'] = {}  # 清空状态
+        
+        sessions = self.get_all_sessions()
+        if not sessions:
+            print("⚠️  没有找到任何会话")
+            return {'scanned': 0, 'new_messages': 0}
+        
+        print(f"📋 发现 {len(sessions)} 个会话")
+        
+        total_new = 0
+        scanned = 0
+        
+        for session in sessions:
+            session_id = session.get('sessionId')
+            if not session_id:
+                continue
+            
+            new_count = self.scan_session(session)
+            total_new += new_count
+            scanned += 1
+            
+            if new_count > 0:
+                print(f"  ✓ {session_id[:8]}... +{new_count} 条消息")
+        
+        # 保存状态
+        self.state['total_saved'] += total_new
+        self._save_state()
+        
+        return {
+            'scanned': scanned,
+            'new_messages': total_new,
+            'total_saved': self.state['total_saved']
+        }
+    
+    def cleanup_old_sessions(self, days: int = 30):
+        """清理过期会话的记忆"""
+        cutoff = datetime.now() - timedelta(days=days)
+        
+        # 获取所有会话记忆
+        # TODO: 实现清理逻辑
+        
+        print(f"🧹 清理 {days} 天前的会话记忆（待实现）")
+
+
+def main():
+    """主函数"""
+    parser = argparse.ArgumentParser(description='扫描 OpenClaw Agent 会话并增量保存')
+    parser.add_argument('--agent', type=str, help='Agent 名称')
+    parser.add_argument('--all-agents', action='store_true', help='扫描所有 Agent')
+    parser.add_argument('--full-scan', action='store_true', help='全量扫描（忽略已处理状态）')
+    parser.add_argument('--workspace', type=str, help='Workspace 路径')
+    parser.add_argument('--cleanup-days', type=int, default=30, help='清理 N 天前的会话')
+    
+    args = parser.parse_args()
+    
+    print("=" * 60)
+    print("🔍 OpenClaw 会话扫描器")
+    print("=" * 60)
+    
+    if args.all_agents:
+        # 扫描所有 Agent
+        agents_path = Path.home() / '.openclaw' / 'agents'
+        if not agents_path.exists():
+            print("❌ 找不到 OpenClaw agents 目录")
+            return
+        
+        agent_dirs = [d for d in agents_path.iterdir() if d.is_dir()]
+        print(f"📋 发现 {len(agent_dirs)} 个 Agent\n")
+        
+        for agent_dir in agent_dirs:
+            agent_name = agent_dir.name
+            print(f"\n[{agent_name}]")
+            scanner = SessionScanner(agent_name)
+            result = scanner.scan_all_sessions(full_scan=args.full_scan)
+            print(f"   扫描：{result['scanned']} 个会话")
+            print(f"   新增：{result['new_messages']} 条消息")
+            print(f"   总计：{result['total_saved']} 条消息")
+    else:
+        # 扫描指定 Agent
+        agent_name = args.agent
+        if not agent_name:
+            # 尝试从 .install-config 读取
+            config_file = Path(args.workspace or '.') / '.install-config'
+            if config_file.exists():
+                for line in config_file.read_text().splitlines():
+                    if line.startswith('agent_name='):
+                        agent_name = line.split('=')[1].strip()
+                        break
+            
+            if not agent_name:
+                print("❌ 请指定 --agent 参数")
+                return
+        
+        print(f"📦 Agent: {agent_name}")
+        
+        workspace = Path(args.workspace) if args.workspace else None
+        scanner = SessionScanner(agent_name, workspace)
+        result = scanner.scan_all_sessions(full_scan=args.full_scan)
+        
+        print(f"\n📊 扫描结果:")
+        print(f"   扫描会话数：{result['scanned']}")
+        print(f"   新增消息数：{result['new_messages']}")
+        print(f"   累计保存：{result['total_saved']} 条")
+        
+        # 清理过期会话
+        if args.cleanup_days:
+            scanner.cleanup_old_sessions(args.cleanup_days)
+    
+    print("\n" + "=" * 60)
+    print("✅ 扫描完成")
+    print("=" * 60)
+
+
+if __name__ == '__main__':
+    main()
