@@ -589,3 +589,39 @@ else
     echo "   Or skip: Continue using normally"
     echo ""
 fi
+
+# 创建安装配置文件
+echo "📝 创建安装配置..."
+cat > "$WORKSPACE_ROOT/.install-config" << CONFIGEOF
+agent_name=$AGENT_NAME
+workspace_path=$WORKSPACE_ROOT
+install_time=$(date -Iseconds)
+openclaw_registered=true
+cron_configured=true
+CONFIGEOF
+echo "   ✅ 完成"
+
+echo ""
+if [ "$LANG" = "zh" ]; then
+    echo "╔════════════════════════════════════════════════════════╗"
+    echo "║  🎉 欢迎使用 evo-agents！                                ║"
+    echo "╚════════════════════════════════════════════════════════╝"
+    echo ""
+    echo "💡 提示："
+    echo "   - 定时任务已自动配置（如未跳过）"
+    echo "   - 首次使用建议运行：./scripts/core/activate-features.sh"
+    echo "   - 查看文档：docs/"
+    echo ""
+else
+    echo "╔════════════════════════════════════════════════════════╗"
+    echo "║  🎉 Welcome to evo-agents!                              ║"
+    echo "╚════════════════════════════════════════════════════════╝"
+    echo ""
+    echo "💡 Tips:"
+    echo "   - Cron jobs auto-configured (if not skipped)"
+    echo "   - Recommended: Run ./scripts/core/activate-features.sh"
+    echo "   - Documentation: docs/"
+    echo ""
+fi
+
+exit 0
