@@ -8,7 +8,6 @@ import sqlite3
 import json
 from datetime import datetime
 from pathlib import Path
-from path_utils import resolve_workspace
 
 class KnowledgeBase:
     """知识库系统（支持多 Agent 数据隔离）"""
@@ -17,11 +16,11 @@ class KnowledgeBase:
         if db_path:
             self.db_path = db_path
         elif shared:
-            self.db_path = str(resolve_workspace() / 'memory' / 'knowledge_base_shared.db')
+            self.db_path = '/Users/dhr/.openclaw/workspace/memory/knowledge_base_shared.db'
         elif agent_id:
-            self.db_path = str(resolve_workspace() / 'memory' / f'{agent_id}_knowledge_base.db')
+            self.db_path = f'/Users/dhr/.openclaw/workspace/memory/{agent_id}_knowledge_base.db'
         else:
-            self.db_path = str(resolve_workspace() / 'memory' / 'knowledge_base.db')
+            self.db_path = '/Users/dhr/.openclaw/workspace/memory/knowledge_base.db'
         
         self.agent_id = agent_id
         self.shared = shared
@@ -56,7 +55,6 @@ class KnowledgeBase:
                 learning_type TEXT,
                 outcome TEXT,
                 tags TEXT,
-                source TEXT,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
         ''')
@@ -98,22 +96,21 @@ class KnowledgeBase:
         
         cursor.execute('''
             INSERT INTO knowledge 
-            (timestamp, domain, subtopic, content, insight, thinking, key_point, difficulty, time_spent, learning_type, outcome, tags, source)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (timestamp, domain, subtopic, content, insight, thinking, key_point, difficulty, time_spent, learning_type, outcome, tags)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             learning.get('timestamp'),
             details.get('domain', ''),
             details.get('subtopic', ''),
             learning.get('content', ''),
-            learning.get('insight', ''),
-            details.get('thinking', ''),
-            details.get('key_point', ''),
+            learning.get('收获', ''),
+            learning.get('思考', ''),
+            learning.get('知识点', ''),
             details.get('difficulty', ''),
             details.get('time_spent', ''),
-            details.get('learning_type', ''),
-            details.get('outcome', ''),
-            tags,
-            learning.get('source', '')
+            learning.get('type', ''),
+            learning.get('outcome', ''),
+            tags
         ))
         
         knowledge_id = cursor.lastrowid
@@ -231,7 +228,7 @@ class KnowledgeBase:
     def export_to_json(self, output_path=None):
         """导出为 JSON"""
         if output_path is None:
-            output_path = str(resolve_workspace() / 'memory' / 'knowledge_base.json')
+            output_path = '/Users/dhr/.openclaw/workspace/memory/knowledge_base.json'
         
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row

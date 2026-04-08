@@ -8,34 +8,28 @@
 """
 
 import json
-import os
 import sqlite3
 from datetime import datetime
 from pathlib import Path
-from path_utils import resolve_workspace
-import sys
-
-# 添加 libs 到路径
 from typing import Optional, Dict, List
 
 class RealSelfEvolution:
     """真实自我进化系统（支持多 Agent 数据隔离）"""
     
     def __init__(self, agent_id: str = None, db_path: str = None):
-        self.workspace = Path(__file__).parent.parent.parent
+        self.workspace = Path('/Users/dhr/.openclaw/workspace')
+        self.memory_dir = self.workspace / 'memory'
         
         if db_path:
             self.evolution_db = Path(db_path)
         elif agent_id:
-            # 每个 Agent 独立的进化数据库 (放在 data/<agent>/memory/)
-            self.evolution_db = self.workspace / 'data' / agent_id / 'memory' / 'evolution.db'
+            # 每个 Agent 独立的进化数据库
+            self.evolution_db = self.workspace / 'skills' / 'evolution-workbench' / f'{agent_id}_evolution.db'
         else:
-            # 默认数据库 (使用 ai-baby)
-            agent_name = os.environ.get('OPENCLAW_AGENT', os.path.basename(str(resolve_workspace())).replace('workspace-', ''))
-            self.evolution_db = self.workspace / 'data' / agent_name / 'memory' / 'evolution.db'
+            # 默认数据库
+            self.evolution_db = self.workspace / 'skills' / 'evolution-workbench' / 'evolution.db'
         
         self.agent_id = agent_id
-        self.memory_dir = self.workspace / 'data' / (agent_id or os.path.basename(str(resolve_workspace())).replace('workspace-', '')) / 'memory'
         
         # 初始化数据库表
         self._init_db()

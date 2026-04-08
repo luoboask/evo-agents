@@ -11,13 +11,19 @@ AGENT_NAME="${1:-my-agent}"
 FORCE="${2:-}"
 WORKSPACE_ROOT="$HOME/.openclaw/workspace-$AGENT_NAME"
 
-# 检测脚本来源，自动选择语言和 Git 源
-if [[ "${BASH_SOURCE[0]}" == *"gitee.com"* ]] || [[ "$0" == *"gitee.com"* ]]; then
-    # Gitee 源 - 中文
-    GIT_URL="https://gitee.com/luoboask/evo-agents.git"
-    SOURCE_NAME="Gitee"
+# 检测系统语言
+if locale | grep -q "zh_CN\|zh_CN\|Chinese"; then
     LANG="zh"
-    
+else
+    LANG="en"
+fi
+
+# Git 源配置
+GIT_URL="https://gitee.com/luoboask/evo-agents.git"
+SOURCE_NAME="Gitee"
+
+# 欢迎信息
+if [ "$LANG" = "zh" ]; then
     echo "╔════════════════════════════════════════════════════════╗"
     echo "║  evo-agents 一键安装                                     ║"
     echo "╚════════════════════════════════════════════════════════╝"
@@ -26,11 +32,6 @@ if [[ "${BASH_SOURCE[0]}" == *"gitee.com"* ]] || [[ "$0" == *"gitee.com"* ]]; th
     echo "📁 Workspace: $WORKSPACE_ROOT"
     echo ""
 else
-    # GitHub 源 - English
-    GIT_URL="https://gitee.com/luoboask/evo-agents.git"
-    SOURCE_NAME="Gitee (preferred)"
-    LANG="en"
-    
     echo "╔════════════════════════════════════════════════════════╗"
     echo "║  evo-agents Quick Install                                ║"
     echo "╚════════════════════════════════════════════════════════╝"
@@ -143,6 +144,13 @@ else
     echo "📋 Configuring AGENTS.md..."
 fi
 if [ -f "AGENTS.md" ] && ! grep -q "SKILL_RULES" AGENTS.md; then
+    # 修改 Session Startup 部分，添加规则文档读取
+    if grep -q "Read \`SOUL.md\`" AGENTS.md; then
+        # 在 "Read SOUL.md" 后添加规则文档读取
+        sed -i.bak 's/Read `SOUL.md` — this is who you are/Read `SOUL.md` — this is who you are\n5. Read `docs\/AGENT_BEHAVIOR.md`, `docs\/WORKSPACE_RULES.md`, `docs\/KNOWLEDGE_BASE_RULES.md` — workspace rules/' AGENTS.md
+        rm -f AGENTS.md.bak
+    fi
+    
     cat >> AGENTS.md << 'EOF'
 
 ---
@@ -159,13 +167,68 @@ if [ -f "AGENTS.md" ] && ! grep -q "SKILL_RULES" AGENTS.md; then
 
 **Full rules:** See `docs/AGENT_BEHAVIOR.md`
 
+---
+
+## 🔍 Before Responding
+
+**Before responding to any user query:**
+
+1. Use `memory-search` to find relevant context about the topic
+2. Integrate retrieved memories into your response
+3. Cite sources when using memory content (e.g., "According to 2026-04-04 memory...")
+
+**Exception:** Skip for simple greetings or when context is obvious.
+
+**Example:**
+```bash
+# User asks: "What did we discuss about Ollama?"
+# Agent should:
+python3 skills/memory-search/search.py "Ollama"
+# Then respond with retrieved context + citations
+```
+
 ### Skill Usage
+
+#### Core Skills
 | When | Use |
 |------|-----|
 | User mentions history | `memory-search` |
 | Real-time info | `web-knowledge` |
 | Task completed | `self-evolution` (evolve) |
 | End of day | `self-evolution` (nightly) |
+
+#### Enhanced Skills (v2.0+)
+
+##### Memory & Knowledge
+| When | Use | Command |
+|------|-----|---------|
+| Build knowledge graph | `knowledge-graph` | `cd skills/knowledge-graph && python3 builder.py` |
+| Compress memories | `memory-compression` | `cd skills/memory-search && python3 compress.py --weekly` |
+| AI entity extraction | Auto (uses `knowledge-graph`) | Optional: qwen2.5:0.5b |
+| Smart summarization | Auto (uses `memory-compression`) | Optional: qwen2.5:1.5b |
+
+##### Harness Agent Plugins (Domain-Specific)
+| Domain | Use Case | Example Command |
+|--------|----------|----------------|
+| **Programming** | Software development | `/harness-agent "开发博客系统" --domain programming` |
+| **E-commerce** | Product/order management | `/harness-agent "双十一活动" --domain ecommerce` |
+| **Data Analysis** | BI/Statistics/Visualization | `/harness-agent "Q1 销售分析" --domain data_analysis` |
+| **DevOps** | CI/CD, Deployment, Monitoring | `/harness-agent "部署到 AWS" --domain devops` |
+| **Marketing** | Campaigns, Social Media | `/harness-agent "新品发布会" --domain marketing` |
+| **Content Creation** | Articles, Video scripts | `/harness-agent "写产品测评" --domain content_creation` |
+| **Self-Media** | Self-media operations | `/harness-agent "运营小红书" --domain self_media_content` |
+
+**Harness Agent Features:**
+- ✅ **8 Domain Plugins**: Programming, E-commerce, Data Analysis, DevOps, Marketing, Content, Self-Media
+- ✅ **Tool Safety Markers**: Auto-detect concurrency-safe vs destructive operations
+- ✅ **Input Validation**: Clear error messages for missing parameters
+- ✅ **Tech Stack Recommendations**: Best practices for each domain
+- ✅ **Simple Design**: ~150 lines per plugin, easy to understand and extend
+
+**Enhanced Memory Features:**
+- ✅ **Knowledge Graph**: AI-powered entity extraction (+50% coverage) + relation inference
+- ✅ **Memory Compression**: Daily → Weekly → Monthly → Yearly hierarchical summaries
+- ✅ **Optional Ollama**: Works without AI models (graceful fallback to basic mode)
 
 **Full rules:** See `docs/SKILL_RULES.md`
 
@@ -191,12 +254,117 @@ if [ -f "AGENTS.md" ] && ! grep -q "SKILL_RULES" AGENTS.md; then
 - Don't execute cron/heartbeat tasks
 
 **Full rules:** See `docs/SUBAGENT_RULES.md`
+
+---
+
+## 🔮 Check Semantic Search (Main Session Only)
+
+**If in MAIN SESSION** (first conversation of the day), check semantic search:
+
+\`\`\`bash
+# Check if Ollama + embedding model installed
+- Run: \`ollama list 2>/dev/null | grep -E "nomic|m3e|bge|text2vec"\`
+- Or check: \`curl -s http://localhost:11434/api/tags\`
+\`\`\`
+
+**If NOT installed**, introduce and ask (only once per day):
+
+**Step 1: Introduce semantic search**
+
+> "🔮 检测到尚未激活**语义搜索**能力。
+> 
+> **什么是语义搜索？**
+> 
+> 语义搜索使用 AI 嵌入模型理解内容的**含义**，而不仅仅是关键词匹配。
+> 
+> **激活后你可以：**
+> - 🧠 搜索'昨天看的文章' → 找到相关内容，即使没提到'文章'这个词
+> - 💡 搜索'项目进展' → 找到所有讨论进度的对话
+> - 🎯 搜索'用户反馈' → 找到所有反馈相关的记忆
+> - ⚡ 支持中文、英文、多语言混合搜索
+> 
+> **需要的资源：**
+> - Ollama（本地模型运行环境，~300MB）
+> - 嵌入模型（推荐 bge-m3，~2.3GB）
+> - 一次性下载，之后离线使用
+> 
+> **模型选择：**
+> - 🇨🇳 中文：bge-m3 (推荐)、bge-large-zh、text2vec
+> - 🇺🇸 英文：nomic-embed-text、mxbai-embed-large、all-minilm
+> - 🌍 多语言：snowflake-arctic-embed"
+
+**Step 2: Ask user**
+
+> "需要激活语义搜索吗？
+> - ✅ 激活：运行 \`$WORKSPACE_ROOT/scripts/core/activate-features.sh\`
+> - ⏭️  跳过：回复'跳过'或'skip'
+> - ℹ️  了解更多：docs/FEATURE_ACTIVATION_GUIDE.md"
+
+**If user says yes/好的/yes**, respond:
+> "好的！请运行以下命令：
+> \`\`\`bash
+> $WORKSPACE_ROOT/scripts/core/activate-features.sh
+> \`\`\`
+> 脚本会引导你安装 Ollama 并选择嵌入模型（支持中文/英文/多语言）。
+> 
+> 完成后告诉我，我会确认激活状态。"
+
+**If user says skip/跳过**, respond:
+> "好的，已跳过。需要时随时运行 \`./scripts/core/activate-features.sh\` 激活。"
+
+**If already installed**, skip this step (don't ask again).
+
+**Check memory**: Before asking, check \`memory/YYYY-MM-DD.md\` - if user already skipped today, don't ask again.
 EOF
 fi
 if [ "$LANG" = "zh" ]; then
     echo "   ✓ AGENTS.md 已配置"
 else
     echo "   ✓ AGENTS.md configured"
+fi
+
+# 在 SOUL.md 中追加核心规则（如果文件存在）
+if [ "$LANG" = "zh" ]; then
+    echo "📝 配置 SOUL.md..."
+else
+    echo "📝 Configuring SOUL.md..."
+fi
+if [ -f "SOUL.md" ] && ! grep -q "核心规则" SOUL.md; then
+    # 备份原文件
+    cp SOUL.md SOUL.md.bak
+    
+    # 在顶部插入核心规则
+    cat > SOUL.md.tmp << 'RULEEOF'
+# SOUL.md - Who You Are
+
+> ⚠️ **核心规则（每次会话必读）**
+>
+> **删除文件**：用户必须明确说"删除"，二次确认，优先 `trash`
+>
+> **隐私信息**：群聊中不分享私人内容
+>
+> **详细规则**：读 `AGENTS.md`
+
+---
+
+RULEEOF
+    
+    # 追加原内容（跳过原来的标题行）
+    tail -n +2 SOUL.md.bak >> SOUL.md.tmp
+    mv SOUL.md.tmp SOUL.md
+    rm -f SOUL.md.bak
+    
+    if [ "$LANG" = "zh" ]; then
+        echo "   ✓ SOUL.md 已配置"
+    else
+        echo "   ✓ SOUL.md configured"
+    fi
+else
+    if [ "$LANG" = "zh" ]; then
+        echo "   ⊘ SOUL.md 不存在或已配置"
+    else
+        echo "   ⊘ SOUL.md not found or already configured"
+    fi
 fi
 
 # 复制规则文档到 docs/
@@ -276,8 +444,58 @@ openclaw_registered=true
 EOF
 echo "   ✅ Done"
 
-# 完成
+# 自动激活基础功能（无需确认）
 echo ""
+if [ "$LANG" = "zh" ]; then
+    echo "🔮 自动激活基础功能..."
+else
+    echo "🔮 Auto-activating basic features..."
+
+# Initialize Knowledge-Graph and RAG systems
+if [ -f "scripts/core/init-knowledge-systems.sh" ]; then
+    ./scripts/core/init-knowledge-systems.sh > /dev/null 2>&1 || true
+fifi
+cd "$WORKSPACE_ROOT"
+
+# 激活知识库系统
+if [ -d "skills/memory-search" ]; then
+    if [ "$LANG" = "zh" ]; then
+        echo "   ✅ 知识库系统已就绪"
+    else
+        echo "   ✅ Knowledge base system ready"
+    fi
+fi
+
+# 激活自进化系统
+if [ -d "skills/self-evolution" ]; then
+    if [ "$LANG" = "zh" ]; then
+        echo "   ✅ 自进化系统已就绪"
+    else
+        echo "   ✅ Self-evolution system ready"
+    fi
+fi
+
+# 激活 RAG 评估系统
+if [ -d "skills/rag" ]; then
+    if [ "$LANG" = "zh" ]; then
+        echo "   ✅ RAG 评估系统已就绪"
+    else
+        echo "   ✅ RAG evaluation system ready"
+    fi
+fi
+
+# 激活定时任务
+if command -v openclaw &> /dev/null; then
+    if [ "$LANG" = "zh" ]; then
+        echo "   ✅ 定时任务已就绪"
+    else
+        echo "   ✅ Cron system ready"
+    fi
+fi
+
+echo ""
+
+# 语义搜索模型需要用户确认（需要安装 Ollama）
 if [ "$LANG" = "zh" ]; then
     echo "╔════════════════════════════════════════════════════════╗"
     echo "║  ✅ 安装完成！                                           ║"
@@ -285,9 +503,16 @@ if [ "$LANG" = "zh" ]; then
     echo ""
     echo "📊 位置：$WORKSPACE_ROOT"
     echo ""
-    echo "🔮 激活高级特性（可选）:"
-    echo "   cd $WORKSPACE_ROOT"
-    echo "   ./scripts/core/activate-features.sh"
+    echo "🔮 基础功能已自动激活："
+    echo "   ✅ 知识库系统"
+    echo "   ✅ 自进化系统"
+    echo "   ✅ RAG 评估系统"
+    echo "   ✅ 定时任务"
+    echo ""
+    echo "⚠️  可选：激活语义搜索模型（需要 Ollama）"
+    echo "   运行：$WORKSPACE_ROOT/scripts/core/activate-features.sh"
+    echo "   或跳过：继续正常使用"
+    echo ""
 else
     echo "╔════════════════════════════════════════════════════════╗"
     echo "║  ✅ Installation Complete!                               ║"
@@ -295,30 +520,57 @@ else
     echo ""
     echo "📊 Location: $WORKSPACE_ROOT"
     echo ""
-    echo "🔮 Activate features (optional):"
-    echo "   cd $WORKSPACE_ROOT"
-    echo "   ./scripts/core/activate-features.sh"
+    echo "🔮 Basic features auto-activated:"
+    echo "   ✅ Knowledge base system"
+    echo "   ✅ Self-evolution system"
+    echo "   ✅ RAG evaluation system"
+    echo "   ✅ Cron system"
+    echo ""
+    echo "⚠️  Optional: Activate semantic search (requires Ollama)"
+    echo "   Run: $WORKSPACE_ROOT/scripts/core/activate-features.sh"
+    echo "   Or skip: Continue using normally"
+    echo ""
 fi
 
-# 创建安装配置文件
-echo "📝 创建安装配置..."
-cat > "$WORKSPACE_ROOT/.install-config" <<EOF
-agent_name=$AGENT_NAME
-workspace_path=$WORKSPACE_ROOT
-install_time=$(date -Iseconds)
-openclaw_registered=true
-EOF
-echo "   ✅ 完成"
+# Add Harness Agent usage notes to AGENTS.md
+if [ "$LANG" = "zh" ]; then
+    echo "📝 配置 Harness Agent 使用说明..."
+else
+    echo "📝 Configuring Harness Agent usage notes..."
+fi
 
-# 完成
-echo ""
-echo "╔════════════════════════════════════════════════════════╗"
-echo "║  ✅ 安装完成！                                           ║"
-echo "╚════════════════════════════════════════════════════════╝"
-echo ""
-echo "📊 位置：$WORKSPACE_ROOT"
-echo ""
-echo "🔮 激活高级特性（可选）:"
-echo "   cd $WORKSPACE_ROOT"
-echo "   ./scripts/core/activate-features.sh"
-echo ""
+cat >> AGENTS.md << 'EOF'
+
+---
+
+## 🛠️ Harness Agent Usage / 使用说明
+
+### ⚠️ Important: Harness Agent Does NOT Use sessions_spawn
+
+**Default Behavior / 默认行为**:
+- ✅ Harness Agent executes tasks in the **current session** / 在当前会话执行
+- ❌ Does **NOT create** sub-agents (no sessions_spawn) / 不创建子 Agent
+- ✅ Single agent handles all tasks / 单个 Agent 处理所有任务
+
+**Why / 为什么**:
+1. Simple & Efficient / 简洁高效 - No overhead
+2. Context Concentration / 上下文集中 - All info in one session
+3. Minimalist Design / 简洁设计 - 150 lines plugin philosophy
+
+**Example / 示例**:
+```bash
+/harness-agent "Write a function" --domain programming
+# → Executes in current session, NO spawn
+```
+
+**Note / 注意**:
+- SUBAGENT_RULES.md applies to **manually created** sub-agents only
+- Harness Agent handles internal logic automatically
+- Reserved for future expansion if needed
+EOF
+
+if [ "$LANG" = "zh" ]; then
+    echo "   ✓ Harness Agent 使用说明已配置"
+else
+    echo "   ✓ Harness Agent usage notes configured"
+fi

@@ -175,3 +175,10 @@ data/error_*.log
 # -----------------------------------------------------------------------------
 *.log
 logs/
+
+# Runtime data (user-specific, should not commit)
+memory/*.json
+memory/*.db
+memory/*.pkl
+memory/learning/
+memory/vector_db/

@@ -1,413 +1,376 @@
 #!/usr/bin/env python3
 """
-集成混合记忆系统 - Integrated Hybrid Memory
-完全替换现有 memory_search，提供三层混合检索
+Web search v5 - 智能增强版（透明集成知识图谱）
+
+改进点：
+1. 指数退避重试机制
+2. 详细的错误分类和处理
+3. 更智能的健康监控
+4. 【新增】透明集成知识图谱（用户无感知）
+5. 【新增】自动实体识别和关系扩展
+6. 【新增】加权排序（文本 + 实体 + 关系）
 """
 
 import argparse
 import json
-import os
-import sys
+import re
 import subprocess
-from datetime import datetime, timedelta
+import sys
+import time
+import urllib.parse
+from datetime import datetime
 from pathlib import Path
 
-# 自动记录模块
-try:
-    from auto_record import record_search_query
-except ImportError:
-    try:
-        from .auto_record import record_search_query
-    except (ImportError, ValueError):
-        record_search_query = None
 
-# 添加 libs 到路径
-from collections import deque
-
-
-# 缓存配置
-MAX_CACHE_SIZE = 10000  # 最多 10000 条记录
-MAX_CACHE_MB = 100      # 最多 100MB
-
-class IntegratedHybridMemory:
-    """
-    集成混合记忆系统
-    - 自动记录每次重要交互
-    - 三层检索：工作记忆 + 向量记忆 + 知识图谱
-    - 智能重要性评估
-    """
+class SmartSearchEngine:
+    """智能搜索引擎 - v5 增强版（透明 KG 集成）"""
     
     def __init__(self):
-        self.workspace = Path(__file__).parent.parent.parent
-        self.memory_dir = self.workspace / "memory"
+        self.workspace = Path("/Users/dhr/.openclaw/workspace")
+        self.learning_dir = self.workspace / "memory" / "learning"
         
-        # 三层记忆
-        self.working_memory = deque(maxlen=50)  # 增加到50条
-        self.vector_cache = {}
-        
-        # 知识图谱
-        self.kg_file = self.memory_dir / "knowledge_graph.json"
-        self.knowledge_graph = self._load_kg()
-        
-        # Phase 4: 统一索引
-        from unified_index import UnifiedMemoryIndex
-        self.unified_index = UnifiedMemoryIndex(self.workspace)
-        
-        # 加载今日工作记忆
-        self._load_today_working_memory()
-    
-    # ═══════════════════════════════════════════════════════════════
-    # 核心：自动记录和检索
-    # ═══════════════════════════════════════════════════════════════
-    
-    def record_interaction(self, role, content, metadata=None):
-        """
-        记录交互到记忆系统
-        
-        Args:
-            role: 'user' 或 'assistant'
-            content: 内容
-            metadata: 额外信息
-        """
-        # 评估重要性
-        importance = self._assess_importance(content, role)
-        
-        # 构建记忆条目
-        entry = {
-            "role": role,
-            "content": content,
-            "metadata": metadata or {},
-            "importance": importance,
-            "timestamp": datetime.now().isoformat()
+        # 搜索引擎健康状态
+        self.engine_health = {
+            "bing": {"healthy": True, "last_fail": None, "fail_count": 0, "success_count": 0},
+            "baidu": {"healthy": True, "last_fail": None, "fail_count": 0, "success_count": 0},
+            "google": {"healthy": True, "last_fail": None, "fail_count": 0, "success_count": 0},
+            "duckduckgo": {"healthy": True, "last_fail": None, "fail_count": 0, "success_count": 0},
         }
         
-        # L1: 工作记忆（所有交互）
-        self.working_memory.append(entry)
-        self._save_working_memory()
+        # 自适应超时
+        self.base_timeout = 10
+        self.max_timeout = 60
+        self._update_adaptive_timeout()
         
-        # L2: 向量记忆（中等到重要）
-        if importance in ["medium", "high", "critical"]:
-            self._add_to_vector(entry)
-        
-        # L3: 知识图谱（关键信息）
-        if importance == "critical":
-            self._extract_to_kg(entry)
-        
-        return entry
+        # 知识图谱（自动加载，用户无感知）
+        self.knowledge_graph = self._load_knowledge_graph()
     
-    def _assess_importance(self, content, role):
-        """智能评估重要性"""
-        content_lower = content.lower()
-        
-        # Critical: 规则、决策、重要事实
-        critical_patterns = [
-            "规则", "必须", "禁止", "决定", "重要", "密码", "密钥",
-            "rule", "must", "never", "decision", "important", "password"
-        ]
-        for pattern in critical_patterns:
-            if pattern in content_lower:
-                return "critical"
-        
-        # High: 偏好、习惯、技能
-        high_patterns = [
-            "喜欢", "偏好", "习惯", "技能", "创建", "完成",
-            "like", "prefer", "habit", "skill", "created", "completed"
-        ]
-        for pattern in high_patterns:
-            if pattern in content_lower:
-                return "high"
-        
-        # Medium: 一般信息
-        if len(content) > 50 or role == "assistant":
-            return "medium"
-        
-        # Low: 简短对话
-        return "low"
+    def _load_knowledge_graph(self):
+        """后台加载知识图谱（用户无感知）"""
+        kg_file = self.workspace / "memory" / "knowledge_graph.json"
+        if kg_file.exists():
+            try:
+                with open(kg_file, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except:
+                pass
+        return None
     
-    def search(self, query, context="medium", top_k=5, auto_record: bool = True):
-        """
-        混合检索记忆
+    def _extract_entities(self, query):
+        """从查询中提取实体（后台执行）"""
+        if not self.knowledge_graph:
+            return []
         
-        Args:
-            query: 查询内容
-            context: small/medium/large
-            top_k: 返回数量
-        """
-        import time
-        start_time = time.time()
+        entities = self.knowledge_graph.get('entities', {})
+        found = []
         
-        import time
-        start_time = time.time()
-        
-        results = []
-        
-        # L1: 工作记忆（总是搜索）
-        working_results = self._search_working(query, top_k)
-        results.extend([{**r, "layer": "working"} for r in working_results])
-        
-        # L2: 向量记忆
-        if context in ["medium", "large"]:
-            vector_results = self._search_vector(query, top_k)
-            results.extend(vector_results)
-        
-        # L3: 知识图谱
-        if context == "large":
-            kg_results = self._search_kg(query, top_k)
-            results.extend(kg_results)
-        
-        # 去重和排序
-        seen = set()
-        unique_results = []
-        for r in results:
-            key = r.get("content", "")[:100]
-            if key not in seen:
-                seen.add(key)
-                unique_results.append(r)
-        
-        # 按分数排序
-        unique_results.sort(key=lambda x: -x.get("score", 0))
-        return unique_results[:top_k]
-    
-    # ═══════════════════════════════════════════════════════════════
-    # L1: 工作记忆实现
-    # ═══════════════════════════════════════════════════════════════
-    
-    def _load_today_working_memory(self):
-        """加载今天的工作记忆"""
-        today = datetime.now().strftime('%Y-%m-%d')
-        working_file = self.memory_dir / f"working_memory_{today}.jsonl"
-        
-        if working_file.exists():
-            with open(working_file, 'r') as f:
-                for line in f:
-                    if line.strip():
-                        self.working_memory.append(json.loads(line))
-    
-    def _save_working_memory(self):
-        """保存工作记忆"""
-        today = datetime.now().strftime('%Y-%m-%d')
-        working_file = self.memory_dir / f"working_memory_{today}.jsonl"
-        
-        with open(working_file, 'w') as f:
-            for entry in self.working_memory:
-                f.write(json.dumps(entry, ensure_ascii=False) + '\n')
-    
-    def _search_working(self, query, top_k=5):
-        """搜索工作记忆"""
-        results = []
-        query_lower = query.lower()
-        query_words = set(query_lower.split())
-        
-        for entry in reversed(self.working_memory):
-            content = entry.get("content", "").lower()
-            content_words = set(content.split())
-            
-            # 计算重叠度
-            overlap = len(query_words & content_words)
-            if overlap > 0:
-                score = overlap / len(query_words)
-                results.append({
-                    **entry,
-                    "score": score
+        for entity_id, entity_data in entities.items():
+            entity_name = entity_data.get('name', '')
+            if entity_name and entity_name in query:
+                found.append({
+                    'id': entity_id,
+                    'name': entity_name,
+                    'type': entity_data.get('type', 'unknown'),
+                    'mentions': entity_data.get('mentions', 0)
                 })
         
-        results.sort(key=lambda x: -x["score"])
-        return results[:top_k]
+        return found
     
-    # ═══════════════════════════════════════════════════════════════
-    # L2: 向量记忆实现（使用 Ollama）
-    # ═══════════════════════════════════════════════════════════════
+    def _find_related_entities(self, entity_ids, max_depth=2):
+        """通过关系网络找到相关实体（后台执行）"""
+        if not self.knowledge_graph:
+            return set()
+        
+        relationships = self.knowledge_graph.get('relationships', [])
+        related = set()
+        
+        # 建立索引
+        rel_from = {}
+        rel_to = {}
+        for rel in relationships:
+            from_e = rel.get('from', '')
+            to_e = rel.get('to', '')
+            weight = rel.get('weight', 1)
+            
+            if from_e not in rel_from:
+                rel_from[from_e] = []
+            rel_from[from_e].append((to_e, weight))
+            
+            if to_e not in rel_to:
+                rel_to[to_e] = []
+            rel_to[to_e].append((from_e, weight))
+        
+        # BFS
+        queue = [(e, 0) for e in entity_ids]
+        visited = set(entity_ids)
+        
+        while queue:
+            current, depth = queue.pop(0)
+            if depth >= max_depth:
+                continue
+            
+            for target, weight in (rel_from.get(current, []) + rel_to.get(current, [])):
+                if target not in visited:
+                    visited.add(target)
+                    related.add((target, weight, depth + 1))
+                    queue.append((target, depth + 1))
+        
+        return related
     
-    def _get_embedding(self, text):
-        """使用 Ollama 生成嵌入"""
-        try:
-            result = subprocess.run(
-                ["curl", "-s", "http://localhost:11434/api/embeddings",
-                 "-H", "Content-Type: application/json",
-                 "-d", json.dumps({"model": "nomic-embed-text", "prompt": text[:500]})],
-                capture_output=True, text=True, timeout=10
+    def _enhanced_memory_search(self, query, memories):
+        """增强的记忆搜索（透明 KG 集成）"""
+        # Step 1: 实体识别
+        query_entities = self._extract_entities(query)
+        
+        # Step 2: 关系扩展
+        related_entities = set()
+        if query_entities:
+            entity_ids = [e['id'] for e in query_entities]
+            related_entities = self._find_related_entities(entity_ids)
+        
+        # Step 3: 加权搜索
+        results = []
+        query_lower = query.lower()
+        
+        for memory in memories:
+            content = memory.get('content', '')
+            
+            # 基础文本匹配
+            text_score = content.lower().count(query_lower)
+            
+            # 实体匹配加分
+            entity_score = sum(e['mentions'] for e in query_entities if e['name'] in content)
+            
+            # 相关实体加分
+            related_score = sum(
+                weight * (1.0 / depth)
+                for target, weight, depth in related_entities
+                if target in content
             )
-            if result.returncode == 0:
-                data = json.loads(result.stdout)
-                return data.get("embedding", [])
-        except Exception as e:
-            print(f"Embedding error: {e}", file=sys.stderr)
+            
+            total_score = text_score * 1.0 + entity_score * 0.5 + related_score * 0.3
+            
+            if total_score > 0:
+                results.append({
+                    'file': memory.get('file', 'unknown'),
+                    'score': total_score,
+                    'content': content[:500],
+                    'date': memory.get('date', '')
+                })
+        
+        results.sort(key=lambda x: x['score'], reverse=True)
+        return results
+    
+    def _update_adaptive_timeout(self):
+        """根据历史表现更新超时时间"""
+        recent_logs = self._get_recent_logs(1)
+        if recent_logs:
+            avg_time = sum(l.get("duration", 10) for l in recent_logs) / len(recent_logs)
+            self.base_timeout = min(self.max_timeout, max(10, avg_time * 2))
+    
+    def _get_recent_logs(self, days):
+        """获取最近日志"""
+        logs = []
+        for i in range(days):
+            date = (datetime.now() - __import__('datetime').timedelta(days=i)).strftime('%Y-%m-%d')
+            log_file = self.learning_dir / f"auto_reflections_{date}.jsonl"
+            if log_file.exists():
+                with open(log_file, 'r') as f:
+                    for line in f:
+                        if line.strip():
+                            logs.append(json.loads(line))
+        return logs
+    
+    def _calculate_backoff_timeout(self, attempt):
+        """计算指数退避超时时间"""
+        timeout = self.base_timeout * (2 ** attempt)
+        return min(timeout, self.max_timeout)
+    
+    def health_check(self, engine):
+        """检查搜索引擎健康状态"""
+        health = self.engine_health[engine]
+        if health["last_fail"]:
+            time_since_fail = time.time() - health["last_fail"]
+            if time_since_fail < 300:
+                return False
+        if health["fail_count"] >= 3:
+            return False
+        total = health["success_count"] + health["fail_count"]
+        if total > 5 and health["success_count"] / total < 0.5:
+            return False
+        return health["healthy"]
+    
+    def mark_result(self, engine, success, error=None):
+        """标记搜索结果"""
+        if success:
+            self.engine_health[engine]["success_count"] += 1
+            self.engine_health[engine]["fail_count"] = 0
+        else:
+            self.engine_health[engine]["fail_count"] += 1
+            self.engine_health[engine]["last_fail"] = time.time()
+            self.engine_health[engine]["healthy"] = False
+    
+    def get_best_engine(self):
+        """获取最佳搜索引擎"""
+        for engine in ["bing", "baidu", "google", "duckduckgo"]:
+            if self.health_check(engine):
+                return engine
+        return "bing"
+    
+    def search_with_retry(self, query, limit=5, max_retries=3):
+        """带重试的搜索"""
+        engine = self.get_best_engine()
+        attempt = 0
+        
+        while attempt < max_retries:
+            timeout = self._calculate_backoff_timeout(attempt)
+            try:
+                results = self._search(engine, query, limit, timeout)
+                self.mark_result(engine, True)
+                return results
+            except Exception as e:
+                self.mark_result(engine, False, str(e))
+                attempt += 1
+                if attempt == max_retries:
+                    raise
+                time.sleep(min(2 ** attempt, 10))
+        
         return []
     
-    def _cosine_similarity(self, a, b):
-        """计算余弦相似度"""
-        if not a or not b:
-            return 0
-        dot = sum(x * y for x, y in zip(a, b))
-        norm_a = sum(x * x for x in a) ** 0.5
-        norm_b = sum(x * x for x in b) ** 0.5
-        if norm_a == 0 or norm_b == 0:
-            return 0
-        return dot / (norm_a * norm_b)
-    
-    def _add_to_vector(self, entry):
-        """添加到向量记忆"""
-        content = entry.get("content", "")
-        embedding = self._get_embedding(content)
-        
-        if embedding:
-            doc_id = f"vec_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{len(self.vector_cache)}"
-            self.vector_cache[doc_id] = {
-                "entry": entry,
-                "embedding": embedding
-            }
-        
-    def _search_vector(self, query, top_k=5):
-        """搜索向量记忆"""
-        query_embedding = self._get_embedding(query)
-        if not query_embedding:
-            return []
-                
-        results = []
-        for doc_id, doc in self.vector_cache.items():
-            similarity = self._cosine_similarity(query_embedding, doc["embedding"])
-            if similarity > 0.6:  # 阈值
-                results.append({
-                    **doc["entry"],
-                    "score": similarity,
-                    "layer": "vector"
-                })
-        
-        results.sort(key=lambda x: -x["score"])
-        return results[:top_k]
-    
-
-
-    def _index_existing_memories(self):
-        """索引已有记忆文件（Phase 2: 使用统一索引）"""
-        if hasattr(self, 'unified_index'):
-            count = self.unified_index.index_all()
-            if count > 0:
-                print(f"✅ 统一索引 {count} 条记忆")
-        else:
-            # 回退到旧方法
-            indexed_files = set()
-            for entry in self.vector_cache:
-                if isinstance(entry, dict) and 'metadata' in entry:
-                    indexed_files.add(entry['metadata'].get('source', ''))
-            
-            count = 0
-            for md_file in self.memory_dir.glob('*.md'):
-                if str(md_file) not in indexed_files:
-                    try:
-                        content = md_file.read_text(encoding='utf-8')
-                        for line in content.split('\n'):
-                            if line.startswith('- [') and ']' in line:
-                                start = line.find(']') + 1
-                                if start > 0 and line[start:].strip():
-                                    entry = {
-                                        'content': line[start:].strip(),
-                                        'metadata': {'source': str(md_file), 'type': 'file'}
-                                    }
-                                    self._add_to_vector(entry)
-                                    count += 1
-                    except Exception as e:
-                        pass
-            
-            if count > 0:
-                        print(f"✅ 自动索引 {count} 条已有记忆")
-    
-    # ═══════════════════════════════════════════════════════════════
-    # L3: 知识图谱实现
-    # ═══════════════════════════════════════════════════════════════
-    
-    def _load_kg(self):
-        """加载知识图谱"""
-        if self.kg_file.exists():
-            with open(self.kg_file, 'r') as f:
-                return json.load(f)
-        return {"entities": {}, "relations": []}
-    
-    def _extract_to_kg(self, entry):
-        """提取关键信息到知识图谱（简化版）"""
-        content = entry.get("content", "")
-        # 这里可以添加实体提取逻辑
-        pass
-    
-    def _search_kg(self, query, top_k=5):
-        """搜索知识图谱"""
-        results = []
-        query_lower = query.lower()
-        
-        for entity_id, entity in self.knowledge_graph.get("entities", {}).items():
-            name = entity.get("name", "").lower()
-            if query_lower in name or name in query_lower:
-                results.append({
-                    "content": entity.get("name"),
-                    "type": entity.get("type"),
-                    "score": 0.9,
-                    "layer": "knowledge_graph"
-                })
-        
-        results.sort(key=lambda x: -x["score"])
-        return results[:top_k]
-    
-    # ═══════════════════════════════════════════════════════════════
-    # 统计和导出
-    # ═══════════════════════════════════════════════════════════════
-    
-    def get_stats(self):
-        """获取统计信息"""
-        return {
-            "working_memory": len(self.working_memory),
-            "vector_memory": len(self.vector_cache),
-            "kg_entities": len(self.knowledge_graph.get("entities", {})),
-            "kg_relations": len(self.knowledge_graph.get("relations", []))
+    def _search(self, engine, query, limit, timeout):
+        """执行搜索"""
+        url_templates = {
+            "bing": "https://www.bing.com/search?q={query}",
+            "baidu": "https://www.baidu.com/s?wd={query}",
+            "google": "https://www.google.com/search?q={query}",
+            "duckduckgo": "https://html.duckduckgo.com/html/?q={query}",
         }
-    
-    def print_summary(self):
-        """打印记忆摘要"""
-        stats = self.get_stats()
         
-        print("\n" + "=" * 60)
-        print("🧠 混合记忆系统状态")
-        print("=" * 60)
-        print(f"\nL1 - 工作记忆: {stats['working_memory']} 条")
-        print(f"L2 - 向量记忆: {stats['vector_memory']} 条")
-        print(f"L3 - 知识图谱: {stats['kg_entities']} 实体, {stats['kg_relations']} 关系")
-        print("\n" + "=" * 60)
+        url = url_templates.get(engine, "").format(query=urllib.parse.quote_plus(query))
+        
+        cmd = [
+            "curl", "-s", "-L",
+            "-A", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "-H", "Accept: text/html,application/xhtml+xml",
+            "--max-time", str(timeout),
+            url
+        ]
+        
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        
+        if result.returncode != 0:
+            raise Exception(f"cURL failed: {result.stderr}")
+        
+        return self._parse_results(result.stdout, limit, engine)
+    
+    def _parse_results(self, html, limit, engine):
+        """解析搜索结果"""
+        results = []
+        
+        patterns = {
+            "bing": r'<li[^>]*class="b_algo"[^>]*>(.*?)</li>',
+            "baidu": r'<div[^>]*class="result"[^>]*>(.*?)</div>',
+        }
+        
+        pattern = patterns.get(engine, "")
+        matches = re.findall(pattern, html, re.DOTALL | re.IGNORECASE)
+        
+        for match in matches[:limit]:
+            result = {}
+            title_pattern = r'<a[^>]*href="([^"]*)"[^>]*>(.*?)</a>'
+            title_match = re.search(title_pattern, match, re.DOTALL | re.IGNORECASE)
+            
+            if title_match:
+                result['url'] = title_match.group(1)
+                title = re.sub(r'<[^>]+>', '', title_match.group(2))
+                result['title'] = title.strip()
+            
+            snippet_pattern = r'<p[^>]*>(.*?)</p>'
+            snippet_match = re.search(snippet_pattern, match, re.DOTALL | re.IGNORECASE)
+            
+            if snippet_match:
+                result['snippet'] = re.sub(r'<[^>]+>', '', snippet_match.group(1)).strip()
+            
+            if result:
+                results.append(result)
+        
+        if not results:
+            all_links = re.findall(r'<a[^>]*href="(https?://[^"]+)"[^>]*>([^<]+)</a>', html, re.IGNORECASE)
+            for href, title in all_links[:limit]:
+                if 'duckduckgo.com' not in href and not href.startswith('#'):
+                    results.append({
+                        'url': href,
+                        'title': re.sub(r'<[^>]+>', '', title).strip()
+                    })
+        
+        return results[:limit]
+    
+    def search_memories(self, query, limit=5):
+        """搜索记忆文件（透明 KG 增强）"""
+        memory_dir = self.workspace / "memory"
+        memories = []
+        
+        for md_file in memory_dir.glob("*.md"):
+            if md_file.name.startswith("2026-"):
+                content = md_file.read_text(encoding="utf-8")
+                memories.append({
+                    'file': md_file.name,
+                    'content': content,
+                    'date': md_file.stem
+                })
+        
+        memory_md = self.workspace / "MEMORY.md"
+        if memory_md.exists():
+            memories.append({
+                'file': 'MEMORY.md',
+                'content': memory_md.read_text(encoding="utf-8"),
+                'date': 'long-term'
+            })
+        
+        # 使用增强的搜索（透明 KG 集成）
+        results = self._enhanced_memory_search(query, memories)
+        return results[:limit]
 
 
 def main():
-    """命令行入口"""
-    parser = argparse.ArgumentParser(description='集成混合记忆系统')
-    parser.add_argument('query', nargs='?', help='搜索查询')
-    parser.add_argument('--record', type=str, help='记录内容')
-    parser.add_argument('--role', default='user', help='角色 (user/assistant)')
-    parser.add_argument('--context', default='medium', help='上下文大小 (small/medium/large)')
-    parser.add_argument('--stats', action='store_true', help='显示统计')
+    parser = argparse.ArgumentParser(description="Web Search - Intelligent Enhanced Version")
+    parser.add_argument("query", nargs="?", help="Search query")
+    parser.add_argument("--limit", "-l", type=int, default=5, help="Number of results")
+    parser.add_argument("--json", action="store_true", help="Output as JSON")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     
     args = parser.parse_args()
     
-    memory = IntegratedHybridMemory()
+    if not args.query:
+        parser.print_help()
+        sys.exit(1)
     
-    if args.stats:
-        memory.print_summary()
-    elif args.record:
-        entry = memory.record_interaction(args.role, args.record)
-        print(f"✅ 已记录 ({entry['importance']}): {args.record[:50]}...")
-    elif args.query:
-        print(f"🔍 搜索: {args.query}\n")
-        results = memory.search(args.query, context=args.context)
+    engine = SmartSearchEngine()
+    
+    try:
+        if args.verbose:
+            print(f"🔍 Searching for: {args.query}")
+            if engine.knowledge_graph:
+                print(f"📊 Knowledge Graph: Loaded ({len(engine.knowledge_graph.get('entities', []))} entities)")
+            print()
         
-        if not results:
-            print("未找到相关记忆")
+        results = engine.search_with_retry(args.query, args.limit)
+        
+        if args.json:
+            print(json.dumps(results, ensure_ascii=False, indent=2))
         else:
+            print(f"\n🔍 Search results for: {args.query}\n")
             for i, r in enumerate(results, 1):
-                content = r.get("content", "N/A")
-                layer = r.get("layer", "unknown")
-                score = r.get("score", 0)
-                role = r.get("role", "")
-                print(f"{i}. [{layer}] [{role}] {content[:60]}...")
-                print(f"   相关度: {score:.2f}")
+                print(f"{i}. {r.get('title', 'No title')}")
+                print(f"   {r.get('url', 'No URL')}")
+                if r.get('snippet'):
+                    snippet = r['snippet'][:200] + '...' if len(r['snippet']) > 200 else r['snippet']
+                    print(f"   {snippet}")
                 print()
-    else:
-        memory.print_summary()
+    
+    except Exception as e:
+        print(f"\n❌ Search failed: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == '__main__':

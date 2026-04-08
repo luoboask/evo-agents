@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """
-Web search v4 - 进化版
+Web search - 增强版
 改进点：
 1. 指数退避重试机制
 2. 详细的错误分类和处理
 3. 更智能的健康监控
+4. 【新增】深度研究模式（多角度搜索 + 智能去重 + 综合摘要）
+5. 【新增】结果质量评分（相关性/时效性/权威性）
+6. 【新增】导出为 Markdown 格式
 """
 
 import argparse
@@ -16,16 +19,13 @@ import time
 import urllib.parse
 from datetime import datetime
 from pathlib import Path
-import sys
-
-# 添加 libs 到路径
 
 
 class SmartSearchEngine:
     """智能搜索引擎 - v4 进化版"""
     
     def __init__(self):
-        self.workspace = Path(__file__).parent.parent.parent
+        self.workspace = Path("/Users/dhr/.openclaw/workspace")
         self.learning_dir = self.workspace / "memory" / "learning"
         
         # 搜索引擎健康状态
@@ -483,3 +483,217 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+# ========== 增强功能：深度研究模式 ==========
+
+def deep_research(query: str, num_angles: int = 4, results_per_angle: int = 5, verbose: bool = False):
+    """深度研究模式 - 多角度搜索 + 智能去重 + 综合摘要"""
+    import hashlib
+    
+    if verbose:
+        print(f"\n🔬 启动深度研究：{query}\n")
+    
+    # Step 1: 生成多个搜索角度
+    templates = [
+        "{query} 最佳实践",
+        "{query} 完整教程",
+        "{query} 案例分析",
+        "{query} 2026 年最新趋势",
+        "{query} 优缺点对比",
+        "{query} 常见问题",
+    ]
+    
+    if "对比" in query or "vs" in query.lower():
+        angles = [f"{query} 详细对比", f"{query} 性能测试", f"{query} 用户评价", f"{query} 价格对比"]
+    elif "教程" in query or "如何" in query:
+        angles = [f"{query} 入门指南", f"{query} 高级技巧", f"{query} 常见错误", f"{query} 实战案例"]
+    else:
+        angles = [t.format(query=query) for t in templates[:num_angles]]
+    
+    if verbose:
+        print(f"📐 搜索角度:")
+        for i, angle in enumerate(angles, 1):
+            print(f"   {i}. {angle}")
+        print()
+    
+    # Step 2: 多角度搜索
+    searcher = SmartSearchEngine()
+    all_results = []
+    
+    for angle in angles:
+        try:
+            results = searcher.search_with_retry(angle, limit=results_per_angle)
+            all_results.extend(results)
+            if verbose:
+                print(f"✅ {angle}: 找到 {len(results)} 条结果")
+        except Exception as e:
+            if verbose:
+                print(f"⚠️  '{angle}' 搜索失败：{e}")
+    
+    if verbose:
+        print(f"\n📊 共收集 {len(all_results)} 条结果")
+    
+    # Step 3: 智能去重
+    seen_urls = set()
+    seen_titles = set()
+    unique_results = []
+    
+    for result in all_results:
+        url = result.get('url', '')
+        title = result.get('title', '')
+        
+        if url in seen_urls:
+            continue
+        
+        title_hash = hashlib.md5(title.encode()).hexdigest()[:8]
+        if title_hash in seen_titles:
+            continue
+        
+        seen_urls.add(url)
+        seen_titles.add(title_hash)
+        unique_results.append(result)
+    
+    if verbose:
+        print(f"✨ 去重后剩余 {len(unique_results)} 条结果")
+    
+    # Step 4: 质量评分
+    query_keywords = set(query.lower().split())
+    scored_results = []
+    
+    for result in unique_results:
+        score = 0.0
+        title = result.get('title', '').lower()
+        snippet = result.get('snippet', '').lower()
+        
+        title_match = sum(1 for kw in query_keywords if kw in title)
+        score += (title_match / len(query_keywords)) * 40 if query_keywords else 0
+        
+        snippet_match = sum(1 for kw in query_keywords if kw in snippet)
+        score += (snippet_match / len(query_keywords)) * 30 if query_keywords else 0
+        
+        domain = result.get('domain', '')
+        authoritative_domains = ['.gov', '.edu', '.org', 'github.com', 'stackoverflow.com']
+        if any(auth in domain for auth in authoritative_domains):
+            score += 30
+        
+        result['score'] = round(score, 1)
+        scored_results.append(result)
+    
+    scored_results.sort(key=lambda x: x.get('score', 0), reverse=True)
+    
+    # Step 5: 生成综合摘要
+    key_points = []
+    sources = []
+    
+    for result in scored_results[:10]:
+        snippet = result.get('snippet', '')
+        if snippet and len(snippet) > 50:
+            key_point = snippet[:150] + "..." if len(snippet) > 150 else snippet
+            key_points.append(key_point)
+        
+        sources.append({
+            'title': result.get('title', ''),
+            'url': result.get('url'),
+            'domain': result.get('domain')
+        })
+    
+    executive_summary = f"关于\"{query}\"的深度研究共找到 {len(scored_results)} 条相关结果。"
+    executive_summary += f"以下是 {len(key_points)} 个关键发现："
+    
+    summary = {
+        'executive_summary': executive_summary,
+        'key_points': key_points[:10],
+        'sources': sources
+    }
+    
+    if verbose:
+        print("\n📝 综合摘要:")
+        print("-" * 60)
+        print(summary['executive_summary'])
+        print("\n关键点:")
+        for point in summary['key_points'][:5]:
+            print(f"  • {point}")
+        print("-" * 60)
+    
+    return {
+        'query': query,
+        'timestamp': datetime.now().isoformat(),
+        'search_angles': angles,
+        'total_results': len(all_results),
+        'unique_results': len(unique_results),
+        'results': scored_results[:20],
+        'summary': summary
+    }
+
+
+def export_to_markdown(data: dict, filename: str):
+    """导出为 Markdown 格式"""
+    with open(filename, 'w', encoding='utf-8') as f:
+        f.write(f"# 深度研究报告：{data['query']}\n\n")
+        f.write(f"**生成时间**: {data['timestamp']}\n\n")
+        f.write(f"**搜索角度**: {', '.join(data['search_angles'])}\n\n")
+        f.write(f"**数据来源**: {data['total_results']} → {data['unique_results']} (去重)\n\n")
+        
+        if data.get('summary'):
+            f.write(f"## 综合摘要\n\n{data['summary']['executive_summary']}\n\n")
+            f.write(f"## 关键发现\n\n")
+            for i, point in enumerate(data['summary']['key_points'], 1):
+                f.write(f"{i}. {point}\n\n")
+        
+        f.write(f"## 详细结果\n\n")
+        for i, result in enumerate(data['results'], 1):
+            f.write(f"### {i}. {result['title']}\n\n")
+            f.write(f"**来源**: [{result.get('domain', 'Unknown')}]({result['url']})\n\n")
+            if result.get('snippet'):
+                f.write(f"{result['snippet']}\n\n")
+            if result.get('score'):
+                f.write(f"**相关性评分**: {result['score']}/100\n\n")
+
+
+# 修改 main() 添加深度研究支持
+_original_main = main
+
+def enhanced_main():
+    parser = argparse.ArgumentParser(description="Web Search - 增强版")
+    parser.add_argument("query", nargs="?", help="搜索关键词")
+    parser.add_argument("--deep-research", action="store_true", help="深度研究模式")
+    parser.add_argument("--angles", type=int, default=4, help="搜索角度数量")
+    parser.add_argument("--export", metavar="FILE", help="导出为 Markdown 文件")
+    parser.add_argument("-v", "--verbose", action="store_true", help="详细输出")
+    parser.add_argument("-l", "--limit", type=int, default=10, help="结果数量")
+    parser.add_argument("--engine", choices=["bing", "baidu", "google", "duckduckgo"], help="指定引擎")
+    
+    args = parser.parse_args()
+    
+    if not args.query:
+        parser.print_help()
+        sys.exit(1)
+    
+    if args.deep_research:
+        report = deep_research(args.query, num_angles=args.angles, verbose=args.verbose)
+        
+        if args.export:
+            export_to_markdown(report, args.export)
+            print(f"📄 报告已导出：{args.export}")
+        else:
+            print("\n" + "="*70)
+            print("🔬 深度研究报告")
+            print("="*70)
+            print(f"主题：{args.query}")
+            print(f"搜索角度：{len(report['search_angles'])} 个")
+            print(f"总结果：{report['total_results']} → {report['unique_results']} (去重)")
+            print("="*70)
+            
+            if report['summary']:
+                print(f"\n{report['summary']['executive_summary']}\n")
+                print("关键点:")
+                for i, point in enumerate(report['summary']['key_points'][:10], 1):
+                    print(f"  {i}. {point}")
+            
+            print("\n" + "="*70)
+    else:
+        _original_main()
+
+if __name__ == '__main__':
+    enhanced_main()

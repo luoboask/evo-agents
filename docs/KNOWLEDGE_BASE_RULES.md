@@ -35,17 +35,22 @@ _公共知识 vs 私人知识 vs Agent 专用知识_
 
 ### 1. 公共知识库 (Public)
 
-**位置：** `skills/*/` 和 `docs/`
+**位置：** `public/`、`skills/*/` 和 `docs/`
 
 ```
 workspace/
+├── public/                        ← 公共知识库根目录
+│   ├── .gitkeep
+│   ├── README.md
+│   ├── projects/                  ← 公共项目文档
+│   └── workflow/                  ← 公共工作流
 ├── skills/
-│   ├── memory-search/SKILL.md      ← 公共技能文档
+│   ├── memory-search/SKILL.md     ← 公共技能文档
 │   ├── rag/SKILL.md
 │   ├── self-evolution/SKILL.md
 │   └── web-knowledge/SKILL.md
 └── docs/
-    ├── SKILL_RULES.md              ← 公共规则
+    ├── SKILL_RULES.md             ← 公共规则
     ├── WORKSPACE_RULES.md
     └── ...
 ```
@@ -60,6 +65,7 @@ workspace/
 - 工具使用说明
 - 公共规则和规范
 - 技术文档
+- 公共项目文档
 
 ---
 
@@ -103,18 +109,19 @@ workspace/
 
 ```
 data/
+├── <agent>/
+│   ├── knowledge/                 ← Agent 知识库
+│   │   └── private/               ← Agent 私有知识
+│   │       ├── projects/          ← 项目相关
+│   │       │   └── *.json
+│   │       └── workflow/          ← 工作流相关
+│   │           └── *.json
+│   ├── memory_stream.db           ← 记忆流数据库
+│   ├── knowledge_base.db          ← 知识库数据库
+│   └── config.yaml                ← Agent 配置
 ├── main-agent/
-│   ├── memory_stream.db
-│   ├── knowledge_base.db
-│   └── config.yaml
 ├── sandbox-agent/
-│   ├── memory_stream.db
-│   ├── knowledge_base.db
-│   └── config.yaml
 └── tao-admin/
-    ├── memory_stream.db
-    ├── knowledge_base.db
-    └── config.yaml
 ```
 
 **特点：**
@@ -128,12 +135,27 @@ data/
 - Agent 学习到的技能
 - Agent 特定上下文
 - Agent 配置
+- 私有项目文档 (`knowledge/private/projects/`)
+- 私有工作流 (`knowledge/private/workflow/`)
 
 **使用规则：**
 ```
 ✅ 每个 Agent 只能访问自己的数据库
 ⚠️ 跨 Agent 数据共享需要明确授权
 ❌ 不要混用不同 Agent 的数据库
+```
+
+**知识存储格式：**
+```json
+// knowledge/private/projects/*.json
+{
+  "id": "b5d9ebc0-b3ba-40cc-9570-65ddf53bcb2b",
+  "title": "项目名称",
+  "content": "项目详情...",
+  "tags": ["tag1", "tag2"],
+  "created_at": "2026-04-02T10:48:00+08:00",
+  "updated_at": "2026-04-02T10:48:00+08:00"
+}
 ```
 
 ---
