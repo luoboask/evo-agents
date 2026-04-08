@@ -517,9 +517,33 @@ if [ "$LANG" = "zh" ]; then
                 echo "      ⚠️  失败"
             fi
             
+            # 记忆压缩（每周日 03:00）
+            echo "   - 记忆压缩 (每周日 03:00)..."
+            if openclaw cron add \
+                --cron "0 3 * * 0" \
+                --agent "$AGENT_NAME" \
+                --message "python3 scripts/core/memory_compressor.py --weekly --monthly" \
+                --name "weekly-compress-$AGENT_NAME" >/dev/null 2>&1; then
+                echo "      ✅ 完成"
+            else
+                echo "      ⚠️  失败"
+            fi
+            
+            # 系统维护（每周日 02:00）
+            echo "   - 系统维护 (每周日 02:00)..."
+            if openclaw cron add \
+                --cron "0 2 * * 0" \
+                --agent "$AGENT_NAME" \
+                --message "bash skills/memory-search/maintenance.sh" \
+                --name "weekly-maintenance-$AGENT_NAME" >/dev/null 2>&1; then
+                echo "      ✅ 完成"
+            else
+                echo "      ⚠️  失败"
+            fi
+            
             echo ""
             echo "📋 当前 OpenClaw cron 任务:"
-            openclaw cron list 2>/dev/null | grep -E "(session-scan|daily-review|nightly-evolution)" | head -5 || echo "   (无)"
+            openclaw cron list 2>/dev/null | grep -E "(session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance)" | head -10 || echo "   (无)"
         else
             echo "   ⚠️  OpenClaw 未安装，跳过定时任务配置"
         fi
