@@ -198,8 +198,6 @@ python3 skills/memory-search/search.py "Ollama"
 | End of day | `self-evolution` (nightly) |
 
 #### Enhanced Skills (v2.0+)
-
-##### Memory & Knowledge
 | When | Use | Command |
 |------|-----|---------|
 | Build knowledge graph | `knowledge-graph` | `cd skills/knowledge-graph && python3 builder.py` |
@@ -207,25 +205,7 @@ python3 skills/memory-search/search.py "Ollama"
 | AI entity extraction | Auto (uses `knowledge-graph`) | Optional: qwen2.5:0.5b |
 | Smart summarization | Auto (uses `memory-compression`) | Optional: qwen2.5:1.5b |
 
-##### Harness Agent Plugins (Domain-Specific)
-| Domain | Use Case | Example Command |
-|--------|----------|----------------|
-| **Programming** | Software development | `/harness-agent "开发博客系统" --domain programming` |
-| **E-commerce** | Product/order management | `/harness-agent "双十一活动" --domain ecommerce` |
-| **Data Analysis** | BI/Statistics/Visualization | `/harness-agent "Q1 销售分析" --domain data_analysis` |
-| **DevOps** | CI/CD, Deployment, Monitoring | `/harness-agent "部署到 AWS" --domain devops` |
-| **Marketing** | Campaigns, Social Media | `/harness-agent "新品发布会" --domain marketing` |
-| **Content Creation** | Articles, Video scripts | `/harness-agent "写产品测评" --domain content_creation` |
-| **Self-Media** | Self-media operations | `/harness-agent "运营小红书" --domain self_media_content` |
-
-**Harness Agent Features:**
-- ✅ **8 Domain Plugins**: Programming, E-commerce, Data Analysis, DevOps, Marketing, Content, Self-Media
-- ✅ **Tool Safety Markers**: Auto-detect concurrency-safe vs destructive operations
-- ✅ **Input Validation**: Clear error messages for missing parameters
-- ✅ **Tech Stack Recommendations**: Best practices for each domain
-- ✅ **Simple Design**: ~150 lines per plugin, easy to understand and extend
-
-**Enhanced Memory Features:**
+**Enhanced Features:**
 - ✅ **Knowledge Graph**: AI-powered entity extraction (+50% coverage) + relation inference
 - ✅ **Memory Compression**: Daily → Weekly → Monthly → Yearly hierarchical summaries
 - ✅ **Optional Ollama**: Works without AI models (graceful fallback to basic mode)
@@ -444,192 +424,13 @@ openclaw_registered=true
 EOF
 echo "   ✅ Done"
 
-<<<<<<< Updated upstream
 # 自动激活基础功能（无需确认）
-=======
-# 设置定时任务（默认自动开启）
-if [ "$LANG" = "zh" ]; then
-    echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "⏰ 自动配置定时任务"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
-    echo "💡 正在为您配置推荐的定时任务..."
-    echo "   ✅ 会话扫描 (每 30 分钟) - 自动同步 OpenClaw 会话"
-    echo "   ✅ 每日回顾 (每天 09:00) - 创建今日记忆 + 显示昨天摘要"
-    echo "   ✅ 夜间进化 (每天 23:00) - 记忆整合 + 自进化"
-    echo "   ✅ 记忆压缩 (每周日 03:00) - 生成周/月摘要"
-    echo "   ✅ 系统维护 (每周日 02:00) - 清理旧数据"
-    echo ""
-    echo "📝 这些任务会在后台自动运行，无需手动干预。"
-    echo "   如需调整，安装后可通过 crontab -e 修改。"
-    echo ""
-    
-    # 询问是否跳过
-    read -p "是否需要跳过定时任务配置？(y/N，默认 N): " -r SKIP_CRON
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        # 1. 会话扫描（30 分钟）
-        if [ -f "$WORKSPACE_ROOT/scripts/core/setup-cron.sh" ]; then
-            echo "📝 设置会话扫描定时任务 (每 30 分钟)..."
-            cd "$WORKSPACE_ROOT"
-            bash scripts/core/setup-cron.sh "$AGENT_NAME" 30 >/dev/null 2>&1 && echo "   ✅ 完成" || echo "   ⚠️  设置失败"
-        fi
-        echo ""
-        
-        # 2. 每日回顾（09:00）
-        if [ -f "$WORKSPACE_ROOT/scripts/core/setup-daily-review.sh" ]; then
-            echo "📝 设置每日回顾定时任务 (每天 09:00)..."
-            cd "$WORKSPACE_ROOT"
-            bash scripts/core/setup-daily-review.sh "$AGENT_NAME" "09:00" >/dev/null 2>&1 && echo "   ✅ 完成" || echo "   ⚠️  设置失败"
-        fi
-        echo ""
-        
-        # 3. 夜间进化（23:00）
-        CRON_CMD="0 23 * * * cd $WORKSPACE_ROOT && python3 skills/self-evolution/nightly_cycle.py >> logs/nightly_evolution.log 2>&1"
-        echo "📝 设置夜间进化循环 (每天 23:00)..."
-        (crontab -l 2>/dev/null | grep -v "nightly_cycle.py"; echo "$CRON_CMD") | crontab - && echo "   ✅ 完成" || echo "   ⚠️  设置失败"
-        echo ""
-        
-        # 4. 记忆压缩（每周日 03:00）
-        CRON_CMD="0 3 * * 0 cd $WORKSPACE_ROOT && python3 scripts/core/memory_compressor.py --weekly --monthly >> logs/memory_compress.log 2>&1"
-        echo "📝 设置每周记忆压缩 (每周日 03:00)..."
-        (crontab -l 2>/dev/null | grep -v "memory_compressor.py"; echo "$CRON_CMD") | crontab - && echo "   ✅ 完成" || echo "   ⚠️  设置失败"
-        echo ""
-        
-        # 5. 系统维护（每周日 02:00）
-        CRON_CMD="0 2 * * 0 cd $WORKSPACE_ROOT && bash skills/memory-search/maintenance.sh >> logs/system_maintenance.log 2>&1"
-        echo "📝 设置每周系统维护 (每周日 02:00)..."
-        (crontab -l 2>/dev/null | grep -v "maintenance.sh"; echo "$CRON_CMD") | crontab - && echo "   ✅ 完成" || echo "   ⚠️  设置失败"
-        echo ""
-        
-        # 验证
-        echo "📋 当前 cron 任务列表:"
-        crontab -l 2>/dev/null | grep -E "(scan_sessions|daily_review|nightly_cycle|memory_compressor|maintenance)" | head -10 || echo "   (无)"
-        echo ""
-        
-        echo "╔════════════════════════════════════════════════════════╗"
-        echo "║  ✅ 定时任务配置完成！                                   ║"
-        echo "╚════════════════════════════════════════════════════════╝"
-        echo ""
-        echo "📊 日志文件:"
-        echo "   - 会话扫描：$WORKSPACE_ROOT/logs/session_scan.log"
-        echo "   - 每日回顾：$WORKSPACE_ROOT/logs/daily_review.log"
-        echo "   - 夜间进化：$WORKSPACE_ROOT/logs/nightly_evolution.log"
-        echo "   - 记忆压缩：$WORKSPACE_ROOT/logs/memory_compress.log"
-        echo "   - 系统维护：$WORKSPACE_ROOT/logs/system_maintenance.log"
-        echo ""
-        echo "🔧 管理命令:"
-        echo "   # 查看所有 cron 任务"
-        echo "   crontab -l"
-        echo ""
-        echo "   # 查看日志"
-        echo "   tail -f $WORKSPACE_ROOT/logs/session_scan.log"
-        echo ""
-        echo "   # 禁用定时任务"
-        echo "   crontab -e  # 编辑并删除不需要的任务"
-        echo ""
-    else
-        echo "   ⊘ 已跳过定时任务配置"
-    fi
-    
-else
-    echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "⏰ Auto-Configure Cron Jobs"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
-    echo "💡 Configuring recommended cron jobs..."
-    echo "   ✅ Session Scan (every 30 min) - Auto-sync OpenClaw sessions"
-    echo "   ✅ Daily Review (daily 09:00) - Create today's memory + yesterday's summary"
-    echo "   ✅ Nightly Evolution (daily 23:00) - Memory consolidation + self-evolution"
-    echo "   ✅ Memory Compress (weekly Sun 03:00) - Generate weekly/monthly summaries"
-    echo "   ✅ System Maintenance (weekly Sun 02:00) - Clean old data"
-    echo ""
-    echo "📝 These tasks will run automatically in the background."
-    echo "   To adjust, edit crontab -e after installation."
-    echo ""
-    
-    # Ask to skip
-    read -p "Skip cron job configuration? (y/N, default N): " -r SKIP_CRON
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        # 1. Session scan (30 min)
-        if [ -f "$WORKSPACE_ROOT/scripts/core/setup-cron.sh" ]; then
-            echo "📝 Setting up session scan (every 30 minutes)..."
-            cd "$WORKSPACE_ROOT"
-            bash scripts/core/setup-cron.sh "$AGENT_NAME" 30 >/dev/null 2>&1 && echo "   ✅ Done" || echo "   ⚠️  Setup failed"
-        fi
-        echo ""
-        
-        # 2. Daily review (09:00)
-        if [ -f "$WORKSPACE_ROOT/scripts/core/setup-daily-review.sh" ]; then
-            echo "📝 Setting up daily review (09:00 daily)..."
-            cd "$WORKSPACE_ROOT"
-            bash scripts/core/setup-daily-review.sh "$AGENT_NAME" "09:00" >/dev/null 2>&1 && echo "   ✅ Done" || echo "   ⚠️  Setup failed"
-        fi
-        echo ""
-        
-        # 3. Nightly evolution (23:00)
-        CRON_CMD="0 23 * * * cd $WORKSPACE_ROOT && python3 skills/self-evolution/nightly_cycle.py >> logs/nightly_evolution.log 2>&1"
-        echo "📝 Setting up nightly evolution (23:00 daily)..."
-        (crontab -l 2>/dev/null | grep -v "nightly_cycle.py"; echo "$CRON_CMD") | crontab - && echo "   ✅ Done" || echo "   ⚠️  Setup failed"
-        echo ""
-        
-        # 4. Memory compress (weekly Sun 03:00)
-        CRON_CMD="0 3 * * 0 cd $WORKSPACE_ROOT && python3 scripts/core/memory_compressor.py --weekly --monthly >> logs/memory_compress.log 2>&1"
-        echo "📝 Setting up weekly memory compress (Sun 03:00)..."
-        (crontab -l 2>/dev/null | grep -v "memory_compressor.py"; echo "$CRON_CMD") | crontab - && echo "   ✅ Done" || echo "   ⚠️  Setup failed"
-        echo ""
-        
-        # 5. System maintenance (weekly Sun 02:00)
-        CRON_CMD="0 2 * * 0 cd $WORKSPACE_ROOT && bash skills/memory-search/maintenance.sh >> logs/system_maintenance.log 2>&1"
-        echo "📝 Setting up weekly system maintenance (Sun 02:00)..."
-        (crontab -l 2>/dev/null | grep -v "maintenance.sh"; echo "$CRON_CMD") | crontab - && echo "   ✅ Done" || echo "   ⚠️  Setup failed"
-        echo ""
-        
-        # Verify
-        echo "📋 Current cron jobs:"
-        crontab -l 2>/dev/null | grep -E "(scan_sessions|daily_review|nightly_cycle|memory_compressor|maintenance)" | head -10 || echo "   (none)"
-        echo ""
-        
-        echo "╔════════════════════════════════════════════════════════╗"
-        echo "║  ✅ Cron jobs configured!                                ║"
-        echo "╚════════════════════════════════════════════════════════╝"
-        echo ""
-        echo "📊 Log files:"
-        echo "   - Session scan: $WORKSPACE_ROOT/logs/session_scan.log"
-        echo "   - Daily review: $WORKSPACE_ROOT/logs/daily_review.log"
-        echo "   - Nightly evolution: $WORKSPACE_ROOT/logs/nightly_evolution.log"
-        echo "   - Memory compress: $WORKSPACE_ROOT/logs/memory_compress.log"
-        echo "   - System maintenance: $WORKSPACE_ROOT/logs/system_maintenance.log"
-        echo ""
-        echo "🔧 Management commands:"
-        echo "   # View all cron jobs"
-        echo "   crontab -l"
-        echo ""
-        echo "   # View logs"
-        echo "   tail -f $WORKSPACE_ROOT/logs/session_scan.log"
-        echo ""
-        echo "   # Disable cron jobs"
-        echo "   crontab -e  # Edit and remove unwanted tasks"
-        echo ""
-    else
-        echo "   ⊘ Skipped cron job configuration"
-    fi
-    
-fi
-
-# 完成
->>>>>>> Stashed changes
 echo ""
 if [ "$LANG" = "zh" ]; then
     echo "🔮 自动激活基础功能..."
 else
     echo "🔮 Auto-activating basic features..."
-
-# Initialize Knowledge-Graph and RAG systems
-if [ -f "scripts/core/init-knowledge-systems.sh" ]; then
-    ./scripts/core/init-knowledge-systems.sh > /dev/null 2>&1 || true
-fifi
+fi
 cd "$WORKSPACE_ROOT"
 
 # 激活知识库系统
@@ -678,7 +479,6 @@ if [ "$LANG" = "zh" ]; then
     echo ""
     echo "📊 位置：$WORKSPACE_ROOT"
     echo ""
-<<<<<<< Updated upstream
     echo "🔮 基础功能已自动激活："
     echo "   ✅ 知识库系统"
     echo "   ✅ 自进化系统"
@@ -689,27 +489,6 @@ if [ "$LANG" = "zh" ]; then
     echo "   运行：$WORKSPACE_ROOT/scripts/core/activate-features.sh"
     echo "   或跳过：继续正常使用"
     echo ""
-=======
-    echo "🔮 激活高级特性（可选）:"
-    echo "   cd $WORKSPACE_ROOT"
-    echo "   ./scripts/core/activate-features.sh"
-    echo ""
-    echo "⏰ 定时任务（如已设置）:"
-    echo "   # 查看会话扫描日志"
-    echo "   tail -f $WORKSPACE_ROOT/logs/session_scan.log"
-    echo ""
-    echo "   # 查看每日回顾日志"
-    echo "   tail -f $WORKSPACE_ROOT/logs/daily_review.log"
-    echo ""
-    echo "   # 手动运行会话扫描"
-    echo "   python3 $WORKSPACE_ROOT/scripts/core/scan_sessions.py --agent $AGENT_NAME"
-    echo ""
-    echo "   # 手动运行每日回顾"
-    echo "   python3 $WORKSPACE_ROOT/skills/memory-search/daily_review.py"
-    echo ""
-    echo "   # 查看所有 cron 任务"
-    echo "   crontab -l"
->>>>>>> Stashed changes
 else
     echo "╔════════════════════════════════════════════════════════╗"
     echo "║  ✅ Installation Complete!                               ║"
@@ -717,7 +496,6 @@ else
     echo ""
     echo "📊 Location: $WORKSPACE_ROOT"
     echo ""
-<<<<<<< Updated upstream
     echo "🔮 Basic features auto-activated:"
     echo "   ✅ Knowledge base system"
     echo "   ✅ Self-evolution system"
@@ -728,68 +506,4 @@ else
     echo "   Run: $WORKSPACE_ROOT/scripts/core/activate-features.sh"
     echo "   Or skip: Continue using normally"
     echo ""
-=======
-    echo "🔮 Activate features (optional):"
-    echo "   cd $WORKSPACE_ROOT"
-    echo "   ./scripts/core/activate-features.sh"
-    echo ""
-    echo "⏰ Cron jobs (if setup):"
-    echo "   # View session scan logs"
-    echo "   tail -f $WORKSPACE_ROOT/logs/session_scan.log"
-    echo ""
-    echo "   # View daily review logs"
-    echo "   tail -f $WORKSPACE_ROOT/logs/daily_review.log"
-    echo ""
-    echo "   # Manual session scan"
-    echo "   python3 $WORKSPACE_ROOT/scripts/core/scan_sessions.py --agent $AGENT_NAME"
-    echo ""
-    echo "   # Manual daily review"
-    echo "   python3 $WORKSPACE_ROOT/skills/memory-search/daily_review.py"
-    echo ""
-    echo "   # View all cron jobs"
-    echo "   crontab -l"
->>>>>>> Stashed changes
-fi
-
-# Add Harness Agent usage notes to AGENTS.md
-if [ "$LANG" = "zh" ]; then
-    echo "📝 配置 Harness Agent 使用说明..."
-else
-    echo "📝 Configuring Harness Agent usage notes..."
-fi
-
-cat >> AGENTS.md << 'EOF'
-
----
-
-## 🛠️ Harness Agent Usage / 使用说明
-
-### ⚠️ Important: Harness Agent Does NOT Use sessions_spawn
-
-**Default Behavior / 默认行为**:
-- ✅ Harness Agent executes tasks in the **current session** / 在当前会话执行
-- ❌ Does **NOT create** sub-agents (no sessions_spawn) / 不创建子 Agent
-- ✅ Single agent handles all tasks / 单个 Agent 处理所有任务
-
-**Why / 为什么**:
-1. Simple & Efficient / 简洁高效 - No overhead
-2. Context Concentration / 上下文集中 - All info in one session
-3. Minimalist Design / 简洁设计 - 150 lines plugin philosophy
-
-**Example / 示例**:
-```bash
-/harness-agent "Write a function" --domain programming
-# → Executes in current session, NO spawn
-```
-
-**Note / 注意**:
-- SUBAGENT_RULES.md applies to **manually created** sub-agents only
-- Harness Agent handles internal logic automatically
-- Reserved for future expansion if needed
-EOF
-
-if [ "$LANG" = "zh" ]; then
-    echo "   ✓ Harness Agent 使用说明已配置"
-else
-    echo "   ✓ Harness Agent usage notes configured"
 fi
