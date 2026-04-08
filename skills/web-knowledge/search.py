@@ -329,7 +329,7 @@ class SmartSearchEngine:
         return results[:limit]
     
     def _parse_google_results(self, html, limit):
-        """解析 Google 搜索结果"""
+        """解析 Google 搜索结果（改进版 - 修复标题格式问题）"""
         results = []
         # Google 结果容器（多种类名）
         container_patterns = [
@@ -347,9 +347,15 @@ class SmartSearchEngine:
             
             result = {}
             
-            # 提取标题和链接
-            title_pattern = r'<a[^>]*href="([^"]*)"[^>]*>(.*?)</a>'
+            # 优先匹配 h3 标签中的链接
+            title_pattern = r'<h3[^>]*>.*?<a[^>]*href="([^"]*)"[^>]*>(.*?)</a>.*?</h3>'
             title_match = re.search(title_pattern, container, re.DOTALL | re.IGNORECASE)
+            
+            if not title_match:
+                # 回退：直接匹配链接
+                title_pattern = r'<a[^>]*href="([^"]*)"[^>]*>(.*?)</a>'
+                title_match = re.search(title_pattern, container, re.DOTALL | re.IGNORECASE)
+            
             if title_match:
                 url = title_match.group(1)
                 # 过滤非结果链接
@@ -357,6 +363,9 @@ class SmartSearchEngine:
                     continue
                 result['url'] = url
                 title = re.sub(r'<[^>]+>', '', title_match.group(2))
+                # 清理标题（移除域名前缀和多余内容）
+                title = re.sub(r'^[a-z0-9.-]+\s*', '', title)  # 移除开头的域名
+                title = re.sub(r'\s*›\s*.*$', '', title)  # 移除 › 后面的内容
                 result['title'] = title.strip()
             
             # 提取摘要
@@ -366,10 +375,11 @@ class SmartSearchEngine:
                 snippet = re.sub(r'<[^>]+>', '', snippet_match.group(1))
                 result['snippet'] = snippet.strip()
             
-            if result.get('title') and result.get('url'):
+            # 验证结果质量
+            if result.get('title') and result.get('url') and len(result['title']) > 5:
                 results.append(result)
         
-        return results
+        return results[:limit]
     
     def _parse_duckduckgo_results(self, html, limit):
         """解析 DuckDuckGo Lite 搜索结果"""
@@ -420,28 +430,48 @@ class SmartSearchEngine:
         return results[:limit]
     
     def _parse_results(self, html, limit):
-        """解析搜索结果"""
+        """解析搜索结果（改进版 - 修复标题格式问题）"""
         results = []
         algo_pattern = r'<li[^>]*class="b_algo"[^>]*>(.*?)</li>'
         algo_matches = re.findall(algo_pattern, html, re.DOTALL | re.IGNORECASE)
         
-        for match in algo_matches[:limit]:
+        for match in algo_matches[:limit * 2]:  # 多匹配一些，过滤后可能不够
             result = {}
-            title_pattern = r'<a[^>]*href="([^"]*)"[^>]*>(.*?)</a>'
+            
+            # 更精确的标题提取 - 优先匹配 h2/h3 标签中的链接
+            title_pattern = r'<h[23][^>]*>.*?<a[^>]*href="([^"]*)"[^>]*>(.*?)</a>.*?</h[23]>'
             title_match = re.search(title_pattern, match, re.DOTALL | re.IGNORECASE)
+            
+            if not title_match:
+                # 回退：直接匹配第一个结果链接
+                title_pattern = r'<a[^>]*href="([^"]*)"[^>]*>(.*?)</a>'
+                title_match = re.search(title_pattern, match, re.DOTALL | re.IGNORECASE)
+            
             if title_match:
-                result['url'] = title_match.group(1)
+                url = title_match.group(1)
+                # 过滤非结果链接
+                if url.startswith('/search') or url.startswith('#') or 'bing.com' in url.lower():
+                    continue
+                result['url'] = url
                 title = re.sub(r'<[^>]+>', '', title_match.group(2))
+                # 清理标题（移除域名前缀和多余内容）
+                title = re.sub(r'^[a-z0-9.-]+\s*', '', title)  # 移除开头的域名
+                title = re.sub(r'\s*›\s*.*$', '', title)  # 移除 › 后面的内容
                 result['title'] = title.strip()
             
+            # 提取摘要
             snippet_pattern = r'<p[^>]*>(.*?)</p>'
             snippet_match = re.search(snippet_pattern, match, re.DOTALL | re.IGNORECASE)
             if snippet_match:
                 snippet = re.sub(r'<[^>]+>', '', snippet_match.group(1))
                 result['snippet'] = snippet.strip()
             
-            if result.get('title') and result.get('url'):
+            # 验证结果质量
+            if result.get('title') and result.get('url') and len(result['title']) > 5:
                 results.append(result)
+            
+            if len(results) >= limit:
+                break
         
         return results
 
