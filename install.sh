@@ -476,32 +476,34 @@ if [ "$LANG" = "zh" ]; then
     # 询问是否跳过
     read -p "是否需要跳过定时任务配置？(y/N，默认 N): " -r SKIP_CRON
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        # 检查是否有定时任务脚本
-        if [ -f "$WORKSPACE_ROOT/scripts/core/setup-cron.sh" ]; then
-            echo "📝 设置会话扫描定时任务 (每 30 分钟)..."
-            cd "$WORKSPACE_ROOT"
-            bash scripts/core/setup-cron.sh "$AGENT_NAME" 30 >/dev/null 2>&1 && echo "   ✅ 完成" || echo "   ⚠️  设置失败"
+        # 使用 OpenClaw 的 cron 系统配置定时任务
+        if command -v openclaw &> /dev/null; then
+            echo "📝 配置 OpenClaw 定时任务..."
+            
+            # 会话扫描（每 30 分钟）
+            echo "   - 会话扫描 (每 30 分钟)..."
+            openclaw cron add --schedule "*/30 * * * *" \
+                --message "cd $WORKSPACE_ROOT && python3 scripts/core/scan_sessions.py --agent $AGENT_NAME" \
+                --name "session-scan-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ 完成" || echo "      ⚠️  失败"
+            
+            # 每日回顾（每天 09:00）
+            echo "   - 每日回顾 (每天 09:00)..."
+            openclaw cron add --schedule "0 9 * * *" \
+                --message "cd $WORKSPACE_ROOT && python3 skills/memory-search/daily_review.py" \
+                --name "daily-review-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ 完成" || echo "      ⚠️  失败"
+            
+            # 夜间进化（每天 23:00）
+            echo "   - 夜间进化 (每天 23:00)..."
+            openclaw cron add --schedule "0 23 * * *" \
+                --message "cd $WORKSPACE_ROOT && python3 skills/self-evolution/nightly_cycle.py" \
+                --name "nightly-evolution-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ 完成" || echo "      ⚠️  失败"
+            
+            echo ""
+            echo "📋 当前 OpenClaw cron 任务:"
+            openclaw cron list 2>/dev/null | grep -E "(session-scan|daily-review|nightly-evolution)" | head -5 || echo "   (无)"
         else
-            echo "   ⚠️  setup-cron.sh 不存在，跳过"
+            echo "   ⚠️  OpenClaw 未安装，跳过定时任务配置"
         fi
-        
-        if [ -f "$WORKSPACE_ROOT/scripts/core/setup-daily-review.sh" ]; then
-            echo "📝 设置每日回顾定时任务 (每天 09:00)..."
-            cd "$WORKSPACE_ROOT"
-            bash scripts/core/setup-daily-review.sh "$AGENT_NAME" "09:00" >/dev/null 2>&1 && echo "   ✅ 完成" || echo "   ⚠️  设置失败"
-        else
-            echo "   ⚠️  setup-daily-review.sh 不存在，跳过"
-        fi
-        
-        # 夜间进化
-        CRON_CMD="0 23 * * * cd $WORKSPACE_ROOT && python3 skills/self-evolution/nightly_cycle.py >> logs/nightly_evolution.log 2>&1"
-        echo "📝 设置夜间进化循环 (每天 23:00)..."
-        (crontab -l 2>/dev/null | grep -v "nightly_cycle"; echo "$CRON_CMD") | crontab - && echo "   ✅ 完成" || echo "   ⚠️  设置失败"
-        
-        echo ""
-        echo "📋 当前 cron 任务列表:"
-        crontab -l 2>/dev/null | grep -E "(scan_sessions|daily_review|nightly_cycle)" | head -5 || echo "   (无)"
-        echo ""
     else
         echo "   ⊘ 已跳过定时任务配置"
     fi
@@ -520,32 +522,34 @@ else
     # Ask to skip
     read -p "Skip cron job configuration? (y/N, default N): " -r SKIP_CRON
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        # Check if cron scripts exist
-        if [ -f "$WORKSPACE_ROOT/scripts/core/setup-cron.sh" ]; then
-            echo "📝 Setting up session scan (every 30 minutes)..."
-            cd "$WORKSPACE_ROOT"
-            bash scripts/core/setup-cron.sh "$AGENT_NAME" 30 >/dev/null 2>&1 && echo "   ✅ Done" || echo "   ⚠️  Setup failed"
+        # Use OpenClaw cron system
+        if command -v openclaw &> /dev/null; then
+            echo "📝 Configuring OpenClaw cron jobs..."
+            
+            # Session scan (every 30 minutes)
+            echo "   - Session Scan (every 30 min)..."
+            openclaw cron add --schedule "*/30 * * * *" \
+                --message "cd $WORKSPACE_ROOT && python3 scripts/core/scan_sessions.py --agent $AGENT_NAME" \
+                --name "session-scan-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+            
+            # Daily review (09:00 daily)
+            echo "   - Daily Review (09:00 daily)..."
+            openclaw cron add --schedule "0 9 * * *" \
+                --message "cd $WORKSPACE_ROOT && python3 skills/memory-search/daily_review.py" \
+                --name "daily-review-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+            
+            # Nightly evolution (23:00 daily)
+            echo "   - Nightly Evolution (23:00 daily)..."
+            openclaw cron add --schedule "0 23 * * *" \
+                --message "cd $WORKSPACE_ROOT && python3 skills/self-evolution/nightly_cycle.py" \
+                --name "nightly-evolution-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+            
+            echo ""
+            echo "📋 Current OpenClaw cron jobs:"
+            openclaw cron list 2>/dev/null | grep -E "(session-scan|daily-review|nightly-evolution)" | head -5 || echo "   (none)"
         else
-            echo "   ⚠️  setup-cron.sh not found, skipped"
+            echo "   ⚠️  OpenClaw not installed, skipped cron configuration"
         fi
-        
-        if [ -f "$WORKSPACE_ROOT/scripts/core/setup-daily-review.sh" ]; then
-            echo "📝 Setting up daily review (09:00 daily)..."
-            cd "$WORKSPACE_ROOT"
-            bash scripts/core/setup-daily-review.sh "$AGENT_NAME" "09:00" >/dev/null 2>&1 && echo "   ✅ Done" || echo "   ⚠️  Setup failed"
-        else
-            echo "   ⚠️  setup-daily-review.sh not found, skipped"
-        fi
-        
-        # Nightly evolution
-        CRON_CMD="0 23 * * * cd $WORKSPACE_ROOT && python3 skills/self-evolution/nightly_cycle.py >> logs/nightly_evolution.log 2>&1"
-        echo "📝 Setting up nightly evolution (23:00 daily)..."
-        (crontab -l 2>/dev/null | grep -v "nightly_cycle"; echo "$CRON_CMD") | crontab - && echo "   ✅ Done" || echo "   ⚠️  Setup failed"
-        
-        echo ""
-        echo "📋 Current cron jobs:"
-        crontab -l 2>/dev/null | grep -E "(scan_sessions|daily_review|nightly_cycle)" | head -5 || echo "   (none)"
-        echo ""
     else
         echo "   ⊘ Skipped cron job configuration"
     fi
