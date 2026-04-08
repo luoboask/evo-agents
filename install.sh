@@ -542,8 +542,8 @@ if [ "$LANG" = "zh" ]; then
             fi
             
             echo ""
-            echo "📋 当前 OpenClaw cron 任务:"
-            openclaw cron list 2>/dev/null | grep -E "(session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance)" | head -10 || echo "   (无)"
+            echo "📋 当前 OpenClaw cron 任务 ($AGENT_NAME):"
+            openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance)" || echo "   (无)"
         else
             echo "   ⚠️  OpenClaw 未安装，跳过定时任务配置"
         fi
