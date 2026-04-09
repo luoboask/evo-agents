@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Memory Hub - 记忆中心 v2.0
-支持 Agent 隔离 + 会话隔离（独立表）
+Memory Hub - 记忆中心 v2.1
+支持 Agent 隔离 + 会话隔离（独立表）+ 容量管理
 
 架构:
 - shared_memories 表 - 共享记忆（所有会话可见）
 - session_memories 表 - 会话记忆（独立表，每会话最多 50 条）
+- 容量管理 - MEMORY.md 和 USER.md 字符限制
 """
 
 from pathlib import Path
@@ -24,6 +25,13 @@ except ImportError:
     from evaluation import EvaluationInterface
     from session_manager import SessionManager
     from session_storage import SessionMemoryStorage
+
+
+# ───────────────────────────────────────────────────────
+# 容量限制配置（参考 Hermes Agent）
+# ───────────────────────────────────────────────────────
+MEMORY_LIMIT = 2200   # MEMORY.md 最大字符数 (~800 tokens)
+USER_LIMIT = 1375     # USER.md 最大字符数 (~500 tokens)
 
 
 class MemoryHub:
@@ -254,3 +262,141 @@ class MemoryHub:
                 **(metadata or {})
             }
         )
+    
+    # ───────────────────────────────────────────────────────
+    # 容量管理接口（Hermes Agent 风格）
+    # ───────────────────────────────────────────────────────
+    
+    def get_memory_usage(self) -> Dict:
+        """获取 MEMORY.md 使用率
+        
+        Returns:
+            dict: {
+                'current': int,      # 当前字符数
+                'limit': int,        # 限制字符数
+                'percentage': float, # 使用百分比
+                'available': int     # 可用字符数
+            }
+        """
+        memory_file = self.workspace_root / 'MEMORY.md'
+        if not memory_file.exists():
+            return {
+                'current': 0,
+                'limit': MEMORY_LIMIT,
+                'percentage': 0.0,
+                'available': MEMORY_LIMIT
+            }
+        
+        content = memory_file.read_text(encoding='utf-8')
+        current = len(content)
+        
+        return {
+            'current': current,
+            'limit': MEMORY_LIMIT,
+            'percentage': round(current / MEMORY_LIMIT * 100, 1),
+            'available': max(0, MEMORY_LIMIT - current)
+        }
+    
+    def get_user_usage(self) -> Dict:
+        """获取 USER.md 使用率
+        
+        Returns:
+            dict: {
+                'current': int,      # 当前字符数
+                'limit': int,        # 限制字符数
+                'percentage': float, # 使用百分比
+                'available': int     # 可用字符数
+            }
+        """
+        user_file = self.workspace_root / 'USER.md'
+        if not user_file.exists():
+            return {
+                'current': 0,
+                'limit': USER_LIMIT,
+                'percentage': 0.0,
+                'available': USER_LIMIT
+            }
+        
+        content = user_file.read_text(encoding='utf-8')
+        current = len(content)
+        
+        return {
+            'current': current,
+            'limit': USER_LIMIT,
+            'percentage': round(current / USER_LIMIT * 100, 1),
+            'available': max(0, USER_LIMIT - current)
+        }
+    
+    def check_memory_capacity(self, new_content: str = "") -> Dict:
+        """检查 MEMORY.md 是否有足够空间添加新内容
+        
+        Args:
+            new_content: 要添加的新内容
+            
+        Returns:
+            dict: {
+                'can_add': bool,     # 是否可以添加
+                'current': int,      # 当前字符数
+                'limit': int,        # 限制字符数
+                'new_would_fit': bool, # 加上新内容是否会超限
+                'usage': str         # 使用率字符串 "1,474/2,200"
+            }
+        """
+        usage = self.get_memory_usage()
+        new_length = len(new_content) if new_content else 0
+        
+        return {
+            'can_add': usage['available'] > 0,
+            'current': usage['current'],
+            'limit': usage['limit'],
+            'new_would_fit': usage['current'] + new_length <= usage['limit'],
+            'usage': f"{usage['current']:,}/{usage['limit']:,}"
+        }
+    
+    def format_memory_usage_display(self) -> str:
+        """格式化记忆使用率显示（用于系统 prompt）
+        
+        Returns:
+            str: 格式化的使用率显示字符串
+        """
+        memory_usage = self.get_memory_usage()
+        user_usage = self.get_user_usage()
+        
+        memory_bar = self._generate_usage_bar(memory_usage['percentage'])
+        user_bar = self._generate_usage_bar(user_usage['percentage'])
+        
+        return f"""
+══════════════════════════════════════════════
+MEMORY (your personal notes) [{memory_usage['percentage']}% — {memory_usage['current']:,}/{MEMORY_LIMIT:,} chars] {memory_bar}
+══════════════════════════════════════════════
+
+══════════════════════════════════════════════
+USER PROFILE [{user_usage['percentage']}% — {user_usage['current']:,}/{USER_LIMIT:,} chars] {user_bar}
+══════════════════════════════════════════════
+"""
+    
+    def _generate_usage_bar(self, percentage: float, width: int = 20) -> str:
+        """生成使用率进度条
+        
+        Args:
+            percentage: 使用百分比 (0-100)
+            width: 进度条宽度
+            
+        Returns:
+            str: 进度条字符串，如 [████████████░░░░░░░░] 60%
+        """
+        filled = int(width * percentage / 100)
+        empty = width - filled
+        
+        # 颜色编码
+        if percentage >= 90:
+            bar_char = '█'  # 危险红色（终端可能显示不同）
+        elif percentage >= 70:
+            bar_char = '█'  # 警告黄色
+        else:
+            bar_char = '█'  # 正常绿色
+        
+        filled_bar = bar_char * filled
+        empty_bar = '░' * empty
+        
+        return f"[{filled_bar}{empty_bar}]"

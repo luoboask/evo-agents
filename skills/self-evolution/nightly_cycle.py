@@ -23,6 +23,10 @@ sys.path.insert(0, str(Path(__file__).parent))
 from memory_stream import MemoryStream
 from self_evolution_real import RealSelfEvolution
 
+# 添加 workspace 到路径
+workspace_path = Path('/Users/dhr/.openclaw/workspace')
+sys.path.insert(0, str(workspace_path))
+
 
 class NightlyEvolutionCycle:
     """夜间进化循环系统"""
@@ -81,6 +85,16 @@ class NightlyEvolutionCycle:
         print("🔍 Auto-Evolution - 自动进化")
         print("=" * 70)
         results['auto_evolution'] = self.auto_evolution()
+        
+        # 5. Memory Capacity Check - 记忆容量检查（每周日执行）
+        if datetime.now().weekday() == 6:  # 周日
+            print("\n" + "=" * 70)
+            print("📊 Memory Capacity Check - 记忆容量检查")
+            print("=" * 70)
+            results['capacity_check'] = self.capacity_check()
+        else:
+            print("\n📊 Memory Capacity Check - 跳过（仅每周日执行）")
+            results['capacity_check'] = {'skipped': True, 'reason': 'Only runs on Sunday'}
         
         # 总结
         print("\n" + "=" * 70)
@@ -447,6 +461,47 @@ class NightlyEvolutionCycle:
             'improvements': improvements
         }
     
+    def capacity_check(self) -> Dict:
+        """
+        📊 Memory Capacity Check - 记忆容量检查
+        
+        检查 MEMORY.md 和 USER.md 的使用率：
+        - < 80%: OK
+        - 80-95%: Warning
+        - > 95%: Critical
+        
+        Returns:
+            dict: 检查结果
+        """
+        try:
+            from capacity_manager import CapacityManager
+            
+            manager = CapacityManager(workspace_root=self.workspace)
+            result = manager.check_capacity(verbose=True)
+            
+            # 如果需要行动且是 Critical，自动压缩
+            if result['status'] == 'critical':
+                print("\n🚨 检测到严重超限，自动压缩...")
+                compress_result = manager.auto_compress(dry_run=False)
+                
+                if compress_result['success']:
+                    print(f"✅ 自动压缩完成：{compress_result['message']}")
+                else:
+                    print(f"⚠️  自动压缩失败：{compress_result.get('message', '未知错误')}")
+            
+            return {
+                'status': 'completed',
+                'result': result,
+                'action_required': result['action_required']
+            }
+        
+        except Exception as e:
+            print(f"⚠️  容量检查失败：{e}")
+            return {
+                'status': 'error',
+                'error': str(e)
+            }
+    
     def _print_summary(self, results: Dict):
         """打印循环总结"""
         print("\n📊 任务完成情况:")
@@ -472,6 +527,15 @@ class NightlyEvolutionCycle:
         ae = results.get('auto_evolution', {})
         if ae.get('status') == 'completed':
             print(f"   🔍 Auto-Evolution: ✅ ({ae.get('improvements_found', 0)}个改进机会)")
+        
+        # Capacity Check
+        cc = results.get('capacity_check', {})
+        if cc.get('skipped'):
+            print(f"   📊 Capacity Check: ⏭️  ({cc.get('reason', '')})")
+        elif cc.get('status') == 'completed':
+            status = cc.get('result', {}).get('status', 'unknown')
+            status_icon = '✅' if status == 'ok' else '⚠️'
+            print(f"   📊 Capacity Check: {status_icon} {status.upper()}")
     
     def _record_cycle_completion(self, results: Dict):
         """记录循环完成事件"""
