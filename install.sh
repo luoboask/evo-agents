@@ -556,8 +556,10 @@ else
     echo ""
     echo "💡 Configuring recommended cron jobs..."
     echo "   ✅ Session Scan (every 30 min) - Auto-sync OpenClaw sessions"
-    echo "   ✅ Daily Review (daily 09:00) - Create today's memory + yesterday's summary"
-    echo "   ✅ Nightly Evolution (daily 23:00) - Memory consolidation + self-evolution"
+    echo "   ✅ Daily Memory Compress (daily 09:30) - Incremental daily summary"
+    echo "   ✅ Weekly Memory Compress (weekly Sun 03:00) - Weekly summary"
+    echo "   ✅ Monthly Memory Compress (monthly 1st 04:00) - Monthly summary"
+    echo "   ✅ Nightly Evolution (daily 23:00) - Self-evolution"
     echo ""
     
     # Ask to skip
@@ -657,6 +659,29 @@ if [ "$LANG" = "zh" ]; then
     echo ""
     echo "💡 提示："
     echo "   - 定时任务已自动配置（如未跳过）"
+    echo "   - 首次使用建议运行：./scripts/core/activate-features.sh"
+    echo "   - 查看文档：docs/"
+    echo ""
+else
+    echo "╔════════════════════════════════════════════════════════╗"
+    echo "║  🎉 Welcome to evo-agents!                              ║"
+    echo "╚════════════════════════════════════════════════════════╝"
+    echo ""
+    echo "💡 Tips:"
+    echo "   - Cron jobs auto-configured (if not skipped)"
+    echo "   - Recommended: Run ./scripts/core/activate-features.sh"
+    echo "   - Documentation: docs/"
+    echo ""
+fi
+
+exit 0
+ures.sh"
+    echo "   - Documentation: docs/"
+    echo ""
+fi
+
+exit 0
+��已自动配置（如未跳过）"
     echo "   - 首次使用建议运行：./scripts/core/activate-features.sh"
     echo "   - 查看文档：docs/"
     echo ""
