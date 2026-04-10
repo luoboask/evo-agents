@@ -163,7 +163,7 @@ exit 0  # 成功退出
 # 第 497,541 行
 logs/nightly_evolution.log
 logs/session_scan.log  (由 setup-cron.sh 创建)
-logs/daily_review.log  (由 setup-daily-review.sh 创建)
+（已删除 daily_review.py，功能由 unified_search 替代）
 ```
 ✅ 日志文件路径正确
 

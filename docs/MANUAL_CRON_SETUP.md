@@ -71,7 +71,7 @@ crontab -l
 
 # 应该看到类似：
 # */30 * * * * cd /Users/dhr/.openclaw/workspace && python3 scripts/core/scan_sessions.py --agent main >> logs/session_scan.log 2>&1
-# 0 9 * * * cd /Users/dhr/.openclaw/workspace && python3 skills/memory-search/daily_review.py >> logs/daily_review.log 2>&1
+# daily_review.py 已删除，使用 unified_search 按需查询
 # 0 23 * * * cd /Users/dhr/.openclaw/workspace && python3 skills/self-evolution/nightly_cycle.py >> logs/nightly_evolution.log 2>&1
 # 0 3 * * 0 cd /Users/dhr/.openclaw/workspace && python3 scripts/core/memory_compressor.py --weekly --monthly >> logs/memory_compress.log 2>&1
 # 0 2 * * 0 cd /Users/dhr/.openclaw/workspace && bash skills/memory-search/maintenance.sh >> logs/system_maintenance.log 2>&1
@@ -96,6 +96,11 @@ crontab -l
 - [定时任务推荐配置](./CRON_RECOMMENDATIONS.md)
 - [会话扫描使用指南](./SESSION_SCAN_CRON.md)
 - [每日回顾集成](./DAILY_REVIEW_INTEGRATION.md)
+
+---
+
+**配置完成！** 🎉
+](./DAILY_REVIEW_INTEGRATION.md)
 
 ---
 

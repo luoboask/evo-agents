@@ -103,7 +103,7 @@ bash scripts/core/diagnose-cron.sh <agent-name>
 1. 检查脚本文件
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ✅ scripts/core/scan_sessions.py
-   ✅ skills/memory-search/daily_review.py
+   （已删除，功能由 unified_search 替代）
    ✅ skills/self-evolution/nightly_cycle.py
    ✅ scripts/core/memory_compressor.py
    ✅ skills/memory-search/maintenance.sh

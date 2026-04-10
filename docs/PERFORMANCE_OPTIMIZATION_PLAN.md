@@ -502,7 +502,7 @@ class HybridSearch:
 **All zero dependencies:**
 
 1. **SQLite Indexes**
-   - File: `skills/memory-search/search_sqlite.py`
+   - File: `shared_memory_search.py（已重构）`
    - Lines: ~20 lines
    - Impact: 5-10x faster
 
@@ -512,7 +512,7 @@ class HybridSearch:
    - Impact: 50-100x faster for repeated queries
 
 3. **SQLite Optimization**
-   - File: `skills/memory-search/search_sqlite.py`
+   - File: `shared_memory_search.py（已重构）`
    - Lines: ~10 lines
    - Impact: 2-5x faster
 

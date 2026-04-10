@@ -578,7 +578,7 @@ else
             # Daily review (09:00 daily)
             echo "   - Daily Review (09:00 daily)..."
             openclaw cron add --schedule "0 9 * * *" \
-                --message "cd $WORKSPACE_ROOT && python3 skills/memory-search/daily_review.py" \
+                # daily_review.py 已删除 \
                 --name "daily-review-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
             # Nightly evolution (23:00 daily)
@@ -667,6 +667,12 @@ else
     echo "💡 Tips:"
     echo "   - Cron jobs auto-configured (if not skipped)"
     echo "   - Recommended: Run ./scripts/core/activate-features.sh"
+    echo "   - Documentation: docs/"
+    echo ""
+fi
+
+exit 0
+ures.sh"
     echo "   - Documentation: docs/"
     echo ""
 fi
