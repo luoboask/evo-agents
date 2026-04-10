@@ -614,9 +614,6 @@ if [ "$LANG" = "zh" ]; then
     echo "   ✅ RAG 评估系统"
     echo "   ✅ 定时任务"
     echo ""
-    echo "✅ 已激活："
-    # Hook 已移除，使用显式调用
-    echo ""
     echo "⚠️  可选：激活语义搜索模型（需要 Ollama）"
     echo "   运行：$WORKSPACE_ROOT/scripts/core/activate-features.sh"
     echo "   或跳过：继续正常使用（关键词搜索）"
