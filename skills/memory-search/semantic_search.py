@@ -1,33 +1,31 @@
 #!/usr/bin/env python3
 """
-Semantic memory search using Ollama embeddings (with RAG evaluation).
-Uses nomic-embed-text for local embedding generation.
+语义搜索 - 使用 memory_indexer.py 创建的 SQLite 索引
+
+用法:
+    python3 skills/memory-search/semantic_search.py "关键词" --top-k 5
 """
 
 import argparse
 import json
-import numpy as np
-import os
-import pickle
-import time
-from datetime import datetime
-from pathlib import Path
+import sqlite3
 import sys
+from pathlib import Path
 
-# 添加 libs 到路径
 workspace_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(workspace_root / 'libs'))
 
-# 导入 RAG 评估
-from rag_eval.recorder import finish_recording
+from path_utils import resolve_workspace
 
-OLLAMA_HOST = "http://127.0.0.1:11434"
+WORKSPACE = resolve_workspace()
+INDEX_DB = WORKSPACE / 'data' / 'index' / 'memory_index.db'
+OLLAMA_URL = "http://localhost:11434/api/embeddings"
+EMBED_MODEL = "bge-m3"
 
 
-def get_embedding(text, model="nomic-embed-text"):
-    """Get embedding from Ollama."""
+def get_embedding(text, model=EMBED_MODEL):
+    """从 Ollama 获取向量嵌入"""
     import urllib.request
-    import urllib.error
     
     data = json.dumps({
         "model": model,
@@ -35,7 +33,7 @@ def get_embedding(text, model="nomic-embed-text"):
     }).encode('utf-8')
     
     req = urllib.request.Request(
-        f"{OLLAMA_HOST}/api/embeddings",
+        f"{OLLAMA_URL}",
         data=data,
         headers={'Content-Type': 'application/json'}
     )
@@ -45,154 +43,82 @@ def get_embedding(text, model="nomic-embed-text"):
             result = json.loads(response.read().decode('utf-8'))
             return result.get('embedding', [])
     except Exception as e:
-        print(f"Error getting embedding: {e}", file=os.sys.stderr)
+        print(f"⚠️  Embedding 失败：{e}", file=sys.stderr)
         return []
 
 
 def cosine_similarity(a, b):
-    """Calculate cosine similarity between two vectors."""
+    """计算余弦相似度"""
+    import numpy as np
     a = np.array(a)
     b = np.array(b)
-    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+    return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))
 
 
-def load_memory_files():
-    """Load all memory files."""
-    workspace = Path(__file__).parent.parent.parent
-    memory_dir = workspace / "memory"
-    
-    documents = []
-    
-    # Load daily memory files
-    if memory_dir.exists():
-        for file_path in sorted(memory_dir.glob("*.md"), reverse=True):
-            try:
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    # Split into chunks by section
-                    sections = content.split('\n## ')
-                    for i, section in enumerate(sections):
-                        if section.strip():
-                            documents.append({
-                                'source': file_path.name,
-                                'section': i,
-                                'content': section.strip()[:1000],  # Limit length
-                                'full_path': str(file_path)
-                            })
-            except Exception as e:
-                continue
-    
-    # Load MEMORY.md
-    memory_file = workspace / "MEMORY.md"
-    if memory_file.exists():
-        try:
-            with open(memory_file, 'r', encoding='utf-8') as f:
-                content = f.read()
-                documents.append({
-                    'source': 'MEMORY.md',
-                    'section': 0,
-                    'content': content[:2000],
-                    'full_path': str(memory_file)
-                })
-        except Exception as e:
-            pass
-    
-    return documents
-
-
-def build_index(documents, cache_file=None):
-    """Build embedding index for documents."""
-    if cache_file and os.path.exists(cache_file):
-        print("Loading cached index...")
-        with open(cache_file, 'rb') as f:
-            return pickle.load(f)
-    
-    print(f"Building index for {len(documents)} documents...")
-    indexed = []
-    
-    for i, doc in enumerate(documents):
-        print(f"  Processing {i+1}/{len(documents)}: {doc['source']}...")
-        embedding = get_embedding(doc['content'])
-        if embedding:
-            doc['embedding'] = embedding
-            indexed.append(doc)
-    
-    if cache_file:
-        os.makedirs(os.path.dirname(cache_file), exist_ok=True)
-        with open(cache_file, 'wb') as f:
-            pickle.dump(indexed, f)
-        print(f"Index cached to {cache_file}")
-    
-    return indexed
-
-
-def semantic_search(query, index, top_k=5):
-    """Search using semantic similarity."""
-    query_embedding = get_embedding(query)
-    
-    if not query_embedding:
+def semantic_search(query, top_k=5):
+    """语义搜索"""
+    if not INDEX_DB.exists():
+        print(f"❌ 索引不存在：{INDEX_DB}")
+        print("   请先运行：python3 scripts/core/memory_indexer.py --full --embed")
         return []
     
-    results = []
-    for doc in index:
-        if 'embedding' in doc:
-            similarity = cosine_similarity(query_embedding, doc['embedding'])
-            results.append({
-                **doc,
-                'similarity': similarity
-            })
+    # 获取查询向量
+    print("🔢 生成查询向量...")
+    query_embedding = get_embedding(query)
+    if not query_embedding:
+        print("❌ 无法生成查询向量")
+        return []
     
-    # Sort by similarity
+    # 从 SQLite 加载所有向量并计算相似度
+    conn = sqlite3.connect(str(INDEX_DB))
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    # 使用 embeddings 表
+    cursor.execute("""
+        SELECT d.id, d.content, e.vector 
+        FROM documents d
+        JOIN embeddings e ON d.id = e.doc_id
+        WHERE e.vector IS NOT NULL
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+    
+    # 计算相似度
+    results = []
+    for row in rows:
+        doc_embedding = json.loads(row['vector'])
+        similarity = cosine_similarity(query_embedding, doc_embedding)
+        results.append({
+            'id': row['id'],
+            'content': row['content'][:200],
+            'similarity': similarity
+        })
+    
+    # 排序并返回 top_k
     results.sort(key=lambda x: x['similarity'], reverse=True)
     return results[:top_k]
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Semantic memory search with Ollama')
-    parser.add_argument('query', help='Search query')
-    parser.add_argument('--top-k', '-k', type=int, default=5, help='Number of results')
-    parser.add_argument('--rebuild', action='store_true', help='Rebuild index')
-    parser.add_argument('--no-cache', action='store_true', help='Do not use cache')
-    
+    parser = argparse.ArgumentParser(description="语义搜索")
+    parser.add_argument('query', help='搜索关键词')
+    parser.add_argument('--top-k', '-k', type=int, default=5, help='返回数量')
     args = parser.parse_args()
     
-    cache_file = Path(__file__).parent.parent.parent / "memory" / ".semantic_cache.pkl"
+    print(f"🔍 语义搜索：{args.query}\n")
     
-    # Load documents
-    documents = load_memory_files()
-    if not documents:
-        print("No memory files found.")
-        return
-    
-    # Build or load index
-    if args.rebuild or args.no_cache:
-        if args.no_cache and os.path.exists(cache_file):
-            os.remove(cache_file)
-        index = build_index(documents, cache_file if not args.no_cache else None)
-    else:
-        index = build_index(documents, cache_file)
-    
-    if not index:
-        print("Failed to build index.")
-        return
-    
-    # Search
-    print(f"\n🔍 Semantic search: '{args.query}'\n")
-    results = semantic_search(args.query, index, args.top_k)
+    results = semantic_search(args.query, top_k=args.top_k)
     
     if not results:
-        print("No results found.")
+        print("   ⏭️  无结果")
         return
     
+    print(f"✅ 找到 {len(results)} 条结果:\n")
     for i, r in enumerate(results, 1):
-        similarity = r['similarity'] * 100
-        print(f"{i}. [{similarity:.1f}%] {r['source']}")
-        content = r['content'][:300]
-        if len(r['content']) > 300:
-            content += "..."
-        print(f"   {content}")
+        print(f"{i}. [相似度：{r['similarity']:.3f}] {r['content']}...")
         print()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
