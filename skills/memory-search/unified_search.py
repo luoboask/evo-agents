@@ -172,10 +172,8 @@ class UnifiedMemorySearch:
         
         # 记录评估
         if record_eval:
-            latency_ms = (time.time() - start_time) * 1000
             finish_recording(
                 retrieved_count=len(all_results),
-                latency_ms=latency_ms,
                 top_k=top_k,
                 similarity_score=all_results[0].get('score', 0) if all_results else 0
             )
