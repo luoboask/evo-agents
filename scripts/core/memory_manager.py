@@ -343,15 +343,29 @@ def compress_monthly():
     monthly_file = MONTHLY_DIR / f"{last_year}-{last_month:02d}.md"
     
     # 收集上月的周摘要
-    weekly_files = sorted(WEEKLY_DIR.glob(f"{last_year}-W*.md"))
     monthly_weeks = []
     
-    for wf in weekly_files:
-        # 简单判断是否属于该月
-        content = wf.read_text(encoding='utf-8')
-        if f"{last_year}-{last_month:02d}" in wf.name or \
-           f"{last_month:02d}" in content.split("\n")[0]:
-            monthly_weeks.append((wf.name, content))
+    # 遍历所有周文件，找出属于上月的
+    if WEEKLY_DIR.exists():
+        for wf in WEEKLY_DIR.glob("*.md"):
+            # 从文件名提取周信息 (格式：2026-W15.md)
+            import re
+            match = re.search(r"(\d{4})-W(\d{2})", wf.name)
+            if match:
+                week_year = int(match.group(1))
+                week_num = int(match.group(2))
+                
+                # 计算该周的开始日期
+                from datetime import datetime
+                jan1 = datetime(week_year, 1, 1)
+                # 第一个周一
+                first_monday = jan1 + timedelta(days=(7 - jan1.weekday()) % 7)
+                # 该周的周一
+                week_monday = first_monday + timedelta(weeks=week_num - 1)
+                
+                # 检查是否属于上月
+                if week_monday.year == last_year and week_monday.month == last_month:
+                    monthly_weeks.append((wf.name, wf.read_text(encoding='utf-8')))
     
     if not monthly_weeks:
         print("  ⏭️  上月无周摘要，跳过")
