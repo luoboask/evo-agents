@@ -138,34 +138,82 @@ setup_ollama() {
     echo ""
     
     # 检查 Ollama
-    if ! command -v ollama &> /dev/null; then
-        echo "❌ Ollama 未安装，请先安装："
-        echo "   curl -fsSL https://ollama.com/install.sh | sh"
-        return 1
+    if command -v ollama &> /dev/null; then
+        echo "✅ Ollama 已安装"
+        OLLAMA_INSTALLED=true
+    else
+        echo "❌ Ollama 未安装"
+        OLLAMA_INSTALLED=false
     fi
     
-    echo "✅ Ollama 已安装"
-    
-    # 启动服务
-    echo "🔄 启动 Ollama 服务..."
-    ollama serve > /dev/null 2>&1 &
-    sleep 3
-    
-    # 下载模型
-    MODEL_NAME="nomic-embed-text"
-    echo "📥 下载嵌入模型：$MODEL_NAME"
-    ollama pull $MODEL_NAME
+    # 如果已安装，检查模型
+    if [ "$OLLAMA_INSTALLED" = true ]; then
+        if ollama list 2>/dev/null | grep -q "nomic-embed-text"; then
+            echo "✅ nomic-embed-text 模型已安装"
+            OLLAMA_READY=true
+        else
+            echo "⚠️  nomic-embed-text 模型未安装"
+            echo ""
+            read -p "是否下载模型？(y/N): " -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                echo "📥 下载嵌入模型..."
+                ollama pull nomic-embed-text && OLLAMA_READY=true || OLLAMA_READY=false
+            else
+                OLLAMA_READY=false
+            fi
+        fi
+    else
+        OLLAMA_READY=false
+    fi
     
     echo ""
-    echo "✅ 模型下载完成"
     
-    # 验证
-    echo "🔍 验证安装..."
-    if ollama list | grep -q "$MODEL_NAME"; then
-        echo "✅ 验证成功"
+    # 自动配置 RAG
+    CONFIG_FILE="$WORKSPACE/libs/rag_eval/config.json"
+    if [ -f "$CONFIG_FILE" ]; then
+        echo "🔧 更新 RAG 配置..."
+        if [ "$OLLAMA_READY" = true ]; then
+            # 启用语义搜索
+            python3 << PYTHON
+import json
+with open("$CONFIG_FILE") as f:
+    config = json.load(f)
+config['semantic_search'] = {
+    'enabled': True,
+    'model': 'nomic-embed-text',
+    'ollama_host': 'http://127.0.0.1:11434'
+}
+with open("$CONFIG_FILE", 'w') as f:
+    json.dump(config, f, indent=2)
+print("✅ 语义搜索已启用")
+PYTHON
+        else
+            # 禁用语义搜索
+            python3 << PYTHON
+import json
+with open("$CONFIG_FILE") as f:
+    config = json.load(f)
+config['semantic_search'] = {
+    'enabled': False,
+    'model': 'nomic-embed-text',
+    'ollama_host': 'http://127.0.0.1:11434'
+}
+with open("$CONFIG_FILE", 'w') as f:
+    json.dump(config, f, indent=2)
+print("✅ 配置已更新（关键词搜索模式）")
+PYTHON
+        fi
+    fi
+    
+    echo ""
+    echo "💡 提示："
+    if [ "$OLLAMA_READY" = true ]; then
+        echo "   ✅ 语义搜索已启用，支持向量相似度查询"
+        echo "   查询时自动使用语义搜索"
     else
-        echo "❌ 验证失败"
-        return 1
+        echo "   ⚠️  语义搜索不可用，自动降级到关键词搜索"
+        echo "   如需启用，请安装 Ollama: https://ollama.ai"
     fi
 }
 
