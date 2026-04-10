@@ -325,6 +325,62 @@ if [ -f "SOUL.md" ] && ! grep -q "核心规则" SOUL.md; then
 
 ---
 
+## 🧠 记忆查询规则
+
+**当用户问到以下类型的问题时，先查询记忆系统**：
+
+### 触发场景
+
+1. **历史相关问题**
+   - "我之前说过什么？"
+   - "我们之前讨论过什么？"
+   - "上次提到 XXX 是什么时候？"
+   - "还记得 XXX 吗？"
+
+2. **配置/使用问题**（可能之前讨论过）
+   - "如何配置 XXX？"
+   - "XXX 怎么用？"
+   - "XXX 是什么？"
+
+3. **项目/任务相关**
+   - "XXX 项目进行到哪了？"
+   - "XXX 任务完成没？"
+
+### 查询方法
+
+```python
+from skills.memory_search.unified_search import UnifiedMemorySearch
+
+search = UnifiedMemorySearch(agent_name='claude-code-agent')
+results = search.search(user_message)
+
+# 如果有相关记忆，在回复中引用
+if results:
+    context = "\n".join([r['content'][:200] for r in results[:3]])
+    # 基于 context 回复用户
+```
+
+### 查询优先级
+
+```
+1. 会话记忆 (session_memory) ← 最近对话，最相关
+   ↓
+2. 语义搜索 (semantic) ← 向量相似度
+   ↓
+3. 共享记忆 (shared_memory) ← 分层历史
+   ↓
+4. 知识图谱 (knowledge_graph) ← 实体关系
+```
+
+### 注意事项
+
+- ✅ **按需查询**：不是每次对话都查询
+- ✅ **引用来源**：回复时说明"根据记忆..."
+- ✅ **避免重复**：如果记忆中有答案，不要重复解释
+- ❌ **不要过度依赖**：记忆可能过期，需要验证
+
+---
+
 RULEEOF
     
     # 追加原内容（跳过原来的标题行）
