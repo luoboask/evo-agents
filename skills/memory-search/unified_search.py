@@ -94,7 +94,7 @@ class UnifiedMemorySearch:
                top_k: int = None,
                use_shared: bool = True,
                use_session: bool = True,
-               use_semantic: bool = False,  # 语义搜索较慢，默认关闭
+               use_semantic: bool = None,  # None 表示从配置读取
                use_kg: bool = True,
                merge_results: bool = True,
                record_eval: bool = True) -> List[Dict]:
@@ -314,6 +314,27 @@ def main():
         print(f"⏱️  延迟：{result['latency_ms']:.2f}ms")
         print(f"📚 来源：{', '.join(result['sources'])}")
         print(f"\n💡 答案:\n{result['answer']}")
+        print(f"\n📊 检索到 {len(result['retrieved'])} 条结果")
+    else:
+        # 只搜索
+        results = search.search(
+            args.query,
+            top_k=args.top_k,
+            use_shared=not args.no_shared,
+            use_session=not args.no_session,
+            use_semantic=args.semantic,
+            use_kg=not args.no_kg
+        )
+        
+        print(f"🔍 查询：{args.query} (找到 {len(results)} 条)\n")
+        
+        for i, r in enumerate(results, 1):
+            print(f"{i}. [{r['source']}] {r['content'][:100]}...")
+
+
+if __name__ == '__main__':
+    main()
+\n💡 答案:\n{result['answer']}")
         print(f"\n📊 检索到 {len(result['retrieved'])} 条结果")
     else:
         # 只搜索
