@@ -152,8 +152,8 @@ def store_to_memory(content: str, memory_type: str, importance: float, tags: lis
 
 
 def compress_daily():
-    """每日记忆压缩"""
-    print("📅 每日记忆压缩...")
+    """每日增量记忆压缩"""
+    print("📅 每日增量记忆压缩...")
     
     state = load_state()
     today = datetime.now()
@@ -174,29 +174,52 @@ def compress_daily():
         print("  ⏭️  今日已压缩，跳过")
         return
     
-    # 提取内容
-    sections = extract_sections(content)
-    extracted = extract_key_lines(content)
+    # 提取新增内容（对比昨日）
+    yesterday = today - timedelta(days=1)
+    yesterday_str = yesterday.strftime("%Y-%m-%d")
+    yesterday_file = MEMORY_DIR / f"{yesterday_str}.md"
     
-    # 生成压缩摘要
-    summary_parts = [f"# {today_str} 记忆摘要"]
+    yesterday_content = ""
+    if yesterday_file.exists():
+        yesterday_content = yesterday_file.read_text(encoding='utf-8')
+    
+    # 提取今日内容
+    extracted = extract_key_lines(content)
+    yesterday_extracted = extract_key_lines(yesterday_content) if yesterday_content else {"events": [], "decisions": [], "learnings": []}
+    
+    # 计算增量（今日 - 昨日）
+    new_events = [e for e in extracted["events"] if e not in yesterday_extracted["events"]]
+    new_decisions = [d for d in extracted["decisions"] if d not in yesterday_extracted["decisions"]]
+    new_learnings = [l for l in extracted["learnings"] if l not in yesterday_extracted["learnings"]]
+    
+    # 如果没有增量，跳过
+    if not new_events and not new_decisions and not new_learnings:
+        print("  ⏭️  无新增内容，跳过")
+        # 仍然更新哈希，避免重复检查
+        state['last_daily_compress'] = today_str
+        state['last_daily_hash'] = current_hash
+        save_state(state)
+        return
+    
+    # 生成增量摘要
+    summary_parts = [f"# {today_str} 增量摘要"]
     summary_parts.append("")
     
-    if extracted["events"]:
-        summary_parts.append("## 📌 主要事件")
-        for event in extracted["events"][:5]:
+    if new_events:
+        summary_parts.append("## 📌 新增事件")
+        for event in new_events[:5]:
             summary_parts.append(f"- {event}")
         summary_parts.append("")
     
-    if extracted["decisions"]:
-        summary_parts.append("## 🔨 重要决定")
-        for decision in extracted["decisions"][:3]:
+    if new_decisions:
+        summary_parts.append("## 🔨 新增决定")
+        for decision in new_decisions[:3]:
             summary_parts.append(f"- {decision}")
         summary_parts.append("")
     
-    if extracted["learnings"]:
-        summary_parts.append("## 📚 学习收获")
-        for learning in extracted["learnings"][:3]:
+    if new_learnings:
+        summary_parts.append("## 📚 新增学习")
+        for learning in new_learnings[:3]:
             summary_parts.append(f"- {learning}")
         summary_parts.append("")
     
@@ -207,11 +230,12 @@ def compress_daily():
         content=summary,
         memory_type='observation',
         importance=8.0,
-        tags=['daily-summary', today_str]
+        tags=['daily-summary', 'incremental', today_str]
     )
     
     if memory_id:
-        print(f"  ✅ 已压缩并存储 (ID: {memory_id})")
+        print(f"  ✅ 增量摘要已存储 (ID: {memory_id})")
+        print(f"     新增：{len(new_events)} 事件，{len(new_decisions)} 决定，{len(new_learnings)} 学习")
         
         # 更新状态
         state['last_daily_compress'] = today_str
