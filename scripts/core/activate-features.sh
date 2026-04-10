@@ -105,7 +105,6 @@ select_feature() {
     echo "   • RAG 评估系统"
     echo "   • 定时任务"
     echo ""
-    echo ""
     echo "💡 提示：运行 '/new' 开始新会话立即生效"
     echo ""
 }
