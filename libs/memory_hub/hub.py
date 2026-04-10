@@ -37,6 +37,29 @@ class MemoryHub:
         self.session_storage = SessionMemoryStorage(self.memory_path)
         self.knowledge = KnowledgeInterface(self)
         self.evaluation = EvaluationInterface(self)
+        
+        # RAG 配置（自动调优参数）
+        self.rag_config = self._load_rag_config()
+    
+    def _load_rag_config(self) -> Dict:
+        """加载 RAG 调优配置"""
+        # 尝试从 libs/rag_eval 读取配置
+        rag_config_path = self.workspace_root / 'libs' / 'rag_eval' / 'config.json'
+        if rag_config_path.exists():
+            try:
+                with open(rag_config_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except:
+                pass
+        
+        # 默认配置
+        return {
+            'current_config': {
+                'top_k': 5,
+                'similarity_threshold': 0.7,
+                'chunk_size': 512
+            }
+        }
     
     # ───────────────────────────────────────────────────────
     # 记忆 CRUD 操作
