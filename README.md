@@ -26,24 +26,6 @@ curl -fsSL https://gitee.com/luoboask/evo-agents/raw/master/install.sh | bash -s
 
 ---
 
-## 🆕 What's New / 新特性
-
-### 📚 Advanced Memory System / 高级记忆系统
-
-**Latest Update (2026-04-10):**
-
-- ✅ **Hierarchical Memory Search** - Search by Month→Week→Day
-- ✅ **Incremental Daily Compression** - Only store new content
-- ✅ **Auto Cleanup** - 14 days daily, 8 weeks weekly, 2 months monthly
-- ✅ **Shared Memory Storage** - All summaries stored in memory_hub
-
-**Memory Compression Schedule:**
-- 📅 **Daily** (09:30) - Incremental summary
-- 📅 **Weekly** (Sun 03:00) - Week summary
-- 📅 **Monthly** (1st 04:00) - Month summary
-
----
-
 ## 🎯 What is evo-agents? / 什么是 evo-agents?
 
 evo-agents is a **production-ready template** for creating isolated OpenClaw agents with:
@@ -299,6 +281,4 @@ MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
 ---
 
 **Made with ❤️ by the evo-agents team**  
-**Last updated: 2026-04-06**
-team**  
 **Last updated: 2026-04-06**
