@@ -3,7 +3,7 @@
 > **Core Concept**: Evaluate and tune retrieval quality  
 > **Purpose**: Monitor, analyze, and optimize memory search performance  
 > **Status**: ✅ Production Ready | Auto-tuning | Metrics Dashboard  
-> **Location**: `libs/rag-eval/` (shared library, not a skill)  
+> **Location**: `libs/rag_eval/` (shared library, not a skill)  
 
 ---
 
@@ -16,11 +16,11 @@
 from rag_eval.recorder import start_recording, finish_recording
 
 # Generate evaluation report
-python3 libs/rag-eval/evaluate.py --report --days 7
+python3 libs/rag_eval/evaluate.py --report --days 7
 
 # Auto-tune parameters
-python3 libs/rag-eval/auto_tune.py --report
-python3 libs/rag-eval/auto_tune.py --next
+python3 libs/rag_eval/auto_tune.py --report
+python3 libs/rag_eval/auto_tune.py --next
 ```
 
 ### Integration
