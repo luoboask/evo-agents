@@ -10,6 +10,7 @@ import argparse
 import json
 import sqlite3
 import sys
+import numpy as np
 from pathlib import Path
 
 workspace_root = Path(__file__).parent.parent.parent
@@ -49,7 +50,9 @@ def get_embedding(text, model=EMBED_MODEL):
 
 def cosine_similarity(a, b):
     """计算余弦相似度"""
-    import numpy as np
+    # 如果 b 是 bytes，转换为 numpy 数组
+    if isinstance(b, bytes):
+        b = np.frombuffer(b, dtype=np.float32)
     a = np.array(a)
     b = np.array(b)
     return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))
@@ -87,8 +90,8 @@ def semantic_search(query, top_k=5):
     # 计算相似度
     results = []
     for row in rows:
-        doc_embedding = json.loads(row['vector'])
-        similarity = cosine_similarity(query_embedding, doc_embedding)
+        # vector 是 bytes 格式（numpy float32 数组）
+        similarity = cosine_similarity(query_embedding, row['vector'])
         results.append({
             'id': row['id'],
             'content': row['content'][:200],
