@@ -400,3 +400,22 @@ USER PROFILE [{user_usage['percentage']}% — {user_usage['current']:,}/{USER_LI
         empty_bar = '░' * empty
         
         return f"[{filled_bar}{empty_bar}]"
+
+    def get_session_memories(self, session_id: str, top_k: int = 50) -> List[Dict]:
+        """获取指定会话的记忆"""
+        return self.session_storage.search_memories(session_id=session_id, top_k=top_k)
+    
+    def get_current_session_memories(self, top_k: int = 15) -> List[Dict]:
+        """获取当前会话的记忆（自动获取最新会话）"""
+        sessions = self.session_storage.get_all_sessions()
+        if not sessions:
+            return []
+        return self.session_storage.search_memories(session_id=sessions[0], top_k=top_k)
+    
+    def get_all_sessions(self) -> List[str]:
+        """获取所有会话 ID"""
+        return self.session_storage.get_all_sessions()
+    
+    def get_session_stats(self, session_id: str) -> Dict:
+        """获取会话统计"""
+        return self.session_storage.get_stats(session_id)
