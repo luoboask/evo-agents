@@ -143,6 +143,7 @@ if [ "$LANG" = "zh" ]; then
 else
     echo "📋 Configuring AGENTS.md..."
 fi
+# 追加规则引用（如果 AGENTS.md 已存在）
 if [ -f "AGENTS.md" ] && ! grep -q "SKILL_RULES" AGENTS.md; then
     # 修改 Session Startup 部分，添加规则文档读取
     if grep -q "Read \`SOUL.md\`" AGENTS.md; then
