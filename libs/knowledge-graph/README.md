@@ -33,7 +33,7 @@ ollama pull qwen2.5:0.5b
 
 ```bash
 # 进入技能目录
-cd ~/.openclaw/workspace-<agent>/skills/knowledge-graph
+cd ~/.openclaw/workspace-<agent>/libs/knowledge-graph
 
 # 构建知识图谱（规则 + AI）
 python3 builder.py
@@ -70,7 +70,7 @@ $ python3 builder.py
 crontab -e
 
 # 添加以下行：
-0 4 * * 6 cd ~/.openclaw/workspace-<agent>/skills/knowledge-graph && python3 builder.py >> /tmp/kg_build.log 2>&1
+0 4 * * 6 cd ~/.openclaw/workspace-<agent>/libs/knowledge-graph && python3 builder.py >> /tmp/kg_build.log 2>&1
 ```
 
 ## 📊 数据结构

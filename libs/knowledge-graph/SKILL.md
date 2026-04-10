@@ -12,20 +12,20 @@
 
 ```bash
 # Add entity
-python3 skills/knowledge-graph/add_entity.py \
+python3 libs/knowledge-graph/add_entity.py \
   --id "user_001" \
   --type "User" \
   --properties '{"name": "Current User", "role": "Developer"}'
 
 # Add relationship
-python3 skills/knowledge-graph/add_relation.py \
+python3 libs/knowledge-graph/add_relation.py \
   --from "user_001" \
   --to "ts_001" \
   --type "PREFERS" \
   --properties '{"reason": "Type safety", "since": "2026-04-01"}'
 
 # Query graph
-python3 skills/knowledge-graph/query.py \
+python3 libs/knowledge-graph/query.py \
   "SELECT ?tech WHERE { user_001 :PREFERS ?tech . }"
 ```
 
@@ -33,7 +33,7 @@ python3 skills/knowledge-graph/query.py \
 
 ```bash
 # Export to visualization format
-python3 skills/knowledge-graph/export.py --format graphml > graph.graphml
+python3 libs/knowledge-graph/export.py --format graphml > graph.graphml
 
 # Open in Gephi or other graph visualization tools
 ```
