@@ -356,7 +356,6 @@ def compress_monthly():
                 week_num = int(match.group(2))
                 
                 # 计算该周的开始日期
-                from datetime import datetime
                 jan1 = datetime(week_year, 1, 1)
                 # 第一个周一
                 first_monday = jan1 + timedelta(days=(7 - jan1.weekday()) % 7)
