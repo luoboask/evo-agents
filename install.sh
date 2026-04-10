@@ -648,9 +648,17 @@ else
             openclaw cron add --schedule "0 4 1 * *" \
                 --message "cd $WORKSPACE_ROOT && python3 scripts/core/memory_manager.py --monthly" \
                 --name "monthly-memory-compress-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+
+            # Knowledge Graph build (02:00 daily)
+            echo "   - Knowledge Graph Build (02:00 daily)..."
+            openclaw cron add --schedule "0 2 * * *" \
+                --message "cd $WORKSPACE_ROOT && python3 libs/knowledge_graph/builder.py" \
+                --name "kg-build-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
             
             # Knowledge Graph build (02:00 daily)
+                --message "cd $WORKSPACE_ROOT && python3 libs/knowledge_graph/builder.py" \\
+                --name "kg-build-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
             # Nightly evolution (23:00 daily)
             echo "   - Nightly Evolution (23:00 daily)..."
