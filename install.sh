@@ -597,7 +597,7 @@ if [ "$LANG" = "zh" ]; then
             
             echo ""
             echo "📋 当前 OpenClaw cron 任务 ($AGENT_NAME):"
-            openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-memory|weekly-memory|monthly-memory|nightly-evolution)" || echo "   (无)"
+            openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-memory|weekly-memory|monthly-memory|kg-build|nightly-evolution)" || echo "   (无)"
         else
             echo "   ⚠️  OpenClaw 未安装，跳过定时任务配置"
         fi
@@ -649,6 +649,12 @@ else
                 --message "cd $WORKSPACE_ROOT && python3 scripts/core/memory_manager.py --monthly" \
                 --name "monthly-memory-compress-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
+            # Knowledge Graph build (02:00 daily)
+            echo "   - Knowledge Graph Build (02:00 daily)..."
+            openclaw cron add --schedule "0 2 * * *" \
+                --message "cd $WORKSPACE_ROOT && python3 libs/knowledge_graph/builder.py" \
+                --name "kg-build-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+            
             # Nightly evolution (23:00 daily)
             echo "   - Nightly Evolution (23:00 daily)..."
             openclaw cron add --schedule "0 23 * * *" \
@@ -657,7 +663,7 @@ else
             
             echo ""
             echo "📋 Current OpenClaw cron jobs:"
-            openclaw cron list 2>/dev/null | grep -E "(session-scan|daily-memory|weekly-memory|monthly-memory|nightly-evolution)" | head -5 || echo "   (none)"
+            openclaw cron list 2>/dev/null | grep -E "(session-scan|daily-memory|weekly-memory|monthly-memory|kg-build|nightly-evolution)" | head -5 || echo "   (none)"
         else
             echo "   ⚠️  OpenClaw not installed, skipped cron configuration"
         fi
