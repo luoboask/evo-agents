@@ -97,7 +97,8 @@ class UnifiedMemorySearch:
                use_semantic: bool = None,  # None 表示从配置读取
                use_kg: bool = True,
                merge_results: bool = True,
-               record_eval: bool = True) -> List[Dict]:
+               record_eval: bool = True,
+               hierarchical: bool = True) -> List[Dict]:
         """
         统一搜索接口
         

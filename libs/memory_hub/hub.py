@@ -84,14 +84,89 @@ class MemoryHub:
                query: str, 
                top_k: int = 5,
                memory_type: Optional[str] = None,
-               semantic: bool = False) -> List[Dict]:
-        """搜索记忆"""
-        return self.storage.search_memories(
-            query=query,
-            top_k=top_k,
+               semantic: bool = False,
+               hierarchical: bool = True) -> List[Dict]:
+        """
+        搜索记忆
+        
+        Args:
+            query: 搜索关键词
+            top_k: 返回数量
+            memory_type: 记忆类型过滤
+            semantic: 是否使用语义搜索
+            hierarchical: 是否使用分层搜索（月→周→日）
+        
+        Returns:
+            记忆列表
+        """
+        if hierarchical:
+            return self._hierarchical_search(query, top_k, memory_type, semantic)
+        else:
+            return self.storage.search_memories(
+                query=query,
+                top_k=top_k,
+                memory_type=memory_type,
+                semantic=semantic
+            )
+    
+    def _hierarchical_search(self, query: str, top_k: int, 
+                            memory_type: Optional[str], 
+                            semantic: bool) -> List[Dict]:
+        """分层搜索：月→周→日"""
+        all_results = []
+        seen_ids = set()
+        
+        # 1. 先搜月记忆（monthly-summary）
+        monthly = self.storage.search_memories(
+            query=f"{query} monthly-summary",
+            top_k=2,
             memory_type=memory_type,
             semantic=semantic
         )
+        for r in monthly:
+            if r['id'] not in seen_ids:
+                all_results.append(r)
+                seen_ids.add(r['id'])
+        
+        # 2. 再搜周记忆（weekly-summary）
+        weekly = self.storage.search_memories(
+            query=f"{query} weekly-summary",
+            top_k=3,
+            memory_type=memory_type,
+            semantic=semantic
+        )
+        for r in weekly:
+            if r['id'] not in seen_ids and len(all_results) < top_k:
+                all_results.append(r)
+                seen_ids.add(r['id'])
+        
+        # 3. 最后搜日记忆（daily-summary）
+        daily = self.storage.search_memories(
+            query=f"{query} daily-summary",
+            top_k=5,
+            memory_type=memory_type,
+            semantic=semantic
+        )
+        for r in daily:
+            if r['id'] not in seen_ids and len(all_results) < top_k:
+                all_results.append(r)
+                seen_ids.add(r['id'])
+        
+        # 4. 如果结果不足，全量搜索补充
+        if len(all_results) < top_k:
+            remaining = top_k - len(all_results)
+            all = self.storage.search_memories(
+                query=query,
+                top_k=remaining,
+                memory_type=memory_type,
+                semantic=semantic
+            )
+            for r in all:
+                if r['id'] not in seen_ids:
+                    all_results.append(r)
+                    seen_ids.add(r['id'])
+        
+        return all_results
     
     def get(self, memory_id: int) -> Optional[Dict]:
         """获取单条记忆"""
