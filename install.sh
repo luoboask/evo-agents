@@ -597,7 +597,7 @@ if [ "$LANG" = "zh" ]; then
             
             echo ""
             echo "📋 当前 OpenClaw cron 任务 ($AGENT_NAME):"
-            openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance)" || echo "   (无)"
+            openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-memory|weekly-memory|monthly-memory|nightly-evolution)" || echo "   (无)"
         else
             echo "   ⚠️  OpenClaw 未安装，跳过定时任务配置"
         fi
@@ -631,11 +631,23 @@ else
                 --message "cd $WORKSPACE_ROOT && python3 scripts/core/scan_sessions.py --agent $AGENT_NAME" \
                 --name "session-scan-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
-            # Daily review (09:00 daily)
-            echo "   - Daily Review (09:00 daily)..."
-            openclaw cron add --schedule "0 9 * * *" \
-                # daily_review.py 已删除 \
-                --name "daily-review-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+            # Daily memory compress (09:30 daily)
+            echo "   - Daily Memory Compress (09:30 daily)..."
+            openclaw cron add --schedule "0 9:30 * * *" \
+                --message "cd $WORKSPACE_ROOT && python3 scripts/core/memory_manager.py --daily" \
+                --name "daily-memory-compress-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+            
+            # Weekly memory compress (Sun 03:00)
+            echo "   - Weekly Memory Compress (Sun 03:00)..."
+            openclaw cron add --schedule "0 3 * * 0" \
+                --message "cd $WORKSPACE_ROOT && python3 scripts/core/memory_compressor.py --weekly" \
+                --name "weekly-memory-compress-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+            
+            # Monthly memory compress (1st 04:00)
+            echo "   - Monthly Memory Compress (1st 04:00)..."
+            openclaw cron add --schedule "0 4 1 * *" \
+                --message "cd $WORKSPACE_ROOT && python3 scripts/core/memory_compressor.py --monthly" \
+                --name "monthly-memory-compress-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
             # Nightly evolution (23:00 daily)
             echo "   - Nightly Evolution (23:00 daily)..."
