@@ -151,10 +151,13 @@ class MemoryHub:
     
     def get_session_memories(self,
                               session_id: str,
-                              top_k: int = 50,
+                              top_k: int = None,
                               memory_type: Optional[str] = None,
                               include_all: bool = False) -> List[Dict]:
-        """获取指定会话的记忆"""
+        """获取指定会话的记忆（top_k=None 时使用 RAG 配置）"""
+        if top_k is None:
+            top_k = self.rag_config.get('current_config', {}).get('top_k', 50)
+        
         return self.session_storage.search_memories(
             session_id=session_id,
             top_k=top_k,
@@ -163,10 +166,13 @@ class MemoryHub:
         )
     
     def get_current_session_memories(self,
-                                      top_k: int = 15,
+                                      top_k: int = None,
                                       memory_type: Optional[str] = None,
                                       include_all: bool = False) -> List[Dict]:
-        """获取当前会话的记忆（自动获取最新会话）"""
+        """获取当前会话的记忆（自动获取最新会话，top_k=None 时使用 RAG 配置）"""
+        if top_k is None:
+            top_k = self.rag_config.get('current_config', {}).get('top_k', 15)
+        
         sessions = self.session_storage.get_all_sessions()
         if not sessions:
             return []
@@ -185,19 +191,4 @@ class MemoryHub:
     
     def get_session_stats(self, session_id: str) -> Dict:
         """获取会话统计"""
-        return self.session_storage.get_stats(session_id)
-    
-    def get_session_memories(self, session_id: str, top_k: int = 50) -> List[Dict]:
-        return self.session_storage.search_memories(session_id=session_id, top_k=top_k)
-    
-    def get_current_session_memories(self, top_k: int = 15) -> List[Dict]:
-        sessions = self.session_storage.get_all_sessions()
-        if not sessions:
-            return []
-        return self.session_storage.search_memories(session_id=sessions[0], top_k=top_k)
-    
-    def get_all_sessions(self) -> List[str]:
-        return self.session_storage.get_all_sessions()
-    
-    def get_session_stats(self, session_id: str) -> Dict:
         return self.session_storage.get_stats(session_id)
