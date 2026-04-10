@@ -280,6 +280,7 @@ def main():
     group.add_argument("--full", action="store_true", help="全量重建")
     group.add_argument("--incremental", action="store_true", help="增量更新")
     parser.add_argument("--embed", action="store_true", help="生成语义向量（需要 Ollama）")
+    parser.add_argument("--memory-db", action="store_true", help="索引 memory_stream.db")
     args = parser.parse_args()
 
     full = args.full
@@ -290,5 +291,118 @@ def main():
     run_index(full=full, embed=args.embed)
 
 
+
+def index_memory_stream_db(embed: bool = False):
+    """索引 memory_stream.db 中的记忆"""
+    import numpy as np
+    
+    print("🔨 索引 memory_stream.db...")
+    print("")
+    
+    memory_db_path = WORKSPACE / 'data' / 'claude-code-agent' / 'memory' / 'memory_stream.db'
+    if not memory_db_path.exists():
+        print(f"❌ memory_stream.db 不存在：{memory_db_path}")
+        return
+    
+    conn = open_db(DB_PATH)
+    cursor = conn.cursor()
+    mem_conn = sqlite3.connect(str(memory_db_path))
+    mem_conn.row_factory = sqlite3.Row
+    mem_cursor = mem_conn.cursor()
+    
+    print("📄 加载共享记忆...")
+    mem_cursor.execute("SELECT id, content, memory_type FROM memories")
+    memories = mem_cursor.fetchall()
+    print(f"   找到 {len(memories)} 条共享记忆")
+    
+    count = 0
+    for mem in memories:
+        content_text = mem['content'][:500]
+        doc_type = mem['memory_type'] or 'memory'
+        
+        cursor.execute("""
+            INSERT OR REPLACE INTO documents 
+            (path, line_start, line_end, content, content_tokenized, type, date, mtime)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            f"memory_stream:memories:{mem['id']}",
+            0, 0, content_text, tokenize(content_text), doc_type, None, datetime.now().timestamp()
+        ))
+        
+        doc_id = cursor.lastrowid
+        count += 1
+        
+        if embed:
+            vec = get_embedding(content_text)
+            if vec and isinstance(vec, bytes):
+                vector_bytes = vec
+            elif vec and isinstance(vec, list):
+                vector_bytes = np.array(vec, dtype=np.float32).tobytes()
+            else:
+                vector_bytes = None
+            
+            if vector_bytes:
+                cursor.execute("INSERT OR REPLACE INTO embeddings (doc_id, vector) VALUES (?, ?)",
+                             (doc_id, vector_bytes))
+        
+        if count % 50 == 0:
+            print(f"   已索引 {count}/{len(memories)}...")
+    
+    print(f"   ✅ 共享记忆：{count} 条")
+    
+    print("\n📄 加载会话记忆...")
+    mem_cursor.execute("SELECT id, session_id, content, memory_type FROM session_memories")
+    session_memories = mem_cursor.fetchall()
+    print(f"   找到 {len(session_memories)} 条会话记忆")
+    
+    session_count = 0
+    for mem in session_memories:
+        content_text = mem['content'][:500]
+        doc_type = mem['memory_type'] or 'session'
+        session_id = mem['session_id'][:8]
+        
+        cursor.execute("""
+            INSERT OR REPLACE INTO documents 
+            (path, line_start, line_end, content, content_tokenized, type, date, mtime)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            f"memory_stream:sessions:{mem['id']}",
+            0, 0, content_text, tokenize(content_text), doc_type, session_id, datetime.now().timestamp()
+        ))
+        
+        doc_id = cursor.lastrowid
+        session_count += 1
+        
+        if embed:
+            vec = get_embedding(content_text)
+            if vec and isinstance(vec, bytes):
+                vector_bytes = vec
+            elif vec and isinstance(vec, list):
+                vector_bytes = np.array(vec, dtype=np.float32).tobytes()
+            else:
+                vector_bytes = None
+            
+            if vector_bytes:
+                cursor.execute("INSERT OR REPLACE INTO embeddings (doc_id, vector) VALUES (?, ?)",
+                             (doc_id, vector_bytes))
+        
+        if session_count % 100 == 0:
+            print(f"   已索引 {session_count}/{len(session_memories)}...")
+    
+    print(f"   ✅ 会话记忆：{session_count} 条")
+    
+    conn.commit()
+    conn.close()
+    mem_conn.close()
+    
+    print("")
+    print(f"✅ 完成：共索引 {count + session_count} 条记忆")
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "--memory-db":
+        embed = "--embed" in sys.argv
+        index_memory_stream_db(embed=embed)
+    else:
+        main()
