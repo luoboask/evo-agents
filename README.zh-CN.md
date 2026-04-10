@@ -12,8 +12,14 @@
 
 ### 一行安装
 
+**国内用户（更快）:**
 ```bash
 curl -fsSL https://gitee.com/luoboask/evo-agents/raw/master/install.sh | bash -s my-agent
+```
+
+**海外用户:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s my-agent
 ```
 
 **完成！** 几秒钟内拥有功能完整的 Agent 工作区。

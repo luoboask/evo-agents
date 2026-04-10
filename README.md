@@ -12,8 +12,14 @@
 
 ### One-line Installation
 
+**Global / 全球:**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh | bash -s my-agent
+```
+
+**China / 中国 (Faster / 更快):**
+```bash
+curl -fsSL https://gitee.com/luoboask/evo-agents/raw/master/install.sh | bash -s my-agent
 ```
 
 **Done!** Full-featured agent workspace in seconds.
