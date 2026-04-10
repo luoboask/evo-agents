@@ -640,13 +640,13 @@ else
             # Weekly memory compress (Sun 03:00)
             echo "   - Weekly Memory Compress (Sun 03:00)..."
             openclaw cron add --schedule "0 3 * * 0" \
-                --message "cd $WORKSPACE_ROOT && python3 scripts/core/memory_compressor.py --weekly" \
+                --message "cd $WORKSPACE_ROOT && python3 scripts/core/memory_manager.py --weekly" \
                 --name "weekly-memory-compress-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
             # Monthly memory compress (1st 04:00)
             echo "   - Monthly Memory Compress (1st 04:00)..."
             openclaw cron add --schedule "0 4 1 * *" \
-                --message "cd $WORKSPACE_ROOT && python3 scripts/core/memory_compressor.py --monthly" \
+                --message "cd $WORKSPACE_ROOT && python3 scripts/core/memory_manager.py --monthly" \
                 --name "monthly-memory-compress-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
             # Nightly evolution (23:00 daily)
