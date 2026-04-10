@@ -168,10 +168,9 @@ def compress_daily():
     content = daily_file.read_text(encoding='utf-8')
     current_hash = get_content_hash(content)
     
-    # 检查是否已压缩
-    if state.get('last_daily_compress') == today_str and \
-       state.get('last_daily_hash') == current_hash:
-        print("  ⏭️  今日已压缩，跳过")
+    # 检查内容是否变化
+    if state.get('last_daily_hash') == current_hash:
+        print("  ⏭️  今日内容无变化，跳过")
         return
     
     # 提取新增内容（对比昨日）
