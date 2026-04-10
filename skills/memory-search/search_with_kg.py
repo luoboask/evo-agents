@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 """
-search_with_kg.py - 集成知识图谱的语义搜索
+search_with_kg.py - 集成知识图谱的语义搜索（带评估记录）
 
 使用 knowledge_graph 共享库进行实体识别和关系扩展。
 """
 
-import sys
+import sys, time
 from pathlib import Path
 
 # 添加 libs 到路径
 workspace_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(workspace_root / 'libs'))
 
-# 导入 knowledge_graph
+# 导入 knowledge_graph 和 rag_eval
 from knowledge_graph.builder import KnowledgeGraphEnhanced
+from rag_eval.recorder import finish_recording
+
 KnowledgeGraph = KnowledgeGraphEnhanced
 
 
@@ -47,13 +49,20 @@ class SearchWithKG:
         
         return memories
     
-    def search(self, query, top_k=10):
-        """搜索记忆（结合知识图谱）"""
+    def search(self, query, top_k=10, record_eval=True):
+        """搜索记忆（结合知识图谱），自动记录评估数据"""
         # 简单实现：关键词匹配 + 实体匹配
         results = []
         for memory in self.memories:
             if query.lower() in memory['content'].lower():
                 results.append({'memory': memory, 'score': 1.0})
+        
+        if record_eval:
+            finish_recording(
+                retrieved_count=len(results),
+                top_k=top_k
+            )
+        
         return results[:top_k]
 
 

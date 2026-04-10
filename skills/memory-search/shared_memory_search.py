@@ -1,16 +1,30 @@
 #!/usr/bin/env python3
-"""Shared Memory Search - 共享记忆搜索"""
-import sys, argparse
+"""Shared Memory Search - 共享记忆搜索（带评估记录）"""
+import sys, argparse, time
 from pathlib import Path
 workspace_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(workspace_root / 'libs'))
 from memory_hub import MemoryHub
+from rag_eval.recorder import finish_recording
 
 class SharedMemorySearch:
     def __init__(self, agent_name=None):
         self.hub = MemoryHub(agent_name)
-    def search(self, query, top_k=10):
-        return self.hub.search(query, top_k=top_k)
+    
+    def search(self, query, top_k=10, record_eval=True):
+        """搜索共享记忆，自动记录评估数据"""
+        start_time = time.time()
+        results = self.hub.search(query, top_k=top_k)
+        
+        if record_eval:
+            finish_recording(
+                retrieved_count=len(results),
+                similarity_score=results[0].get('score') if results else None,
+                top_k=top_k
+            )
+        
+        return results
+    
     def stats(self):
         return self.hub.stats()
 

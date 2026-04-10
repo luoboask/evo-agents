@@ -94,7 +94,7 @@ def show_stats():
     
     import subprocess
     result = subprocess.run(
-        ["python3", "libs/rag-eval/evaluate.py", "--report", "--days", "1"],
+        ["python3", "libs/rag_eval/evaluate.py", "--report", "--days", "1"],
         capture_output=True, text=True
     )
     print(result.stdout)
