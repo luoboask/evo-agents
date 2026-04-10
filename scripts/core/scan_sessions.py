@@ -55,8 +55,8 @@ class SessionScanner:
         
         from memory_hub import MemoryHub
         
-        # 直接传入 workspace_root，避免 MemoryHub 自己查找
-        self.memory = MemoryHub(agent_name=agent_name, workspace_root=self.workspace_root)
+        # MemoryHub uses resolve_workspace() internally
+        self.memory = MemoryHub(agent_name=agent_name)
         
         # 状态文件（记录已处理的会话）
         self.state_file = self.workspace_root / 'data' / agent_name / '.session_scan_state.json'
@@ -189,22 +189,21 @@ class SessionScanner:
         else:
             return
         
-        # 添加到会话记忆（50 条限制）
+        # 添加到会话记忆（100 条限制）
         try:
             # 限制长度到 4000 字符（约 2000 汉字），保留完整上下文
-            memory_id = self.memory.add_session(
+            memory_id = self.memory.session_storage.add_memory(
+                session_id=session_id,
                 content=f"[{role.upper()}] {content[:4000]}",
                 memory_type=memory_type,
                 importance=importance,
                 tags=tags,
                 metadata={
-                    'session_id': session_id,
                     'session_key': session_key,
                     'message_id': msg_id,
                     'timestamp': timestamp,
                     'role': role
-                },
-                session_id=session_id
+                }
             )
             # 调试输出
             if memory_id:

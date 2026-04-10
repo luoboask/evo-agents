@@ -21,23 +21,23 @@
 
 ```bash
 # 记录一次检索
-python3 skills/rag/evaluate.py --record \
+python3 libs/rag-eval/evaluate.py --record \
   --query "用户偏好" \
   --retrieved 5 \
   --latency 120 \
   --feedback positive
 
 # 查看本周报告
-python3 skills/rag/evaluate.py --report --week
+python3 libs/rag-eval/evaluate.py --report --week
 
 # 自动调优实验
-python3 skills/rag/auto_tune.py
+python3 libs/rag-eval/auto_tune.py
 ```
 
 ## 文件结构
 
 ```
-skills/rag/
+libs/rag-eval/
 ├── evaluate.py          # 评估框架主脚本
 ├── auto_tune.py         # 自动调优实验
 ├── metrics.py           # 指标计算
