@@ -347,6 +347,24 @@ def main():
         archive_old_dailies(args.keep_days)
         print()
     print("✅ 完成")
+    
+    # 自动重建索引
+    print("\n🔨 重建索引...")
+    indexer_script = WORKSPACE / "scripts" / "core" / "memory_indexer.py"
+    if indexer_script.exists():
+        import subprocess
+        result = subprocess.run(
+            ["python3", str(indexer_script), "--incremental", "--embed"],
+            cwd=WORKSPACE,
+            capture_output=True,
+            text=True
+        )
+        if result.returncode == 0:
+            print("   ✅ 索引已更新")
+        else:
+            print(f"   ⚠️  索引失败：{result.stderr}")
+    else:
+        print("   ⚠️  索引器不存在")
 
 
 if __name__ == "__main__":
