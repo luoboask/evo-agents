@@ -178,6 +178,14 @@ class UnifiedMemorySearch:
                 similarity_score=all_results[0].get('score', 0) if all_results else 0
             )
         
+        # 记录使用的搜索模式
+        if len(search_modes) == 0:
+            print("⚠️  警告：所有搜索方式都不可用")
+        elif len(search_modes) == 1:
+            print(f"ℹ️  使用单一搜索模式：{search_modes[0]}")
+        else:
+            print(f"✅ 使用混合搜索模式：{', '.join(search_modes)}")
+        
         return all_results
     
     def _merge_results(self, results: List[Dict], top_k: int) -> List[Dict]:

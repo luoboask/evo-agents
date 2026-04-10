@@ -45,21 +45,16 @@ fi
 
 echo ""
 
-# 询问是否启用语义搜索
+# 自动配置语义搜索
 USE_SEMANTIC=false
 
 if [ "$OLLAMA_READY" = true ]; then
-    read -p "是否启用语义搜索？(y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        USE_SEMANTIC=true
-        echo "   ✅ 语义搜索已启用"
-    else
-        echo "   ⚠️  语义搜索已禁用（可随时启用）"
-    fi
+    USE_SEMANTIC=true
+    echo "   ✅ 语义搜索已启用（自动检测 Ollama 可用）"
 else
     echo "   ⚠️  语义搜索不可用（Ollama 未安装或模型缺失）"
-    echo "   如需启用，请安装 Ollama: https://ollama.ai"
+    echo "   💡 将自动降级到关键词搜索"
+    echo "   如需启用语义搜索，请安装 Ollama: https://ollama.ai"
 fi
 
 echo ""
@@ -165,6 +160,11 @@ echo "   python3 skills/memory-search/unified_search.py \"关键词\""
 echo ""
 echo "   # 查看统计"
 echo "   python3 skills/memory-search/session_memory_search.py --stats"
+echo ""
+echo "   # RAG 调优（积累 10+ 数据后）"
+echo "   python3 libs/rag_eval/auto_tune.py --report"
+echo ""
+cho "   python3 skills/memory-search/session_memory_search.py --stats"
 echo ""
 echo "   # RAG 调优（积累 10+ 数据后）"
 echo "   python3 libs/rag_eval/auto_tune.py --report"
