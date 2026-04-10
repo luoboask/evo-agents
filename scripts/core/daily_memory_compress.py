@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """
-每日 MEMORY.md 压缩 - 压缩 MEMORY.md 内容，保持简洁
+每日 MEMORY.md 压缩 - 将 MEMORY.md 内容压缩并存储到共享记忆
 
 功能:
 - 读取 MEMORY.md
-- 压缩"重要事件"部分（保留最近 7 天）
-- 合并重复内容
-- 保持文件简洁
+- 提取关键内容（用户信息、重要事件、技能、决定等）
+- 压缩为结构化摘要
+- 存储到共享记忆（memories 表）
 
 用法:
     python3 scripts/core/daily_memory_compress.py
 """
 
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 import sys
 
@@ -21,6 +21,7 @@ import sys
 workspace_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(workspace_root / 'libs'))
 
+from memory_hub import MemoryHub
 from path_utils import resolve_workspace
 
 WORKSPACE = resolve_workspace()
@@ -28,88 +29,116 @@ MEMORY_DIR = WORKSPACE / "memory"
 MEMORY_MD = MEMORY_DIR / "MEMORY.md"
 
 
+def extract_sections(content: str) -> dict:
+    """从 MEMORY.md 中提取各个部分"""
+    sections = {}
+    current_section = None
+    current_content = []
+    
+    for line in content.split("\n"):
+        if line.startswith("## "):
+            # 保存上一个 section
+            if current_section:
+                sections[current_section] = "\n".join(current_content)
+            
+            # 开始新 section
+            current_section = line[3:].strip()
+            current_content = []
+        elif current_section:
+            current_content.append(line)
+    
+    # 保存最后一个 section
+    if current_section:
+        sections[current_section] = "\n".join(current_content)
+    
+    return sections
+
+
 def compress_memory_md():
-    """压缩 MEMORY.md，保持简洁"""
+    """压缩 MEMORY.md 并存储到共享记忆"""
     if not MEMORY_MD.exists():
         print("⏭️  MEMORY.md 不存在，跳过")
         return
     
-    print("📅 压缩 MEMORY.md...")
+    print("📅 压缩 MEMORY.md 到共享记忆...")
     
+    # 读取 MEMORY.md
     content = MEMORY_MD.read_text(encoding="utf-8")
-    lines = content.split("\n")
+    sections = extract_sections(content)
     
-    # 找到"## 重要事件"部分
-    in_events_section = False
-    events_start = -1
-    events_end = -1
+    # 生成压缩摘要
+    summary_parts = ["# MEMORY.md 压缩摘要"]
+    summary_parts.append(f"_生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M')}_" )
+    summary_parts.append("")
     
-    for i, line in enumerate(lines):
-        if line.startswith("## 重要事件"):
-            in_events_section = True
-            events_start = i
-        elif in_events_section and line.startswith("## "):
-            events_end = i
-            break
+    # 用户信息
+    if "用户" in sections:
+        summary_parts.append("## 👤 用户信息")
+        summary_parts.append(sections["用户"].strip())
+        summary_parts.append("")
     
-    if events_start == -1:
-        print("  ⏭️  未找到重要事件部分，跳过")
-        return
-    
-    # 提取事件条目
-    event_lines = []
-    cutoff_date = datetime.now() - timedelta(days=7)  # 保留最近 7 天
-    
-    for i in range(events_start + 1, events_end if events_end > 0 else len(lines)):
-        line = lines[i]
-        # 跳过子条目（以"  - "开头的）
-        if line.strip().startswith("- **"):
-            # 提取日期（支持多种格式）
+    # 重要事件（最近 7 天）
+    if "重要事件" in sections:
+        events = sections["重要事件"].strip()
+        event_lines = [line for line in events.split("\n") if line.strip().startswith("- **")]
+        
+        # 只保留最近 7 天的事件
+        cutoff_date = datetime.now() - timedelta(days=7)
+        recent_events = []
+        
+        for line in event_lines:
             match = re.search(r'(\d{4}-\d{2}-\d{2})', line)
             if match:
                 event_date = datetime.strptime(match.group(1), "%Y-%m-%d")
                 if event_date >= cutoff_date:
-                    event_lines.append((event_date, line))
-    
-    # 按日期排序（最新的在前）
-    event_lines.sort(key=lambda x: x[0], reverse=True)
-    
-    # 生成新的事件部分
-    new_events = ["## 重要事件", ""]
-    
-    # 添加汇总行
-    if event_lines:
-        total_events = sum(
-            int(re.search(r'(\d+) 个事件', line[1]).group(1) or 0) 
-            for line in event_lines 
-            if re.search(r'(\d+) 个事件', line[1])
-        )
-        total_decisions = sum(
-            int(re.search(r'(\d+) 个决定', line[1]).group(1) or 0) 
-            for line in event_lines 
-            if re.search(r'(\d+) 个决定', line[1])
-        )
-        total_learnings = sum(
-            int(re.search(r'(\d+) 个学习', line[1]).group(1) or 0) 
-            for line in event_lines 
-            if re.search(r'(\d+) 个学习', line[1])
-        )
+                    recent_events.append(line)
         
-        # 添加每日条目（最多 7 天）
-        for event_date, line in event_lines[:7]:
-            # 简化格式，只保留日期和摘要
-            new_events.append(f"- **{event_date.strftime('%m-%d')}**: {line.split('**: ')[-1] if '**: ' in line else line[2:]}")
+        if recent_events:
+            summary_parts.append("## 📅 最近事件（7 天内）")
+            for event in recent_events[:10]:  # 最多 10 条
+                summary_parts.append(event)
+            summary_parts.append("")
     
-    # 替换旧的事件部分
-    if events_end > 0:
-        new_lines = lines[:events_start] + new_events + lines[events_end:]
-    else:
-        new_lines = lines[:events_start] + new_events
+    # 技能
+    if "技能" in sections:
+        summary_parts.append("## 🛠️ 技能")
+        summary_parts.append(sections["技能"].strip())
+        summary_parts.append("")
     
-    # 写回文件
-    MEMORY_MD.write_text("\n".join(new_lines), encoding="utf-8")
+    # 决定
+    if "决定" in sections:
+        summary_parts.append("## 🔨 重要决定")
+        summary_parts.append(sections["决定"].strip())
+        summary_parts.append("")
     
-    print(f"  ✅ MEMORY.md 已压缩（保留最近 7 天，共 {len(event_lines)} 条）")
+    # 项目
+    if "项目" in sections:
+        summary_parts.append("## 📦 项目")
+        # 只保留项目名称和关键信息
+        projects = sections["项目"].strip()
+        for line in projects.split("\n")[:20]:  # 最多 20 行
+            summary_parts.append(line)
+        summary_parts.append("")
+    
+    summary = "\n".join(summary_parts)
+    
+    # 存储到共享记忆
+    try:
+        hub = MemoryHub(agent_name='claude-code-agent')
+        memory_id = hub.add(
+            content=summary,
+            memory_type='observation',
+            importance=9.0,  # 高重要性
+            tags=['memory-md', 'compressed', 'daily-summary']
+        )
+        print(f"✅ MEMORY.md 摘要已存储到共享记忆 (ID: {memory_id})")
+        print(f"   内容长度：{len(summary)} 字符")
+    except Exception as e:
+        print(f"⚠️  存储失败：{e}")
+
+
+# 需要导入 timedelta
+from datetime import timedelta
 
 
 def main():
