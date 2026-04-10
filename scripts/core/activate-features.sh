@@ -217,6 +217,23 @@ PYTHON
     fi
 }
 
+# 安装 Memory Fallback Hook
+install_memory_hook() {
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "🪝 安装 Memory Fallback Hook"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    
+    HOOK_DIR="$WORKSPACE/hooks/memory-fallback"
+    if [ -f "$HOOK_DIR/install.sh" ]; then
+        echo "📦 安装 Hook..."
+        bash "$HOOK_DIR/install.sh" 2>&1 | sed 's/^/   /' || true
+    else
+        echo "   ⚠️  Hook 安装脚本不存在"
+    fi
+}
+
 # 主流程
 select_feature
 
