@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Semantic memory search using Ollama embeddings.
+Semantic memory search using Ollama embeddings (with RAG evaluation).
 Uses nomic-embed-text for local embedding generation.
 """
 
@@ -9,12 +9,17 @@ import json
 import numpy as np
 import os
 import pickle
+import time
 from datetime import datetime
 from pathlib import Path
 import sys
 
 # 添加 libs 到路径
+workspace_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(workspace_root / 'libs'))
 
+# 导入 RAG 评估
+from rag_eval.recorder import finish_recording
 
 OLLAMA_HOST = "http://127.0.0.1:11434"
 
