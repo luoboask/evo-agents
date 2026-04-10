@@ -657,7 +657,7 @@ else
             
             echo ""
             echo "📋 Current OpenClaw cron jobs:"
-            openclaw cron list 2>/dev/null | grep -E "(session-scan|daily-review|nightly-evolution)" | head -5 || echo "   (none)"
+            openclaw cron list 2>/dev/null | grep -E "(session-scan|daily-memory|weekly-memory|monthly-memory|nightly-evolution)" | head -5 || echo "   (none)"
         else
             echo "   ⚠️  OpenClaw not installed, skipped cron configuration"
         fi
