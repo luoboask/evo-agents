@@ -253,6 +253,35 @@ if [ -f "AGENTS.md" ] && ! grep -q "SKILL_RULES" AGENTS.md; then
 
 ---
 
+## 🧠 Perception System
+
+**This agent runs with automatic perception enhancement:**
+
+- **Real-time indexing** - New conversations indexed within 5 minutes
+- **Smart reply enhancement** - Auto-quotes historical experience and meta-rules
+- **Active learning triggers** - Detects patterns at 04:00 daily
+- **Knowledge graph expansion** - Auto-extracts entities weekly
+
+**You don't need to:**
+- Manually search memories
+- Manually quote meta-rules
+- Manually trigger learning
+
+**The system automatically:**
+- Retrieves relevant history
+- Quotes applicable meta-rules
+- Records every interaction
+- Detects learning opportunities
+- Expands knowledge graph
+
+**Current stats:**
+- Session memories: 260+
+- Meta-rules: 58+
+- Evolution events: 45+
+- Knowledge graph: 36+ entities
+
+---
+
 ## 🎯 Agent Rules
 
 ### Core Behavior
