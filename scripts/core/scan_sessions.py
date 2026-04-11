@@ -237,53 +237,30 @@ class SessionScanner:
             return
         
         try:
-            # 兼容不同版本的 MemoryHub
-            try:
-                # 新版本：使用 add_session
-                memory_id = self.memory.add_session(
-                    content=session_content,
-                    memory_type=memory_type,
-                    importance=importance,
-                    tags=tags,
-                    metadata={
-                        'session_id': session_id,
-                        'session_key': session_key,
-                        'message_count': len(messages),
-                        'user_count': user_count,
-                        'assistant_count': assistant_count,
-                        'first_timestamp': first_msg.get('timestamp', ''),
-                        'last_timestamp': last_msg.get('timestamp', ''),
-                        'is_incremental': is_incremental,
-                        'new_messages': new_count,
-                        'is_truncated': is_truncated,
-                        'content_length': len(session_content)
-                    },
-                    session_id=session_id
-                )
-            except AttributeError:
-                # 旧版本：使用 add + session_storage
-                memory_id = self.memory.add(
-                    content=session_content,
-                    memory_type=memory_type,
-                    importance=importance,
-                    tags=tags,
-                    metadata={
-                        'session_id': session_id,
-                        'session_key': session_key,
-                        'message_count': len(messages),
-                        'user_count': user_count,
-                        'assistant_count': assistant_count,
-                        'first_timestamp': first_msg.get('timestamp', ''),
-                        'last_timestamp': last_msg.get('timestamp', ''),
-                        'is_incremental': is_incremental,
-                        'new_messages': new_count,
-                        'is_truncated': is_truncated,
-                        'content_length': len(session_content)
-                    }
-                )
+            # 直接调用 session_storage.add_memory() 保存到 session_memories 表
+            # 这是唯一正确的方式，确保数据存入正确的表
+            memory_id = self.memory.session_storage.add_memory(
+                session_id=session_id,
+                content=session_content,
+                memory_type=memory_type,
+                importance=importance,
+                tags=tags,
+                metadata={
+                    'session_key': session_key,
+                    'message_count': len(messages),
+                    'user_count': user_count,
+                    'assistant_count': assistant_count,
+                    'first_timestamp': first_msg.get('timestamp', ''),
+                    'last_timestamp': last_msg.get('timestamp', ''),
+                    'is_incremental': is_incremental,
+                    'new_messages': new_count,
+                    'is_truncated': is_truncated,
+                    'content_length': len(session_content)
+                }
+            )
             
             if memory_id:
-                print(f"    ✓ 保存会话 {session_id[:8]}... ({len(messages)}条消息，{memory_id})")
+                print(f"    ✓ 保存会话 {session_id[:8]}... ({len(messages)}条消息，ID={memory_id})")
         except Exception as e:
             print(f"⚠️  保存会话失败：{e}")
             import traceback
