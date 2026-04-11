@@ -613,13 +613,18 @@ if [ "$LANG" = "zh" ]; then
     # --force 模式下自动重新配置 Cron
     if [[ "$FORCE_REINSTALL" == "true" ]]; then
         echo "🔄 完全重装模式：自动重新配置 Cron 任务..."
-        SKIP_CRON=""
+        AUTO_CONFIG_CRON="true"
     else
         # 询问是否跳过
         read -p "是否需要跳过定时任务配置？(y/N，默认 N): " -r SKIP_CRON
+        if [[ ! $SKIP_CRON =~ ^[Yy]$ ]]; then
+            AUTO_CONFIG_CRON="true"
+        else
+            AUTO_CONFIG_CRON=""
+        fi
     fi
     
-    if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ -z "$SKIP_CRON" ]]; then
+    if [[ "$AUTO_CONFIG_CRON" == "true" ]]; then
         # 使用 OpenClaw 的 cron 系统配置定时任务
         if command -v openclaw &> /dev/null; then
             echo "📝 配置 OpenClaw 定时任务..."
