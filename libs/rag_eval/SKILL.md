@@ -1,8 +1,9 @@
-# RAG (Retrieval-Augmented Generation) - Enhanced QA System
+# RAG Evaluation - 检索评估系统
 
-> **Core Concept**: Combine retrieval from knowledge sources with LLM generation  
-> **Purpose**: Provide accurate, context-aware answers with reduced hallucination  
-> **Status**: ✅ Production Ready | Multi-Source Retrieval | Hybrid Search  
+> **Core Concept**: Evaluate and tune retrieval quality  
+> **Purpose**: Monitor, analyze, and optimize memory search performance  
+> **Status**: ✅ Production Ready | Auto-tuning | Metrics Dashboard  
+> **Location**: `libs/rag_eval/` (shared library, not a skill)  
 
 ---
 
@@ -11,26 +12,38 @@
 ### Basic Usage
 
 ```bash
-# Ask a question
-python3 skills/rag/ask.py "What programming languages does the user prefer?"
+# Record retrieval (integrated in memory-search)
+from rag_eval.recorder import start_recording, finish_recording
 
-# With custom context
-python3 skills/rag/ask.py \
-  "Should we use TypeScript?" \
-  --context "project_type:web,team_size:5"
+# Generate evaluation report
+python3 libs/rag_eval/evaluate.py --report --days 7
 
-# Show retrieval sources
-python3 skills/rag/ask.py "Why did we choose Redis?" --show-sources
+# Auto-tune parameters
+python3 libs/rag_eval/auto_tune.py --report
+python3 libs/rag_eval/auto_tune.py --next
 ```
 
-### Configure RAG
+### Integration
 
-```bash
-# Set retrieval parameters
-python3 skills/rag/config.py \
-  --top-k 5 \
-  --min-score 0.7 \
-  --sources vector,kg,keyword
+```python
+# In memory-search skills
+from rag_eval.recorder import start_recording, finish_recording
+import time
+
+def search(query, top_k=10):
+    start_recording(query)
+    start = time.time()
+    
+    results = hub.search(query, top_k=top_k)
+    
+    latency = (time.time() - start) * 1000
+    finish_recording(
+        retrieved_count=len(results),
+        latency_ms=latency,
+        top_k=top_k
+    )
+    
+    return results
 ```
 
 ---

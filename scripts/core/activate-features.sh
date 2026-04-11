@@ -47,8 +47,6 @@ echo "   - 语义搜索模型需要单独安装（需 Ollama）"
 echo "   - 基础功能无需激活，开箱即用"
 echo ""
 echo "🚀 快速开始:"
-echo "   /harness-agent \"开发博客系统\" --domain programming"
-echo "   /harness-agent \"Q1 销售分析\" --domain data_analysis"
 echo ""
 
 # 选择功能
@@ -107,27 +105,6 @@ select_feature() {
     echo "   • RAG 评估系统"
     echo "   • 定时任务"
     echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
-    echo "🚀 立即使用 Harness Agent:"
-    echo ""
-    echo "   # 软件开发"
-    echo "   /harness-agent \"开发博客系统\" --domain programming"
-    echo ""
-    echo "   # 数据分析"
-    echo "   /harness-agent \"Q1 销售分析\" --domain data_analysis"
-    echo ""
-    echo "   # 电商运营"
-    echo "   /harness-agent \"双十一活动\" --domain ecommerce"
-    echo ""
-    echo "   # 运维部署"
-    echo "   /harness-agent \"部署到 AWS\" --domain devops"
-    echo ""
-    echo "   # 营销策划"
-    echo "   /harness-agent \"新品发布会\" --domain marketing"
-    echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
     echo "💡 提示：运行 '/new' 开始新会话立即生效"
     echo ""
 }
@@ -138,34 +115,99 @@ setup_ollama() {
     echo ""
     
     # 检查 Ollama
-    if ! command -v ollama &> /dev/null; then
-        echo "❌ Ollama 未安装，请先安装："
-        echo "   curl -fsSL https://ollama.com/install.sh | sh"
-        return 1
+    if command -v ollama &> /dev/null; then
+        echo "✅ Ollama 已安装"
+        OLLAMA_INSTALLED=true
+    else
+        echo "❌ Ollama 未安装"
+        OLLAMA_INSTALLED=false
     fi
     
-    echo "✅ Ollama 已安装"
-    
-    # 启动服务
-    echo "🔄 启动 Ollama 服务..."
-    ollama serve > /dev/null 2>&1 &
-    sleep 3
-    
-    # 下载模型
-    MODEL_NAME="nomic-embed-text"
-    echo "📥 下载嵌入模型：$MODEL_NAME"
-    ollama pull $MODEL_NAME
+    # 如果已安装，检查模型
+    if [ "$OLLAMA_INSTALLED" = true ]; then
+        if ollama list 2>/dev/null | grep -q "nomic-embed-text"; then
+            echo "✅ nomic-embed-text 模型已安装"
+            OLLAMA_READY=true
+        else
+            echo "⚠️  nomic-embed-text 模型未安装"
+            echo ""
+            read -p "是否下载模型？(y/N): " -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                echo "📥 下载嵌入模型..."
+                ollama pull nomic-embed-text && OLLAMA_READY=true || OLLAMA_READY=false
+            else
+                OLLAMA_READY=false
+            fi
+        fi
+    else
+        OLLAMA_READY=false
+    fi
     
     echo ""
-    echo "✅ 模型下载完成"
     
-    # 验证
-    echo "🔍 验证安装..."
-    if ollama list | grep -q "$MODEL_NAME"; then
-        echo "✅ 验证成功"
+    # 自动配置 RAG
+    CONFIG_FILE="$WORKSPACE/libs/rag_eval/config.json"
+    if [ -f "$CONFIG_FILE" ]; then
+        echo "🔧 更新 RAG 配置..."
+        if [ "$OLLAMA_READY" = true ]; then
+            # 启用语义搜索
+            python3 << PYTHON
+import json
+with open("$CONFIG_FILE") as f:
+    config = json.load(f)
+config['semantic_search'] = {
+    'enabled': True,
+    'model': 'nomic-embed-text',
+    'ollama_host': 'http://127.0.0.1:11434'
+}
+with open("$CONFIG_FILE", 'w') as f:
+    json.dump(config, f, indent=2)
+print("✅ 语义搜索已启用")
+PYTHON
+        else
+            # 禁用语义搜索
+            python3 << PYTHON
+import json
+with open("$CONFIG_FILE") as f:
+    config = json.load(f)
+config['semantic_search'] = {
+    'enabled': False,
+    'model': 'nomic-embed-text',
+    'ollama_host': 'http://127.0.0.1:11434'
+}
+with open("$CONFIG_FILE", 'w') as f:
+    json.dump(config, f, indent=2)
+print("✅ 配置已更新（关键词搜索模式）")
+PYTHON
+        fi
+    fi
+    
+    echo ""
+    echo "💡 提示："
+    if [ "$OLLAMA_READY" = true ]; then
+        echo "   ✅ 语义搜索已启用，支持向量相似度查询"
+        echo "   查询时自动使用语义搜索"
     else
-        echo "❌ 验证失败"
-        return 1
+        echo "   ⚠️  语义搜索不可用，自动降级到关键词搜索"
+        echo "   如需启用，请安装 Ollama: https://ollama.ai"
+    fi
+}
+
+# 安装 Memory Fallback Hook
+install_memory_hook() {
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "🪝 安装 Memory Fallback Hook"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    
+    HOOK_DIR="$WORKSPACE/hooks/memory-fallback"
+    if [ -f "$HOOK_DIR/install.sh" ]; then
+        echo "📦 安装 Hook..."
+        bash "$HOOK_DIR/install.sh" 2>&1 | sed 's/^/   /' || true
+    else
+        echo "   ⚠️  Hook 安装脚本不存在"
     fi
 }
 

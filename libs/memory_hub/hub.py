@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Memory Hub - 记忆中心 v2.0
-支持 Agent 隔离 + 会话隔离（独立表）
-
-架构:
-- shared_memories 表 - 共享记忆（所有会话可见）
-- session_memories 表 - 会话记忆（独立表，每会话最多 50 条）
+Memory Hub - 记忆中心
+统一管理所有记忆相关操作
 """
 
 from pathlib import Path
@@ -16,36 +12,20 @@ try:
     from .storage import StorageManager
     from .knowledge import KnowledgeInterface
     from .evaluation import EvaluationInterface
-    from .session_manager import SessionManager
     from .session_storage import SessionMemoryStorage
 except ImportError:
     from storage import StorageManager
     from knowledge import KnowledgeInterface
     from evaluation import EvaluationInterface
-    from session_manager import SessionManager
     from session_storage import SessionMemoryStorage
 
 
 class MemoryHub:
-    """记忆中心 - 统一管理所有记忆相关操作
+    """记忆中心 - 统一管理所有记忆相关操作"""
     
-    支持两种隔离级别:
-    1. Agent 隔离 - 不同 Agent 有独立的数据目录
-    2. 会话隔离 - 会话记忆独立表存储（每会话最多 50 条）
-    """
-    
-    def __init__(self, agent_name: str, session_id: str = None, workspace_root: Path = None):
-        """
-        初始化 MemoryHub
-        
-        Args:
-            agent_name: Agent 名称（用于数据隔离）
-            session_id: 会话 ID（可选，用于会话隔离）
-            workspace_root: Workspace 路径（可选，默认自动查找）
-        """
+    def __init__(self, agent_name: str):
         self.agent_name = agent_name
-        self.session_id = session_id
-        self.workspace_root = workspace_root or resolve_workspace()
+        self.workspace_root = resolve_workspace()
         
         # 数据路径
         self.data_path = self.workspace_root / 'data' / agent_name
@@ -53,16 +33,36 @@ class MemoryHub:
         self.memory_path.mkdir(parents=True, exist_ok=True)
         
         # 初始化子模块
-        # shared_storage: 共享记忆（旧表，无 session_id 限制）
-        self.shared_storage = StorageManager(self.memory_path)
-        # session_storage: 会话记忆（新表，每会话最多 50 条）
+        self.storage = StorageManager(self.memory_path)
         self.session_storage = SessionMemoryStorage(self.memory_path)
-        self.session_manager = SessionManager(self.memory_path)
         self.knowledge = KnowledgeInterface(self)
         self.evaluation = EvaluationInterface(self)
+        
+        # RAG 配置（自动调优参数）
+        self.rag_config = self._load_rag_config()
+    
+    def _load_rag_config(self) -> Dict:
+        """加载 RAG 调优配置"""
+        # 尝试从 libs/rag_eval 读取配置
+        rag_config_path = self.workspace_root / 'libs' / 'rag_eval' / 'config.json'
+        if rag_config_path.exists():
+            try:
+                with open(rag_config_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except:
+                pass
+        
+        # 默认配置
+        return {
+            'current_config': {
+                'top_k': 5,
+                'similarity_threshold': 0.7,
+                'chunk_size': 512
+            }
+        }
     
     # ───────────────────────────────────────────────────────
-    # 共享记忆操作（原始接口，无 session_id）
+    # 记忆 CRUD 操作
     # ───────────────────────────────────────────────────────
     
     def add(self, 
@@ -71,8 +71,8 @@ class MemoryHub:
             importance: float = 5.0,
             tags: List[str] = None,
             metadata: Dict = None) -> int:
-        """添加共享记忆（原始接口）"""
-        return self.shared_storage.add_memory(
+        """添加记忆"""
+        return self.storage.add_memory(
             content=content,
             memory_type=memory_type,
             importance=importance,
@@ -84,147 +84,108 @@ class MemoryHub:
                query: str, 
                top_k: int = 5,
                memory_type: Optional[str] = None,
-               semantic: bool = False) -> List[Dict]:
-        """搜索共享记忆（原始接口）"""
-        return self.shared_storage.search_memories(
-            query=query,
-            top_k=top_k,
-            memory_type=memory_type,
-            semantic=semantic
-        )
-    
-    # ───────────────────────────────────────────────────────
-    # 会话记忆操作（独立表，每会话最多 50 条）
-    # ───────────────────────────────────────────────────────
-    
-    def add_session(self,
-                    content: str,
-                    memory_type: str = 'observation',
-                    importance: float = 5.0,
-                    tags: List[str] = None,
-                    metadata: Dict = None,
-                    session_id: str = None) -> int:
+               semantic: bool = False,
+               hierarchical: bool = True) -> List[Dict]:
         """
-        添加会话记忆（自动清理超出 50 条的旧记录）
+        搜索记忆
         
         Args:
-            content: 记忆内容
-            memory_type: 记忆类型
-            importance: 重要性
-            tags: 标签列表
-            metadata: 元数据
-            session_id: 会话 ID（None 表示使用当前会话）
-        """
-        effective_session_id = session_id or self.session_id
-        if not effective_session_id:
-            raise ValueError("必须指定 session_id 或先设置当前会话")
-        
-        return self.session_storage.add_memory(
-            session_id=effective_session_id,
-            content=content,
-            memory_type=memory_type,
-            importance=importance,
-            tags=tags,
-            metadata=metadata
-        )
-    
-    def search_session(self,
-                       query: str,
-                       top_k: int = 5,
-                       memory_type: Optional[str] = None,
-                       session_id: str = None,
-                       semantic: bool = False) -> List[Dict]:
-        """
-        搜索会话记忆
-        
-        Args:
-            query: 搜索查询
+            query: 搜索关键词
             top_k: 返回数量
             memory_type: 记忆类型过滤
-            session_id: 会话 ID（None 表示使用当前会话）
             semantic: 是否使用语义搜索
-        """
-        effective_session_id = session_id or self.session_id
-        if not effective_session_id:
-            raise ValueError("必须指定 session_id 或先设置当前会话")
+            hierarchical: 是否使用分层搜索（月→周→日）
         
-        return self.session_storage.search_memories(
-            session_id=effective_session_id,
-            top_k=top_k,
+        Returns:
+            记忆列表
+        """
+        if hierarchical:
+            return self._hierarchical_search(query, top_k, memory_type, semantic)
+        else:
+            return self.storage.search_memories(
+                query=query,
+                top_k=top_k,
+                memory_type=memory_type,
+                semantic=semantic
+            )
+    
+    def _hierarchical_search(self, query: str, top_k: int, 
+                            memory_type: Optional[str], 
+                            semantic: bool) -> List[Dict]:
+        """分层搜索：月→周→日"""
+        all_results = []
+        seen_ids = set()
+        
+        # 1. 先搜月记忆（monthly-summary）
+        monthly = self.storage.search_memories(
+            query=f"{query} monthly-summary",
+            top_k=2,
             memory_type=memory_type,
             semantic=semantic
         )
-    
-    def get_session_stats(self, session_id: str = None) -> Dict:
-        """获取会话统计"""
-        effective_session_id = session_id or self.session_id
-        if not effective_session_id:
-            return {'error': 'No session ID provided'}
+        for r in monthly:
+            if r['id'] not in seen_ids:
+                all_results.append(r)
+                seen_ids.add(r['id'])
         
-        return self.session_storage.get_stats(effective_session_id)
-    
-    # ───────────────────────────────────────────────────────
-    # 委托接口（共享记忆 - 原始接口）
-    # ───────────────────────────────────────────────────────
+        # 2. 再搜周记忆（weekly-summary）
+        weekly = self.storage.search_memories(
+            query=f"{query} weekly-summary",
+            top_k=3,
+            memory_type=memory_type,
+            semantic=semantic
+        )
+        for r in weekly:
+            if r['id'] not in seen_ids and len(all_results) < top_k:
+                all_results.append(r)
+                seen_ids.add(r['id'])
+        
+        # 3. 最后搜日记忆（daily-summary）
+        daily = self.storage.search_memories(
+            query=f"{query} daily-summary",
+            top_k=5,
+            memory_type=memory_type,
+            semantic=semantic
+        )
+        for r in daily:
+            if r['id'] not in seen_ids and len(all_results) < top_k:
+                all_results.append(r)
+                seen_ids.add(r['id'])
+        
+        # 4. 如果结果不足，全量搜索补充
+        if len(all_results) < top_k:
+            remaining = top_k - len(all_results)
+            all = self.storage.search_memories(
+                query=query,
+                top_k=remaining,
+                memory_type=memory_type,
+                semantic=semantic
+            )
+            for r in all:
+                if r['id'] not in seen_ids:
+                    all_results.append(r)
+                    seen_ids.add(r['id'])
+        
+        return all_results
     
     def get(self, memory_id: int) -> Optional[Dict]:
-        """获取单条记忆（共享记忆）"""
-        return self.shared_storage.get_memory(memory_id)
+        """获取单条记忆"""
+        return self.storage.get_memory(memory_id)
     
     def delete(self, memory_id: int) -> bool:
-        """删除记忆（共享记忆）"""
-        return self.shared_storage.delete_memory(memory_id)
+        """删除记忆"""
+        return self.storage.delete_memory(memory_id)
     
     def update(self, memory_id: int, **kwargs) -> bool:
-        """更新记忆（共享记忆）"""
-        return self.shared_storage.update_memory(memory_id, **kwargs)
+        """更新记忆"""
+        return self.storage.update_memory(memory_id, **kwargs)
     
     def stats(self) -> Dict:
-        """获取统计信息（共享记忆）"""
-        return self.shared_storage.get_stats()
+        """获取统计信息"""
+        return self.storage.get_stats()
     
     # ───────────────────────────────────────────────────────
-    # 会话管理接口
-    # ───────────────────────────────────────────────────────
-    
-    def create_session(self,
-                       session_name: str = None,
-                       metadata: Dict = None) -> str:
-        """创建新会话"""
-        session_id = self.session_manager.create_session(session_name, metadata)
-        self.session_id = session_id
-        return session_id
-    
-    def switch_session(self, session_id: str):
-        """切换到指定会话"""
-        self.session_id = session_id
-        self.session_manager.update_session_activity(session_id)
-    
-    def close_session(self, session_id: str = None):
-        """关闭当前会话"""
-        sid = session_id or self.session_id
-        if sid:
-            self.session_manager.close_session(sid)
-            self.session_id = None
-    
-    def get_current_session(self) -> Optional[Dict]:
-        """获取当前会话信息"""
-        if self.session_id:
-            return self.session_manager.get_session(self.session_id)
-        return None
-    
-    def list_sessions(self,
-                      active_only: bool = True,
-                      limit: int = 50) -> List[Dict]:
-        """列出会话"""
-        return self.session_manager.list_sessions(active_only, limit)
-    
-    def clear_session_memories(self, session_id: str) -> int:
-        """清空会话的所有记忆"""
-        return self.session_storage.clear_session(session_id)
-    
-    # ───────────────────────────────────────────────────────
-    # 评估和进化接口
+    # 评估接口（委托给 evaluation 模块）
     # ───────────────────────────────────────────────────────
     
     def record_evaluation(self, **kwargs):
@@ -239,11 +200,15 @@ class MemoryHub:
         """分析评估数据"""
         return self.evaluation.analyze(min_samples)
     
+    # ───────────────────────────────────────────────────────
+    # 进化记录接口
+    # ───────────────────────────────────────────────────────
+    
     def record_evolution(self,
                         event_type: str,
                         content: str,
                         metadata: Dict = None) -> int:
-        """记录进化事件（添加到共享记忆）"""
+        """记录进化事件"""
         return self.add(
             content=content,
             memory_type='reflection',
@@ -254,3 +219,51 @@ class MemoryHub:
                 **(metadata or {})
             }
         )
+    
+    # ───────────────────────────────────────────────────────
+    # 会话记忆接口
+    # ───────────────────────────────────────────────────────
+    
+    def get_session_memories(self,
+                              session_id: str,
+                              top_k: int = None,
+                              memory_type: Optional[str] = None,
+                              include_all: bool = False) -> List[Dict]:
+        """获取指定会话的记忆（top_k=None 时使用 RAG 配置）"""
+        if top_k is None:
+            top_k = self.rag_config.get('current_config', {}).get('top_k', 50)
+        
+        return self.session_storage.search_memories(
+            session_id=session_id,
+            top_k=top_k,
+            memory_type=memory_type,
+            include_all=include_all
+        )
+    
+    def get_current_session_memories(self,
+                                      top_k: int = None,
+                                      memory_type: Optional[str] = None,
+                                      include_all: bool = False) -> List[Dict]:
+        """获取当前会话的记忆（自动获取最新会话，top_k=None 时使用 RAG 配置）"""
+        if top_k is None:
+            top_k = self.rag_config.get('current_config', {}).get('top_k', 15)
+        
+        sessions = self.session_storage.get_all_sessions()
+        if not sessions:
+            return []
+        
+        latest_session = sessions[0]
+        return self.session_storage.search_memories(
+            session_id=latest_session,
+            top_k=top_k,
+            memory_type=memory_type,
+            include_all=include_all
+        )
+    
+    def get_all_sessions(self) -> List[str]:
+        """获取所有有记忆的会话 ID"""
+        return self.session_storage.get_all_sessions()
+    
+    def get_session_stats(self, session_id: str) -> Dict:
+        """获取会话统计"""
+        return self.session_storage.get_stats(session_id)

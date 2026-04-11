@@ -161,6 +161,89 @@ def parse_md_chunks(filepath: Path) -> List[dict]:
     return chunks
 
 
+
+
+def hybrid_search(query, top_k=10):
+    """混合搜索（关键词 + 语义）"""
+    import numpy as np
+    
+    if not DB_PATH.exists():
+        return []
+    
+    # 1. 关键词搜索
+    keyword_results = keyword_search(query, top_k=top_k * 2)
+    
+    # 2. 语义搜索
+    semantic_results = []
+    query_embedding = get_embedding(query)
+    if query_embedding:
+        try:
+            conn = sqlite3.connect(str(DB_PATH))
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            
+            cursor.execute("SELECT doc_id, vector FROM embeddings")
+            for row in cursor.fetchall():
+                # 正确读取 BLOB 向量
+                try:
+                    vector_bytes = bytes(row['vector'])
+                    doc_embedding = np.frombuffer(vector_bytes, dtype=np.float32)
+                except Exception as e:
+                    print(f"Vector read error: {e}")
+                    continue
+                
+                # 计算余弦相似度
+                query_vec = np.array(query_embedding, dtype=np.float32)
+                similarity = float(np.dot(query_vec, doc_embedding) / 
+                                 (np.linalg.norm(query_vec) * np.linalg.norm(doc_embedding)))
+                
+                # 获取文档内容
+                cursor.execute("SELECT id, content, path, type FROM documents WHERE id = ?", (row['doc_id'],))
+                doc_row = cursor.fetchone()
+                if doc_row:
+                    semantic_results.append({
+                        'id': doc_row['id'],
+                        'content': doc_row['content'][:500],
+                        'source': doc_row['path'],
+                        'type': doc_row['type'],
+                        'score': similarity,
+                        'search_type': 'semantic'
+                    })
+            
+            conn.close()
+            semantic_results.sort(key=lambda x: x['score'], reverse=True)
+            semantic_results = semantic_results[:top_k * 2]
+        except Exception as e:
+            print(f"Semantic search error: {e}")
+    
+    # 3. 合并结果
+    merged = {}
+    for r in keyword_results + semantic_results:
+        doc_id = r['id']
+        if doc_id not in merged:
+            merged[doc_id] = r
+        else:
+            if r['search_type'] == 'keyword':
+                merged[doc_id]['keyword_score'] = r.get('score', 0)
+            else:
+                merged[doc_id]['semantic_score'] = r.get('score', 0)
+    
+    # 4. 加权排序
+    final_results = []
+    for doc_id, r in merged.items():
+        keyword_score = r.get('keyword_score', 0)
+        semantic_score = r.get('semantic_score', 0)
+        
+        if r['search_type'] == 'keyword' and keyword_score > 0:
+            keyword_score = min(keyword_score / 10.0, 1.0)
+        
+        combined_score = 0.6 * keyword_score + 0.4 * semantic_score
+        r['combined_score'] = combined_score
+        final_results.append(r)
+    
+    final_results.sort(key=lambda x: x['combined_score'], reverse=True)
+    return final_results[:top_k]
+
 def get_embedding(text: str, prefix: str = "search_document: ") -> Optional[bytes]:
     """使用 Ollama 生成嵌入向量，加 nomic 推荐的 task prefix"""
     try:
@@ -280,6 +363,7 @@ def main():
     group.add_argument("--full", action="store_true", help="全量重建")
     group.add_argument("--incremental", action="store_true", help="增量更新")
     parser.add_argument("--embed", action="store_true", help="生成语义向量（需要 Ollama）")
+    parser.add_argument("--memory-db", action="store_true", help="索引 memory_stream.db")
     args = parser.parse_args()
 
     full = args.full
@@ -290,5 +374,200 @@ def main():
     run_index(full=full, embed=args.embed)
 
 
+
+def index_memory_stream_db(embed: bool = False):
+    """索引 memory_stream.db 中的记忆"""
+    import numpy as np
+    
+    print("🔨 索引 memory_stream.db...")
+    print("")
+    
+    memory_db_path = WORKSPACE / 'data' / 'claude-code-agent' / 'memory' / 'memory_stream.db'
+    if not memory_db_path.exists():
+        print(f"❌ memory_stream.db 不存在：{memory_db_path}")
+        return
+    
+    conn = open_db(DB_PATH)
+    cursor = conn.cursor()
+    mem_conn = sqlite3.connect(str(memory_db_path))
+    mem_conn.row_factory = sqlite3.Row
+    mem_cursor = mem_conn.cursor()
+    
+    print("📄 加载共享记忆...")
+    mem_cursor.execute("SELECT id, content, memory_type FROM memories")
+    memories = mem_cursor.fetchall()
+    print(f"   找到 {len(memories)} 条共享记忆")
+    
+    count = 0
+    for mem in memories:
+        content_text = mem['content'][:500]
+        doc_type = mem['memory_type'] or 'memory'
+        
+        cursor.execute("""
+            INSERT OR REPLACE INTO documents 
+            (path, line_start, line_end, content, content_tokenized, type, date, mtime)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            f"memory_stream:memories:{mem['id']}",
+            0, 0, content_text, tokenize(content_text), doc_type, None, datetime.now().timestamp()
+        ))
+        
+        doc_id = cursor.lastrowid
+        count += 1
+        
+        if embed:
+            vec = get_embedding(content_text)
+            if vec and isinstance(vec, bytes):
+                vector_bytes = vec
+            elif vec and isinstance(vec, list):
+                vector_bytes = np.array(vec, dtype=np.float32).tobytes()
+            else:
+                vector_bytes = None
+            
+            if vector_bytes:
+                cursor.execute("INSERT OR REPLACE INTO embeddings (doc_id, vector) VALUES (?, ?)",
+                             (doc_id, vector_bytes))
+        
+        if count % 50 == 0:
+            print(f"   已索引 {count}/{len(memories)}...")
+    
+    print(f"   ✅ 共享记忆：{count} 条")
+    
+    print("\n📄 加载会话记忆...")
+    mem_cursor.execute("SELECT id, session_id, content, memory_type FROM session_memories")
+    session_memories = mem_cursor.fetchall()
+    print(f"   找到 {len(session_memories)} 条会话记忆")
+    
+    session_count = 0
+    for mem in session_memories:
+        content_text = mem['content'][:500]
+        doc_type = mem['memory_type'] or 'session'
+        session_id = mem['session_id'][:8]
+        
+        cursor.execute("""
+            INSERT OR REPLACE INTO documents 
+            (path, line_start, line_end, content, content_tokenized, type, date, mtime)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            f"memory_stream:sessions:{mem['id']}",
+            0, 0, content_text, tokenize(content_text), doc_type, session_id, datetime.now().timestamp()
+        ))
+        
+        doc_id = cursor.lastrowid
+        session_count += 1
+        
+        if embed:
+            vec = get_embedding(content_text)
+            if vec and isinstance(vec, bytes):
+                vector_bytes = vec
+            elif vec and isinstance(vec, list):
+                vector_bytes = np.array(vec, dtype=np.float32).tobytes()
+            else:
+                vector_bytes = None
+            
+            if vector_bytes:
+                cursor.execute("INSERT OR REPLACE INTO embeddings (doc_id, vector) VALUES (?, ?)",
+                             (doc_id, vector_bytes))
+        
+        if session_count % 100 == 0:
+            print(f"   已索引 {session_count}/{len(session_memories)}...")
+    
+    print(f"   ✅ 会话记忆：{session_count} 条")
+    
+    conn.commit()
+    conn.close()
+    mem_conn.close()
+    
+    print("")
+    print(f"✅ 完成：共索引 {count + session_count} 条记忆")
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "--memory-db":
+        embed = "--embed" in sys.argv
+        index_memory_stream_db(embed=embed)
+    else:
+        main()
+
+
+def keyword_search(query, top_k=10):
+    """关键词搜索（FTS5）"""
+    if not DB_PATH.exists():
+        return []
+    
+    conn = sqlite3.connect(str(DB_PATH))
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    # 分词
+    query_tokenized = tokenize(query)
+    
+    # FTS5 搜索
+    cursor.execute("""
+        SELECT d.id, d.content, d.path, d.line_start, d.type,
+               bm25(documents_fts) as score
+        FROM documents_fts
+        JOIN documents d ON d.id = documents_fts.rowid
+        WHERE documents_fts MATCH ?
+        ORDER BY score
+        LIMIT ?
+    """, (query_tokenized, top_k))
+    
+    results = []
+    for row in cursor.fetchall():
+        results.append({
+            'id': row['id'],
+            'content': row['content'][:500],
+            'source': row['path'],
+            'type': row['type'],
+            'score': -row['score'],  # bm25 分数越低越好，取反
+            'search_type': 'keyword'
+        })
+    
+    conn.close()
+    return results
+
+
+def keyword_search(query, top_k=10):
+    """关键词搜索（FTS5）"""
+    if not DB_PATH.exists():
+        return []
+    
+    conn = sqlite3.connect(str(DB_PATH))
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    # 分词
+    query_tokenized = tokenize(query)
+    
+    # FTS5 搜索
+    try:
+        cursor.execute("""
+            SELECT d.id, d.content, d.path, d.line_start, d.type,
+                   bm25(documents_fts) as score
+            FROM documents_fts
+            JOIN documents d ON d.id = documents_fts.rowid
+            WHERE documents_fts MATCH ?
+            ORDER BY score
+            LIMIT ?
+        """, (query_tokenized, top_k))
+        
+        results = []
+        for row in cursor.fetchall():
+            results.append({
+                'id': row['id'],
+                'content': row['content'][:500],
+                'source': row['path'],
+                'type': row['type'],
+                'score': -row['score'] if row['score'] else 0,
+                'search_type': 'keyword'
+            })
+        
+        conn.close()
+        return results
+    except Exception as e:
+        print(f"Keyword search error: {e}")
+        conn.close()
+        return []
+

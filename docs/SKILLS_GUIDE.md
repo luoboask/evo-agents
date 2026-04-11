@@ -1,7 +1,7 @@
 # 🎯 OpenClaw 核心技能完整使用指南
 
-> 更新时间：2026-04-06  
-> 包含技能：Harness Agent | Session-Report | Memory-Search | Web-Knowledge | Self-Evolution
+> 更新时间：2026-04-10  
+> 包含技能：Harness Agent | Memory-Search | Web-Knowledge | Self-Evolution
 
 ---
 
@@ -94,22 +94,15 @@
 
 ```bash
 # 基础用法 - 预览并确认
-/session-report
 
 # 只预览，不保存
-/session-report --dry-run
 
 # 只保存特定类型
-/session-report --type user        # 只保存用户偏好
-/session-report --type feedback    # 只保存反馈记忆
-/session-report --type project     # 只保存项目决策
-/session-report --type reference   # 只保存外部资源
 ```
 
 ### 📋 完整参数
 
 ```bash
-/session-report \
   --dry-run \                # 只预览，不保存
   --force \                  # 强制保存（跳过确认）
   --type <类型> \            # user/feedback/project/reference
@@ -122,20 +115,15 @@
 ```bash
 # 示例 1: 项目完成后总结
 # [完成电商项目开发后]
-/session-report --type project
 
 # 示例 2: 了解用户偏好后
 # [用户说"我不喜欢冗长回复，直接给代码"]
-/session-report --type feedback
 
 # 示例 3: 获取外部资源后
 # [用户分享"监控在 grafana.internal/d/api-latency"]
-/session-report --type reference
 
 # 示例 4: 先预览再决定
-/session-report --dry-run
 # 查看预览后，如果满意：
-/session-report
 ```
 
 ### 📝 保存的内容示例
@@ -356,7 +344,6 @@ cat skills/self-evolution/reports/weekly_$(date +%Y-W%V).md
 /harness-agent "开发电商网站" --domain programming
 # → 执行复杂任务
 
-/session-report --type project
 # → 保存项目决策到记忆
 
 # Day 3: 继续开发
@@ -375,7 +362,6 @@ cat skills/self-evolution/reports/weekly_$(date +%Y-W%V).md
 # → 建议：继续使用 Harness
 
 # Day 30: 项目上线
-/session-report --type project --type feedback
 # → 保存成功经验到记忆
 
 # Day 35: 月度回顾
@@ -402,11 +388,9 @@ cat skills/self-evolution/reports/weekly_$(date +%Y-W%V).md
    ```bash
    # ✅ 正确
    [完成架构讨论后]
-   /session-report --type project
    
    # ❌ 错误
    [简单问答后]
-   /session-report  # 没必要
    ```
 
 3. **让 Memory-Search 自动工作**
@@ -448,10 +432,6 @@ cat skills/self-evolution/reports/weekly_$(date +%Y-W%V).md
 /harness-agent "任务" --dry-run          # 只预览
 
 # ========== Session-Report ==========
-/session-report                          # 预览并确认
-/session-report --dry-run                # 只预览
-/session-report --type project           # 只保存项目记忆
-/session-report --force                  # 强制保存
 
 # ========== Memory-Search ==========
 # 自动工作，无需手动调用
@@ -516,7 +496,6 @@ cat skills/self-evolution/reports/monthly_*.md # 查看月报
 ## 📚 相关文档
 
 - Harness Agent 详细文档：`skills/harness-agent/SKILL.md`
-- Session-Report 详细文档：`skills/session-report/SKILL.md`
 - Memory-Search 详细文档：`skills/memory-search/README.md`
 - Web-Knowledge 详细文档：`skills/web-knowledge/README.md`
 - Self-Evolution 详细文档：`skills/self-evolution/README.md`

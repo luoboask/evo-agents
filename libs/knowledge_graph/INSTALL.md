@@ -12,7 +12,7 @@
 
 ```bash
 # 1. 进入技能目录
-cd ~/.openclaw/workspace/skills/knowledge-graph
+cd ~/.openclaw/workspace/libs/knowledge-graph
 
 # 2. 测试运行
 python3 -c "from builder import KnowledgeGraph; print('✅ 模块加载成功')"
@@ -54,7 +54,7 @@ print(f'实体数：{len(kg.entities)}')
 
 ```bash
 # 检查技能目录
-ls -la ~/.openclaw/workspace/skills/knowledge-graph/
+ls -la ~/.openclaw/workspace/libs/knowledge-graph/
 
 # 应该看到：
 # builder.py
@@ -76,7 +76,7 @@ python3 -c "from builder import KnowledgeGraph; print('✅ KnowledgeGraph 加载
 ### Step 3: 测试运行
 
 ```bash
-cd ~/.openclaw/workspace/skills/knowledge-graph
+cd ~/.openclaw/workspace/libs/knowledge-graph
 
 # 测试知识图谱构建
 python3 -c "
@@ -142,7 +142,7 @@ self.graph_file = self.memory_dir / "knowledge_graph.json"
 ## 📁 安装后的目录结构
 
 ```
-~/.openclaw/workspace/skills/knowledge-graph/
+~/.openclaw/workspace/libs/knowledge-graph/
 ├── builder.py              # 知识图谱构建器
 └── INSTALL.md              # 本文件
 
@@ -210,7 +210,7 @@ kg.save()
 
 ```bash
 # 1. 测试模块导入
-cd ~/.openclaw/workspace/skills/knowledge-graph
+cd ~/.openclaw/workspace/libs/knowledge-graph
 python3 -c "from builder import KnowledgeGraph; print('✅ 加载成功')"
 
 # 2. 测试基本操作
@@ -266,7 +266,7 @@ cat ~/.openclaw/workspace/memory/knowledge_graph.json | python3 -m json.tool | h
 **A:** 检查 Python 路径：
 
 ```bash
-cd ~/.openclaw/workspace/skills/knowledge-graph
+cd ~/.openclaw/workspace/libs/knowledge-graph
 python3 -c "import sys; print(sys.path)"
 ```
 
@@ -323,7 +323,7 @@ cp ~/.openclaw/workspace/memory/knowledge_graph.json \
 **A:** 删除技能目录（数据保留）：
 
 ```bash
-rm -rf ~/.openclaw/workspace/skills/knowledge-graph
+rm -rf ~/.openclaw/workspace/libs/knowledge-graph
 ```
 
 ---
