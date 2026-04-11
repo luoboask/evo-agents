@@ -763,6 +763,36 @@ else
                 --no-deliver \
                 --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
+            # Daily review (09:00 daily)
+            echo "   - Daily Review (09:00 daily)..."
+            openclaw cron add \
+                --cron "0 9 * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 skills/memory-search/daily_review.py" \
+                --name "daily-review-$AGENT_NAME" \
+                --no-deliver \
+                --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+            
+            # Weekly maintenance (Sun 02:00)
+            echo "   - Weekly Maintenance (Sun 02:00)..."
+            openclaw cron add \
+                --cron "0 2 * * 0" \
+                --agent "$AGENT_NAME" \
+                --message "bash skills/memory-search/maintenance.sh" \
+                --name "weekly-maintenance-$AGENT_NAME" \
+                --no-deliver \
+                --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+            
+            # Weekly compress (Sun 03:00)
+            echo "   - Weekly Compress (Sun 03:00)..."
+            openclaw cron add \
+                --cron "0 3 * * 0" \
+                --agent "$AGENT_NAME" \
+                --message "python3 scripts/core/memory_compressor.py --weekly" \
+                --name "weekly-compress-$AGENT_NAME" \
+                --no-deliver \
+                --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+            
             # Nightly evolution (23:00 daily)
             echo "   - Nightly Evolution (23:00 daily)..."
             openclaw cron add \
