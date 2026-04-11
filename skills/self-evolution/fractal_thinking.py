@@ -593,6 +593,9 @@ class FractalThinkingEngine:
         # 生成综合报告
         report = self._generate_fractal_report(all_analyses, pattern_summary, meta_rules_found)
         
+        # ❗ 关键：保存元规则到记忆系统（goal 类型）
+        self._save_meta_rules_to_memory(meta_rules_found, all_analyses)
+        
         return {
             'total_analyses': len(all_analyses),
             'by_level': {level: len([a for a in all_analyses if a.level == level]) for level in range(4)},
@@ -694,3 +697,31 @@ if __name__ == '__main__':
     for i, insight in enumerate(insights, 1):
         print(f"\n{i}. [{insight['level']}] 重要性：{insight['importance']}")
         print(f"   {insight['content'][:100]}...")
+
+
+# =============================================================================
+# 元规则保存功能
+# =============================================================================
+
+def _save_meta_rules_to_memory(self, meta_rules: List[str], analyses: List[FractalAnalysis]):
+    """保存元规则到记忆系统（goal 类型）"""
+    if not meta_rules:
+        print("\n⚠️  没有元规则需要保存")
+        return
+    
+    print(f"\n📜 保存 {len(meta_rules)} 条元规则到记忆系统...")
+    
+    # 去重
+    unique_rules = list(set(meta_rules))
+    
+    # 保存到记忆流（goal 类型）
+    for rule in unique_rules:
+        self.memory_stream.add_memory(
+            content=rule,
+            memory_type='goal',  # 元规则用 goal 类型
+            importance=9.5,  # 高重要性
+            tags=['meta_rule', 'fractal_thinking', datetime.now().strftime('%Y-%m-%d')]
+        )
+        print(f"  ✅ 保存：{rule[:50]}...")
+    
+    print(f"✅ 已保存 {len(unique_rules)} 条元规则")

@@ -146,7 +146,7 @@ class RealExpertAgent:
         return "\n".join(suggestions)
     
     def _reflect(self, task, result, memories, rules):
-        """任务后反思"""
+        """任务后反思 + 记录进化事件"""
         
         # 生成反思内容
         reflection = f"""
@@ -182,6 +182,41 @@ class RealExpertAgent:
             print("✅ 反思已记录到记忆系统")
         except Exception as e:
             print(f"⚠️  记录失败：{e}")
+        
+        # ❗ 关键：记录进化事件（供分形思考分析）
+        try:
+            self._record_evolution_event(task, result, memories, rules)
+            print("✅ 进化事件已记录")
+        except Exception as e:
+            print(f"⚠️  进化事件记录失败：{e}")
+    
+    def _record_evolution_event(self, task, result, memories, rules):
+        """记录进化事件到 evolution.db"""
+        from skills.self-evolution.self_evolution_real import RealSelfEvolution
+        
+        evolution = RealSelfEvolution()
+        
+        # 判断事件类型
+        event_type = 'TASK_COMPLETED'
+        if '优化' in task or 'optim' in task.lower():
+            event_type = 'CODE_IMPROVED'
+        elif 'Bug' in task or '修复' in task:
+            event_type = 'BUG_FIX'
+        elif '添加' in task or '新增' in task:
+            event_type = 'FEATURE_ADDED'
+        
+        # 提取学习点
+        lesson = f"基于 {len(memories)} 条记忆和 {len(rules)} 条元规则完成任务"
+        if memories:
+            lesson += f"，检索到相关历史经验"
+        if rules:
+            lesson += f"，应用了元规则指导"
+        
+        evolution.record(
+            event_type=event_type,
+            description=f"任务：{task}",
+            lesson_learned=lesson
+        )
     
     def weekly_review(self):
         """周回顾"""
