@@ -645,7 +645,8 @@ if [ "$LANG" = "zh" ]; then
                 --cron "*/30 * * * *" \
                 --agent "$AGENT_NAME" \
                 --message "python3 scripts/core/scan_sessions.py --agent $AGENT_NAME" \
-                --name "session-scan-$AGENT_NAME" >/dev/null 2>&1; then
+                --name "session-scan-$AGENT_NAME" \
+                --delivery "mode=none" >/dev/null 2>&1; then
                 echo "      ✅ 完成"
             else
                 echo "      ⚠️  失败"
@@ -657,7 +658,8 @@ if [ "$LANG" = "zh" ]; then
                 --cron "0 9 * * *" \
                 --agent "$AGENT_NAME" \
                 --message "python3 skills/memory-search/daily_review.py" \
-                --name "daily-review-$AGENT_NAME" >/dev/null 2>&1; then
+                --name "daily-review-$AGENT_NAME" \
+                --delivery "mode=none" >/dev/null 2>&1; then
                 echo "      ✅ 完成"
             else
                 echo "      ⚠️  失败"
@@ -669,7 +671,8 @@ if [ "$LANG" = "zh" ]; then
                 --cron "0 23 * * *" \
                 --agent "$AGENT_NAME" \
                 --message "python3 skills/self-evolution/nightly_cycle.py" \
-                --name "nightly-evolution-$AGENT_NAME" >/dev/null 2>&1; then
+                --name "nightly-evolution-$AGENT_NAME" \
+                --delivery "mode=none" >/dev/null 2>&1; then
                 echo "      ✅ 完成"
             else
                 echo "      ⚠️  失败"
@@ -681,7 +684,8 @@ if [ "$LANG" = "zh" ]; then
                 --cron "0 3 * * 0" \
                 --agent "$AGENT_NAME" \
                 --message "python3 scripts/core/memory_compressor.py --weekly --monthly" \
-                --name "weekly-compress-$AGENT_NAME" >/dev/null 2>&1; then
+                --name "weekly-compress-$AGENT_NAME" \
+                --delivery "mode=none" >/dev/null 2>&1; then
                 echo "      ✅ 完成"
             else
                 echo "      ⚠️  失败"
@@ -693,7 +697,8 @@ if [ "$LANG" = "zh" ]; then
                 --cron "0 2 * * 0" \
                 --agent "$AGENT_NAME" \
                 --message "bash skills/memory-search/maintenance.sh" \
-                --name "weekly-maintenance-$AGENT_NAME" >/dev/null 2>&1; then
+                --name "weekly-maintenance-$AGENT_NAME" \
+                --delivery "mode=none" >/dev/null 2>&1; then
                 echo "      ✅ 完成"
             else
                 echo "      ⚠️  失败"
@@ -732,36 +737,18 @@ else
             # Session scan (every 30 minutes)
             echo "   - Session Scan (every 30 min)..."
             openclaw cron add --schedule "*/30 * * * *" \
-                --message "cd $WORKSPACE_ROOT && python3 scripts/core/scan_sessions.py --agent $AGENT_NAME" \
-                --name "session-scan-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
-            
-            # Daily memory compress (09:30 daily)
-            echo "   - Daily Memory Compress (09:30 daily)..."
-            openclaw cron add --schedule "0 9:30 * * *" \
-                --message "cd $WORKSPACE_ROOT && python3 scripts/core/memory_manager.py --daily" \
-                --name "daily-memory-compress-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
-            
-            # Weekly memory compress (Sun 03:00)
-            echo "   - Weekly Memory Compress (Sun 03:00)..."
-            openclaw cron add --schedule "0 3 * * 0" \
-                --message "cd $WORKSPACE_ROOT && python3 scripts/core/memory_manager.py --weekly" \
-                --name "weekly-memory-compress-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
-            
-            # Monthly memory compress (1st 04:00)
-            echo "   - Monthly Memory Compress (1st 04:00)..."
-            openclaw cron add --schedule "0 4 1 * *" \
-                --message "cd $WORKSPACE_ROOT && python3 scripts/core/memory_manager.py --monthly" \
-                --name "monthly-memory-compress-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
-
-                --name "kg-build-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
-
-                --name "kg-build-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
-            
+                --agent "$AGENT_NAME" \
+                --message "python3 scripts/core/scan_sessions.py --agent $AGENT_NAME" \
+                --name "session-scan-$AGENT_NAME" \
+                --delivery "mode=none" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
             # Nightly evolution (23:00 daily)
             echo "   - Nightly Evolution (23:00 daily)..."
-                --message "cd $WORKSPACE_ROOT && python3 skills/self-evolution/nightly_cycle.py" \
-                --name "nightly-evolution-$AGENT_NAME" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+            openclaw cron add --schedule "0 23 * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 skills/self-evolution/nightly_cycle.py" \
+                --name "nightly-evolution-$AGENT_NAME" \
+                --delivery "mode=none" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
             echo ""
             echo "📋 Current OpenClaw cron jobs:"
