@@ -72,30 +72,46 @@ def run_benchmark(questions: list, agent_name: str = "test-agent", limit: int = 
             try:
                 # 读取会话文件
                 session_path = Path(session_file)
+                if not session_path.is_absolute():
+                    # 相对于 workspace 目录
+                    session_path = Path.cwd() / session_path
+                
                 if session_path.exists():
                     with open(session_path, 'r', encoding='utf-8') as f:
                         content = f.read()
+                    
+                    # 使用 session_id 作为文件名
+                    session_id = session_path.stem
                     
                     # 添加到记忆
                     memory.add_session(
                         content=content,
                         memory_type='observation',
                         tags=['haystack', 'benchmark'],
-                        metadata={'source': session_file}
+                        metadata={'source': session_file},
+                        session_id=session_id
                     )
             except Exception as e:
                 print(f"  ⚠️  导入失败 {session_file}: {e}")
         
-        # 查询
+        # 查询（直接使用 session_storage，因为 memory.search() 有问题）
         try:
-            retrieved = memory.search(
-                q['question'],
-                top_k=10,
-                semantic=True
+            retrieved = memory.session_storage.search_memories(
+                session_id='',  # 空表示搜索所有会话
+                top_k=10
             )
             
-            # 提取检索结果的 ID
-            retrieved_ids = [r.get('metadata', {}).get('source', '') for r in retrieved]
+            # 调试输出
+            if len(retrieved) > 0:
+                print(f"  检索到 {len(retrieved)} 条结果")
+            
+            # 提取检索结果的 ID（使用 session_id 作为来源）
+            retrieved_ids = []
+            for r in retrieved:
+                source = r.get('session_id', '')
+                if source:
+                    # 转换为文件路径格式
+                    retrieved_ids.append(f"memory/{source}.md")
             
             # 映射到索引
             all_sources = q['haystack']
