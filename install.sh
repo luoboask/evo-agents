@@ -646,7 +646,8 @@ if [ "$LANG" = "zh" ]; then
                 --agent "$AGENT_NAME" \
                 --message "python3 scripts/core/scan_sessions.py --agent $AGENT_NAME" \
                 --name "session-scan-$AGENT_NAME" \
-                --delivery "mode=none" >/dev/null 2>&1; then
+                --no-deliver \
+                --session isolated >/dev/null 2>&1; then
                 echo "      ✅ 完成"
             else
                 echo "      ⚠️  失败"
@@ -659,7 +660,8 @@ if [ "$LANG" = "zh" ]; then
                 --agent "$AGENT_NAME" \
                 --message "python3 skills/memory-search/daily_review.py" \
                 --name "daily-review-$AGENT_NAME" \
-                --delivery "mode=none" >/dev/null 2>&1; then
+                --no-deliver \
+                --session isolated >/dev/null 2>&1; then
                 echo "      ✅ 完成"
             else
                 echo "      ⚠️  失败"
@@ -672,7 +674,8 @@ if [ "$LANG" = "zh" ]; then
                 --agent "$AGENT_NAME" \
                 --message "python3 skills/self-evolution/nightly_cycle.py" \
                 --name "nightly-evolution-$AGENT_NAME" \
-                --delivery "mode=none" >/dev/null 2>&1; then
+                --no-deliver \
+                --session isolated >/dev/null 2>&1; then
                 echo "      ✅ 完成"
             else
                 echo "      ⚠️  失败"
@@ -685,7 +688,8 @@ if [ "$LANG" = "zh" ]; then
                 --agent "$AGENT_NAME" \
                 --message "python3 scripts/core/memory_compressor.py --weekly --monthly" \
                 --name "weekly-compress-$AGENT_NAME" \
-                --delivery "mode=none" >/dev/null 2>&1; then
+                --no-deliver \
+                --session isolated >/dev/null 2>&1; then
                 echo "      ✅ 完成"
             else
                 echo "      ⚠️  失败"
@@ -698,7 +702,8 @@ if [ "$LANG" = "zh" ]; then
                 --agent "$AGENT_NAME" \
                 --message "bash skills/memory-search/maintenance.sh" \
                 --name "weekly-maintenance-$AGENT_NAME" \
-                --delivery "mode=none" >/dev/null 2>&1; then
+                --no-deliver \
+                --session isolated >/dev/null 2>&1; then
                 echo "      ✅ 完成"
             else
                 echo "      ⚠️  失败"
@@ -736,19 +741,23 @@ else
             
             # Session scan (every 30 minutes)
             echo "   - Session Scan (every 30 min)..."
-            openclaw cron add --schedule "*/30 * * * *" \
+            openclaw cron add \
+                --cron "*/30 * * * *" \
                 --agent "$AGENT_NAME" \
                 --message "python3 scripts/core/scan_sessions.py --agent $AGENT_NAME" \
                 --name "session-scan-$AGENT_NAME" \
-                --delivery "mode=none" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+                --no-deliver \
+                --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
             # Nightly evolution (23:00 daily)
             echo "   - Nightly Evolution (23:00 daily)..."
-            openclaw cron add --schedule "0 23 * * *" \
+            openclaw cron add \
+                --cron "0 23 * * *" \
                 --agent "$AGENT_NAME" \
                 --message "python3 skills/self-evolution/nightly_cycle.py" \
                 --name "nightly-evolution-$AGENT_NAME" \
-                --delivery "mode=none" >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+                --no-deliver \
+                --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
             echo ""
             echo "📋 Current OpenClaw cron jobs:"
