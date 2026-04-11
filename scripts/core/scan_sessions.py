@@ -214,6 +214,9 @@ class SessionScanner:
         user_count = sum(1 for m in messages if m.get('message', {}).get('role') == 'user')
         assistant_count = sum(1 for m in messages if m.get('message', {}).get('role') == 'assistant')
         
+        # ❗ 新增：提取进化事件（纯规则，无需大模型）
+        self.extract_and_record_evolution_events(messages, session_id)
+        
         # 生成会话摘要内容（自动压缩）
         session_content = self._generate_session_summary(messages, target_length=8000)
         
@@ -476,6 +479,85 @@ class SessionScanner:
         # TODO: 实现清理逻辑
         
         print(f"🧹 清理 {days} 天前的会话记忆（待实现）")
+    
+    # =====================================================================
+    # 进化事件提取（纯规则，无需大模型）
+    # =====================================================================
+    
+    def extract_and_record_evolution_events(self, messages: List[Dict], session_id: str):
+        """从会话中提取进化事件（纯规则匹配）"""
+        try:
+            from skills.self-evolution.self_evolution_real import RealSelfEvolution
+            evolution = RealSelfEvolution()
+            
+            events_recorded = 0
+            
+            for msg in messages:
+                role = msg.get('message', {}).get('role')
+                content = self.extract_message_content(msg)
+                
+                # 只分析 ASSISTANT 的消息
+                if role != 'assistant' or not content:
+                    continue
+                
+                # 匹配事件类型
+                event_type = self.match_event_type(content)
+                
+                if event_type:
+                    # 提取信息
+                    description = content[:200]  # 截断
+                    lesson = self.extract_lesson(content, event_type)
+                    
+                    # 记录到 evolution.db
+                    evolution.record(
+                        event_type=event_type,
+                        description=f"会话 {session_id[:8]}...: {description}",
+                        lesson_learned=lesson
+                    )
+                    events_recorded += 1
+            
+            if events_recorded > 0:
+                print(f"  📈 提取 {events_recorded} 个进化事件")
+        except Exception as e:
+            # 静默失败，不影响主流程
+            pass
+    
+    def match_event_type(self, content: str) -> Optional[str]:
+        """匹配事件类型（关键词规则）"""
+        content_lower = content.lower()
+        
+        # Bug 修复
+        if any(k in content_lower for k in ['修复', 'bug', 'fix', '错误', 'error', '问题']):
+            return 'BUG_FIX'
+        
+        # 功能新增
+        if any(k in content_lower for k in ['新增', '添加', '功能', 'feature', 'add', '实现']):
+            return 'FEATURE_ADDED'
+        
+        # 代码优化
+        if any(k in content_lower for k in ['优化', '改进', '重构', 'optimize', 'refactor', '性能']):
+            return 'CODE_IMPROVED'
+        
+        # 知识获取
+        if any(k in content_lower for k in ['学习', '理解', 'learn', 'understand', '知道', '明白']):
+            return 'KNOWLEDGE_GAINED'
+        
+        # 任务完成
+        if any(k in content_lower for k in ['完成', 'done', 'finish', 'completed', '搞定']):
+            return 'TASK_COMPLETED'
+        
+        return None
+    
+    def extract_lesson(self, content: str, event_type: str) -> str:
+        """从内容中提取学习点（规则提取）"""
+        lessons = {
+            'BUG_FIX': '修复了问题，需要总结避免再次发生',
+            'FEATURE_ADDED': '新增功能完成，需要文档化',
+            'CODE_IMPROVED': '代码质量提升，需要保持',
+            'KNOWLEDGE_GAINED': '获取新知识，需要应用',
+            'TASK_COMPLETED': '任务完成，需要复盘'
+        }
+        return lessons.get(event_type, '任务已完成')
 
 
 def main():
