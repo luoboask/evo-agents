@@ -633,7 +633,7 @@ if [ "$LANG" = "zh" ]; then
             # --force 模式下先清理旧任务
             if [[ "$FORCE_REINSTALL" == "true" ]]; then
                 echo "🧹 清理旧的 Cron 任务..."
-                openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance)" | awk '{print $1}' | while read job_id; do
+                openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress)" | awk '{print $1}' | while read job_id; do
                     openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ 已删除任务 $job_id" || true
                 done
                 echo "   ✅ 完成"
@@ -752,6 +752,15 @@ else
         # Use OpenClaw cron system
         if command -v openclaw &> /dev/null; then
             echo "📝 Configuring OpenClaw cron jobs..."
+            
+            # Clean old tasks in force reinstall mode
+            if [[ "$FORCE_REINSTALL" == "true" ]]; then
+                echo "🧹 Cleaning old cron tasks..."
+                openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress)" | awk '{print $1}' | while read job_id; do
+                    openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ Removed task $job_id" || true
+                done
+                echo "   ✅ Done"
+            fi
             
             # Session scan (every 30 minutes)
             echo "   - Session Scan (every 30 min)..."
