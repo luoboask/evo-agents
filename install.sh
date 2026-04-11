@@ -12,7 +12,7 @@ FORCE="${2:-}"
 WORKSPACE_ROOT="$HOME/.openclaw/workspace-$AGENT_NAME"
 
 # 检测系统语言
-if locale | grep -q "zh_CN\|zh_CN\|Chinese"; then
+if locale | grep -qiE "zh_CN|zh_TW|zh_HK|zh_SG|zh-Hans|zh-Hant|Chinese"; then
     LANG="zh"
 else
     LANG="en"
