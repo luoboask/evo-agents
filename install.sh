@@ -11,11 +11,11 @@ AGENT_NAME="${1:-my-agent}"
 FORCE="${2:-}"
 WORKSPACE_ROOT="$HOME/.openclaw/workspace-$AGENT_NAME"
 
-# 检测系统语言
-if locale | grep -qiE "zh_CN|zh_TW|zh_HK|zh_SG|zh-Hans|zh-Hant|Chinese"; then
-    LANG="zh"
+# 检测系统语言（使用自定义变量，避免覆盖系统 LANG）
+if locale 2>/dev/null | grep -qiE "zh_CN|zh_TW|zh_HK|zh_SG|zh-Hans|zh-Hant|Chinese"; then
+    INSTALL_LANG="zh"
 else
-    LANG="en"
+    INSTALL_LANG="en"
 fi
 
 # Git 源配置
@@ -23,7 +23,7 @@ GIT_URL="https://gitee.com/luoboask/evo-agents.git"
 SOURCE_NAME="Gitee"
 
 # 欢迎信息
-if [ "$LANG" = "zh" ]; then
+if [ "$INSTALL_LANG" = "zh" ]; then
     echo "╔════════════════════════════════════════════════════════╗"
     echo "║  evo-agents 一键安装                                     ║"
     echo "╚════════════════════════════════════════════════════════╝"
@@ -207,7 +207,7 @@ else
 fi
 
 # 创建目录
-if [ "$LANG" = "zh" ]; then
+if [ "$INSTALL_LANG" = "zh" ]; then
     echo "📁 创建目录..."
 else
     echo "📁 Creating directories..."
@@ -218,20 +218,20 @@ mkdir -p scripts/user
 echo "   ✅ Done"
 
 # 注册到 OpenClaw
-if [ "$LANG" = "zh" ]; then
+if [ "$INSTALL_LANG" = "zh" ]; then
     echo "📝 注册到 OpenClaw..."
 else
     echo "📝 Registering to OpenClaw..."
 fi
 if openclaw agents list 2>/dev/null | grep -q "^$AGENT_NAME"; then
-    if [ "$LANG" = "zh" ]; then
+    if [ "$INSTALL_LANG" = "zh" ]; then
         echo "   ⚠️  已注册"
     else
         echo "   ⚠️  Already registered"
     fi
 else
     openclaw agents add "$AGENT_NAME" --workspace "$WORKSPACE_ROOT" --non-interactive
-    if [ "$LANG" = "zh" ]; then
+    if [ "$INSTALL_LANG" = "zh" ]; then
         echo "   ✅ 完成"
     else
         echo "   ✅ Done"
@@ -396,14 +396,14 @@ python3 skills/memory-search/search.py "Ollama"
 **Check memory**: Before asking, check \`memory/YYYY-MM-DD.md\` - if user already skipped today, don't ask again.
 EOF
 fi
-if [ "$LANG" = "zh" ]; then
+if [ "$INSTALL_LANG" = "zh" ]; then
     echo "   ✓ AGENTS.md 已配置"
 else
     echo "   ✓ AGENTS.md configured"
 fi
 
 # 在 SOUL.md 中追加核心规则（如果文件存在）
-if [ "$LANG" = "zh" ]; then
+if [ "$INSTALL_LANG" = "zh" ]; then
     echo "📝 配置 SOUL.md..."
 else
     echo "📝 Configuring SOUL.md..."
@@ -489,13 +489,13 @@ RULEEOF
     mv SOUL.md.tmp SOUL.md
     rm -f SOUL.md.bak
     
-    if [ "$LANG" = "zh" ]; then
+    if [ "$INSTALL_LANG" = "zh" ]; then
         echo "   ✓ SOUL.md 已配置"
     else
         echo "   ✓ SOUL.md configured"
     fi
 else
-    if [ "$LANG" = "zh" ]; then
+    if [ "$INSTALL_LANG" = "zh" ]; then
         echo "   ⊘ SOUL.md 不存在或已配置"
     else
         echo "   ⊘ SOUL.md not found or already configured"
@@ -503,7 +503,7 @@ else
 fi
 
 # 复制规则文档到 docs/
-if [ "$LANG" = "zh" ]; then
+if [ "$INSTALL_LANG" = "zh" ]; then
     echo "📋 复制规则文档..."
 else
     echo "📋 Copying rule documents..."
@@ -516,14 +516,14 @@ for doc in AGENT_INSTRUCTIONS AGENT_BEHAVIOR SKILL_RULES WORKSPACE_RULES KNOWLED
         cp "$src" "$dst"
     fi
 done
-if [ "$LANG" = "zh" ]; then
+if [ "$INSTALL_LANG" = "zh" ]; then
     echo "   ✓ 规则已复制"
 else
     echo "   ✓ Rules copied"
 fi
 
 # 创建必要文件
-if [ "$LANG" = "zh" ]; then
+if [ "$INSTALL_LANG" = "zh" ]; then
     echo "📝 创建必要文件..."
 else
     echo "📝 Creating files..."
@@ -552,7 +552,7 @@ echo "   ✅ Done"
 
 # 记录重要提示给 Agent
 echo ""
-if [ "$LANG" = "zh" ]; then
+if [ "$INSTALL_LANG" = "zh" ]; then
     echo "📝 记录重要提示给 Agent..."
 else
     echo "📝 Recording workspace rules..."
@@ -562,11 +562,11 @@ python3 scripts/core/session_recorder.py \
     -t event \
     -c "Workspace Rules: Read docs/WORKSPACE_RULES.md, docs/KNOWLEDGE_BASE_RULES.md, docs/AGENT_BEHAVIOR.md" \
     --agent "$AGENT_NAME" 2>/dev/null && \
-    if [ "$LANG" = "zh" ]; then echo "   ✓ 已记录"; else echo "   ✓ Recorded"; fi \
-    || if [ "$LANG" = "zh" ]; then echo "   ⊘ 跳过"; else echo "   ⊘ Skipped"; fi
+    if [ "$INSTALL_LANG" = "zh" ]; then echo "   ✓ 已记录"; else echo "   ✓ Recorded"; fi \
+    || if [ "$INSTALL_LANG" = "zh" ]; then echo "   ⊘ 跳过"; else echo "   ⊘ Skipped"; fi
 
 # 创建安装配置文件
-if [ "$LANG" = "zh" ]; then
+if [ "$INSTALL_LANG" = "zh" ]; then
     echo "📝 创建安装配置..."
 else
     echo "📝 Creating install config..."
@@ -581,7 +581,7 @@ echo "   ✅ Done"
 
 # 自动激活基础功能（无需确认）
 echo ""
-if [ "$LANG" = "zh" ]; then
+if [ "$INSTALL_LANG" = "zh" ]; then
     echo "🔮 自动激活基础功能..."
 else
     echo "🔮 Auto-activating basic features..."
@@ -590,7 +590,7 @@ cd "$WORKSPACE_ROOT"
 
 # 激活知识库系统
 if [ -d "skills/memory-search" ]; then
-    if [ "$LANG" = "zh" ]; then
+    if [ "$INSTALL_LANG" = "zh" ]; then
         echo "   ✅ 知识库系统已就绪"
     else
         echo "   ✅ Knowledge base system ready"
@@ -599,7 +599,7 @@ fi
 
 # 激活自进化系统
 if [ -d "skills/self-evolution" ]; then
-    if [ "$LANG" = "zh" ]; then
+    if [ "$INSTALL_LANG" = "zh" ]; then
         echo "   ✅ 自进化系统已就绪"
     else
         echo "   ✅ Self-evolution system ready"
@@ -608,7 +608,7 @@ fi
 
 # 激活 RAG 评估系统
 if [ -d "skills/rag" ]; then
-    if [ "$LANG" = "zh" ]; then
+    if [ "$INSTALL_LANG" = "zh" ]; then
         echo "   ✅ RAG 评估系统已就绪"
     else
         echo "   ✅ RAG evaluation system ready"
@@ -616,7 +616,7 @@ if [ -d "skills/rag" ]; then
 fi
 
 # 配置定时任务（自动）
-if [ "$LANG" = "zh" ]; then
+if [ "$INSTALL_LANG" = "zh" ]; then
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "⏰ 自动配置定时任务"
@@ -856,7 +856,7 @@ fi
 echo ""
 
 # 语义搜索模型需要用户确认（需要安装 Ollama）
-if [ "$LANG" = "zh" ]; then
+if [ "$INSTALL_LANG" = "zh" ]; then
     echo "╔════════════════════════════════════════════════════════╗"
     echo "║  ✅ 安装完成！                                           ║"
     echo "╚════════════════════════════════════════════════════════╝"
@@ -904,7 +904,7 @@ CONFIGEOF
 echo "   ✅ 完成"
 
 echo ""
-if [ "$LANG" = "zh" ]; then
+if [ "$INSTALL_LANG" = "zh" ]; then
     echo "╔════════════════════════════════════════════════════════╗"
     echo "║  🎉 欢迎使用 evo-agents！                                ║"
     echo "╚════════════════════════════════════════════════════════╝"
