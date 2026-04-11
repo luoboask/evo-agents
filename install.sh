@@ -44,8 +44,82 @@ fi
 # 检查 workspace 是否存在
 if [ -d "$WORKSPACE_ROOT" ]; then
     if [[ "$FORCE" == "--force" ]] || [[ "$FORCE" == "-f" ]]; then
-        echo "⚠️  Workspace 已存在，强制继续"
+        echo "⚠️  Workspace 已存在，执行完全重装..."
+        echo ""
+        
+        # 1. 备份用户数据
+        echo "💾 备份用户数据..."
+        BACKUP_DIR="/tmp/evo-agents-backup-$AGENT_NAME-$(date +%Y%m%d%H%M%S)"
+        mkdir -p "$BACKUP_DIR"
+        
+        if [ -d "$WORKSPACE_ROOT/data" ]; then
+            cp -r "$WORKSPACE_ROOT/data" "$BACKUP_DIR/" && echo "   ✅ data/ 已备份"
+        fi
+        if [ -d "$WORKSPACE_ROOT/memory" ]; then
+            cp -r "$WORKSPACE_ROOT/memory" "$BACKUP_DIR/" && echo "   ✅ memory/ 已备份"
+        fi
+        if [ -d "$WORKSPACE_ROOT/config" ]; then
+            cp -r "$WORKSPACE_ROOT/config" "$BACKUP_DIR/" && echo "   ✅ config/ 已备份"
+        fi
+        if [ -f "$WORKSPACE_ROOT/.install-config" ]; then
+            cp "$WORKSPACE_ROOT/.install-config" "$BACKUP_DIR/" && echo "   ✅ .install-config 已备份"
+        fi
+        
+        echo "   📁 备份位置：$BACKUP_DIR"
+        echo ""
+        
+        # 2. 删除旧 workspace（保留 .openclaw 配置）
+        echo "🗑️  删除旧 workspace..."
+        rm -rf "$WORKSPACE_ROOT"
+        echo "   ✅ 完成"
+        echo ""
+        
+        # 3. 重新克隆
+        echo "📥 克隆最新代码..."
+        echo "   源：$SOURCE_NAME ($GIT_URL)"
+        
+        if ! git clone --depth 1 "$GIT_URL" "$WORKSPACE_ROOT" 2>/dev/null; then
+            if [[ "$GIT_URL" == *"gitee.com"* ]]; then
+                echo "   ⚠️  Gitee 失败，尝试 GitHub..."
+                GIT_URL="https://github.com/luoboask/evo-agents.git"
+                SOURCE_NAME="GitHub"
+                if ! git clone --depth 1 "$GIT_URL" "$WORKSPACE_ROOT" 2>/dev/null; then
+                    echo "❌ 所有源都失败，请检查网络连接"
+                    echo ""
+                    echo "💡 从备份恢复..."
+                    if [ -d "$BACKUP_DIR" ]; then
+                        mkdir -p "$WORKSPACE_ROOT"
+                        cp -r "$BACKUP_DIR"/* "$WORKSPACE_ROOT/" 2>/dev/null || true
+                        echo "   ✅ 已恢复到：$WORKSPACE_ROOT"
+                    fi
+                    exit 1
+                fi
+            else
+                echo "❌ 克隆失败，请检查网络连接"
+                exit 1
+            fi
+        fi
+        
         cd "$WORKSPACE_ROOT"
+        
+        # 4. 恢复用户数据
+        echo ""
+        echo "💾 恢复用户数据..."
+        if [ -d "$BACKUP_DIR/data" ]; then
+            cp -r "$BACKUP_DIR/data" "$WORKSPACE_ROOT/" && echo "   ✅ data/ 已恢复"
+        fi
+        if [ -d "$BACKUP_DIR/memory" ]; then
+            cp -r "$BACKUP_DIR/memory" "$WORKSPACE_ROOT/" && echo "   ✅ memory/ 已恢复"
+        fi
+        if [ -d "$BACKUP_DIR/config" ]; then
+            cp -r "$BACKUP_DIR/config" "$WORKSPACE_ROOT/" && echo "   ✅ config/ 已恢复"
+        fi
+        if [ -f "$BACKUP_DIR/.install-config" ]; then
+            cp "$BACKUP_DIR/.install-config" "$WORKSPACE_ROOT/" && echo "   ✅ .install-config 已恢复"
+        fi
+        echo ""
+        
+        # 5. 清理开发文件
         echo "🧹 清理开发文件..."
         rm -rf .github/ 2>/dev/null || true
         rm -f CONTRIBUTING.md CODE_OF_CONDUCT.md SECURITY.md 2>/dev/null || true
@@ -54,6 +128,13 @@ if [ -d "$WORKSPACE_ROOT" ]; then
         rm -f skills/self-evolution/README_*.md skills/self-evolution/ARCHITECTURE.md 2>/dev/null || true
         rm -f skills/rag/report.html 2>/dev/null || true
         echo "   ✅ 完成"
+        echo ""
+        
+        # 6. 标记为完全重装
+        FORCE_REINSTALL="true"
+        echo "✅ 完全重装完成！"
+        echo "   备份位置：$BACKUP_DIR (可手动删除)"
+        echo ""
     else
         echo "⚠️  Workspace 已存在"
         echo ""
@@ -62,8 +143,9 @@ if [ -d "$WORKSPACE_ROOT" ]; then
         echo "      curl -sO https://raw.githubusercontent.com/luoboask/evo-agents/master/install.sh"
         echo "      bash install.sh $AGENT_NAME"
         echo ""
-        echo "   2. 或使用 --force 强制继续："
+        echo "   2. 或使用 --force 强制重装："
         echo "      curl -fsSL ... | bash -s $AGENT_NAME --force"
+        echo "      ⚠️  注意：--force 会完全重装（备份→删除→克隆→恢复）"
         echo ""
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
@@ -79,6 +161,7 @@ else
         if [[ "$GIT_URL" == *"gitee.com"* ]]; then
             echo "   ⚠️  Gitee 失败，尝试 GitHub..."
             GIT_URL="https://github.com/luoboask/evo-agents.git"
+            SOURCE_NAME="GitHub"
             if ! git clone --depth 1 "$GIT_URL" "$WORKSPACE_ROOT" 2>/dev/null; then
                 echo "❌ 所有源都失败，请检查网络连接"
                 exit 1
@@ -527,13 +610,29 @@ if [ "$LANG" = "zh" ]; then
     echo "   ✅ 夜间进化 (每天 23:00) - 记忆整合 + 自进化"
     echo ""
     
-    # 询问是否跳过
-    read -p "是否需要跳过定时任务配置？(y/N，默认 N): " -r SKIP_CRON
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    # --force 模式下自动重新配置 Cron
+    if [[ "$FORCE_REINSTALL" == "true" ]]; then
+        echo "🔄 完全重装模式：自动重新配置 Cron 任务..."
+        SKIP_CRON=""
+    else
+        # 询问是否跳过
+        read -p "是否需要跳过定时任务配置？(y/N，默认 N): " -r SKIP_CRON
+    fi
+    
+    if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ -z "$SKIP_CRON" ]]; then
         # 使用 OpenClaw 的 cron 系统配置定时任务
         if command -v openclaw &> /dev/null; then
             echo "📝 配置 OpenClaw 定时任务..."
             cd "$WORKSPACE_ROOT"
+            
+            # --force 模式下先清理旧任务
+            if [[ "$FORCE_REINSTALL" == "true" ]]; then
+                echo "🧹 清理旧的 Cron 任务..."
+                openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance)" | awk '{print $1}' | while read job_id; do
+                    openclaw cron remove --job "$job_id" >/dev/null 2>&1 && echo "   ✅ 已删除任务 $job_id" || true
+                done
+                echo "   ✅ 完成"
+            fi
             
             # 会话扫描（每 30 分钟）
             echo "   - 会话扫描 (每 30 分钟)..."
