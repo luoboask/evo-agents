@@ -1,0 +1,23 @@
+[
+    {
+        "id": "q001",
+        "question": "用户最喜欢的编程语言是什么？",
+        "haystack": ["memory/2026-04-01.md", "memory/2026-04-02.md", "memory/2026-04-03.md"],
+        "ground_truth": ["memory/2026-04-01.md"],
+        "type": "preference"
+    },
+    {
+        "id": "q002",
+        "question": "用户提到过哪个数据库系统？",
+        "haystack": ["memory/2026-04-01.md", "memory/2026-04-02.md"],
+        "ground_truth": ["memory/2026-04-02.md"],
+        "type": "fact"
+    },
+    {
+        "id": "q003",
+        "question": "用户在哪个项目中使用了 React？",
+        "haystack": ["memory/2026-04-01.md", "memory/2026-04-02.md", "memory/2026-04-03.md"],
+        "ground_truth": ["memory/2026-04-03.md"],
+        "type": "project"
+    }
+]
