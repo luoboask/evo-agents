@@ -686,8 +686,22 @@ if [ "$LANG" = "zh" ]; then
             if openclaw cron add \
                 --cron "0 3 * * 0" \
                 --agent "$AGENT_NAME" \
-                --message "python3 scripts/core/memory_compressor.py --weekly --monthly" \
+                --message "python3 scripts/core/memory_compressor.py --weekly" \
                 --name "weekly-compress-$AGENT_NAME" \
+                --no-deliver \
+                --session isolated >/dev/null 2>&1; then
+                echo "      ✅ 完成"
+            else
+                echo "      ⚠️  失败"
+            fi
+            
+            # 记忆压缩（每月 1 号 04:00）
+            echo "   - 记忆压缩 (每月 1 号 04:00)..."
+            if openclaw cron add \
+                --cron "0 4 1 * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 scripts/core/memory_compressor.py --monthly" \
+                --name "monthly-compress-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1; then
                 echo "      ✅ 完成"
@@ -756,6 +770,16 @@ else
                 --agent "$AGENT_NAME" \
                 --message "python3 skills/self-evolution/nightly_cycle.py" \
                 --name "nightly-evolution-$AGENT_NAME" \
+                --no-deliver \
+                --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+            
+            # Monthly memory compress (1st 04:00)
+            echo "   - Monthly Memory Compress (1st 04:00)..."
+            openclaw cron add \
+                --cron "0 4 1 * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 scripts/core/memory_compressor.py --monthly" \
+                --name "monthly-compress-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
