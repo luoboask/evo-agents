@@ -14,7 +14,7 @@
 
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent / 'libs'))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'libs'))
 
 from memory_hub import MemoryHub
 from datetime import datetime

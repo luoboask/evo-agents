@@ -17,7 +17,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-sys.path.insert(0, str(Path(__file__).parent.parent / 'libs'))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'libs'))
 
 from memory_hub.session_storage import SessionMemoryStorage
 
