@@ -149,6 +149,23 @@ if [ -d "$WORKSPACE_ROOT" ]; then
         echo ""
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
+        
+        # 询问是否清理旧 Cron 任务
+        read -p "是否清理旧的 Cron 任务并重新配置？(y/N，默认 N): " -r CLEAN_CRON
+        if [[ "$CLEAN_CRON" =~ ^[Yy]$ ]]; then
+            echo "🧹 清理旧的 Cron 任务..."
+            if command -v openclaw &> /dev/null; then
+                openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress)" | awk '{print $1}' | while read job_id; do
+                    openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ 已删除任务 $job_id" || true
+                done
+                echo "   ✅ 完成"
+                FORCE_REINSTALL="true"  # 标记需要重新配置
+            else
+                echo "   ⚠️  OpenClaw 未安装，跳过"
+            fi
+        fi
+        
+        echo ""
         echo "继续安装（10 秒后自动继续，按 Ctrl+C 取消）..."
         sleep 10
         cd "$WORKSPACE_ROOT"
