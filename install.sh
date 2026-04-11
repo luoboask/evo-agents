@@ -155,8 +155,9 @@ if [ -d "$WORKSPACE_ROOT" ]; then
         if [[ "$CLEAN_CRON" =~ ^[Yy]$ ]]; then
             echo "🧹 清理旧的 Cron 任务..."
             if command -v openclaw &> /dev/null; then
-                openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress)" | awk '{print $1}' | while read job_id; do
-                    openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ 已删除任务 $job_id" || true
+                # 使用 --json 获取完整输出，避免截断问题
+                openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress\")) | .id" | while read job_id; do
+                    [ -n "$job_id" ] && openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ 已删除任务 $job_id" || true
                 done
                 echo "   ✅ 完成"
                 FORCE_REINSTALL="true"  # 标记需要重新配置
@@ -650,8 +651,9 @@ if [ "$LANG" = "zh" ]; then
             # --force 模式下先清理旧任务
             if [[ "$FORCE_REINSTALL" == "true" ]]; then
                 echo "🧹 清理旧的 Cron 任务..."
-                openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress)" | awk '{print $1}' | while read job_id; do
-                    openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ 已删除任务 $job_id" || true
+                # 使用 --json 获取完整输出，避免截断问题
+                openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress\")) | .id" | while read job_id; do
+                    [ -n "$job_id" ] && openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ 已删除任务 $job_id" || true
                 done
                 echo "   ✅ 完成"
             fi
@@ -773,8 +775,9 @@ else
             # Clean old tasks in force reinstall mode
             if [[ "$FORCE_REINSTALL" == "true" ]]; then
                 echo "🧹 Cleaning old cron tasks..."
-                openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress)" | awk '{print $1}' | while read job_id; do
-                    openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ Removed task $job_id" || true
+                # Use --json to get full output, avoid truncation issues
+                openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress\")) | .id" | while read job_id; do
+                    [ -n "$job_id" ] && openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ Removed task $job_id" || true
                 done
                 echo "   ✅ Done"
             fi
