@@ -686,6 +686,19 @@ if [ "$INSTALL_LANG" = "zh" ]; then
                 echo "   ✅ 完成"
             fi
             
+            # 实时索引（每 5 分钟）
+            echo "   - 实时索引 (每 5 分钟)..."
+            if openclaw cron add \
+                --cron "*/5 * * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 skills/memory-search/realtime_indexer.py --auto" \
+                --name "$AGENT_NAME-realtime-index" \
+                --no-deliver --session isolated >/dev/null 2>&1; then
+                echo "      ✅ 完成"
+            else
+                echo "      ⚠️  失败"
+            fi
+            
             # 会话扫描（每 30 分钟）
             echo "   - 会话扫描 (每 30 分钟)..."
             if openclaw cron add \
@@ -728,6 +741,19 @@ if [ "$INSTALL_LANG" = "zh" ]; then
                 echo "      ⚠️  失败"
             fi
             
+            # 主动学习触发（每天 04:00）
+            echo "   - 主动学习触发 (每天 04:00)..."
+            if openclaw cron add \
+                --cron "0 4 * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 skills/self-evolution/active_learning_trigger.py --agent $AGENT_NAME --execute" \
+                --name "$AGENT_NAME-active-learning" \
+                --no-deliver --session isolated >/dev/null 2>&1; then
+                echo "      ✅ 完成"
+            else
+                echo "      ⚠️  失败"
+            fi
+            
             # 记忆压缩（每周日 03:00）
             echo "   - 记忆压缩 (每周日 03:00)..."
             if openclaw cron add \
@@ -756,6 +782,19 @@ if [ "$INSTALL_LANG" = "zh" ]; then
                 echo "      ⚠️  失败"
             fi
             
+            # 知识图谱扩展（每周日 05:00）
+            echo "   - 知识图谱扩展 (每周日 05:00)..."
+            if openclaw cron add \
+                --cron "0 5 * * 0" \
+                --agent "$AGENT_NAME" \
+                --message "python3 skills/knowledge-graph/auto_expander.py --agent $AGENT_NAME --limit 100" \
+                --name "$AGENT_NAME-kg-expansion" \
+                --no-deliver --session isolated >/dev/null 2>&1; then
+                echo "      ✅ 完成"
+            else
+                echo "      ⚠️  失败"
+            fi
+            
             # 系统维护（每周日 02:00）
             echo "   - 系统维护 (每周日 02:00)..."
             if openclaw cron add \
@@ -772,7 +811,7 @@ if [ "$INSTALL_LANG" = "zh" ]; then
             
             echo ""
             echo "📋 当前 OpenClaw cron 任务 ($AGENT_NAME):"
-            openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-memory|weekly-memory|monthly-memory|kg-build|nightly-evolution)" || echo "   (无)"
+            openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-memory|weekly-memory|monthly-memory|kg-build|nightly-evolution|realtime|active|kg-expansion)" || echo "   (无)"
         else
             echo "   ⚠️  OpenClaw 未安装，跳过定时任务配置"
         fi
