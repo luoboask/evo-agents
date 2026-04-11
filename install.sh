@@ -634,7 +634,7 @@ if [ "$LANG" = "zh" ]; then
             if [[ "$FORCE_REINSTALL" == "true" ]]; then
                 echo "🧹 清理旧的 Cron 任务..."
                 openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance)" | awk '{print $1}' | while read job_id; do
-                    openclaw cron remove --job "$job_id" >/dev/null 2>&1 && echo "   ✅ 已删除任务 $job_id" || true
+                    openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ 已删除任务 $job_id" || true
                 done
                 echo "   ✅ 完成"
             fi
