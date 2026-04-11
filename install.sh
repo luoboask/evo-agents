@@ -11,11 +11,10 @@ AGENT_NAME="${1:-my-agent}"
 FORCE="${2:-}"
 WORKSPACE_ROOT="$HOME/.openclaw/workspace-$AGENT_NAME"
 
-# 检测系统语言（使用自定义变量，避免覆盖系统 LANG）
+# 检测系统语言（默认英文，使用自定义变量避免覆盖系统 LANG）
+INSTALL_LANG="en"  # 默认英文
 if locale 2>/dev/null | grep -qiE "zh_CN|zh_TW|zh_HK|zh_SG|zh-Hans|zh-Hant|Chinese"; then
     INSTALL_LANG="zh"
-else
-    INSTALL_LANG="en"
 fi
 
 # Git 源配置
