@@ -51,7 +51,22 @@ if [ "$LANG" = "zh" ]; then
         ollama list 2>/dev/null | grep -E "nomic|m3e|bge|text2vec" || echo "  (无)"
         echo ""
         
-        read -p "是否需要安装/更换嵌入模型？(y/N): " -r INSTALL_MODEL
+        # 检查是否已有语义搜索模型
+        if ollama list 2>/dev/null | grep -qE "nomic|m3e|bge|text2vec"; then
+            echo "✅ 语义搜索已可用（已安装嵌入模型）"
+            echo ""
+            read -p "是否需要更换嵌入模型？(y/N): " -r INSTALL_MODEL
+        else
+            echo "⚠️  语义搜索不可用（未安装嵌入模型）"
+            echo ""
+            echo "💡 嵌入模型用于语义搜索功能："
+            echo "   - 理解查询的含义，而非关键词匹配"
+            echo "   - 搜索"昨天看的文章" → 找到相关内容，即使没提到"文章"这个词"
+            echo "   - 搜索"项目进展" → 找到所有讨论进度的对话"
+            echo ""
+            read -p "是否安装嵌入模型以启用语义搜索？(y/N): " -r INSTALL_MODEL
+        fi
+        
         if [[ "$INSTALL_MODEL" =~ ^[Yy]$ ]]; then
             echo ""
             echo "选择模型："
@@ -175,7 +190,22 @@ else
         ollama list 2>/dev/null | grep -E "nomic|m3e|bge|text2vec" || echo "  (none)"
         echo ""
         
-        read -p "Install/change embedding model? (y/N): " -r INSTALL_MODEL
+        # Check if semantic search model exists
+        if ollama list 2>/dev/null | grep -qE "nomic|m3e|bge|text2vec"; then
+            echo "✅ Semantic search available (embedding model installed)"
+            echo ""
+            read -p "Change embedding model? (y/N): " -r INSTALL_MODEL
+        else
+            echo "⚠️  Semantic search unavailable (no embedding model)"
+            echo ""
+            echo "💡 Embedding models enable semantic search:"
+            echo "   - Understand query meaning, not just keyword matching"
+            echo "   - Search 'yesterday's article' → find relevant content, even without 'article' keyword"
+            echo "   - Search 'project progress' → find all conversations about progress"
+            echo ""
+            read -p "Install embedding model to enable semantic search? (y/N): " -r INSTALL_MODEL
+        fi
+        
         if [[ "$INSTALL_MODEL" =~ ^[Yy]$ ]]; then
             echo ""
             echo "Select model:"
