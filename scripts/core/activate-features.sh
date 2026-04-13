@@ -172,7 +172,10 @@ if [ "$LANG" = "zh" ]; then
     echo ""
     echo "✅ 功能激活完成！"
     echo ""
-    echo "💡 提示：运行 '/new' 开始新会话立即生效"
+    echo "💡 提示："
+    echo "   - 语义搜索已启用，下次会话自动生效"
+    echo "   - 如果使用 OpenClaw，开始新对话即可体验"
+    echo "   - 查看文档：docs/QUICKSTART.md"
     
 else
     # English
@@ -311,5 +314,8 @@ else
     echo ""
     echo "✅ Feature activation complete!"
     echo ""
-    echo "💡 Tip: Run '/new' to start a new session"
+    echo "💡 Tip:"
+    echo "   - Semantic search enabled, will work in next session"
+    echo "   - If using OpenClaw, start a new conversation to experience"
+    echo "   - Documentation: docs/QUICKSTART.md"
 fi
