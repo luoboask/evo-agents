@@ -759,7 +759,7 @@ if [ "$INSTALL_LANG" = "zh" ]; then
             if openclaw cron add \
                 --cron "0 3 * * 0" \
                 --agent "$AGENT_NAME" \
-                --message "python3 scripts/core/memory_compressor.py --weekly" \
+                --message "python3 scripts/core/memory_manager.py --weekly" \
                 --name "weekly-compress-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1; then
@@ -773,7 +773,7 @@ if [ "$INSTALL_LANG" = "zh" ]; then
             if openclaw cron add \
                 --cron "0 4 1 * *" \
                 --agent "$AGENT_NAME" \
-                --message "python3 scripts/core/memory_compressor.py --monthly" \
+                --message "python3 scripts/core/memory_manager.py --monthly" \
                 --name "monthly-compress-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1; then
@@ -800,7 +800,7 @@ if [ "$INSTALL_LANG" = "zh" ]; then
             if openclaw cron add \
                 --cron "0 2 * * 0" \
                 --agent "$AGENT_NAME" \
-                --message "bash skills/memory-search/maintenance.sh" \
+                --message "python3 scripts/core/memory_manager.py --cleanup --stats" \
                 --name "weekly-maintenance-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1; then
@@ -849,7 +849,16 @@ else
                 echo "   ✅ Done"
             fi
             
-            # Session scan (every 30 minutes)
+                        # Realtime indexer (every 5 minutes)
+            echo "   - Realtime Indexer (every 5 min)..."
+            openclaw cron add \
+                --cron "*/5 * * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 skills/memory-search/realtime_indexer.py --auto" \
+                --name "$AGENT_NAME-realtime-index" \
+                --no-deliver --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+
+# Session scan (every 30 minutes)
             echo "   - Session Scan (every 30 min)..."
             openclaw cron add \
                 --cron "*/30 * * * *" \
@@ -874,7 +883,7 @@ else
             openclaw cron add \
                 --cron "0 2 * * 0" \
                 --agent "$AGENT_NAME" \
-                --message "bash skills/memory-search/maintenance.sh" \
+                --message "python3 scripts/core/memory_manager.py --cleanup --stats" \
                 --name "weekly-maintenance-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
@@ -884,12 +893,21 @@ else
             openclaw cron add \
                 --cron "0 3 * * 0" \
                 --agent "$AGENT_NAME" \
-                --message "python3 scripts/core/memory_compressor.py --weekly" \
+                --message "python3 scripts/core/memory_manager.py --weekly" \
                 --name "weekly-compress-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
-            # Nightly evolution (23:00 daily)
+                        # Active learning (04:00 daily)
+            echo "   - Active Learning (04:00 daily)..."
+            openclaw cron add \
+                --cron "0 4 * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 skills/self-evolution/active_learning_trigger.py --agent $AGENT_NAME --execute" \
+                --name "$AGENT_NAME-active-learning" \
+                --no-deliver --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+
+# Nightly evolution (23:00 daily)
             echo "   - Nightly Evolution (23:00 daily)..."
             openclaw cron add \
                 --cron "0 23 * * *" \
@@ -904,10 +922,19 @@ else
             openclaw cron add \
                 --cron "0 4 1 * *" \
                 --agent "$AGENT_NAME" \
-                --message "python3 scripts/core/memory_compressor.py --monthly" \
+                --message "python3 scripts/core/memory_manager.py --monthly" \
                 --name "monthly-compress-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+
+            # Knowledge graph expansion (Sun 05:00)
+            echo "   - Knowledge Graph Expansion (Sun 05:00)..."
+            openclaw cron add \
+                --cron "0 5 * * 0" \
+                --agent "$AGENT_NAME" \
+                --message "python3 skills/knowledge-graph/auto_expander.py --agent $AGENT_NAME --limit 100" \
+                --name "$AGENT_NAME-kg-expansion" \
+                --no-deliver --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
             echo ""
             echo "📋 Current OpenClaw cron jobs:"
