@@ -118,14 +118,18 @@ if [ -d "$WORKSPACE_ROOT" ]; then
         fi
         echo ""
         
-        # 5. 清理开发文件
+        # 5. 清理开发文件和无关文档
         echo "🧹 清理开发文件..."
         rm -rf .github/ 2>/dev/null || true
         rm -f CONTRIBUTING.md CODE_OF_CONDUCT.md SECURITY.md 2>/dev/null || true
         rm -f GITHUB_PUSH_RULES.md CHANGELOG.md workspace-setup.md 2>/dev/null || true
         rm -rf examples/ 2>/dev/null || true
+        rm -rf benchmarks/ 2>/dev/null || true
         rm -f skills/self-evolution/README_*.md skills/self-evolution/ARCHITECTURE.md 2>/dev/null || true
+        rm -f skills/self-evolution/*.md 2>/dev/null || true
         rm -f skills/rag/report.html 2>/dev/null || true
+        rm -f skills/BILINGUAL_STATUS.md skills/FINAL_STATUS.md skills/STATUS.md 2>/dev/null || true
+        rm -f skills/harness-agent/*_REPORT.md skills/harness-agent/QUICK_SUMMARY.md 2>/dev/null || true
         echo "   ✅ 完成"
         echo ""
         
@@ -198,10 +202,13 @@ else
     rm -f README.zh-CN.md 2>/dev/null || true
     rm -f LICENSE 2>/dev/null || true
     rm -rf docs/dev/ docs/internal/ 2>/dev/null || true
-    rm -rf examples/ 2>/dev/null || true
+    rm -rf examples/ benchmarks/ 2>/dev/null || true
     rm -f skills/self-evolution/README_*.md 2>/dev/null || true
     rm -f skills/self-evolution/ARCHITECTURE.md 2>/dev/null || true
+    rm -f skills/self-evolution/*.md 2>/dev/null || true
     rm -f skills/rag/report.html 2>/dev/null || true
+    rm -f skills/BILINGUAL_STATUS.md skills/FINAL_STATUS.md skills/STATUS.md 2>/dev/null || true
+    rm -f skills/harness-agent/*_REPORT.md skills/harness-agent/QUICK_SUMMARY.md 2>/dev/null || true
     echo "   ✅ 完成"
 fi
 
