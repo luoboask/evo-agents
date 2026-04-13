@@ -1,21 +1,26 @@
 #!/usr/bin/env python3
 """
-记忆管理器 - 统一的记忆压缩和管理系统
+记忆管理器 - 统一的记忆压缩和管理系统（整合版）
 
 功能:
 - 每日记忆压缩（保留 14 天）
 - 周记忆压缩（保留 8 周）
 - 月记忆压缩（保留 2 个月）
-- 自动清理过期记忆
+- MEMORY.md 文件压缩
+- 自动清理过期记忆和空文件
+- 系统统计
 - 存储到共享记忆
 - 分层搜索（月→周→日）
 
 用法:
-    python3 scripts/core/memory_manager.py --daily
-    python3 scripts/core/memory_manager.py --weekly
-    python3 scripts/core/memory_manager.py --monthly
-    python3 scripts/core/memory_manager.py --all
-    python3 scripts/core/memory_manager.py --search "关键词"
+    python3 scripts/core/memory_manager.py --daily          # 每日增量压缩
+    python3 scripts/core/memory_manager.py --weekly         # 周摘要
+    python3 scripts/core/memory_manager.py --monthly        # 月摘要
+    python3 scripts/core/memory_manager.py --compress       # MEMORY.md 压缩
+    python3 scripts/core/memory_manager.py --cleanup        # 清理过期 + 空文件
+    python3 scripts/core/memory_manager.py --stats          # 系统统计
+    python3 scripts/core/memory_manager.py --search "关键词"  # 搜索记忆
+    python3 scripts/core/memory_manager.py --all            # 全部执行
 """
 
 import argparse
@@ -25,6 +30,7 @@ import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
 import sys
+import os
 
 # 添加 libs 到路径
 workspace_root = Path(__file__).parent.parent.parent
@@ -32,6 +38,10 @@ sys.path.insert(0, str(workspace_root / 'libs'))
 
 from memory_hub import MemoryHub
 from path_utils import resolve_workspace
+
+# 记忆限制常量
+MEMORY_LIMIT = 2200  # MEMORY.md 字符限制
+USER_LIMIT = 1375    # USER.md 字符限制
 
 WORKSPACE = resolve_workspace()
 MEMORY_DIR = WORKSPACE / "memory"
@@ -48,6 +58,10 @@ MONTHLY_KEEP_MONTHS = 2    # 月记忆保留 2 个月
 STATE_FILE = MEMORY_DIR / ".memory_manager_state.json"
 
 
+# ============================================================================
+# 状态管理
+# ============================================================================
+
 def load_state() -> dict:
     """加载状态"""
     if STATE_FILE.exists():
@@ -57,6 +71,7 @@ def load_state() -> dict:
         'last_daily_compress': None,
         'last_weekly_compress': None,
         'last_monthly_compress': None,
+        'last_cleanup': None,
         'total_compressions': 0
     }
 
@@ -73,6 +88,10 @@ def get_content_hash(content: str) -> str:
     import hashlib
     return hashlib.md5(content.encode('utf-8')).hexdigest()
 
+
+# ============================================================================
+# 内容提取工具
+# ============================================================================
 
 def extract_sections(content: str) -> dict:
     """从 markdown 中提取各个部分"""
@@ -138,7 +157,7 @@ def extract_key_lines(content: str) -> dict:
 def store_to_memory(content: str, memory_type: str, importance: float, tags: list):
     """存储到共享记忆"""
     try:
-        hub = MemoryHub(agent_name='claude-code-agent')
+        hub = MemoryHub(agent_name='ai-baby')
         memory_id = hub.add(
             content=content,
             memory_type=memory_type,
@@ -150,6 +169,10 @@ def store_to_memory(content: str, memory_type: str, importance: float, tags: lis
         print(f"⚠️  存储失败：{e}")
         return None
 
+
+# ============================================================================
+# 记忆压缩功能
+# ============================================================================
 
 def compress_daily():
     """每日增量记忆压缩"""
@@ -194,7 +217,6 @@ def compress_daily():
     # 如果没有增量，跳过
     if not new_events and not new_decisions and not new_learnings:
         print("  ⏭️  无新增内容，跳过")
-        # 仍然更新哈希，避免重复检查
         state['last_daily_compress'] = today_str
         state['last_daily_hash'] = current_hash
         save_state(state)
@@ -236,7 +258,6 @@ def compress_daily():
         print(f"  ✅ 增量摘要已存储 (ID: {memory_id})")
         print(f"     新增：{len(new_events)} 事件，{len(new_decisions)} 决定，{len(new_learnings)} 学习")
         
-        # 更新状态
         state['last_daily_compress'] = today_str
         state['last_daily_hash'] = current_hash
         state['total_compressions'] = state.get('total_compressions', 0) + 1
@@ -251,7 +272,6 @@ def compress_weekly():
     print("📅 周记忆压缩...")
     
     today = datetime.now()
-    # 计算本周一
     last_monday = today - timedelta(days=today.weekday())
     last_sunday = last_monday + timedelta(days=6)
     week_num = last_monday.isocalendar()[1]
@@ -307,11 +327,9 @@ def compress_weekly():
     
     summary = "\n".join(summary_parts)
     
-    # 保存周摘要文件
     WEEKLY_DIR.mkdir(parents=True, exist_ok=True)
     weekly_file.write_text(summary, encoding='utf-8')
     
-    # 存储到共享记忆
     memory_id = store_to_memory(
         content=summary,
         memory_type='observation',
@@ -322,7 +340,6 @@ def compress_weekly():
     if memory_id:
         print(f"  ✅ 周摘要已保存 (ID: {memory_id}, 文件：{weekly_file.name})")
     
-    # 清理超过 8 周的周摘要
     cleanup_old_files(WEEKLY_DIR, "weekly", WEEKLY_KEEP_WEEKS * 7)
 
 
@@ -331,7 +348,6 @@ def compress_monthly():
     print("📅 月记忆压缩...")
     
     today = datetime.now()
-    # 计算上月
     if today.month == 1:
         last_month = 12
         last_year = today.year - 1
@@ -341,27 +357,20 @@ def compress_monthly():
     
     monthly_file = MONTHLY_DIR / f"{last_year}-{last_month:02d}.md"
     
-    # 收集上月的周摘要
     monthly_weeks = []
     
-    # 遍历所有周文件，找出属于上月的
     if WEEKLY_DIR.exists():
         for wf in WEEKLY_DIR.glob("*.md"):
-            # 从文件名提取周信息 (格式：2026-W15.md)
             import re
             match = re.search(r"(\d{4})-W(\d{2})", wf.name)
             if match:
                 week_year = int(match.group(1))
                 week_num = int(match.group(2))
                 
-                # 计算该周的开始日期
                 jan1 = datetime(week_year, 1, 1)
-                # 第一个周一
                 first_monday = jan1 + timedelta(days=(7 - jan1.weekday()) % 7)
-                # 该周的周一
                 week_monday = first_monday + timedelta(weeks=week_num - 1)
                 
-                # 检查是否属于上月
                 if week_monday.year == last_year and week_monday.month == last_month:
                     monthly_weeks.append((wf.name, wf.read_text(encoding='utf-8')))
     
@@ -369,13 +378,11 @@ def compress_monthly():
         print("  ⏭️  上月无周摘要，跳过")
         return
     
-    # 生成月摘要
     summary_parts = [f"# {last_year}-{last_month:02d} 月摘要"]
     summary_parts.append("")
     summary_parts.append(f"_包含 {len(monthly_weeks)} 周的摘要_")
     summary_parts.append("")
     
-    # 汇总关键内容
     all_events = []
     all_decisions = []
     all_learnings = []
@@ -415,11 +422,9 @@ def compress_monthly():
     
     summary = "\n".join(summary_parts)
     
-    # 保存月摘要文件
     MONTHLY_DIR.mkdir(parents=True, exist_ok=True)
     monthly_file.write_text(summary, encoding='utf-8')
     
-    # 存储到共享记忆
     memory_id = store_to_memory(
         content=summary,
         memory_type='observation',
@@ -430,9 +435,94 @@ def compress_monthly():
     if memory_id:
         print(f"  ✅ 月摘要已保存 (ID: {memory_id}, 文件：{monthly_file.name})")
     
-    # 清理超过 2 个月的月摘要
     cleanup_old_files(MONTHLY_DIR, "monthly", MONTHLY_KEEP_MONTHS * 30)
 
+
+# ============================================================================
+# MEMORY.md 压缩功能（从 compress_memory.py 整合）
+# ============================================================================
+
+def analyze_memory_file(workspace_root: Path) -> dict:
+    """分析 MEMORY.md 内容结构"""
+    memory_file = workspace_root / 'MEMORY.md'
+    if not memory_file.exists():
+        return {'error': 'MEMORY.md not found'}
+    
+    content = memory_file.read_text(encoding='utf-8')
+    lines = content.split('\n')
+    
+    sections = []
+    current_section = {'name': 'Header', 'start': 0, 'lines': 0, 'chars': 0}
+    
+    for i, line in enumerate(lines):
+        if line.startswith('## '):
+            if current_section['lines'] > 0:
+                sections.append(current_section)
+            current_section = {
+                'name': line.replace('## ', '').strip(),
+                'start': i,
+                'lines': 1,
+                'chars': len(line)
+            }
+        else:
+            current_section['lines'] += 1
+            current_section['chars'] += len(line) + 1
+    
+    if current_section['lines'] > 0:
+        sections.append(current_section)
+    
+    return {
+        'total_lines': len(lines),
+        'total_chars': len(content),
+        'sections': sections,
+        'limit': MEMORY_LIMIT,
+        'over_by': len(content) - MEMORY_LIMIT
+    }
+
+
+def compress_memory_file(workspace_root: Path, dry_run: bool = False) -> str:
+    """压缩 MEMORY.md"""
+    memory_file = workspace_root / 'MEMORY.md'
+    if not memory_file.exists():
+        return "❌ MEMORY.md not found"
+    
+    content = memory_file.read_text(encoding='utf-8')
+    compressed = content
+    
+    # 1. 移除多余空行（保留最多 2 个连续空行）
+    compressed = re.sub(r'\n{3,}', '\n\n', compressed)
+    
+    # 2. 移除行首行尾空白
+    lines = compressed.split('\n')
+    lines = [line.rstrip() for line in lines]
+    compressed = '\n'.join(lines)
+    
+    reduction = len(content) - len(compressed)
+    reduction_pct = reduction / len(content) * 100 if content else 0
+    
+    result = f"""
+📊 压缩结果:
+   原始：{len(content):,} chars
+   压缩后：{len(compressed):,} chars
+   减少：{reduction:,} chars ({reduction_pct:.1f}%)
+   仍超出：{max(0, len(compressed) - MEMORY_LIMIT):,} chars
+"""
+    
+    if not dry_run and reduction > 0:
+        backup = memory_file.parent / f'MEMORY.md.backup.{datetime.now().strftime("%Y%m%d%H%M%S")}'
+        shutil.copy(str(memory_file), str(backup))
+        memory_file.write_text(compressed, encoding='utf-8')
+        result += f"\n✅ 已保存到 {memory_file}"
+        result += f"\n💾 备份在 {backup}"
+    elif dry_run:
+        result += "\n⚠️  预览模式，使用 --execute 执行实际压缩"
+    
+    return result
+
+
+# ============================================================================
+# 清理功能
+# ============================================================================
 
 def cleanup_old_files(directory: Path, file_type: str, keep_days: int):
     """清理过期文件"""
@@ -443,12 +533,10 @@ def cleanup_old_files(directory: Path, file_type: str, keep_days: int):
     removed = 0
     
     for file in directory.glob("*.md"):
-        # 从文件名提取日期
         match = re.search(r'(\d{4}-\d{2}-\d{2})', file.name)
         if match:
             file_date = datetime.strptime(match.group(1), "%Y-%m-%d")
             if file_date < cutoff_date:
-                # 移动到归档目录
                 archive_subdir = ARCHIVE_DIR / file_type / file_date.strftime("%Y/%m")
                 archive_subdir.mkdir(parents=True, exist_ok=True)
                 shutil.move(str(file), str(archive_subdir / file.name))
@@ -458,14 +546,111 @@ def cleanup_old_files(directory: Path, file_type: str, keep_days: int):
         print(f"  🗑️  清理 {removed} 个过期{file_type}文件 (> {keep_days}天)")
 
 
+def cleanup_empty_files():
+    """清理空文件"""
+    print("🧹 清理空文件...")
+    
+    removed = 0
+    for dir_path in [MEMORY_DIR, WEEKLY_DIR, MONTHLY_DIR]:
+        if not dir_path.exists():
+            continue
+        for file in dir_path.glob("*.md"):
+            if file.stat().st_size == 0:
+                file.unlink()
+                removed += 1
+    
+    if removed > 0:
+        print(f"  ✅ 清理 {removed} 个空文件")
+    else:
+        print("  ⏭️  无空文件")
+
+
+def run_cleanup():
+    """执行完整清理"""
+    print("🧹 执行系统清理...\n")
+    
+    # 清理过期文件
+    print("1. 清理过期每日记忆文件...")
+    cleanup_old_files(MEMORY_DIR, "daily", DAILY_KEEP_DAYS)
+    
+    print("\n2. 清理过期周摘要文件...")
+    cleanup_old_files(WEEKLY_DIR, "weekly", WEEKLY_KEEP_WEEKS * 7)
+    
+    print("\n3. 清理过期月摘要文件...")
+    cleanup_old_files(MONTHLY_DIR, "monthly", MONTHLY_KEEP_MONTHS * 30)
+    
+    print("\n4. 清理空文件...")
+    cleanup_empty_files()
+    
+    # 更新状态
+    state = load_state()
+    state['last_cleanup'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    save_state(state)
+    
+    print("\n✅ 清理完成")
+
+
+# ============================================================================
+# 统计功能
+# ============================================================================
+
+def show_stats():
+    """显示系统统计"""
+    print("📊 记忆系统统计\n")
+    
+    # 文件统计
+    print("1. 文件统计:")
+    daily_count = len(list(MEMORY_DIR.glob("*.md"))) if MEMORY_DIR.exists() else 0
+    weekly_count = len(list(WEEKLY_DIR.glob("*.md"))) if WEEKLY_DIR.exists() else 0
+    monthly_count = len(list(MONTHLY_DIR.glob("*.md"))) if MONTHLY_DIR.exists() else 0
+    print(f"   每日记忆文件：{daily_count}")
+    print(f"   周摘要文件：{weekly_count}")
+    print(f"   月摘要文件：{monthly_count}")
+    
+    # MEMORY.md 状态
+    print("\n2. MEMORY.md 状态:")
+    memory_file = WORKSPACE / 'MEMORY.md'
+    if memory_file.exists():
+        content = memory_file.read_text(encoding='utf-8')
+        chars = len(content)
+        pct = chars / MEMORY_LIMIT * 100
+        status = "✅" if chars <= MEMORY_LIMIT else "⚠️"
+        print(f"   {status} 字符数：{chars:,} / {MEMORY_LIMIT:,} ({pct:.1f}%)")
+    else:
+        print("   ❌ 文件不存在")
+    
+    # 状态信息
+    print("\n3. 最后执行时间:")
+    state = load_state()
+    print(f"   每日压缩：{state.get('last_daily_compress', '从未')}")
+    print(f"   每周压缩：{state.get('last_weekly_compress', '从未')}")
+    print(f"   每月压缩：{state.get('last_monthly_compress', '从未')}")
+    print(f"   系统清理：{state.get('last_cleanup', '从未')}")
+    print(f"   总压缩次数：{state.get('total_compressions', 0)}")
+    
+    # 共享记忆统计
+    print("\n4. 共享记忆:")
+    try:
+        hub = MemoryHub(agent_name='ai-baby')
+        stats = hub.stats()
+        print(f"   总记忆数：{stats.get('total', 0)}")
+        print(f"   向量数：{stats.get('vectors', 0)}")
+    except Exception as e:
+        print(f"   ⚠️  无法获取统计：{e}")
+    
+    print("")
+
+
+# ============================================================================
+# 搜索功能
+# ============================================================================
+
 def search_memory(query: str, top_k: int = 10):
     """分层搜索：月→周→日"""
-    print(f"🔍 搜索：{query}")
-    print("")
+    print(f"🔍 搜索：{query}\n")
     
-    hub = MemoryHub(agent_name='claude-code-agent')
+    hub = MemoryHub(agent_name='ai-baby')
     
-    # 1. 先搜月记忆
     print("📅 搜索月记忆...")
     monthly_results = hub.search(f"{query} monthly-summary", top_k=2)
     if monthly_results:
@@ -475,7 +660,6 @@ def search_memory(query: str, top_k: int = 10):
     else:
         print("  ⏭️  无月记忆")
     
-    # 2. 再搜周记忆
     print("\n📅 搜索周记忆...")
     weekly_results = hub.search(f"{query} weekly-summary", top_k=3)
     if weekly_results:
@@ -485,7 +669,6 @@ def search_memory(query: str, top_k: int = 10):
     else:
         print("  ⏭️  无周记忆")
     
-    # 3. 最后搜日记忆
     print("\n📅 搜索日记忆...")
     daily_results = hub.search(f"{query} daily-summary", top_k=5)
     if daily_results:
@@ -495,9 +678,8 @@ def search_memory(query: str, top_k: int = 10):
     else:
         print("  ⏭️  无日记忆")
     
-    # 4. 如果都没找到，全量搜索
     if not monthly_results and not weekly_results and not daily_results:
-        print("\n🔍 全量搜索日记忆...")
+        print("\n🔍 全量搜索...")
         all_results = hub.search(query, top_k=top_k)
         if all_results:
             print(f"  ✅ 找到 {len(all_results)} 条记忆")
@@ -509,17 +691,42 @@ def search_memory(query: str, top_k: int = 10):
     print("")
 
 
+# ============================================================================
+# 主函数
+# ============================================================================
+
 def main():
-    parser = argparse.ArgumentParser(description="记忆管理器")
-    parser.add_argument("--daily", action="store_true", help="每日压缩")
-    parser.add_argument("--weekly", action="store_true", help="周压缩")
-    parser.add_argument("--monthly", action="store_true", help="月压缩")
-    parser.add_argument("--all", action="store_true", help="全部压缩")
+    parser = argparse.ArgumentParser(
+        description="记忆管理器 - 统一的记忆压缩和管理系统",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+示例:
+  python3 scripts/core/memory_manager.py --daily          # 每日增量压缩
+  python3 scripts/core/memory_manager.py --weekly         # 周摘要
+  python3 scripts/core/memory_manager.py --monthly        # 月摘要
+  python3 scripts/core/memory_manager.py --compress       # MEMORY.md 压缩
+  python3 scripts/core/memory_manager.py --cleanup        # 清理过期 + 空文件
+  python3 scripts/core/memory_manager.py --stats          # 系统统计
+  python3 scripts/core/memory_manager.py --search "关键词"  # 搜索记忆
+  python3 scripts/core/memory_manager.py --all            # 全部执行
+        """
+    )
+    
+    parser.add_argument("--daily", action="store_true", help="每日增量压缩")
+    parser.add_argument("--weekly", action="store_true", help="周摘要")
+    parser.add_argument("--monthly", action="store_true", help="月摘要")
+    parser.add_argument("--compress", action="store_true", help="MEMORY.md 压缩")
+    parser.add_argument("--cleanup", action="store_true", help="清理过期 + 空文件")
+    parser.add_argument("--stats", action="store_true", help="系统统计")
     parser.add_argument("--search", type=str, help="搜索记忆")
     parser.add_argument("--top-k", type=int, default=10, help="搜索结果数量")
+    parser.add_argument("--dry-run", action="store_true", help="预览模式（不实际修改）")
+    parser.add_argument("--execute", action="store_true", help="执行实际压缩（与 --compress 配合）")
+    parser.add_argument("--all", action="store_true", help="全部执行")
+    
     args = parser.parse_args()
     
-    if not any([args.daily, args.weekly, args.monthly, args.all, args.search]):
+    if not any([args.daily, args.weekly, args.monthly, args.compress, args.cleanup, args.stats, args.search, args.all]):
         parser.print_help()
         return
     
@@ -527,6 +734,23 @@ def main():
     
     if args.search:
         search_memory(args.search, args.top_k)
+    elif args.stats:
+        show_stats()
+    elif args.compress:
+        print("📝 MEMORY.md 压缩...\n")
+        analysis = analyze_memory_file(WORKSPACE)
+        if 'error' in analysis:
+            print(f"❌ {analysis['error']}")
+            return
+        print(f"   总字符数：{analysis['total_chars']:,}")
+        print(f"   限制：{MEMORY_LIMIT:,}")
+        print(f"   超出：{analysis['over_by']:,} chars")
+        print(f"   章节数：{len(analysis['sections'])}")
+        print("")
+        result = compress_memory_file(WORKSPACE, dry_run=not args.execute)
+        print(result)
+    elif args.cleanup:
+        run_cleanup()
     else:
         if args.daily or args.all:
             compress_daily()
@@ -534,6 +758,8 @@ def main():
             compress_weekly()
         if args.monthly or args.all:
             compress_monthly()
+        if args.cleanup or args.all:
+            run_cleanup()
     
     print("\n✅ 完成")
 
