@@ -46,12 +46,21 @@ if command -v ollama &> /dev/null; then
     if [[ "$INSTALL_MODEL" =~ ^[Yy]$ ]]; then
         echo ""
         echo "选择模型："
-        echo "  1) nomic-embed-text (英文推荐，~0.5GB)"
-        echo "  2) bge-m3 (中文推荐，~2.3GB)"
-        echo "  3) m3e (中文，~0.5GB)"
-        echo "  4) 跳过"
         echo ""
-        read -p "选择 [1-4]: " -r MODEL_CHOICE
+        echo "  【英文推荐】"
+        echo "  1) nomic-embed-text (通用，~0.5GB)"
+        echo "  2) mxbai-embed-large (高性能，~0.7GB)"
+        echo "  3) all-minilm (轻量，~0.2GB)"
+        echo "  4) snowflake-arctic-embed (多语言，~0.5GB)"
+        echo ""
+        echo "  【中文推荐】"
+        echo "  5) bge-m3 (中文推荐，~2.3GB)"
+        echo "  6) m3e (中文，~0.5GB)"
+        echo "  7) bge-large-zh (中文，~1.3GB)"
+        echo ""
+        echo "  0) 跳过"
+        echo ""
+        read -p "选择 [0-7]: " -r MODEL_CHOICE
         
         case "$MODEL_CHOICE" in
             1)
@@ -59,12 +68,28 @@ if command -v ollama &> /dev/null; then
                 ollama pull nomic-embed-text
                 ;;
             2)
+                echo "📥 下载 mxbai-embed-large..."
+                ollama pull mxbai-embed-large
+                ;;
+            3)
+                echo "📥 下载 all-minilm..."
+                ollama pull all-minilm
+                ;;
+            4)
+                echo "📥 下载 snowflake-arctic-embed..."
+                ollama pull snowflake-arctic-embed
+                ;;
+            5)
                 echo "📥 下载 bge-m3..."
                 ollama pull bge-m3
                 ;;
-            3)
+            6)
                 echo "📥 下载 m3e..."
                 ollama pull m3e
+                ;;
+            7)
+                echo "📥 下载 bge-large-zh..."
+                ollama pull bge-large-zh
                 ;;
             *)
                 echo "⏭️  跳过模型安装"
