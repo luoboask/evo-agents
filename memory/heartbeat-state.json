@@ -1,9 +1,16 @@
 {
   "lastChecks": {
-    "daily_review": 1711263720,
-    "memory_maintenance": 1711263720,
-    "last_maintenance_date": "2026-03-24"
+    "daily_review": 1744872000,
+    "memory_maintenance": 1744876320,
+    "last_maintenance_date": "2026-04-16"
   },
-  "heartbeatCount": 1,
-  "lastHeartbeat": "2026-03-24T14:02:00+08:00"
+  "heartbeatCount": 4,
+  "lastHeartbeat": "2026-04-16T07:22:00+08:00",
+  "mlx_download_status": {
+    "model": "Jackrong/Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled",
+    "size": "52GB",
+    "status": "complete",
+    "completed_at": "2026-04-14T08:55:00+08:00",
+    "location": "~/.cache/huggingface/hub/models--Jackrong--Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled/"
+  }
 }
