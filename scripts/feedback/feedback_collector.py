@@ -18,17 +18,22 @@ from typing import Dict, List, Optional
 class FeedbackCollector:
     """用户反馈收集器"""
     
-    def __init__(self, db_path: str = None):
+    def __init__(self, agent_name: str = "default", db_path: str = None):
         """
         初始化反馈收集器
         
         Args:
-            db_path: 数据库路径（默认在 evolution_effects.db）
+            agent_name: Agent 名称
+            db_path: 数据库路径（默认在 data/{agent}/memory/evolution_effects.db）
         """
         if db_path:
             self.db_path = Path(db_path)
         else:
-            self.db_path = Path(__file__).parent.parent / "self-evolution" / "evolution_effects.db"
+            workspace = Path(__file__).parent.parent.parent
+            self.db_path = workspace / "data" / agent_name / "memory" / "evolution_effects.db"
+        
+        # 确保目录存在
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
         
         self._init_db()
         print(f"📝 用户反馈收集器已初始化")

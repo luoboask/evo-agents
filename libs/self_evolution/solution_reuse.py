@@ -58,8 +58,8 @@ def cosine_similarity(a: List[float], b: List[float]) -> float:
 class SolutionReuse:
     """解决方案复用器"""
     
-    def __init__(self):
-        self.tracker = EffectTracker()
+    def __init__(self, agent_name: str = "default"):
+        self.tracker = EffectTracker(agent_name=agent_name)
     
     def find_similar_problems(self, 
                              problem: str, 

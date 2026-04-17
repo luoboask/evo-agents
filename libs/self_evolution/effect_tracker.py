@@ -20,8 +20,16 @@ from typing import Dict, List, Optional
 class EffectTracker:
     """效果追踪器"""
     
-    def __init__(self, db_path: str = None):
-        self.db_path = db_path or Path(__file__).parent / 'evolution_effects.db'
+    def __init__(self, agent_name: str = "default", db_path: str = None):
+        if db_path:
+            self.db_path = Path(db_path)
+        else:
+            # 默认存到 data/{agent}/memory/evolution_effects.db
+            workspace = Path(__file__).parent.parent.parent
+            self.db_path = workspace / 'data' / agent_name / 'memory' / 'evolution_effects.db'
+        
+        # 确保目录存在
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
     
     def _init_db(self):
