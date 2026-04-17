@@ -23,13 +23,13 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict
 
 sys.path.insert(0, str(Path(__file__).parent))
-sys.path.insert(0, str(Path(__file__).parent.parent / 'memory-search'))
+sys.path.insert(0, str(Path(__file__).parent.parent / 'libs'))
 
 from memory_stream import MemoryStream
 from self_evolution_real import RealSelfEvolution
 
-# 复用 memory-search 的 Ollama embedding
-from semantic_search import get_embedding as ollama_embed, cosine_similarity
+# 使用 libs 下的通用 embedding 工具
+from embedding_utils import get_embedding as ollama_embed, cosine_similarity
 
 
 @dataclass

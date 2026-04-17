@@ -19,11 +19,11 @@ from dataclasses import dataclass, asdict
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent))
-sys.path.insert(0, str(Path(__file__).parent.parent / 'memory-search'))
+sys.path.insert(0, str(Path(__file__).parent.parent / 'libs'))
 
 from memory_stream import MemoryStream
 from self_evolution_real import RealSelfEvolution
-from semantic_search import get_embedding, cosine_similarity
+from embedding_utils import get_embedding, cosine_similarity
 
 
 @dataclass

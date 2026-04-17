@@ -1,0 +1,32 @@
+[
+  {
+    "id": 3,
+    "solution_id": 101,
+    "problem": null,
+    "rating": 4,
+    "comment": "不错",
+    "user_id": null,
+    "session_id": null,
+    "created_at": "2026-04-17T14:03:46.591449"
+  },
+  {
+    "id": 2,
+    "solution_id": 100,
+    "problem": "Python 异步编程",
+    "rating": 5,
+    "comment": "回答很详细，很有帮助！",
+    "user_id": "user-a",
+    "session_id": "session-1",
+    "created_at": "2026-04-17T14:03:46.589206"
+  },
+  {
+    "id": 1,
+    "solution_id": 100,
+    "problem": "Python 异步编程",
+    "rating": 5,
+    "comment": "回答很详细，很有帮助！",
+    "user_id": "user-a",
+    "session_id": "session-1",
+    "created_at": "2026-04-17T14:03:31.192107"
+  }
+]

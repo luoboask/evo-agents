@@ -12,11 +12,15 @@ from pathlib import Path
 workspace_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(workspace_root / 'libs'))
 
-# 导入 knowledge_graph 和 rag_eval
-from knowledge_graph.builder import KnowledgeGraphEnhanced
-from rag_eval.recorder import finish_recording
+# 导入 rag_eval (libs 下的通用库)
+try:
+    from rag_eval.recorder import finish_recording
+except ImportError:
+    def finish_recording(*args, **kwargs):
+        pass  # 无 rag_eval 时静默跳过
 
-KnowledgeGraph = KnowledgeGraphEnhanced
+# knowledge_graph 已移除（跨 skill 依赖）
+KnowledgeGraph = None
 
 
 class SearchWithKG:
