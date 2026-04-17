@@ -1,44 +1,58 @@
 #!/usr/bin/env python3
 """
-真正的自我进化系统
+真正的自我进化系统 v2.0
 - 从实际任务执行中学习
 - 从代码变更中学习
 - 从错误修复中学习
 - 从用户反馈中学习
+- 效果追踪 + 方案复用 (新增)
 """
 
 import json
+import os
 import sqlite3
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, List
 
+from effect_tracker import EffectTracker
+from solution_reuse import SolutionReuse
+
 class RealSelfEvolution:
     """真实自我进化系统（支持多 Agent 数据隔离）"""
     
     def __init__(self, agent_id: str = None, db_path: str = None):
-        self.workspace = Path('/Users/dhr/.openclaw/workspace')
-        self.memory_dir = self.workspace / 'memory'
+        self.workspace = Path('/Users/dhr/.openclaw/workspace-ai-baby')
         
         if db_path:
             self.evolution_db = Path(db_path)
         elif agent_id:
-            # 每个 Agent 独立的进化数据库
-            self.evolution_db = self.workspace / 'skills' / 'evolution-workbench' / f'{agent_id}_evolution.db'
+            # 每个 Agent 独立的进化数据库 (放在 data/<agent>/memory/)
+            self.evolution_db = self.workspace / 'data' / agent_id / 'memory' / 'evolution.db'
         else:
-            # 默认数据库
-            self.evolution_db = self.workspace / 'skills' / 'evolution-workbench' / 'evolution.db'
+            # 默认数据库 (使用 ai-baby)
+            agent_name = os.environ.get('OPENCLAW_AGENT', 'ai-baby')
+            self.evolution_db = self.workspace / 'data' / agent_name / 'memory' / 'evolution.db'
         
         self.agent_id = agent_id
+        self.memory_dir = self.workspace / 'data' / (agent_id or 'ai-baby') / 'memory'
         
         # 初始化数据库表
         self._init_db()
         
+        # 新增：效果追踪器
+        self.effect_tracker = EffectTracker(db_path=self.evolution_db.parent / 'evolution_effects.db')
+        
+        # 新增：解决方案复用器
+        self.solution_reuse = SolutionReuse()
+        
         if agent_id:
-            print(f"📈 进化系统已初始化（Agent: {agent_id}）")
+            print(f"📈 进化系统 v2.0 已初始化（Agent: {agent_id}）")
         else:
-            print(f"📈 进化系统已初始化（默认）")
+            print(f"📈 进化系统 v2.0 已初始化（默认）")
         print(f"   数据库：{self.evolution_db}")
+        print(f"   效果追踪：✅ 已启用")
+        print(f"   方案复用：✅ 已启用")
     
     def _init_db(self):
         """初始化数据库表"""
@@ -102,6 +116,35 @@ class RealSelfEvolution:
             self._write_to_knowledge(event)
         
         return event
+    
+    def solve_with_reuse(self, problem: str, problem_type: str, solve_func):
+        """
+        解决问题 (优先复用历史方案)
+        
+        Args:
+            problem: 问题描述
+            problem_type: 问题类型
+            solve_func: 解决函数
+        
+        Returns:
+            (solution, source) - source 为 'reused' 或 'new'
+        """
+        return self.solution_reuse.solve_with_reuse(problem, problem_type, solve_func)
+    
+    def mark_solution_effect(self, problem: str, success: bool, feedback: str = None):
+        """
+        标记解决方案效果
+        
+        Args:
+            problem: 问题描述
+            success: 是否成功
+            feedback: 用户反馈
+        """
+        self.effect_tracker.mark_used(problem, success, feedback)
+    
+    def get_evolution_stats(self) -> Dict:
+        """获取进化统计信息"""
+        return self.effect_tracker.get_stats()
     
     def _write_evolution_log(self, event):
         """写入进化日志文件"""
