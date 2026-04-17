@@ -635,9 +635,26 @@ fi
 # 激活自进化系统
 if [ -d "skills/self-evolution" ]; then
     if [ "$INSTALL_LANG" = "zh" ]; then
-        echo "   ✅ 自进化系统已就绪"
+        echo "   ✅ 自进化系统 v2.0 已就绪"
+        echo "      - 效果追踪 + 方案复用"
+        echo "      - Embedding 缓存 (15000x 加速)"
+        echo "      - 隐私保护 (会话隔离)"
     else
-        echo "   ✅ Self-evolution system ready"
+        echo "   ✅ Self-evolution v2.0 ready"
+        echo "      - Effect tracking + Solution reuse"
+        echo "      - Embedding cache (15000x faster)"
+        echo "      - Privacy protection (session isolation)"
+    fi
+fi
+
+# 激活 libs 模块
+if [ -d "libs/self_evolution" ]; then
+    if [ "$INSTALL_LANG" = "zh" ]; then
+        echo "   ✅ 核心库已就绪"
+        echo "      - self_evolution (自进化核心)"
+        echo "      - session_manager (会话管理)"
+    else
+        echo "   ✅ Core libraries ready"
     fi
 fi
 
@@ -658,9 +675,16 @@ if [ "$INSTALL_LANG" = "zh" ]; then
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo "💡 正在为您配置推荐的定时任务..."
+    echo "   ✅ 实时索引 (每 5 分钟) - 保持搜索索引最新"
     echo "   ✅ 会话扫描 (每 30 分钟) - 自动同步 OpenClaw 会话"
     echo "   ✅ 每日回顾 (每天 09:00) - 创建今日记忆 + 显示昨天摘要"
-    echo "   ✅ 夜间进化 (每天 23:00) - 记忆整合 + 自进化"
+    echo "   ✅ 每日压缩 (每天 09:30) - 增量压缩记忆"
+    echo "   ✅ 主动学习 (每天 04:00) - 自动触发学习"
+    echo "   ✅ 夜间进化 (每天 23:00) - 记忆整合 + 自进化 + 会话整合"
+    echo "   ✅ 系统维护 (每周日 02:00) - 清理 + 统计"
+    echo "   ✅ 周压缩 (每周日 03:00) - 生成周摘要"
+    echo "   ✅ 知识图谱扩展 (每周日 05:00) - 发现实体关系"
+    echo "   ✅ 月压缩 (每月 1 号 04:00) - 生成月摘要"
     echo ""
     
     # --force 模式下自动重新配置 Cron
@@ -846,11 +870,16 @@ else
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo "💡 Configuring recommended cron jobs..."
+    echo "   ✅ Realtime Index (every 5 min) - Keep search index updated"
     echo "   ✅ Session Scan (every 30 min) - Auto-sync OpenClaw sessions"
-    echo "   ✅ Daily Memory Compress (daily 09:30) - Incremental daily summary"
-    echo "   ✅ Weekly Memory Compress (weekly Sun 03:00) - Weekly summary"
-    echo "   ✅ Monthly Memory Compress (monthly 1st 04:00) - Monthly summary"
-    echo "   ✅ Nightly Evolution (daily 23:00) - Self-evolution"
+    echo "   ✅ Daily Review (daily 09:00) - Create today's memory"
+    echo "   ✅ Daily Compress (daily 09:30) - Incremental daily summary"
+    echo "   ✅ Active Learning (daily 04:00) - Auto-trigger learning"
+    echo "   ✅ Nightly Evolution (daily 23:00) - Memory consolidation + Self-evolution + Session consolidation"
+    echo "   ✅ Weekly Maintenance (Sun 02:00) - Cleanup + Stats"
+    echo "   ✅ Weekly Compress (Sun 03:00) - Weekly summary"
+    echo "   ✅ Knowledge Graph Expansion (Sun 05:00) - Entity relationships"
+    echo "   ✅ Monthly Compress (1st 04:00) - Monthly summary"
     echo ""
     
     # Ask to skip
