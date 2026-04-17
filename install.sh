@@ -725,7 +725,7 @@ if [ "$INSTALL_LANG" = "zh" ]; then
             if openclaw cron add \
                 --cron "0 9 * * *" \
                 --agent "$AGENT_NAME" \
-                --message "python3 skills/memory-search/daily_review.py" \
+                --message "python3 scripts/core/memory_manager.py --review" \
                 --name "daily-review-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1; then
@@ -894,7 +894,7 @@ else
             openclaw cron add \
                 --cron "0 9 * * *" \
                 --agent "$AGENT_NAME" \
-                --message "python3 skills/memory-search/daily_review.py" \
+                --message "python3 scripts/core/memory_manager.py --review" \
                 --name "daily-review-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"

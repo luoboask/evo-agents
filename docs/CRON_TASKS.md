@@ -4,7 +4,7 @@
 |---|------|--------|----------|------|
 | 1 | `*/5 * * * *` | realtime-index | `python3 skills/memory-search/realtime_indexer.py --auto` | 实时索引新会话和记忆 |
 | 2 | `*/30 * * * *` | session-scan | `python3 scripts/core/scan_sessions.py --agent $AGENT_NAME` | 扫描 OpenClaw 会话并增量保存 |
-| 3 | `0 9 * * *` | daily-review | `python3 skills/memory-search/daily_review.py` | 创建今日记忆文件 + 显示昨日摘要 |
+| 3 | `0 9 * * *` | daily-review | `python3 scripts/core/memory_manager.py --review` | 创建今日记忆文件 + 显示昨日摘要 |
 | 4 | `0 9:30 * * *` | daily-compress | `python3 scripts/core/memory_manager.py --daily` | 每日增量记忆压缩 |
 | 5 | `0 23 * * *` | nightly-evolution | `python3 skills/self-evolution/nightly_cycle.py` | 夜间进化循环：每日复盘 → 记忆整合 → 上下文清理 → 自动进化 |
 | 6 | `0 4 * * *` | active-learning | `python3 skills/self-evolution/active_learning_trigger.py --agent $AGENT_NAME --execute` | 基于触发条件自动执行进化任务 |
@@ -31,10 +31,13 @@ class SessionScanner:
     def scan(self, agent_name, full_scan=False, limit=50): ...
 ```
 
-### skills/memory-search/daily_review.py
+### scripts/core/memory_manager.py --review
 ```python
-# ⚠️ 脚本不存在
-# 功能：创建今日记忆文件，显示昨日摘要
+def daily_review():
+    """每日回顾"""
+    1. create_today_memory()     # 创建今日记忆文件
+    2. get_yesterday_memory_summary()  # 获取昨日摘要
+    3. 输出格式化报告
 ```
 
 ### skills/self-evolution/nightly_cycle.py

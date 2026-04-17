@@ -3,6 +3,7 @@
 记忆管理器 - 统一的记忆压缩和管理系统（整合版）
 
 功能:
+- 每日回顾（创建今日记忆 + 显示昨日摘要）
 - 每日记忆压缩（保留 14 天）
 - 周记忆压缩（保留 8 周）
 - 月记忆压缩（保留 2 个月）
@@ -13,6 +14,7 @@
 - 分层搜索（月→周→日）
 
 用法:
+    python3 scripts/core/memory_manager.py --review         # 每日回顾
     python3 scripts/core/memory_manager.py --daily          # 每日增量压缩
     python3 scripts/core/memory_manager.py --weekly         # 周摘要
     python3 scripts/core/memory_manager.py --monthly        # 月摘要
@@ -56,6 +58,109 @@ MONTHLY_KEEP_MONTHS = 2    # 月记忆保留 2 个月
 
 # 状态文件
 STATE_FILE = MEMORY_DIR / ".memory_manager_state.json"
+
+
+# ============================================================================
+# 每日回顾
+# ============================================================================
+
+def get_yesterday_date():
+    """获取昨天日期"""
+    yesterday = datetime.now() - timedelta(days=1)
+    return yesterday.strftime('%Y-%m-%d')
+
+
+def get_today_date():
+    """获取今天日期"""
+    return datetime.now().strftime('%Y-%m-%d')
+
+
+def read_memory_file(date_str):
+    """读取记忆文件"""
+    memory_file = MEMORY_DIR / f"{date_str}.md"
+    if memory_file.exists():
+        with open(memory_file, 'r', encoding='utf-8') as f:
+            return f.read()
+    return None
+
+
+def create_today_memory():
+    """创建今日记忆文件"""
+    MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+    today = get_today_date()
+    today_file = MEMORY_DIR / f"{today}.md"
+    
+    created = False
+    if not today_file.exists():
+        with open(today_file, 'w', encoding='utf-8') as f:
+            f.write(f"# {today} - 会话记录\n\n## 会话\n\n")
+        created = True
+    
+    return created, today
+
+
+def get_yesterday_memory_summary():
+    """获取昨日记忆摘要"""
+    yesterday = get_yesterday_date()
+    content = read_memory_file(yesterday)
+    
+    if not content:
+        return None, yesterday
+    
+    # 提取关键内容（标题、列表项、待办事项）
+    lines = content.split('\n')
+    summary_lines = []
+    
+    for line in lines:
+        line = line.strip()
+        if line.startswith('#') or line.startswith('- ') or line.startswith('* '):
+            summary_lines.append(line)
+        elif '[x]' in line or '[ ]' in line:
+            summary_lines.append(line)
+    
+    return '\n'.join(summary_lines[:50]), yesterday
+
+
+def daily_review():
+    """执行每日回顾"""
+    output = []
+    
+    output.append("=" * 60)
+    output.append("📅 每日回顾 - Daily Review")
+    output.append("=" * 60)
+    output.append("")
+    
+    # 创建今日记忆文件
+    created, today = create_today_memory()
+    
+    if created:
+        output.append(f"✅ 已创建今日记忆文件：memory/{today}.md")
+    else:
+        output.append(f"📄 今日记忆文件已存在：memory/{today}.md")
+    output.append("")
+    
+    # 显示昨日记忆摘要
+    summary, yesterday = get_yesterday_memory_summary()
+    
+    if summary:
+        output.append(f"📅 昨天 ({yesterday}) 的记忆摘要:")
+        output.append("-" * 40)
+        output.append(summary)
+        output.append("-" * 40)
+    else:
+        output.append(f"ℹ️  昨天 ({yesterday}) 没有记忆记录")
+    
+    output.append("")
+    output.append("=" * 60)
+    output.append("💡 提示：你可以随时让我搜索记忆，例如:")
+    output.append('   - "我们昨天做了什么？"')
+    output.append('   - "搜索关于 websearch 的记忆"')
+    output.append('   - "我有什么待办事项？"')
+    output.append("=" * 60)
+    
+    result = '\n'.join(output)
+    print(result)
+    return result
 
 
 # ============================================================================
@@ -701,6 +806,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例:
+  python3 scripts/core/memory_manager.py --review         # 每日回顾
   python3 scripts/core/memory_manager.py --daily          # 每日增量压缩
   python3 scripts/core/memory_manager.py --weekly         # 周摘要
   python3 scripts/core/memory_manager.py --monthly        # 月摘要
@@ -712,6 +818,7 @@ def main():
         """
     )
     
+    parser.add_argument("--review", action="store_true", help="每日回顾（创建今日记忆 + 显示昨日摘要）")
     parser.add_argument("--daily", action="store_true", help="每日增量压缩")
     parser.add_argument("--weekly", action="store_true", help="周摘要")
     parser.add_argument("--monthly", action="store_true", help="月摘要")
@@ -726,13 +833,15 @@ def main():
     
     args = parser.parse_args()
     
-    if not any([args.daily, args.weekly, args.monthly, args.compress, args.cleanup, args.stats, args.search, args.all]):
+    if not any([args.review, args.daily, args.weekly, args.monthly, args.compress, args.cleanup, args.stats, args.search, args.all]):
         parser.print_help()
         return
     
     print("🗄️  记忆管理器\n")
     
-    if args.search:
+    if args.review:
+        daily_review()
+    elif args.search:
         search_memory(args.search, args.top_k)
     elif args.stats:
         show_stats()
