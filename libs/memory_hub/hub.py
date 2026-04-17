@@ -114,7 +114,6 @@ class MemoryHub:
             )
         
         # 过滤私有记忆（会话隔离）- 在 hierarchical search 后也要过滤
-        print(f"DEBUG: session_id={session_id}, results={len(results)}", file=sys.stderr)
         if session_id:
             # 有会话上下文：返回公共记忆 + 本会话私有记忆
             filtered = []
@@ -123,6 +122,7 @@ class MemoryHub:
                 if isinstance(metadata, str):
                     try:
                         metadata = json.loads(metadata)
+                        if metadata is None: metadata = {}
                     except:
                         metadata = {}
                 
@@ -139,20 +139,25 @@ class MemoryHub:
                 if isinstance(metadata, str):
                     try:
                         metadata = json.loads(metadata)
+                        if metadata is None: metadata = {}
                     except:
                         metadata = {}
                 
-                print(f"DEBUG: content={m.get('content')}", file=sys.stderr)
-                print(f"DEBUG: raw metadata={m.get('metadata')}", file=sys.stderr)
-                print(f"DEBUG: parsed metadata={metadata}", file=sys.stderr)
-                print(f"DEBUG: is_private={metadata.get('is_private', False)}", file=sys.stderr)
                 if not metadata.get('is_private', False):
                     filtered.append(m)
-                    print(f"DEBUG: Added to filtered", file=sys.stderr)
                 else:
-                    print(f"DEBUG: Skipped (private)", file=sys.stderr)
+                    pass
         
-        print(f"DEBUG: filtered={len(filtered)}", file=sys.stderr)
+        # 解析 metadata
+        for m in filtered:
+            md = m.get("metadata")
+            if isinstance(md, str):
+                try:
+                    m["metadata"] = json.loads(md)
+                except:
+                    m["metadata"] = {}
+            if m["metadata"] is None:
+                m["metadata"] = {}
         return filtered[:top_k]
     
     def _hierarchical_search(self, query: str, top_k: int, 
