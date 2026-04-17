@@ -159,7 +159,7 @@ if [ -d "$WORKSPACE_ROOT" ]; then
             echo "🧹 清理旧的 Cron 任务..."
             if command -v openclaw &> /dev/null; then
                 # 使用 --json 获取完整输出，避免截断问题
-                openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress\")) | .id" | while read job_id; do
+                openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-review|daily-compress|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress\")) | .id" | while read job_id; do
                     [ -n "$job_id" ] && openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ 已删除任务 $job_id" || true
                 done
                 echo "   ✅ 完成"
@@ -687,7 +687,7 @@ if [ "$INSTALL_LANG" = "zh" ]; then
             if [[ "$FORCE_REINSTALL" == "true" ]]; then
                 echo "🧹 清理旧的 Cron 任务..."
                 # 使用 --json 获取完整输出，避免截断问题
-                openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress\")) | .id" | while read job_id; do
+                openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-review|daily-compress|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress\")) | .id" | while read job_id; do
                     [ -n "$job_id" ] && openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ 已删除任务 $job_id" || true
                 done
                 echo "   ✅ 完成"
@@ -727,6 +727,20 @@ if [ "$INSTALL_LANG" = "zh" ]; then
                 --agent "$AGENT_NAME" \
                 --message "python3 skills/memory-search/daily_review.py" \
                 --name "daily-review-$AGENT_NAME" \
+                --no-deliver \
+                --session isolated >/dev/null 2>&1; then
+                echo "      ✅ 完成"
+            else
+                echo "      ⚠️  失败"
+            fi
+            
+            # 每日记忆压缩（每天 09:30）
+            echo "   - 每日记忆压缩 (每天 09:30)..."
+            if openclaw cron add \
+                --cron "0 9:30 * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 scripts/core/memory_manager.py --daily" \
+                --name "daily-compress-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1; then
                 echo "      ✅ 完成"
@@ -850,7 +864,7 @@ else
             if [[ "$FORCE_REINSTALL" == "true" ]]; then
                 echo "🧹 Cleaning old cron tasks..."
                 # Use --json to get full output, avoid truncation issues
-                openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress\")) | .id" | while read job_id; do
+                openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-review|daily-compress|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress\")) | .id" | while read job_id; do
                     [ -n "$job_id" ] && openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ Removed task $job_id" || true
                 done
                 echo "   ✅ Done"
@@ -882,6 +896,16 @@ else
                 --agent "$AGENT_NAME" \
                 --message "python3 skills/memory-search/daily_review.py" \
                 --name "daily-review-$AGENT_NAME" \
+                --no-deliver \
+                --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+            
+            # Daily memory compress (09:30 daily)
+            echo "   - Daily Memory Compress (09:30 daily)..."
+            openclaw cron add \
+                --cron "0 9:30 * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 scripts/core/memory_manager.py --daily" \
+                --name "daily-compress-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             

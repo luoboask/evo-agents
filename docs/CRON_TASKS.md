@@ -5,12 +5,13 @@
 | 1 | `*/5 * * * *` | realtime-index | `python3 skills/memory-search/realtime_indexer.py --auto` | 实时索引新会话和记忆 |
 | 2 | `*/30 * * * *` | session-scan | `python3 scripts/core/scan_sessions.py --agent $AGENT_NAME` | 扫描 OpenClaw 会话并增量保存 |
 | 3 | `0 9 * * *` | daily-review | `python3 skills/memory-search/daily_review.py` | 创建今日记忆文件 + 显示昨日摘要 |
-| 4 | `0 23 * * *` | nightly-evolution | `python3 skills/self-evolution/nightly_cycle.py` | 夜间进化循环：每日复盘 → 记忆整合 → 上下文清理 → 自动进化 |
-| 5 | `0 4 * * *` | active-learning | `python3 skills/self-evolution/active_learning_trigger.py --agent $AGENT_NAME --execute` | 基于触发条件自动执行进化任务 |
-| 6 | `0 3 * * 0` | weekly-compress | `python3 scripts/core/memory_manager.py --weekly` | 每周记忆压缩，生成周摘要 |
-| 7 | `0 4 1 * *` | monthly-compress | `python3 scripts/core/memory_manager.py --monthly` | 每月记忆压缩，生成月摘要 |
-| 8 | `0 5 * * 0` | kg-expansion | `python3 skills/knowledge-graph/auto_expander.py --agent $AGENT_NAME --limit 100` | 自动扩展知识图谱，发现实体关系 |
-| 9 | `0 2 * * 0` | weekly-maintenance | `python3 scripts/core/memory_manager.py --cleanup --stats` | 系统清理 + 生成统计报告 |
+| 4 | `0 9:30 * * *` | daily-compress | `python3 scripts/core/memory_manager.py --daily` | 每日增量记忆压缩 |
+| 5 | `0 23 * * *` | nightly-evolution | `python3 skills/self-evolution/nightly_cycle.py` | 夜间进化循环：每日复盘 → 记忆整合 → 上下文清理 → 自动进化 |
+| 6 | `0 4 * * *` | active-learning | `python3 skills/self-evolution/active_learning_trigger.py --agent $AGENT_NAME --execute` | 基于触发条件自动执行进化任务 |
+| 7 | `0 3 * * 0` | weekly-compress | `python3 scripts/core/memory_manager.py --weekly` | 每周记忆压缩，生成周摘要 |
+| 8 | `0 4 1 * *` | monthly-compress | `python3 scripts/core/memory_manager.py --monthly` | 每月记忆压缩，生成月摘要 |
+| 9 | `0 5 * * 0` | kg-expansion | `python3 skills/knowledge-graph/auto_expander.py --agent $AGENT_NAME --limit 100` | 自动扩展知识图谱，发现实体关系 |
+| 10 | `0 2 * * 0` | weekly-maintenance | `python3 scripts/core/memory_manager.py --cleanup --stats` | 系统清理 + 生成统计报告 |
 
 ---
 
@@ -58,7 +59,7 @@ class ActiveLearningTrigger:
 ### scripts/core/memory_manager.py
 ```python
 # 统一记忆管理器
-# 支持模式：--daily, --weekly, --monthly, --cleanup, --stats
+# 支持模式：--daily (每日压缩), --weekly, --monthly, --cleanup, --stats
 ```
 
 ### skills/knowledge-graph/auto_expander.py
@@ -72,7 +73,7 @@ class KnowledgeGraphAutoExpander:
 
 ## 执行时间分布
 
-**每日**: 04:00 主动学习 | 09:00 每日回顾 | 23:00 夜间进化
+**每日**: 04:00 主动学习 | 09:00 每日回顾 → 09:30 每日压缩 | 23:00 夜间进化
 
 **周日**: 02:00 系统维护 → 03:00 周压缩 → 05:00 知识图谱扩展
 
