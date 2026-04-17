@@ -1017,6 +1017,35 @@ else
     echo ""
 fi
 
+# 更新 TOOLS.md（添加 web-knowledge 使用说明）
+echo "📝 更新 TOOLS.md..."
+cat >> "$WORKSPACE_ROOT/TOOLS.md" << 'TOOLSEOF'
+
+## Web Search
+
+**Skill**: `web-knowledge` (v7.0.0)  
+**Entry**: `python3 skills/web-knowledge/search.py`
+
+```bash
+# 基础搜索
+python3 skills/web-knowledge/search.py "查询词"
+
+# 指定数量
+python3 skills/web-knowledge/search.py "查询词" --limit 5
+
+# 导出 JSON/Markdown
+python3 skills/web-knowledge/search.py "查询词" --format json
+python3 skills/web-knowledge/search.py "查询词" --format markdown -o result.md
+```
+
+**特性**:
+- ✅ 质量评分（自动识别知乎/GitHub 等权威网站）
+- ✅ 智能去重（URL 哈希）
+- ✅ 中文优化（Bing 中国 + 百度）
+- ✅ 多格式输出（text/json/markdown）
+TOOLSEOF
+echo "   ✅ 完成"
+
 # 创建安装配置文件
 echo "📝 创建安装配置..."
 cat > "$WORKSPACE_ROOT/.install-config" << CONFIGEOF
