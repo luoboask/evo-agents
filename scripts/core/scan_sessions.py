@@ -487,7 +487,7 @@ class SessionScanner:
     def extract_and_record_evolution_events(self, messages: List[Dict], session_id: str):
         """从会话中提取进化事件（纯规则匹配）"""
         try:
-            from skills.self-evolution.self_evolution_real import RealSelfEvolution
+            from skills.self_evolution.self_evolution_real import RealSelfEvolution
             evolution = RealSelfEvolution()
             
             events_recorded = 0
