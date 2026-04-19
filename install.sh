@@ -159,6 +159,14 @@ if [ -d "$WORKSPACE_ROOT" ]; then
             echo "🧹 清理旧的 Cron 任务..."
             if command -v openclaw &> /dev/null; then
                 # 使用 --json 获取完整输出，避免截断问题
+            # Fractal thinking (hourly)
+            openclaw cron add \
+                --cron "0 * * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 skills/self-evolution/fractal_thinking.py --auto --agent $AGENT_NAME" \
+                --name "$AGENT_NAME-fractal-thinking" \
+                --no-deliver \
+                --session isolated >/dev/null 2>&1 && echo "      ✅ Fractal thinking" || echo "      ⚠️  Failed"
                 openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-compress|nightly-evolution|weekly-compress|monthly-compress\")) | .id" | while read job_id; do
                     [ -n "$job_id" ] && openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ 已删除任务 $job_id" || true
                 done
