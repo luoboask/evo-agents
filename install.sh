@@ -165,7 +165,23 @@ if [ -d "$WORKSPACE_ROOT" ]; then
                 --agent "$AGENT_NAME" \
                 --message "python3 skills/self-evolution/fractal_thinking.py --auto --agent $AGENT_NAME" \
                 --name "$AGENT_NAME-fractal-thinking" \
+
+            # Domain knowledge auto-organize (daily 2AM)
+            openclaw cron add \
+                --cron "0 2 * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 scripts/domain/domain_knowledge.py --auto-organize --domain 技术 --agent $AGENT_NAME" \
+                --name "$AGENT_NAME-domain-auto-organize" \
+
+            # Domain knowledge weekly review (Sun 6AM)
+            openclaw cron add \
+                --cron "0 6 * * 0" \
+                --agent "$AGENT_NAME" \
+                --message "python3 scripts/domain/domain_knowledge.py --weekly-review --domain 技术 --agent $AGENT_NAME" \
+                --name "$AGENT_NAME-domain-weekly-review" \
                 --no-deliver \
+                --session isolated >/dev/null 2>&1 && echo "      ✅ Domain weekly review" || echo "      ⚠️  Failed"                --no-deliver \
+                --session isolated >/dev/null 2>&1 && echo "      ✅ Domain auto-organize" || echo "      ⚠️  Failed"                --no-deliver \
                 --session isolated >/dev/null 2>&1 && echo "      ✅ Fractal thinking" || echo "      ⚠️  Failed"
                 openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-compress|nightly-evolution|weekly-compress|monthly-compress\")) | .id" | while read job_id; do
                     [ -n "$job_id" ] && openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ 已删除任务 $job_id" || true
