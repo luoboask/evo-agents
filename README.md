@@ -239,6 +239,27 @@ User Question
 ./scripts/core/activate-features.sh
 ```
 
+### Force Reinstall
+
+If you need to completely reinstall (will backup and restore your data):
+
+```bash
+# Force reinstall
+./install.sh my-agent --force
+
+# Or use short flag
+./install.sh my-agent -f
+```
+
+**What it does:**
+1. ✅ Backs up `data/`, `memory/`, `config/`
+2. ✅ Deletes old code files
+3. ✅ Clones latest code from GitHub
+4. ✅ Restores your data
+5. ✅ Reconfigures Cron jobs
+
+**Note:** Your data (memories, configurations) will be preserved.
+
 ### Memory Management
 
 ```bash

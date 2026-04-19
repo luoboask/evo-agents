@@ -4,6 +4,8 @@ Memory Hub - 记忆中心
 统一管理所有记忆相关操作
 """
 
+import sys
+import json
 from pathlib import Path
 from path_utils import resolve_workspace
 from typing import List, Dict, Optional
@@ -85,9 +87,10 @@ class MemoryHub:
                top_k: int = 5,
                memory_type: Optional[str] = None,
                semantic: bool = False,
-               hierarchical: bool = True) -> List[Dict]:
+               hierarchical: bool = True,
+               session_id: Optional[str] = None) -> List[Dict]:
         """
-        搜索记忆
+        搜索记忆（支持会话隔离）
         
         Args:
             query: 搜索关键词
@@ -95,19 +98,67 @@ class MemoryHub:
             memory_type: 记忆类型过滤
             semantic: 是否使用语义搜索
             hierarchical: 是否使用分层搜索（月→周→日）
+            session_id: 会话 ID（用于过滤私有记忆）
         
         Returns:
-            记忆列表
+            记忆列表（已过滤私有记忆）
         """
         if hierarchical:
-            return self._hierarchical_search(query, top_k, memory_type, semantic)
+            results = self._hierarchical_search(query, top_k, memory_type, semantic)
         else:
-            return self.storage.search_memories(
+            results = self.storage.search_memories(
                 query=query,
                 top_k=top_k,
                 memory_type=memory_type,
                 semantic=semantic
             )
+        
+        # 过滤私有记忆（会话隔离）- 在 hierarchical search 后也要过滤
+        if session_id:
+            # 有会话上下文：返回公共记忆 + 本会话私有记忆
+            filtered = []
+            for m in results:
+                metadata = m.get('metadata', '{}')
+                if isinstance(metadata, str):
+                    try:
+                        metadata = json.loads(metadata)
+                        if metadata is None: metadata = {}
+                    except:
+                        metadata = {}
+                
+                is_private = metadata.get('is_private', False)
+                original_session_id = metadata.get('original_session_id')
+                
+                if not is_private or original_session_id == session_id:
+                    filtered.append(m)
+        else:
+            # 无会话上下文：只返回公共记忆
+            filtered = []
+            for m in results:
+                metadata = m.get('metadata', '{}')
+                if isinstance(metadata, str):
+                    try:
+                        metadata = json.loads(metadata)
+                        if metadata is None: metadata = {}
+                    except:
+                        metadata = {}
+                
+                if not metadata.get('is_private', False):
+                    filtered.append(m)
+                else:
+                    pass
+        
+        # 解析 metadata
+        for m in filtered:
+            md = m.get("metadata")
+            if isinstance(md, str):
+                try:
+                    m["metadata"] = json.loads(md)
+                except:
+                    m["metadata"] = {}
+            if m["metadata"] is None:
+                m["metadata"] = {}
+        return filtered[:top_k]
     
     def _hierarchical_search(self, query: str, top_k: int, 
                             memory_type: Optional[str], 

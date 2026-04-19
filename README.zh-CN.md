@@ -239,6 +239,27 @@ evo-agents/
 ./scripts/core/activate-features.sh
 ```
 
+### 强制重装
+
+如果需要完全重新安装（会备份并恢复你的数据）：
+
+```bash
+# 强制重装
+./install.sh my-agent --force
+
+# 或使用简写
+./install.sh my-agent -f
+```
+
+**执行流程：**
+1. ✅ 备份 `data/`, `memory/`, `config/`
+2. ✅ 删除旧代码文件
+3. ✅ 从 GitHub 克隆最新代码
+4. ✅ 恢复你的数据
+5. ✅ 重新配置 Cron 任务
+
+**注意：** 你的数据（记忆、配置）会被保留。
+
 ### 记忆管理
 
 ```bash

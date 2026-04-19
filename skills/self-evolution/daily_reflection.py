@@ -15,7 +15,7 @@ class DailyReflection:
     """每日深度反思"""
     
     def __init__(self, workspace=None):
-        self.workspace = Path(workspace) if workspace else Path('/Users/dhr/.openclaw/workspace')
+        self.workspace = Path(workspace) if workspace else Path('/Users/dhr/.openclaw/workspace-ai-baby')
         self.learning_dir = self.workspace / 'memory' / 'learning'
         self.learning_dir.mkdir(parents=True, exist_ok=True)
         

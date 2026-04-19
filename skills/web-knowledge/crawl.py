@@ -6,6 +6,7 @@
 2. 智能解析 - 识别文章/文档/产品页
 3. 内容清洗 - 去除广告、导航、无关元素
 4. 多格式输出 - Markdown/JSON/纯文本
+5. 关键词提取 - 混合模式（LLM + TF-IDF）
 """
 
 import argparse
@@ -14,6 +15,7 @@ import re
 import subprocess
 import sys
 import time
+import socket
 from datetime import datetime
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -38,6 +40,25 @@ class WebCrawler:
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
         ]
+        
+        # LLM 检测（用于关键词提取）
+        self.llm_available = self._check_llm()
+    
+    def _check_llm(self) -> bool:
+        """检查本地 LLM 是否可用（Ollama）"""
+        try:
+            # 检查 Ollama 端口
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            result = sock.connect_ex(('localhost', 11434))
+            sock.close()
+            if result == 0:
+                print(f"🧠 检测到本地 LLM (Ollama)", file=sys.stderr)
+                return True
+        except:
+            pass
+        
+        print(f"⚠️  未检测到本地 LLM，将使用 TF-IDF 提取关键词", file=sys.stderr)
+        return False
     
     def fetch_page(self, url):
         """获取网页内容"""
@@ -291,8 +312,100 @@ class WebCrawler:
         
         return text
     
-    def crawl(self, url, output_format="markdown"):
-        """爬取单个网页"""
+    def _extract_keywords_llm(self, content: str, top_k: int = 5) -> list:
+        """使用 LLM 提取关键词"""
+        try:
+            import requests
+            
+            prompt = f"""从以下内容中提取{top_k}个最重要的关键词，只返回关键词，用逗号分隔：
+
+{content[:1500]}
+
+关键词："""
+            
+            # 调用 Ollama API
+            response = requests.post(
+                'http://localhost:11434/api/generate',
+                json={
+                    'model': 'qwen2.5:7b',
+                    'prompt': prompt,
+                    'stream': False
+                },
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                result = response.json().get('response', '')
+                keywords = [k.strip() for k in result.split(',') if k.strip()]
+                return keywords[:top_k]
+        except Exception as e:
+            print(f"LLM 关键词提取失败：{e}", file=sys.stderr)
+        
+        return []
+    
+    def _extract_keywords_tfidf(self, content: str, top_k: int = 5) -> list:
+        """使用 TF-IDF 提取关键词（无需 LLM）"""
+        try:
+            from collections import Counter
+            
+            # 尝试使用 jieba 分词（如果有）
+            try:
+                import jieba
+                words = jieba.lcut(content)
+                print(f"   使用 jieba 分词", file=sys.stderr)
+            except ImportError:
+                # 降级：简单按字符分割
+                words = re.findall(r'[\w\u4e00-\u9fff]{2,}', content)
+                print(f"   使用简单分词（未安装 jieba）", file=sys.stderr)
+            
+            # 过滤常见停用词
+            stopwords = {
+                '的', '了', '在', '是', '和', '与', '或', '就', '都', '而', '及', '到', '着', '过',
+                '看', '很', '非常', '这个', '那个', '我们', '你们', '他们', '什么', '怎么', '为什么',
+                '如何', '可以', '应该', '必须', '需要', '一个', '一些', '没有', '还有', '就是',
+                '通过', '使用', '进行', '已经', '能够', '可能', '如果', '但是', '所以', '因为'
+            }
+            words = [w for w in words if w not in stopwords and len(w) >= 2]
+            
+            # 词频统计
+            word_freq = Counter(words)
+            
+            # 返回 top_k
+            return [word for word, _ in word_freq.most_common(top_k)]
+        except Exception as e:
+            print(f"TF-IDF 关键词提取失败：{e}", file=sys.stderr)
+        
+        return []
+    
+    def extract_keywords(self, content: str, top_k: int = 5) -> list:
+        """混合模式关键词提取
+        
+        优先使用 LLM（更准确），如果 LLM 不可用则降级到 TF-IDF
+        """
+        print(f"🔑 提取关键词（top{top_k}）...", file=sys.stderr)
+        
+        # 优先使用 LLM
+        if self.llm_available:
+            keywords = self._extract_keywords_llm(content, top_k)
+            if keywords:
+                print(f"✅ LLM 提取到 {len(keywords)} 个关键词", file=sys.stderr)
+                return keywords
+        
+        # 降级到 TF-IDF
+        print(f"⚠️  使用 TF-IDF 提取关键词", file=sys.stderr)
+        keywords = self._extract_keywords_tfidf(content, top_k)
+        print(f"✅ TF-IDF 提取到 {len(keywords)} 个关键词", file=sys.stderr)
+        return keywords
+    
+    def crawl(self, url, output_format="markdown", extract_keywords=False, top_k=5):
+        """爬取单个网页
+        
+        Args:
+            url: 网页 URL
+            output_format: 输出格式 (markdown/json/text)
+            extract_keywords: 是否提取关键词
+            top_k: 关键词数量
+        """
         start_time = time.time()
         
         try:
@@ -308,6 +421,12 @@ class WebCrawler:
             # 提取内容
             content = self.extract_content(html, page_type)
             
+            # 提取关键词（可选）
+            keywords = []
+            if extract_keywords:
+                full_text = metadata.get('description', '') + ' ' + ' '.join(content)
+                keywords = self.extract_keywords(full_text, top_k)
+            
             # 构建结果
             result = {
                 "success": True,
@@ -316,6 +435,7 @@ class WebCrawler:
                 "type_scores": type_scores,
                 "metadata": metadata,
                 "content": content,
+                "keywords": keywords,
                 "content_length": sum(len(c) for c in content),
                 "duration": time.time() - start_time,
                 "timestamp": datetime.now().isoformat(),
@@ -454,6 +574,9 @@ def main():
     parser = argparse.ArgumentParser(description='网页内容爬取器')
     parser.add_argument('url', nargs='?', help='要爬取的 URL')
     parser.add_argument('--urls', type=str, help='URL 列表文件路径（每行一个 URL）')
+    parser.add_argument('--keywords', '-k', action='store_true',
+                        help='自动提取关键词（混合模式：LLM + TF-IDF）')
+    parser.add_argument('--top-k', type=int, default=5, help='关键词数量')
     parser.add_argument('--output', '-o', choices=['markdown', 'json', 'text'], default='markdown',
                         help='输出格式')
     parser.add_argument('--workers', type=int, default=3, help='并发工作线程数')
@@ -478,7 +601,7 @@ def main():
     print(f"🕷️  开始爬取 {len(urls)} 个页面...", file=sys.stderr)
     
     if len(urls) == 1:
-        result = crawler.crawl(urls[0], args.output)
+        result = crawler.crawl(urls[0], args.output, extract_keywords=args.keywords, top_k=args.top_k)
         print(result)
     else:
         results = crawler.crawl_batch(urls, args.output, args.workers)

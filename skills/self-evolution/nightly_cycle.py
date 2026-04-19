@@ -53,14 +53,36 @@ class NightlyEvolutionCycle:
             }
         }
     
-    def run_full_cycle(self):
-        """运行完整的夜间进化循环"""
+    def run_full_cycle(self, force: bool = False):
+        """
+        运行完整的夜间进化循环
+        
+        Args:
+            force: 是否强制执行（忽略条件检查）
+        """
         print("=" * 70)
         print("🌙 夜间进化循环")
         print(f"   开始时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print("=" * 70)
         
+        # 条件检查（除非强制执行）
+        if not force:
+            should_run, reason = self._should_run_nightly()
+            if not should_run:
+                print(f"\n⚠️  跳过夜间进化：{reason}")
+                print(f"💡 提示：使用 --force 参数强制执行")
+                return {
+                    'status': 'skipped',
+                    'reason': reason
+                }
+        
         results = {}
+        
+        # 0. Session Consolidation - 会话记忆整合（新增）
+        print("\n" + "=" * 70)
+        print("📦 Session Consolidation - 会话记忆整合")
+        print("=" * 70)
+        results['session_consolidation'] = self.session_consolidation()
         
         # 1. Wind Down - 每日复盘
         print("\n" + "=" * 70)
@@ -105,11 +127,88 @@ class NightlyEvolutionCycle:
         # 记录进化事件
         self._record_cycle_completion(results)
         
+        # 记录执行统计
+        self._log_execution_stats(results)
+        
         print("\n" + "=" * 70)
         print(f"✅ 夜间循环完成：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print("=" * 70)
         
         return results
+    
+    def _should_run_nightly(self) -> tuple:
+        """
+        检查是否应该执行夜间进化
+        
+        Returns:
+            (should_run, reason)
+        """
+        # 检查今天的进化事件
+        today = datetime.now().strftime('%Y-%m-%d')
+        events = self.evolution.get_evolution_history(limit=10)
+        today_events = [e for e in events if e['timestamp'].startswith(today)]
+        
+        if not today_events:
+            return False, "今日无进化事件"
+        
+        return True, "条件满足"
+    
+    def _log_execution_stats(self, results: Dict):
+        """记录执行统计"""
+        try:
+            state_file = self.memory_dir / ".nightly_cycle_state.json"
+            
+            if state_file.exists():
+                with open(state_file, 'r', encoding='utf-8') as f:
+                    state = json.load(f)
+            else:
+                state = {'executions': []}
+            
+            execution = {
+                'timestamp': datetime.now().isoformat(),
+                'status': 'completed',
+                'results_summary': {k: 'done' for k in results.keys()}
+            }
+            
+            state['executions'].append(execution)
+            state['executions'] = state['executions'][-30:]
+            
+            with open(state_file, 'w', encoding='utf-8') as f:
+                json.dump(state, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"⚠️  记录统计失败：{e}")
+    
+    def session_consolidation(self) -> Dict:
+        """
+        📦 Session Consolidation - 会话记忆整合
+        
+        将高价值会话记忆转移到长期记忆：
+        - 筛选重要性 >= 6.0 的记忆
+        - 过滤超过 24 小时的旧记忆
+        - 批量转移到长期记忆
+        - 清理已整合的会话记忆
+        """
+        try:
+            from libs.session_manager.session_consolidator import SessionConsolidator
+            
+            print("\n📦 整合会话记忆...")
+            
+            consolidator = SessionConsolidator(agent_name=self.agent_name)
+            result = consolidator.run_consolidation()
+            
+            print(f"   ✅ 整合完成：{result['consolidated']}条")
+            
+            return {
+                'success': True,
+                'consolidated': result['consolidated'],
+                'failed': result['failed']
+            }
+        except Exception as e:
+            print(f"   ⚠️  整合失败：{e}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
     
     def wind_down(self) -> Dict:
         """
