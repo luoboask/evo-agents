@@ -27,7 +27,7 @@ class ActiveLearningTrigger:
     
     def __init__(self, agent_name='demo51-agent'):
         self.agent_name = agent_name
-        self.db_path = Path(f'data/{agent_name}/evolution.db')
+        self.db_path = Path(f'data/{agent_name}/memory/evolution.db')
         self.memory_path = Path(f'data/{agent_name}/memory/memory_stream.db')
         
         # 触发阈值配置
