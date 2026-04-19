@@ -118,14 +118,18 @@ if [ -d "$WORKSPACE_ROOT" ]; then
         fi
         echo ""
         
-        # 5. 清理开发文件
+        # 5. 清理开发文件和无关文档
         echo "🧹 清理开发文件..."
         rm -rf .github/ 2>/dev/null || true
         rm -f CONTRIBUTING.md CODE_OF_CONDUCT.md SECURITY.md 2>/dev/null || true
         rm -f GITHUB_PUSH_RULES.md CHANGELOG.md workspace-setup.md 2>/dev/null || true
         rm -rf examples/ 2>/dev/null || true
+        rm -rf benchmarks/ 2>/dev/null || true
         rm -f skills/self-evolution/README_*.md skills/self-evolution/ARCHITECTURE.md 2>/dev/null || true
+        rm -f skills/self-evolution/*.md 2>/dev/null || true
         rm -f skills/rag/report.html 2>/dev/null || true
+        rm -f skills/BILINGUAL_STATUS.md skills/FINAL_STATUS.md skills/STATUS.md 2>/dev/null || true
+        rm -f skills/harness-agent/*_REPORT.md skills/harness-agent/QUICK_SUMMARY.md 2>/dev/null || true
         echo "   ✅ 完成"
         echo ""
         
@@ -155,7 +159,7 @@ if [ -d "$WORKSPACE_ROOT" ]; then
             echo "🧹 清理旧的 Cron 任务..."
             if command -v openclaw &> /dev/null; then
                 # 使用 --json 获取完整输出，避免截断问题
-                openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress\")) | .id" | while read job_id; do
+                openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-compress|nightly-evolution|weekly-compress|monthly-compress\")) | .id" | while read job_id; do
                     [ -n "$job_id" ] && openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ 已删除任务 $job_id" || true
                 done
                 echo "   ✅ 完成"
@@ -198,10 +202,13 @@ else
     rm -f README.zh-CN.md 2>/dev/null || true
     rm -f LICENSE 2>/dev/null || true
     rm -rf docs/dev/ docs/internal/ 2>/dev/null || true
-    rm -rf examples/ 2>/dev/null || true
+    rm -rf examples/ benchmarks/ 2>/dev/null || true
     rm -f skills/self-evolution/README_*.md 2>/dev/null || true
     rm -f skills/self-evolution/ARCHITECTURE.md 2>/dev/null || true
+    rm -f skills/self-evolution/*.md 2>/dev/null || true
     rm -f skills/rag/report.html 2>/dev/null || true
+    rm -f skills/BILINGUAL_STATUS.md skills/FINAL_STATUS.md skills/STATUS.md 2>/dev/null || true
+    rm -f skills/harness-agent/*_REPORT.md skills/harness-agent/QUICK_SUMMARY.md 2>/dev/null || true
     echo "   ✅ 完成"
 fi
 
@@ -628,9 +635,26 @@ fi
 # 激活自进化系统
 if [ -d "skills/self-evolution" ]; then
     if [ "$INSTALL_LANG" = "zh" ]; then
-        echo "   ✅ 自进化系统已就绪"
+        echo "   ✅ 自进化系统 v2.0 已就绪"
+        echo "      - 效果追踪 + 方案复用"
+        echo "      - Embedding 缓存 (15000x 加速)"
+        echo "      - 隐私保护 (会话隔离)"
     else
-        echo "   ✅ Self-evolution system ready"
+        echo "   ✅ Self-evolution v2.0 ready"
+        echo "      - Effect tracking + Solution reuse"
+        echo "      - Embedding cache (15000x faster)"
+        echo "      - Privacy protection (session isolation)"
+    fi
+fi
+
+# 激活 libs 模块
+if [ -d "libs/self_evolution" ]; then
+    if [ "$INSTALL_LANG" = "zh" ]; then
+        echo "   ✅ 核心库已就绪"
+        echo "      - self_evolution (自进化核心)"
+        echo "      - session_manager (会话管理)"
+    else
+        echo "   ✅ Core libraries ready"
     fi
 fi
 
@@ -651,9 +675,16 @@ if [ "$INSTALL_LANG" = "zh" ]; then
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo "💡 正在为您配置推荐的定时任务..."
+    echo "   ✅ 实时索引 (每 5 分钟) - 保持搜索索引最新"
     echo "   ✅ 会话扫描 (每 30 分钟) - 自动同步 OpenClaw 会话"
     echo "   ✅ 每日回顾 (每天 09:00) - 创建今日记忆 + 显示昨天摘要"
-    echo "   ✅ 夜间进化 (每天 23:00) - 记忆整合 + 自进化"
+    echo "   ✅ 每日压缩 (每天 09:30) - 增量压缩记忆"
+    echo "   ✅ 主动学习 (每天 04:00) - 自动触发学习"
+    echo "   ✅ 夜间进化 (每天 23:00) - 记忆整合 + 自进化 + 会话整合"
+    echo "   ✅ 系统维护 (每周日 02:00) - 清理 + 统计"
+    echo "   ✅ 周压缩 (每周日 03:00) - 生成周摘要"
+    echo "   ✅ 知识图谱扩展 (每周日 05:00) - 发现实体关系"
+    echo "   ✅ 月压缩 (每月 1 号 04:00) - 生成月摘要"
     echo ""
     
     # --force 模式下自动重新配置 Cron
@@ -680,7 +711,7 @@ if [ "$INSTALL_LANG" = "zh" ]; then
             if [[ "$FORCE_REINSTALL" == "true" ]]; then
                 echo "🧹 清理旧的 Cron 任务..."
                 # 使用 --json 获取完整输出，避免截断问题
-                openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress\")) | .id" | while read job_id; do
+                openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-compress|nightly-evolution|weekly-compress|monthly-compress\")) | .id" | while read job_id; do
                     [ -n "$job_id" ] && openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ 已删除任务 $job_id" || true
                 done
                 echo "   ✅ 完成"
@@ -718,8 +749,14 @@ if [ "$INSTALL_LANG" = "zh" ]; then
             if openclaw cron add \
                 --cron "0 9 * * *" \
                 --agent "$AGENT_NAME" \
-                --message "python3 skills/memory-search/daily_review.py" \
-                --name "daily-review-$AGENT_NAME" \
+                --message "python3 scripts/core/memory_manager.py --daily" \
+            # 每日记忆压缩（每天 09:30）
+            echo "   - 每日记忆压缩 (每天 09:30)..."
+            if openclaw cron add \
+                --cron "0 9:30 * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 scripts/core/memory_manager.py --daily" \
+                --name "daily-compress-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1; then
                 echo "      ✅ 完成"
@@ -759,7 +796,7 @@ if [ "$INSTALL_LANG" = "zh" ]; then
             if openclaw cron add \
                 --cron "0 3 * * 0" \
                 --agent "$AGENT_NAME" \
-                --message "python3 scripts/core/memory_compressor.py --weekly" \
+                --message "python3 scripts/core/memory_manager.py --weekly" \
                 --name "weekly-compress-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1; then
@@ -773,7 +810,7 @@ if [ "$INSTALL_LANG" = "zh" ]; then
             if openclaw cron add \
                 --cron "0 4 1 * *" \
                 --agent "$AGENT_NAME" \
-                --message "python3 scripts/core/memory_compressor.py --monthly" \
+                --message "python3 scripts/core/memory_manager.py --monthly" \
                 --name "monthly-compress-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1; then
@@ -800,15 +837,7 @@ if [ "$INSTALL_LANG" = "zh" ]; then
             if openclaw cron add \
                 --cron "0 2 * * 0" \
                 --agent "$AGENT_NAME" \
-                --message "bash skills/memory-search/maintenance.sh" \
-                --name "weekly-maintenance-$AGENT_NAME" \
-                --no-deliver \
-                --session isolated >/dev/null 2>&1; then
-                echo "      ✅ 完成"
-            else
-                echo "      ⚠️  失败"
-            fi
-            
+                --message "python3 scripts/core/memory_manager.py --cleanup --stats" \
             echo ""
             echo "📋 当前 OpenClaw cron 任务 ($AGENT_NAME):"
             openclaw cron list 2>/dev/null | grep "$AGENT_NAME" | grep -E "(session-scan|daily-memory|weekly-memory|monthly-memory|kg-build|nightly-evolution|realtime|active|kg-expansion)" || echo "   (无)"
@@ -825,11 +854,16 @@ else
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo "💡 Configuring recommended cron jobs..."
+    echo "   ✅ Realtime Index (every 5 min) - Keep search index updated"
     echo "   ✅ Session Scan (every 30 min) - Auto-sync OpenClaw sessions"
-    echo "   ✅ Daily Memory Compress (daily 09:30) - Incremental daily summary"
-    echo "   ✅ Weekly Memory Compress (weekly Sun 03:00) - Weekly summary"
-    echo "   ✅ Monthly Memory Compress (monthly 1st 04:00) - Monthly summary"
-    echo "   ✅ Nightly Evolution (daily 23:00) - Self-evolution"
+    echo "   ✅ Daily Review (daily 09:00) - Create today's memory"
+    echo "   ✅ Daily Compress (daily 09:30) - Incremental daily summary"
+    echo "   ✅ Active Learning (daily 04:00) - Auto-trigger learning"
+    echo "   ✅ Nightly Evolution (daily 23:00) - Memory consolidation + Self-evolution + Session consolidation"
+    echo "   ✅ Weekly Maintenance (Sun 02:00) - Cleanup + Stats"
+    echo "   ✅ Weekly Compress (Sun 03:00) - Weekly summary"
+    echo "   ✅ Knowledge Graph Expansion (Sun 05:00) - Entity relationships"
+    echo "   ✅ Monthly Compress (1st 04:00) - Monthly summary"
     echo ""
     
     # Ask to skip
@@ -843,13 +877,22 @@ else
             if [[ "$FORCE_REINSTALL" == "true" ]]; then
                 echo "🧹 Cleaning old cron tasks..."
                 # Use --json to get full output, avoid truncation issues
-                openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-review|nightly-evolution|weekly-compress|weekly-maintenance|monthly-compress\")) | .id" | while read job_id; do
+                openclaw cron list --json 2>/dev/null | jq -r ".[] | select(.agentId | contains(\"$AGENT_NAME\")) | select(.name | test(\"session-scan|daily-compress|nightly-evolution|weekly-compress|monthly-compress\")) | .id" | while read job_id; do
                     [ -n "$job_id" ] && openclaw cron remove "$job_id" >/dev/null 2>&1 && echo "   ✅ Removed task $job_id" || true
                 done
                 echo "   ✅ Done"
             fi
             
-            # Session scan (every 30 minutes)
+                        # Realtime indexer (every 5 minutes)
+            echo "   - Realtime Indexer (every 5 min)..."
+            openclaw cron add \
+                --cron "*/5 * * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 skills/memory-search/realtime_indexer.py --auto" \
+                --name "$AGENT_NAME-realtime-index" \
+                --no-deliver --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+
+# Session scan (every 30 minutes)
             echo "   - Session Scan (every 30 min)..."
             openclaw cron add \
                 --cron "*/30 * * * *" \
@@ -864,8 +907,14 @@ else
             openclaw cron add \
                 --cron "0 9 * * *" \
                 --agent "$AGENT_NAME" \
-                --message "python3 skills/memory-search/daily_review.py" \
-                --name "daily-review-$AGENT_NAME" \
+                --message "python3 scripts/core/memory_manager.py --daily" \
+            # Daily memory compress (09:30 daily)
+            echo "   - Daily Memory Compress (09:30 daily)..."
+            openclaw cron add \
+                --cron "0 9:30 * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 scripts/core/memory_manager.py --daily" \
+                --name "daily-compress-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
@@ -874,22 +923,27 @@ else
             openclaw cron add \
                 --cron "0 2 * * 0" \
                 --agent "$AGENT_NAME" \
-                --message "bash skills/memory-search/maintenance.sh" \
-                --name "weekly-maintenance-$AGENT_NAME" \
-                --no-deliver \
-                --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
-            
+                --message "python3 scripts/core/memory_manager.py --cleanup --stats" \
             # Weekly compress (Sun 03:00)
             echo "   - Weekly Compress (Sun 03:00)..."
             openclaw cron add \
                 --cron "0 3 * * 0" \
                 --agent "$AGENT_NAME" \
-                --message "python3 scripts/core/memory_compressor.py --weekly" \
+                --message "python3 scripts/core/memory_manager.py --weekly" \
                 --name "weekly-compress-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
-            # Nightly evolution (23:00 daily)
+                        # Active learning (04:00 daily)
+            echo "   - Active Learning (04:00 daily)..."
+            openclaw cron add \
+                --cron "0 4 * * *" \
+                --agent "$AGENT_NAME" \
+                --message "python3 skills/self-evolution/active_learning_trigger.py --agent $AGENT_NAME --execute" \
+                --name "$AGENT_NAME-active-learning" \
+                --no-deliver --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+
+# Nightly evolution (23:00 daily)
             echo "   - Nightly Evolution (23:00 daily)..."
             openclaw cron add \
                 --cron "0 23 * * *" \
@@ -904,10 +958,19 @@ else
             openclaw cron add \
                 --cron "0 4 1 * *" \
                 --agent "$AGENT_NAME" \
-                --message "python3 scripts/core/memory_compressor.py --monthly" \
+                --message "python3 scripts/core/memory_manager.py --monthly" \
                 --name "monthly-compress-$AGENT_NAME" \
                 --no-deliver \
                 --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
+
+            # Knowledge graph expansion (Sun 05:00)
+            echo "   - Knowledge Graph Expansion (Sun 05:00)..."
+            openclaw cron add \
+                --cron "0 5 * * 0" \
+                --agent "$AGENT_NAME" \
+                --message "python3 skills/knowledge-graph/auto_expander.py --agent $AGENT_NAME --limit 100" \
+                --name "$AGENT_NAME-kg-expansion" \
+                --no-deliver --session isolated >/dev/null 2>&1 && echo "      ✅ Done" || echo "      ⚠️  Failed"
             
             echo ""
             echo "📋 Current OpenClaw cron jobs:"
@@ -958,6 +1021,35 @@ else
     echo "   Or skip: Continue using normally"
     echo ""
 fi
+
+# 更新 TOOLS.md（添加 web-knowledge 使用说明）
+echo "📝 更新 TOOLS.md..."
+cat >> "$WORKSPACE_ROOT/TOOLS.md" << 'TOOLSEOF'
+
+## Web Search
+
+**Skill**: `web-knowledge` (v7.0.0)  
+**Entry**: `python3 skills/web-knowledge/search.py`
+
+```bash
+# 基础搜索
+python3 skills/web-knowledge/search.py "查询词"
+
+# 指定数量
+python3 skills/web-knowledge/search.py "查询词" --limit 5
+
+# 导出 JSON/Markdown
+python3 skills/web-knowledge/search.py "查询词" --format json
+python3 skills/web-knowledge/search.py "查询词" --format markdown -o result.md
+```
+
+**特性**:
+- ✅ 质量评分（自动识别知乎/GitHub 等权威网站）
+- ✅ 智能去重（URL 哈希）
+- ✅ 中文优化（Bing 中国 + 百度）
+- ✅ 多格式输出（text/json/markdown）
+TOOLSEOF
+echo "   ✅ 完成"
 
 # 创建安装配置文件
 echo "📝 创建安装配置..."
